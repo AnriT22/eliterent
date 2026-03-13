@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Details — Eliterent.ge</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="navbar-auth.css">
+    <link rel="stylesheet" href="vehicle.css">
+    <script src="api-helper.js"></script>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header sticky-header">
+        <div class="container header-content">
+            <div class="header-left">
+                <a href="/" class="logo">
+                    <img src="images/logo.png" alt="Eliterent.ge" class="logo-img">
+                    <span class="logo-text">Eliterent.ge</span>
+                </a>
+            </div>
+            <div class="header-center">
+                <nav class="nav-menu">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="vehicles.html" class="nav-link active">Vehicles</a>
+                    <a href="reviews.html" class="nav-link">Reviews</a>
+                    <a href="about.html" class="nav-link">About</a>
+                    <a href="contact.html" class="nav-link">Contact</a>
+                </nav>
+            </div>
+            <div class="header-right">
+                <a href="register-partner.html" class="partner-btn">Become Partner</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- BREADCRUMB -->
+    <div class="vd-breadcrumb">
+        <div class="container">
+            <a href="index.html">Home</a>
+            <span>›</span>
+            <a href="vehicles.html">Vehicles</a>
+            <span>›</span>
+            <span id="vdBreadcrumbName">Loading...</span>
+        </div>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div class="vd-loading" id="vdLoading">
+        <div class="vd-loading-spinner"></div>
+        <p>Loading vehicle...</p>
+    </div>
+
+    <!-- ERROR STATE -->
+    <div class="vd-error" id="vdError">
+        <div class="vd-error-inner">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <h2>Vehicle Not Found</h2>
+            <p>This vehicle may have been removed or is no longer available.</p>
+            <a href="vehicles.html" class="vd-back-btn">Browse All Vehicles</a>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="vd-container container" id="vdContent" style="display:none;">
+
+        <!-- LEFT: Gallery + Details -->
+        <div class="vd-left">
+            <!-- Image Gallery -->
+            <div class="vd-gallery">
+                <div class="vd-main-img-wrap">
+                    <img id="vdMainImg" src="" alt="" class="vd-main-img">
+                    <button class="vd-fav-btn" id="vdFavBtn" title="Add to favorites">&#9825;</button>
+                    <span class="vd-year-badge" id="vdYearBadge"></span>
+                </div>
+                <div class="vd-thumbs" id="vdThumbs"></div>
+            </div>
+
+            <!-- Specs -->
+            <div class="vd-section">
+                <h2 class="vd-section-title">Specifications</h2>
+                <div class="vd-specs-grid" id="vdSpecsGrid"></div>
+            </div>
+
+            <!-- Description -->
+            <div class="vd-section" id="vdDescSection" style="display:none;">
+                <h2 class="vd-section-title">About This Vehicle</h2>
+                <p class="vd-description" id="vdDescription"></p>
+            </div>
+
+            <!-- Features -->
+            <div class="vd-section" id="vdFeaturesSection" style="display:none;">
+                <h2 class="vd-section-title">Features & Amenities</h2>
+                <div class="vd-features-grid" id="vdFeatures"></div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Booking Panel -->
+        <div class="vd-right">
+            <div class="vd-booking-panel">
+                <div class="vd-vehicle-header">
+                    <h1 class="vd-vehicle-name" id="vdVehicleName">Loading...</h1>
+                    <div class="vd-vehicle-meta" id="vdVehicleMeta"></div>
+                </div>
+
+                <div class="vd-price-display">
+                    <span class="vd-price-amount" id="vdPrice">$0</span>
+                    <span class="vd-price-unit">/ day</span>
+                </div>
+
+                <div class="vd-partner-info" id="vdPartnerInfo" style="display:none;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span id="vdPartnerName"></span>
+                </div>
+
+                <!-- Date Selection -->
+                <div class="vd-date-section">
+                    <div class="vd-date-row">
+                        <div class="vd-date-box" id="vdPickupBox" onclick="vdOpenCalendar('pickup')">
+                            <div class="vd-date-label">Pick-up Date</div>
+                            <div class="vd-date-val" id="vdPickupVal">Select date</div>
+                        </div>
+                        <div class="vd-date-box" id="vdDropoffBox" onclick="vdOpenCalendar('dropoff')">
+                            <div class="vd-date-label">Drop-off Date</div>
+                            <div class="vd-date-val" id="vdDropoffVal">Select date</div>
+                        </div>
+                    </div>
+                    <div class="vd-time-row">
+                        <div class="vd-time-group">
+                            <label class="vd-time-label">Pick-up Time</label>
+                            <select class="vd-time-select" id="vdPickupTime">
+                                <option value="08:00">08:00</option><option value="09:00">09:00</option>
+                                <option value="10:00" selected>10:00</option><option value="11:00">11:00</option>
+                                <option value="12:00">12:00</option><option value="13:00">13:00</option>
+                                <option value="14:00">14:00</option><option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option><option value="17:00">17:00</option>
+                                <option value="18:00">18:00</option><option value="19:00">19:00</option>
+                                <option value="20:00">20:00</option><option value="21:00">21:00</option>
+                                <option value="22:00">22:00</option>
+                            </select>
+                        </div>
+                        <div class="vd-time-group">
+                            <label class="vd-time-label">Drop-off Time</label>
+                            <select class="vd-time-select" id="vdDropoffTime">
+                                <option value="08:00">08:00</option><option value="09:00">09:00</option>
+                                <option value="10:00" selected>10:00</option><option value="11:00">11:00</option>
+                                <option value="12:00">12:00</option><option value="13:00">13:00</option>
+                                <option value="14:00">14:00</option><option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option><option value="17:00">17:00</option>
+                                <option value="18:00">18:00</option><option value="19:00">19:00</option>
+                                <option value="20:00">20:00</option><option value="21:00">21:00</option>
+                                <option value="22:00">22:00</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="vd-total-row" id="vdTotalRow" style="display:none;">
+                        <span class="vd-total-label">Total Estimate</span>
+                        <span class="vd-total-amount" id="vdTotalAmount"></span>
+                    </div>
+                </div>
+
+                <div class="vd-badges" id="vdBadges"></div>
+
+                <button class="vd-book-btn" id="vdBookBtn">Next →</button>
+                <button class="vd-clear-btn" id="vdClearBtn" style="display:none;">Clear Dates</button>
+                <button class="vd-back-link" onclick="history.back()">← Back to Vehicles</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Booking Confirmation Modal (reused from vehicles.html) -->
+    <div class="bk-overlay" id="vdBookingModal" style="display:none;">
+        <div class="bk-modal">
+            <button class="bk-close" id="vdBookingClose">&#x2715;</button>
+            <h2 class="bk-title">Confirm Your Booking</h2>
+
+            <div class="bk-vehicle-row">
+                <img class="bk-vehicle-img" id="vdBkImg" src="" alt="">
+                <div class="bk-vehicle-info">
+                    <div class="bk-vehicle-name" id="vdBkName"></div>
+                    <div class="bk-vehicle-meta" id="vdBkMeta"></div>
+                </div>
+            </div>
+
+            <div class="bk-dates-row">
+                <div class="bk-date-box">
+                    <div class="bk-date-label">Pick-up</div>
+                    <div class="bk-date-val" id="vdBkPickup"></div>
+                </div>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                <div class="bk-date-box">
+                    <div class="bk-date-label">Drop-off</div>
+                    <div class="bk-date-val" id="vdBkDropoff"></div>
+                </div>
+                <div class="bk-date-box bk-days-box">
+                    <div class="bk-date-label">Duration</div>
+                    <div class="bk-date-val" id="vdBkDays"></div>
+                </div>
+            </div>
+
+            <div class="bk-price-row">
+                <span class="bk-price-label">Total Price</span>
+                <span class="bk-price-total" id="vdBkTotal"></span>
+            </div>
+
+            <div class="bk-field-group">
+                <label class="bk-label">Pick-up Location</label>
+                <input type="text" class="bk-input" id="vdBkPickupLoc" placeholder="e.g. Tbilisi Airport" value="Tbilisi">
+            </div>
+            <div class="bk-field-group">
+                <label class="bk-label">Drop-off Location</label>
+                <input type="text" class="bk-input" id="vdBkDropoffLoc" placeholder="Same as pick-up or specify" value="Tbilisi">
+            </div>
+            <div class="bk-field-group">
+                <label class="bk-label">Notes (optional)</label>
+                <textarea class="bk-input bk-textarea" id="vdBkNotes" placeholder="Any special requests..."></textarea>
+            </div>
+
+            <div class="bk-error" id="vdBkError" style="display:none;"></div>
+            <button class="bk-submit-btn" id="vdBkSubmit">Confirm Booking</button>
+            <p class="bk-note">You will not be charged now. The partner will confirm your booking.</p>
+        </div>
+    </div>
+
+    <!-- Booking Success Modal -->
+    <div class="bk-overlay" id="vdSuccessModal" style="display:none;">
+        <div class="bk-modal bk-success-modal">
+            <div class="bk-success-icon">&#x2714;</div>
+            <h2 class="bk-title">Booking Submitted!</h2>
+            <p class="bk-success-msg">Your booking request has been sent to the partner. You'll see it in <strong>My Bookings</strong> in your profile.</p>
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                <a href="guest-profile.html#bookings" class="bk-submit-btn" style="text-decoration:none;display:inline-block;">View My Bookings</a>
+                <a href="vehicles.html" class="bk-cancel-btn" style="text-decoration:none;display:inline-block;text-align:center;">Browse More</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simple Calendar Picker Modal -->
+    <div class="vd-cal-overlay" id="vdCalModal" style="display:none;">
+        <div class="vd-cal-modal">
+            <div class="vd-cal-header">
+                <button class="vd-cal-nav" id="vdCalPrev">‹</button>
+                <span class="vd-cal-month-label" id="vdCalMonthLabel"></span>
+                <button class="vd-cal-nav" id="vdCalNext">›</button>
+                <button class="vd-cal-close" id="vdCalClose">&#x2715;</button>
+            </div>
+            <div class="vd-cal-days-header">
+                <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+            </div>
+            <div class="vd-cal-grid" id="vdCalGrid"></div>
+            <div class="vd-cal-footer">
+                <span id="vdCalInstruction">Select a date</span>
+                <button class="vd-cal-apply" id="vdCalApply">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING QUICK CHAT -->
+    <a href="https://wa.me/995591522299" target="_blank" class="floating-whatsapp" style="text-decoration:none;color:inherit;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        <span>Quick Chat</span>
+    </a>
+    <footer class="footer">
+        <div class="container footer-content" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="footer-column"><h4>EliteRent.ge</h4><p>Premium car rental marketplace for Georgia adventures.</p><div class="social-icons"><a href="https://www.facebook.com/profile.php?id=61583448788067" target="_blank" class="social-icon" title="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a><a href="https://www.instagram.com/eliterentalgeorgia/" target="_blank" class="social-icon" title="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a></div></div>
+            <div class="footer-column"><h4>Legal</h4><ul><li><a href="tos.html">Terms & Conditions</a></li><li><a href="privacy.html">Privacy Policy</a></li><li><a href="#" onclick="document.getElementById('contactModal').style.display='flex'; return false;">Contact</a></li></ul></div>
+            <div class="footer-column"><h4>Contact</h4><p>📧 elite.rental25@gmail.com</p><p>📞 +995 591 522 299</p><p>📍 Tbilisi, Georgia</p></div>
+        </div>
+        <div class="footer-bottom"><p>&copy; 2026 EliteRent.ge. All rights reserved.</p></div>
+    </footer>
+    <div id="contactModal" onclick="if(event.target===this)this.style.display='none';" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+        <div style="background:#fff; border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.15); text-align:center;">
+            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#64748b; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">✕</button>
+            <div style="width:64px; height:64px; background:linear-gradient(135deg,#3b82f6,#2563eb); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px;">📞</div>
+            <h2 style="font-size:24px; font-weight:800; color:#1e293b; margin-bottom:8px;">Contact Us</h2>
+            <p style="font-size:14px; color:#64748b; margin-bottom:28px;">We're here to help! Reach us anytime.</p>
+            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0'">
+                <div style="width:44px; height:44px; background:#eff6ff; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">📧</div>
+                <div style="text-align:left;"><div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div><div style="font-size:15px; color:#1e293b; font-weight:600;">elite.rental25@gmail.com</div></div>
+            </a>
+            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#e2e8f0'">
+                <div style="width:44px; height:44px; background:#f0fdf4; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="24" height="24" viewBox="0 0 24 24" fill="#22c55e"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></div>
+                <div style="text-align:left;"><div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div><div style="font-size:15px; color:#1e293b; font-weight:600;">+995 591 522 299</div></div>
+            </a>
+        </div>
+    </div>
+
+    <script src="vehicle.js"></script>
+    <script src="navbar-auth.js"></script>
+</body>
+</html>

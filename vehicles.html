@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicles — Eliterent.ge</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="vehicles.css">
+    <link rel="stylesheet" href="navbar-auth.css">
+    <script src="api-helper.js"></script>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="header sticky-header">
+        <div class="container header-content">
+            <div class="header-left">
+                <a href="/" class="logo">
+                    <img src="images/logo.png" alt="Eliterent.ge" class="logo-img">
+                    <span class="logo-text">Eliterent.ge</span>
+                </a>
+            </div>
+            <div class="header-center">
+                <nav class="nav-menu">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="vehicles.html" class="nav-link active">Vehicles</a>
+                    <a href="reviews.html" class="nav-link">Reviews</a>
+                    <a href="about.html" class="nav-link">About</a>
+                    <a href="contact.html" class="nav-link">Contact</a>
+                </nav>
+            </div>
+            <div class="header-right">
+                <div class="selector-group">
+                    <button class="selector-btn currency-btn" id="currencyBtn">
+                        <span class="selector-icon">💵</span>
+                        <span class="selector-text">USD</span>
+                        <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div class="dropdown-menu currency-dropdown" id="currencyDropdown" style="display:none;">
+                        <a href="#" class="dropdown-item" data-currency="USD">$ USD</a>
+                        <a href="#" class="dropdown-item" data-currency="EUR">€ EUR</a>
+                        <a href="#" class="dropdown-item" data-currency="GEL">₾ GEL</a>
+                    </div>
+                </div>
+                <div class="selector-group">
+                    <button class="selector-btn language-btn" id="languageBtn">
+                        <span class="selector-icon">EN</span>
+                        <span class="selector-text">English</span>
+                        <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div class="dropdown-menu language-dropdown" id="languageDropdown" style="display:none;">
+                        <div class="dropdown-header">SELECT LANGUAGE</div>
+                        <a href="#" class="dropdown-item" data-language="en"><span class="language-flag">en</span><span>English</span><span class="checkmark">✓</span></a>
+                        <a href="#" class="dropdown-item" data-language="ru"><span class="language-flag">��</span><span>Русский</span></a>
+                        <a href="#" class="dropdown-item" data-language="ka"><span class="language-flag">🇬🇪</span><span>ქართული</span></a>
+                    </div>
+                </div>
+                <a href="register-partner.html" class="partner-btn">Become Partner</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- VEHICLES PAGE LAYOUT -->
+    <div class="vp-layout">
+
+        <!-- LEFT SIDEBAR -->
+        <aside class="vp-sidebar" id="vpSidebar">
+
+            <!-- Hide Filters -->
+            <button class="vf-hide-btn" id="vfHideBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/></svg>
+                Hide Filters
+            </button>
+
+            <!-- Location / Term -->
+            <div class="vf-panel" id="panelLocation">
+                <div class="vf-panel-header" data-target="bodyLocation">
+                    <span class="vf-panel-title">Location / term</span>
+                    <svg class="vf-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="vf-panel-body" id="bodyLocation">
+                    <p class="vf-location-label">Pick-up location</p>
+                    <div class="vf-location-input-wrap">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <input type="text" class="vf-location-input" id="pickupLocation" value="Tbilisi">
+                    </div>
+                    <p class="vf-pickup-dropoff-label">Pick-up &amp; Drop-off</p>
+                    <div class="vf-date-display clickable" id="vfDateDisplay" onclick="openVehiclesCalendar()">
+                        <span id="vfDateText">Select dates</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
+                    <button class="vf-search-btn" id="vfSearchBtn">Search</button>
+                    <button class="vf-check-btn" id="vfCheckBtn" style="display:none;">✓ Check Availability</button>
+                    <label class="vf-checkbox-row">
+                        <input type="checkbox" id="returnSameLocation" checked>
+                        <span class="vf-custom-checkbox"></span>
+                        Return to same location
+                    </label>
+                </div>
+            </div>
+
+            <!-- Category -->
+            <div class="vf-panel" id="panelCategory">
+                <div class="vf-panel-header" data-target="bodyCategory">
+                    <span class="vf-panel-title">Category</span>
+                    <svg class="vf-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="vf-panel-body" id="bodyCategory">
+                    <div class="vf-checkbox-grid">
+                        <label class="vf-checkbox-row"><input type="checkbox" name="category" value="economy"><span class="vf-custom-checkbox"></span>Economy</label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="category" value="standard"><span class="vf-custom-checkbox"></span>Standard</label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="category" value="suv"><span class="vf-custom-checkbox"></span>SUV</label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="category" value="minivan"><span class="vf-custom-checkbox"></span>Minivan</label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="category" value="convertible"><span class="vf-custom-checkbox"></span>Convertible/Coupe</label>
+                    </div>
+                    <div class="vf-divider"></div>
+                    <button class="vf-check-all" data-group="category">Check all</button>
+                </div>
+            </div>
+
+            <!-- Engine -->
+            <div class="vf-panel" id="panelEngine">
+                <div class="vf-panel-header" data-target="bodyEngine">
+                    <span class="vf-panel-title">Engine</span>
+                    <svg class="vf-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="vf-panel-body" id="bodyEngine">
+                    <div class="vf-checkbox-grid">
+                        <label class="vf-checkbox-row"><input type="checkbox" name="engine" value="diesel"><span class="vf-custom-checkbox"></span>Diesel</label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="engine" value="gasoline"><span class="vf-custom-checkbox"></span>Gasoline</label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="engine" value="electric"><span class="vf-custom-checkbox"></span>Electric</label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="engine" value="hybrid"><span class="vf-custom-checkbox"></span><span style="color:#e27d60;font-weight:600;">Hybrid</span></label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="engine" value="plugin-hybrid"><span class="vf-custom-checkbox"></span>Plug-in hybrid</label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="engine" value="not-specified"><span class="vf-custom-checkbox"></span>Not specified</label>
+                    </div>
+                    <div class="vf-divider"></div>
+                    <button class="vf-check-all" data-group="engine">Check all</button>
+                </div>
+            </div>
+
+            <!-- Gearbox -->
+            <div class="vf-panel" id="panelGearbox">
+                <div class="vf-panel-header" data-target="bodyGearbox">
+                    <span class="vf-panel-title">Gearbox</span>
+                    <svg class="vf-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="vf-panel-body" id="bodyGearbox">
+                    <div class="vf-checkbox-grid">
+                        <label class="vf-checkbox-row"><input type="checkbox" name="gearbox" value="automatic"><span class="vf-custom-checkbox"></span>Automatic</label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="gearbox" value="manual"><span class="vf-custom-checkbox"></span>Manual</label>
+                    </div>
+                    <div class="vf-divider"></div>
+                    <button class="vf-check-all" data-group="gearbox">Check all</button>
+                </div>
+            </div>
+
+            <!-- Drive Type -->
+            <div class="vf-panel" id="panelDrive">
+                <div class="vf-panel-header" data-target="bodyDrive">
+                    <span class="vf-panel-title">Drive Type</span>
+                    <svg class="vf-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="vf-panel-body" id="bodyDrive">
+                    <div class="vf-checkbox-grid">
+                        <label class="vf-checkbox-row"><input type="checkbox" name="drive" value="fwd"><span class="vf-custom-checkbox"></span>Front Wheel Drive</label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="drive" value="rwd"><span class="vf-custom-checkbox"></span>Rear Wheel Drive</label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="drive" value="awd"><span class="vf-custom-checkbox"></span>4x4</label>
+                    </div>
+                    <div class="vf-divider"></div>
+                    <button class="vf-check-all" data-group="drive">Check all</button>
+                </div>
+            </div>
+
+            <!-- Interior Type -->
+            <div class="vf-panel" id="panelInterior">
+                <div class="vf-panel-header" data-target="bodyInterior">
+                    <span class="vf-panel-title">Interior Type</span>
+                    <svg class="vf-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="vf-panel-body" id="bodyInterior">
+                    <div class="vf-checkbox-grid">
+                        <label class="vf-checkbox-row"><input type="checkbox" name="interior" value="fabric"><span class="vf-custom-checkbox"></span>Fabric</label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="interior" value="leather"><span class="vf-custom-checkbox"></span>Leather</label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="interior" value="alcantara"><span class="vf-custom-checkbox"></span>Alcantara</label>
+                    </div>
+                    <div class="vf-divider"></div>
+                    <button class="vf-check-all" data-group="interior">Check all</button>
+                </div>
+            </div>
+
+            <!-- Steering Wheel Side -->
+            <div class="vf-panel" id="panelSteering">
+                <div class="vf-panel-header" data-target="bodySteering">
+                    <span class="vf-panel-title">Steering Wheel Side</span>
+                    <svg class="vf-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="vf-panel-body" id="bodySteering">
+                    <div class="vf-checkbox-grid">
+                        <label class="vf-checkbox-row"><input type="checkbox" name="steering" value="left"><span class="vf-custom-checkbox"></span>Left</label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="steering" value="right"><span class="vf-custom-checkbox"></span>Right</label>
+                    </div>
+                    <div class="vf-divider"></div>
+                    <button class="vf-check-all" data-group="steering">Check all</button>
+                </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="vf-panel" id="panelPayment">
+                <div class="vf-panel-header" data-target="bodyPayment">
+                    <span class="vf-panel-title">Payment Method</span>
+                    <svg class="vf-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="vf-panel-body" id="bodyPayment">
+                    <div class="vf-checkbox-grid">
+                        <label class="vf-checkbox-row"><input type="checkbox" name="payment" value="cash" checked><span class="vf-custom-checkbox"></span>Cash</label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="payment" value="card"><span class="vf-custom-checkbox"></span>Card</label>
+                    </div>
+                    <div class="vf-divider"></div>
+                    <button class="vf-check-all" data-group="payment">Check all</button>
+                </div>
+            </div>
+
+            <!-- Price Range -->
+            <div class="vf-panel" id="panelPrice">
+                <div class="vf-panel-header" data-target="bodyPrice">
+                    <span class="vf-panel-title">Price per Day</span>
+                    <svg class="vf-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="vf-panel-body" id="bodyPrice">
+                    <div class="vf-price-labels">
+                        <span id="vfPriceMin">$0</span>
+                        <span id="vfPriceMax">$500+</span>
+                    </div>
+                    <div class="vf-range-wrap">
+                        <input type="range" class="vf-range" id="priceRangeMin" min="0" max="500" value="0" step="5">
+                        <input type="range" class="vf-range" id="priceRangeMax" min="0" max="500" value="500" step="5">
+                        <div class="vf-range-track">
+                            <div class="vf-range-fill" id="vfRangeFill"></div>
+                        </div>
+                    </div>
+                    <div class="vf-price-inputs">
+                        <div class="vf-price-input-wrap">
+                            <span>$</span>
+                            <input type="number" id="priceInputMin" value="0" min="0" max="500" class="vf-price-input">
+                        </div>
+                        <span class="vf-price-dash">–</span>
+                        <div class="vf-price-input-wrap">
+                            <span>$</span>
+                            <input type="number" id="priceInputMax" value="500" min="0" max="500" class="vf-price-input">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button id="vpResetFilters" style="width:100%;padding:12px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px;color:#64748b;font-weight:600;font-size:13px;cursor:pointer;margin-top:12px;transition:all 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">Reset All Filters</button>
+        </aside>
+        <!-- END SIDEBAR -->
+
+        <!-- MAIN CONTENT -->
+        <main class="vp-main">
+            <div class="vp-topbar">
+                <span class="vp-count-badge" id="vpCountBadge">Loading...</span>
+                <div class="vp-topbar-right">
+                    <input type="text" class="vp-search-input" id="vpSearch" placeholder="Search cars...">
+                    <div class="vp-year-filter">
+                        <button class="vp-year-btn active" data-year="all">All</button>
+                        <button class="vp-year-btn" data-year="2024">2024+</button>
+                        <button class="vp-year-btn" data-year="2020">2020–2023</button>
+                        <button class="vp-year-btn" data-year="2016">2016–2019</button>
+                        <button class="vp-year-btn" data-year="old">&lt; 2016</button>
+                    </div>
+                    <select class="vp-sort-select" id="vpSort">
+                        <option value="price-asc">&#8597; Price: Low to High</option>
+                        <option value="price-desc">&#8597; Price: High to Low</option>
+                        <option value="year-desc">&#8597; Newest First</option>
+                        <option value="name-asc">&#8597; Name A–Z</option>
+                    </select>
+                </div>
+            </div>
+            <button class="vp-filter-toggle-btn" id="vpFilterToggle">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/></svg>
+                Filters
+            </button>
+            <button class="vp-show-filters-btn" id="vpShowFilters" style="display:none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/></svg>
+                Show Filters
+            </button>
+            <div class="vp-grid" id="vpGrid">
+                <!-- Loading placeholder — vehicles loaded from API -->
+                <div id="vpLoadingState" style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#94a3b8;">
+                    <p style="font-size:16px;font-weight:600;">Loading vehicles...</p>
+                </div>
+                <div id="vpEmptyState" style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#94a3b8;display:none;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                    <h3 style="margin:12px 0 4px;color:#1e293b;">No vehicles yet</h3>
+                    <p>Partners can add vehicles from their dashboard</p>
+                </div>
+            </div><!-- end vp-grid -->
+        </main><!-- end vp-main -->
+    </div><!-- end vp-layout -->
+
+    <!-- FLOATING QUICK CHAT -->
+    <a href="https://wa.me/995591522299" target="_blank" class="floating-whatsapp" style="text-decoration:none;color:inherit;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+        </svg>
+        <span>Quick Chat</span>
+    </a>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container footer-content" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="footer-column">
+                <h4>EliteRent.ge</h4>
+                <p>Premium car rental marketplace for Georgia adventures.</p>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com/profile.php?id=61583448788067" target="_blank" class="social-icon" title="Facebook">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    </a>
+                    <a href="https://www.instagram.com/eliterentalgeorgia/" target="_blank" class="social-icon" title="Instagram">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="tos.html">Terms & Conditions</a></li>
+                    <li><a href="privacy.html">Privacy Policy</a></li>
+                    <li><a href="#" onclick="document.getElementById('contactModal').style.display='flex'; return false;">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Contact</h4>
+                <p>📧 elite.rental25@gmail.com</p>
+                <p>📞 +995 591 522 299</p>
+                <p>📍 Tbilisi, Georgia</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 EliteRent.ge. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Contact Modal -->
+    <div id="contactModal" onclick="if(event.target===this)this.style.display='none';" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+        <div style="background:#fff; border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.15); text-align:center;">
+            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#64748b; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">✕</button>
+            <div style="width:64px; height:64px; background:linear-gradient(135deg,#3b82f6,#2563eb); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px;">📞</div>
+            <h2 style="font-size:24px; font-weight:800; color:#1e293b; margin-bottom:8px;">Contact Us</h2>
+            <p style="font-size:14px; color:#64748b; margin-bottom:28px;">We're here to help! Reach us anytime.</p>
+            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0'">
+                <div style="width:44px; height:44px; background:#eff6ff; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">📧</div>
+                <div style="text-align:left;">
+                    <div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div>
+                    <div style="font-size:15px; color:#1e293b; font-weight:600;">elite.rental25@gmail.com</div>
+                </div>
+            </a>
+            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#e2e8f0'">
+                <div style="width:44px; height:44px; background:#f0fdf4; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#22c55e"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+                </div>
+                <div style="text-align:left;">
+                    <div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div>
+                    <div style="font-size:15px; color:#1e293b; font-weight:600;">+995 591 522 299</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Booking Confirmation Modal -->
+    <div class="bk-overlay" id="bookingModal" style="display:none;">
+        <div class="bk-modal">
+            <button class="bk-close" id="bookingModalClose">&#x2715;</button>
+            <h2 class="bk-title">Confirm Your Booking</h2>
+
+            <div class="bk-vehicle-row" id="bkVehicleRow">
+                <img class="bk-vehicle-img" id="bkVehicleImg" src="" alt="">
+                <div class="bk-vehicle-info">
+                    <div class="bk-vehicle-name" id="bkVehicleName"></div>
+                    <div class="bk-vehicle-meta" id="bkVehicleMeta"></div>
+                </div>
+            </div>
+
+            <div class="bk-dates-row" id="bkDatesRow">
+                <div class="bk-date-box">
+                    <div class="bk-date-label">Pick-up</div>
+                    <div class="bk-date-val" id="bkPickup"></div>
+                </div>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                <div class="bk-date-box">
+                    <div class="bk-date-label">Drop-off</div>
+                    <div class="bk-date-val" id="bkDropoff"></div>
+                </div>
+                <div class="bk-date-box bk-days-box">
+                    <div class="bk-date-label">Duration</div>
+                    <div class="bk-date-val" id="bkDays"></div>
+                </div>
+            </div>
+
+            <div class="bk-price-row">
+                <span class="bk-price-label">Total Price</span>
+                <span class="bk-price-total" id="bkTotal"></span>
+            </div>
+
+            <div class="bk-field-group">
+                <label class="bk-label">Pick-up Location</label>
+                <input type="text" class="bk-input" id="bkPickupLoc" placeholder="e.g. Tbilisi Airport" value="Tbilisi">
+            </div>
+            <div class="bk-field-group">
+                <label class="bk-label">Drop-off Location</label>
+                <input type="text" class="bk-input" id="bkDropoffLoc" placeholder="Same as pick-up or specify" value="Tbilisi">
+            </div>
+            <div class="bk-field-group">
+                <label class="bk-label">Notes (optional)</label>
+                <textarea class="bk-input bk-textarea" id="bkNotes" placeholder="Any special requests or information for the partner..."></textarea>
+            </div>
+
+            <div class="bk-error" id="bkError" style="display:none;"></div>
+
+            <button class="bk-submit-btn" id="bkSubmitBtn">Confirm Booking</button>
+            <p class="bk-note">You will not be charged now. The partner will confirm your booking.</p>
+        </div>
+    </div>
+
+    <!-- Booking Success Modal -->
+    <div class="bk-overlay" id="bookingSuccessModal" style="display:none;">
+        <div class="bk-modal bk-success-modal">
+            <div class="bk-success-icon">&#x2714;</div>
+            <h2 class="bk-title">Booking Submitted!</h2>
+            <p class="bk-success-msg">Your booking request has been sent to the partner. You'll see it in <strong>My Bookings</strong> in your profile.</p>
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                <a href="guest-profile.html#bookings" class="bk-submit-btn" style="text-decoration:none;display:inline-block;">View My Bookings</a>
+                <button class="bk-cancel-btn" id="bkSuccessClose">Continue Browsing</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Picker Modal -->
+    <div class="calendar-modal" id="vehiclesCalendarModal">
+        <div class="calendar-overlay"></div>
+        <div class="calendar-content">
+            <div class="calendar-header">
+                <button class="nav-btn prev-btn">‹</button>
+                <div class="month-year-selector">
+                    <select id="vehiclesMonthSelect">
+                        <option value="0">January</option>
+                        <option value="1">February</option>
+                        <option value="2">March</option>
+                        <option value="3">April</option>
+                        <option value="4">May</option>
+                        <option value="5">June</option>
+                        <option value="6">July</option>
+                        <option value="7">August</option>
+                        <option value="8">September</option>
+                        <option value="9">October</option>
+                        <option value="10">November</option>
+                        <option value="11">December</option>
+                    </select>
+                    <select id="vehiclesYearSelect">
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                    </select>
+                </div>
+                <button class="nav-btn next-btn">›</button>
+            </div>
+            <div class="calendar-body">
+                <div class="month-calendar" id="vehiclesCalendar1"></div>
+                <div class="month-calendar" id="vehiclesCalendar2"></div>
+            </div>
+            <div class="time-selectors">
+                <div class="time-group">
+                    <label>Pick-up Time</label>
+                    <div class="time-inputs">
+                        <select id="vehiclesPickupHour" class="time-select">
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10" selected>10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                            <option value="13">13</option>
+                            <option value="14">14</option>
+                            <option value="15">15</option>
+                            <option value="16">16</option>
+                            <option value="17">17</option>
+                            <option value="18">18</option>
+                        </select>
+                        <span>:</span>
+                        <select id="vehiclesPickupMinute" class="time-select">
+                            <option value="00">00</option>
+                            <option value="15">15</option>
+                            <option value="30">30</option>
+                            <option value="45">45</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="time-group">
+                    <label>Drop-off Time</label>
+                    <div class="time-inputs">
+                        <select id="vehiclesDropoffHour" class="time-select">
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10" selected>10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                            <option value="13">13</option>
+                            <option value="14">14</option>
+                            <option value="15">15</option>
+                            <option value="16">16</option>
+                            <option value="17">17</option>
+                            <option value="18">18</option>
+                        </select>
+                        <span>:</span>
+                        <select id="vehiclesDropoffMinute" class="time-select">
+                            <option value="00">00</option>
+                            <option value="15">15</option>
+                            <option value="30">30</option>
+                            <option value="45">45</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="calendar-actions">
+                <button class="btn-cancel" id="vehiclesCancelBtn">Cancel</button>
+                <button class="btn-apply" id="vehiclesApplyBtn">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+    (function () {
+        var grid = document.getElementById('vpGrid');
+        var loadingState = document.getElementById('vpLoadingState');
+        var emptyState = document.getElementById('vpEmptyState');
+
+        function getChecked(name) {
+            var vals = [];
+            document.querySelectorAll('input[name="' + name + '"]:checked').forEach(function (cb) { vals.push(cb.value); });
+            return vals;
+        }
+
+        function applyFilters() {
+            var cards = Array.from(document.querySelectorAll('.vc-card'));
+            var search = document.getElementById('vpSearch').value.toLowerCase().trim();
+            var yearBtn = document.querySelector('.vp-year-btn.active');
+            var yearFilter = yearBtn ? yearBtn.dataset.year : 'all';
+            var sortVal = document.getElementById('vpSort').value;
+
+            var cats = getChecked('category');
+            var engines = getChecked('engine');
+            var gearboxes = getChecked('gearbox');
+            var drives = getChecked('drive');
+            var interiors = getChecked('interior');
+            var steerings = getChecked('steering');
+            var payments = getChecked('payment');
+            var priceMin = parseInt(document.getElementById('priceRangeMin').value) || 0;
+            var priceMax = parseInt(document.getElementById('priceRangeMax').value) || 500;
+
+            var visible = cards.filter(function (card) {
+                var n = (card.dataset.name || '').toLowerCase();
+                var year = parseInt(card.dataset.year, 10);
+                var cat = card.dataset.category;
+                var eng = card.dataset.engine;
+                var gear = card.dataset.gearbox;
+                var drv = card.dataset.drive;
+                var intr = card.dataset.interior;
+                var steer = card.dataset.steering;
+                var pay = card.dataset.payment;
+                var price = parseFloat(card.dataset.price) || 0;
+
+                if (search && n.indexOf(search) === -1) return false;
+                if (yearFilter === '2024' && year < 2024) return false;
+                if (yearFilter === '2020' && (year < 2020 || year > 2023)) return false;
+                if (yearFilter === '2016' && (year < 2016 || year > 2019)) return false;
+                if (yearFilter === 'old' && year >= 2016) return false;
+                if (cats.length && cats.indexOf(cat) === -1) return false;
+                if (engines.length && engines.indexOf(eng) === -1) return false;
+                if (gearboxes.length && gearboxes.indexOf(gear) === -1) return false;
+                if (drives.length && drives.indexOf(drv) === -1) return false;
+                if (interiors.length && interiors.indexOf(intr) === -1) return false;
+                if (steerings.length && steerings.indexOf(steer) === -1) return false;
+                if (payments.length && payments.indexOf(pay) === -1) return false;
+                if (price < priceMin) return false;
+                if (priceMax < 500 && price > priceMax) return false;
+                return true;
+            });
+
+            visible.sort(function (a, b) {
+                if (sortVal === 'price-asc') return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                if (sortVal === 'price-desc') return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                if (sortVal === 'year-desc') return parseInt(b.dataset.year, 10) - parseInt(a.dataset.year, 10);
+                if (sortVal === 'name-asc') return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+                return (b.dataset.created || '').localeCompare(a.dataset.created || '');
+            });
+
+            cards.forEach(function (c) { c.style.display = 'none'; });
+            visible.forEach(function (c) { c.style.display = ''; grid.appendChild(c); });
+
+            var badge = document.getElementById('vpCountBadge');
+            if (badge) badge.textContent = visible.length + ' car' + (visible.length !== 1 ? 's' : '') + ' available';
+        }
+        window.applyFilters = applyFilters;
+
+        /* Panel collapse */
+        document.querySelectorAll('.vf-panel-header').forEach(function (h) {
+            h.addEventListener('click', function () { this.closest('.vf-panel').classList.toggle('collapsed'); });
+        });
+
+        /* Check-all buttons */
+        document.querySelectorAll('.vf-check-all').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var group = this.dataset.group;
+                var boxes = document.querySelectorAll('input[name="' + group + '"]');
+                var allChecked = Array.from(boxes).every(function (b) { return b.checked; });
+                boxes.forEach(function (b) { b.checked = !allChecked; });
+                applyFilters();
+            });
+        });
+
+        /* Hide / Show sidebar */
+        var sidebar = document.getElementById('vpSidebar');
+        var showBtn = document.getElementById('vpShowFilters');
+        document.getElementById('vfHideBtn').addEventListener('click', function () {
+            sidebar.classList.add('hidden');
+            document.querySelector('.vp-layout').classList.add('sidebar-hidden');
+            showBtn.style.display = 'inline-flex';
+        });
+        showBtn.addEventListener('click', function () {
+            sidebar.classList.remove('hidden');
+            document.querySelector('.vp-layout').classList.remove('sidebar-hidden');
+            showBtn.style.display = 'none';
+        });
+
+        /* Mobile filter toggle — with overlay */
+        var sidebarOverlay = document.createElement('div');
+        sidebarOverlay.className = 'vp-sidebar-overlay';
+        sidebarOverlay.addEventListener('click', function() {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('open');
+        });
+        document.body.appendChild(sidebarOverlay);
+
+        var toggleBtn = document.getElementById('vpFilterToggle');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function () {
+                sidebar.classList.add('open');
+                sidebarOverlay.classList.add('open');
+            });
+        }
+
+        /* Hide btn also closes on mobile */
+        document.getElementById('vfHideBtn').addEventListener('click', function() {
+            if (window.innerWidth <= 900) {
+                sidebar.classList.remove('open');
+                sidebarOverlay.classList.remove('open');
+            }
+        });
+
+        /* Year filter buttons */
+        document.querySelectorAll('.vp-year-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.vp-year-btn').forEach(function (b) { b.classList.remove('active'); });
+                this.classList.add('active');
+                applyFilters();
+            });
+        });
+
+        /* Sort & search */
+        document.getElementById('vpSort').addEventListener('change', applyFilters);
+        document.getElementById('vpSearch').addEventListener('input', applyFilters);
+
+        /* Search button — reload vehicles with location + date filters */
+        var searchBtn = document.getElementById('vfSearchBtn');
+        if (searchBtn) {
+            searchBtn.addEventListener('click', function () {
+                if (typeof vcLoadVehicles === 'function') vcLoadVehicles();
+            });
+        }
+
+        /* Check Availability button — same as search but re-opens calendar if no dates */
+        var checkBtn = document.getElementById('vfCheckBtn');
+        if (checkBtn) {
+            checkBtn.addEventListener('click', function () {
+                if (typeof vcLoadVehicles === 'function') vcLoadVehicles();
+            });
+        }
+
+        /* Pick-up location — reload on Enter */
+        var locInput = document.getElementById('pickupLocation');
+        if (locInput) {
+            locInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && typeof vcLoadVehicles === 'function') vcLoadVehicles();
+            });
+        }
+
+        /* Reset all filters button */
+        var resetBtn = document.getElementById('vpResetFilters');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function () {
+                document.querySelectorAll('.vf-panel input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
+                document.getElementById('vpSearch').value = '';
+                document.querySelectorAll('.vp-year-btn').forEach(function (b) { b.classList.remove('active'); });
+                var allBtn = document.querySelector('.vp-year-btn[data-year="all"]');
+                if (allBtn) allBtn.classList.add('active');
+                var rMin = document.getElementById('priceRangeMin');
+                var rMax = document.getElementById('priceRangeMax');
+                var iMin = document.getElementById('priceInputMin');
+                var iMax = document.getElementById('priceInputMax');
+                if (rMin) rMin.value = 0;
+                if (rMax) rMax.value = 500;
+                if (iMin) iMin.value = 0;
+                if (iMax) iMax.value = 500;
+                var fill = document.querySelector('.vf-range-fill');
+                if (fill) { fill.style.left = '0%'; fill.style.width = '100%'; }
+                document.getElementById('vpSort').value = 'default';
+                applyFilters();
+            });
+        }
+
+        /* Sidebar checkboxes */
+        document.querySelectorAll('.vf-panel input[type="checkbox"]').forEach(function (cb) {
+            cb.addEventListener('change', applyFilters);
+        });
+
+        /* Price range slider */
+        (function() {
+            var rMin = document.getElementById('priceRangeMin');
+            var rMax = document.getElementById('priceRangeMax');
+            var iMin = document.getElementById('priceInputMin');
+            var iMax = document.getElementById('priceInputMax');
+            var lMin = document.getElementById('vfPriceMin');
+            var lMax = document.getElementById('vfPriceMax');
+            var fill = document.getElementById('vfRangeFill');
+            if (!rMin || !rMax) return;
+
+            function updateSlider() {
+                var lo = Math.min(parseInt(rMin.value), parseInt(rMax.value));
+                var hi = Math.max(parseInt(rMin.value), parseInt(rMax.value));
+                rMin.value = lo; rMax.value = hi;
+                if (iMin) iMin.value = lo;
+                if (iMax) iMax.value = hi;
+                if (lMin) lMin.textContent = '$' + lo;
+                if (lMax) lMax.textContent = hi >= 500 ? '$500+' : '$' + hi;
+                if (fill) {
+                    fill.style.left  = (lo / 500 * 100) + '%';
+                    fill.style.width = ((hi - lo) / 500 * 100) + '%';
+                }
+                if (typeof window.applyFilters === 'function') window.applyFilters();
+            }
+
+            rMin.addEventListener('input', updateSlider);
+            rMax.addEventListener('input', updateSlider);
+
+            if (iMin) iMin.addEventListener('change', function() {
+                rMin.value = Math.max(0, Math.min(parseInt(this.value)||0, parseInt(rMax.value)));
+                updateSlider();
+            });
+            if (iMax) iMax.addEventListener('change', function() {
+                rMax.value = Math.min(500, Math.max(parseInt(this.value)||500, parseInt(rMin.value)));
+                updateSlider();
+            });
+
+            updateSlider();
+        })();
+
+
+    })();
+
+    // Initial vehicle load on page ready
+    document.addEventListener('DOMContentLoaded', function() { vcLoadVehicles(); });
+    // Fallback if DOMContentLoaded already fired
+    if (document.readyState !== 'loading') { vcLoadVehicles(); }
+
+    // ========================================
+    // VEHICLES CALENDAR
+    // ========================================
+    var vcSelStart=null,vcSelEnd=null,vcTempStart=null,vcTempEnd=null,vcDisplayMonth=new Date();
+    function vcDate(y,m,d){var dt=new Date(y,m,d);dt.setHours(0,0,0,0);return dt;}
+    function vcSameDay(a,b){return a&&b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
+    function vcFmt(dt){return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}
+
+    function vcUpdateDisplay() {
+        var el = document.getElementById('vfDateText');
+        if (!el || !vcSelStart || !vcSelEnd) return;
+        var ph = document.getElementById('vehiclesPickupHour'), pm = document.getElementById('vehiclesPickupMinute');
+        var dh = document.getElementById('vehiclesDropoffHour'), dm = document.getElementById('vehiclesDropoffMinute');
+        var s = vcSelStart.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+        var e = vcSelEnd.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+        el.textContent = s+', '+(ph?ph.value:'10')+':'+(pm?pm.value:'00')+' – '+e+', '+(dh?dh.value:'10')+':'+(dm?dm.value:'00');
+    }
+
+    function vcRenderMonth(date) {
+        var y = date.getFullYear(), m = date.getMonth();
+        var name = date.toLocaleString('en-US',{month:'long'});
+        var firstDay = new Date(y,m,1).getDay();
+        var days = new Date(y,m+1,0).getDate();
+        var today = new Date(); today.setHours(0,0,0,0);
+        var html = '<div class="month-title">'+name+' '+y+'</div><div class="calendar-grid">';
+        ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(function(d){ html+='<div class="day-header">'+d+'</div>'; });
+        for (var i=0; i<firstDay; i++) html+='<div class="day empty"></div>';
+        for (var day=1; day<=days; day++) {
+            var cur = vcDate(y,m,day);
+            var isPast = cur < today;
+            var rangeS = vcTempStart && vcTempEnd ? (vcTempStart<=vcTempEnd ? vcTempStart : vcTempEnd) : vcTempStart;
+            var rangeE = vcTempStart && vcTempEnd ? (vcTempStart<=vcTempEnd ? vcTempEnd : vcTempStart) : null;
+            var cls = 'day';
+            if (vcSameDay(cur,today)) cls+=' today';
+            if (isPast) cls+=' disabled';
+            if (rangeS && vcSameDay(cur,rangeS)) cls+=' selected start';
+            else if (rangeE && vcSameDay(cur,rangeE)) cls+=' selected end';
+            else if (rangeS && rangeE && cur>rangeS && cur<rangeE) cls+=' in-range';
+            var dateStr = vcFmt(cur);
+            html+='<div class="'+cls+'" data-date="'+dateStr+'">'+day+'</div>';
+        }
+        var totalCells = firstDay + days;
+        var rem = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+        for (var n=0; n<rem; n++) html+='<div class="day empty"></div>';
+        html+='</div>';
+        return html;
+    }
+
+    function vcRenderCalendars() {
+        var c1 = document.getElementById('vehiclesCalendar1'), c2 = document.getElementById('vehiclesCalendar2');
+        if (!c1 || !c2 || !vcDisplayMonth) return;
+        c1.innerHTML = vcRenderMonth(vcDisplayMonth);
+        var nm = new Date(vcDisplayMonth); nm.setMonth(nm.getMonth()+1);
+        c2.innerHTML = vcRenderMonth(nm);
+    }
+
+    function vcHandleClick(e) {
+        var el = e.target;
+        if (!el.classList.contains('day')) el = el.closest && el.closest('.day');
+        if (!el || !el.dataset.date || el.classList.contains('disabled') || el.classList.contains('other-month') || el.classList.contains('empty')) return;
+        var parts = el.dataset.date.split('-');
+        var clicked = vcDate(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
+        if (!vcTempStart) {
+            vcTempStart = clicked; vcTempEnd = null;
+        } else if (!vcTempEnd) {
+            if (vcSameDay(clicked,vcTempStart)) { vcTempStart=null; vcTempEnd=null; }
+            else if (clicked < vcTempStart) { vcTempEnd=vcTempStart; vcTempStart=clicked; }
+            else vcTempEnd = clicked;
+        } else {
+            vcTempStart = clicked; vcTempEnd = null;
+        }
+        vcRenderCalendars();
+    }
+
+    // One-time setup for the calendar modal (event listeners attached once)
+    (function setupVehiclesCalendar() {
+        var modal = document.getElementById('vehiclesCalendarModal');
+        if (!modal) return;
+
+        var monthSel = document.getElementById('vehiclesMonthSelect');
+        var yearSel  = document.getElementById('vehiclesYearSelect');
+        var body     = modal.querySelector('.calendar-body');
+        var overlay  = modal.querySelector('.calendar-overlay');
+
+        // Navigation prev/next
+        modal.querySelector('.prev-btn').addEventListener('click', function() {
+            vcDisplayMonth.setMonth(vcDisplayMonth.getMonth() - 1);
+            if (monthSel) monthSel.value = vcDisplayMonth.getMonth();
+            if (yearSel)  yearSel.value  = vcDisplayMonth.getFullYear();
+            vcRenderCalendars();
+        });
+        modal.querySelector('.next-btn').addEventListener('click', function() {
+            vcDisplayMonth.setMonth(vcDisplayMonth.getMonth() + 1);
+            if (monthSel) monthSel.value = vcDisplayMonth.getMonth();
+            if (yearSel)  yearSel.value  = vcDisplayMonth.getFullYear();
+            vcRenderCalendars();
+        });
+        if (monthSel) monthSel.addEventListener('change', function() {
+            vcDisplayMonth.setMonth(parseInt(this.value));
+            vcRenderCalendars();
+        });
+        if (yearSel) yearSel.addEventListener('change', function() {
+            vcDisplayMonth.setFullYear(parseInt(this.value));
+            vcRenderCalendars();
+        });
+
+        // Day click delegation
+        if (body) body.addEventListener('click', vcHandleClick);
+
+        // Overlay / cancel close
+        if (overlay) overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) { modal.classList.remove('active'); vcTempStart=vcSelStart?new Date(vcSelStart):null; vcTempEnd=vcSelEnd?new Date(vcSelEnd):null; }
+        });
+        document.getElementById('vehiclesCancelBtn').addEventListener('click', function() {
+            modal.classList.remove('active');
+            vcTempStart=vcSelStart?new Date(vcSelStart):null; vcTempEnd=vcSelEnd?new Date(vcSelEnd):null;
+        });
+
+        // Apply
+        document.getElementById('vehiclesApplyBtn').addEventListener('click', function() {
+            if (!vcTempStart || !vcTempEnd) {
+                var body = document.querySelector('.calendar-body');
+                if (body) { body.style.outline = '2px solid #ef4444'; setTimeout(function(){ body.style.outline=''; }, 1500); }
+                return;
+            }
+            vcSelStart = new Date(vcTempStart);
+            vcSelEnd   = new Date(vcTempEnd);
+            vcUpdateDisplay();
+            modal.classList.remove('active');
+            // Show the Check Availability button
+            var checkBtn = document.getElementById('vfCheckBtn');
+            if (checkBtn) checkBtn.style.display = 'block';
+            vcLoadVehicles();
+        });
+    })();
+
+    window.openVehiclesCalendar = function() {
+        var modal = document.getElementById('vehiclesCalendarModal');
+        if (!modal) return;
+        var now = new Date(); now.setHours(0,0,0,0);
+        vcDisplayMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        vcTempStart = vcSelStart ? new Date(vcSelStart) : null;
+        vcTempEnd   = vcSelEnd   ? new Date(vcSelEnd)   : null;
+        var ms = document.getElementById('vehiclesMonthSelect');
+        var ys = document.getElementById('vehiclesYearSelect');
+        if (ms) ms.value = vcDisplayMonth.getMonth();
+        if (ys) ys.value = vcDisplayMonth.getFullYear();
+        vcRenderCalendars();
+        modal.classList.add('active');
+    };
+
+    
+    function vcLoadVehicles() {
+        var loadingState = document.getElementById('vpLoadingState');
+        var grid = document.getElementById('vpGrid');
+        var emptyState = document.getElementById('vpEmptyState');
+        if (loadingState) loadingState.style.display = 'flex';
+        if (grid) grid.innerHTML = '';
+        if (emptyState) emptyState.style.display = 'none';
+        var apiUrl = '/api/vehicles?sort=newest';
+        if (vcSelStart && vcSelEnd) apiUrl += '&pickup_date=' + vcFmt(vcSelStart) + '&dropoff_date=' + vcFmt(vcSelEnd);
+        fetch(apiUrl)
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            var vehicles = data.vehicles || [];
+            if (loadingState) loadingState.style.display = 'none';
+            if (vehicles.length === 0) {
+                if (grid) grid.innerHTML = '<div style="padding:60px;text-align:center;grid-column:1/-1;"><div style="font-size:48px;">🚫</div><h3 style="color:#dc2626;">No Vehicles Available</h3><p style="color:#6b7280;">All vehicles are blocked for the selected dates. Try different dates.</p></div>';
+                return;
+            }
+            renderVehiclesGrid(vehicles);
+        })
+        .catch(function(err) { console.error('vcLoadVehicles error:', err); if (loadingState) loadingState.style.display = 'none'; });
+    }
+
+    function renderVehiclesGrid(vehicles) {
+        var grid = document.getElementById('vpGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        var user = null;
+        try { user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')); } catch(e) {}
+        var now = Date.now(), DAY = 86400000;
+
+        // Batch fetch all favorited IDs in one request
+        var favIds = {};
+        function buildCards(favSet) {
+            vehicles.forEach(function(v) {
+                var imgSrc = v.image_url || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240'%3E%3Crect fill='%23e2e8f0' width='400' height='240'/%3E%3Ctext x='200' y='125' text-anchor='middle' fill='%2394a3b8' font-size='16' font-family='sans-serif'%3ENo Image%3C/text%3E%3C/svg%3E";
+                var cat     = (v.category   || 'economy').toLowerCase();
+                var engine  = (v.engine     || 'gasoline').toLowerCase();
+                var gearbox = (v.gearbox    || 'automatic').toLowerCase();
+                var drive   = (v.drive_type || 'fwd').toLowerCase();
+                var price   = v.price_per_day || 0;
+                var year    = v.year  || 2020;
+                var name    = v.name  || 'Vehicle';
+                var seats   = v.seats || 5;
+                var isNew   = v.created_at && (now - new Date(v.created_at).getTime()) < DAY;
+                var isFav   = !!favSet[v.id];
+
+                var card = document.createElement('div');
+                card.className = 'vc-card';
+                card.setAttribute('data-id',       v.id);
+                card.setAttribute('data-category',  cat);
+                card.setAttribute('data-engine',    engine);
+                card.setAttribute('data-gearbox',   gearbox);
+                card.setAttribute('data-drive',     drive);
+                card.setAttribute('data-interior',  (v.interior_type || 'fabric').toLowerCase());
+                card.setAttribute('data-steering',  (v.steering_side || 'left').toLowerCase());
+                card.setAttribute('data-payment',   (v.payment_method || 'cash').toLowerCase());
+                card.setAttribute('data-year',      year);
+                card.setAttribute('data-price',     price);
+                card.setAttribute('data-name',      name);
+                card.setAttribute('data-created',   v.created_at || '');
+                card.setAttribute('data-imgurl',    v.image_url  || '');
+
+                card.innerHTML =
+                    '<div class="vc-image-wrap">'
+                    + '<img src="' + imgSrc + '" alt="' + name + '">'
+                    + '<span class="vc-year-badge">' + year + '</span>'
+                    + (isNew ? '<span class="vc-new-badge">NEW</span>' : '')
+                    + '<button class="vc-fav-btn' + (isFav ? ' active' : '') + '">' + (isFav ? '&#9829;' : '&#9825;') + '</button>'
+                    + '</div>'
+                    + '<div class="vc-body">'
+                    + '<div class="vc-title-row"><span class="vc-name">' + name + '</span><span class="vc-category-tag ' + cat + '">' + cat.charAt(0).toUpperCase() + cat.slice(1) + '</span></div>'
+                    + '<div class="vc-specs">'
+                    + '<span class="vc-spec">' + engine.charAt(0).toUpperCase() + engine.slice(1) + '</span>'
+                    + '<span class="vc-spec">' + gearbox.charAt(0).toUpperCase() + gearbox.slice(1) + '</span>'
+                    + '<span class="vc-spec">' + seats + ' Seats</span>'
+                    + '<span class="vc-spec">' + drive.toUpperCase() + '</span>'
+                    + '</div>'
+                    + '<div class="vc-price-section">'
+                    + '<div class="vc-price-row"><span class="vc-price-label">Price per day:</span><span class="vc-price-current">$' + price + '</span><span class="vc-price-unit">/day</span></div>'
+                    + '<button class="vc-book-btn">Book Now</button>'
+                    + (v.company_name ? '<div class="vc-partner-name">by ' + v.company_name + '</div>' : '')
+                    + '</div>'
+                    + '</div>';
+
+                grid.appendChild(card);
+
+                // Card click → detail page (except buttons)
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', function(e) {
+                    if (e.target.closest('button')) return;
+                    window.location.href = 'vehicle.html?id=' + v.id;
+                });
+
+                // Fav button
+                var favBtn = card.querySelector('.vc-fav-btn');
+                if (isFav) favBtn.style.color = '#ef4444';
+                favBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    window.toggleFavorite(v.id, favBtn);
+                });
+
+                // Book Now button
+                card.querySelector('.vc-book-btn').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    window.openBookingModal(v);
+                });
+            });
+
+            // Re-apply active filters after grid rebuild
+            if (typeof applyFilters === 'function') applyFilters();
+
+            var badge = document.getElementById('vpCountBadge');
+            if (badge) badge.textContent = vehicles.length + ' car' + (vehicles.length !== 1 ? 's' : '') + ' available';
+        }
+
+        if (token && user && user.role === 'guest') {
+            fetch('/api/favorites/ids', { headers: { 'Authorization': 'Bearer ' + token } })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                (d.ids || []).forEach(function(id) { favIds[id] = true; });
+                buildCards(favIds);
+            })
+            .catch(function() { buildCards({}); });
+        } else {
+            buildCards({});
+        }
+    }
+
+    // Toggle favorite function
+    window.toggleFavorite = function(vehicleId, btn) {
+        const isActive = btn.classList.contains('active');
+        
+        // Check if user is logged in
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        var user = null;
+        try { user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')); } catch (e) {}
+        
+        if (!token || !user || user.role !== 'guest') {
+            window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
+            return;
+        }
+        
+        if (isActive) {
+            // Remove from favorites
+            fetch('/api/favorites/' + vehicleId, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                btn.classList.remove('active');
+                btn.innerHTML = '&#9825;';
+                btn.style.color = '';
+            })
+            .catch(function (err) { console.error('Remove favorite error:', err); });
+        } else {
+            fetch('/api/favorites/' + vehicleId, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(function (res) { return res.json(); })
+            .then(function () {
+                btn.classList.add('active');
+                btn.innerHTML = '&#9829;';
+                btn.style.color = '#ef4444';
+            })
+            .catch(function (err) { console.error('Add favorite error:', err); });
+        }
+    };
+
+    // ========================================
+    // BOOKING MODAL
+    // ========================================
+    (function() {
+        var _bkVehicle = null;
+
+        window.openBookingModal = function(v) {
+            // Go directly to the vehicle detail page
+            window.location.href = 'vehicle.html?id=' + v.id;
+        };
+
+        function closeBookingModal() {
+            document.getElementById('bookingModal').style.display = 'none';
+            _bkVehicle = null;
+        }
+
+        document.getElementById('bookingModalClose').addEventListener('click', closeBookingModal);
+        document.getElementById('bookingModal').addEventListener('click', function(e) {
+            if (e.target === this) closeBookingModal();
+        });
+
+        document.getElementById('bkSubmitBtn').addEventListener('click', function() {
+            if (!_bkVehicle) return;
+
+            var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            var btn   = document.getElementById('bkSubmitBtn');
+            var errEl = document.getElementById('bkError');
+
+            var pickupLoc  = document.getElementById('bkPickupLoc').value.trim();
+            var dropoffLoc = document.getElementById('bkDropoffLoc').value.trim();
+            var notes      = document.getElementById('bkNotes').value.trim();
+
+            errEl.style.display = 'none';
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+
+            fetch('/api/bookings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({
+                    vehicle_id:       _bkVehicle.id,
+                    pickup_date:      vcFmt(vcSelStart),
+                    dropoff_date:     vcFmt(vcSelEnd),
+                    pickup_location:  pickupLoc,
+                    dropoff_location: dropoffLoc,
+                    guest_notes:      notes
+                })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = 'Confirm Booking';
+                if (data.error) {
+                    errEl.textContent = data.error;
+                    errEl.style.display = 'block';
+                    return;
+                }
+                closeBookingModal();
+                document.getElementById('bookingSuccessModal').style.display = 'flex';
+            })
+            .catch(function() {
+                btn.disabled = false;
+                btn.textContent = 'Confirm Booking';
+                errEl.textContent = 'Network error. Please try again.';
+                errEl.style.display = 'block';
+            });
+        });
+
+        document.getElementById('bkSuccessClose').addEventListener('click', function() {
+            document.getElementById('bookingSuccessModal').style.display = 'none';
+        });
+        document.getElementById('bookingSuccessModal').addEventListener('click', function(e) {
+            if (e.target === this) this.style.display = 'none';
+        });
+    })();
+    </script>
+    <script src="navbar-auth.js"></script>
+
+</body>
+</html>

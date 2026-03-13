@@ -1,0 +1,90 @@
+/* ========================================
+   PARTNER REGISTRATION — STYLES
+   ======================================== */
+
+.pr-step-intro {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 4px;
+    padding: 10px 14px;
+    background: #f0f7ff;
+    border-radius: 10px;
+    border-left: 3px solid #3B82F6;
+}
+
+/* Filter group */
+.pr-filter-group {
+    margin-bottom: 6px;
+}
+
+.pr-filter-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f3d3e;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 10px;
+}
+
+/* Chip grid */
+.pr-chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Chip label */
+.pr-chip {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.pr-chip input[type="checkbox"] {
+    display: none;
+}
+
+.pr-chip span {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    background: #f8f9fa;
+    border: 2px solid #e0e0e0;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.pr-chip:hover span {
+    border-color: #3B82F6;
+    color: #3B82F6;
+    background: rgba(59, 130, 246, 0.04);
+}
+
+.pr-chip input[type="checkbox"]:checked + span {
+    background: #3B82F6;
+    border-color: #3B82F6;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .pr-chip span {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .pr-chip-grid {
+        gap: 6px;
+    }
+
+    .pr-filter-title {
+        font-size: 12px;
+    }
+}
