@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile — Eliterent.ge</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="navbar-auth.css">
+    <link rel="stylesheet" href="guest-profile.css">
+    <script src="api-helper.js"></script>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header sticky-header">
+        <div class="container header-content">
+            <div class="header-left">
+                <a href="/" class="logo">
+                    <img src="images/logo.png" alt="Eliterent.ge" class="logo-img">
+                    <span class="logo-text">Eliterent.ge</span>
+                </a>
+            </div>
+            <div class="header-center">
+                <nav class="nav-menu">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="vehicles.html" class="nav-link">Vehicles</a>
+                    <a href="reviews.html" class="nav-link">Reviews</a>
+                    <a href="about.html" class="nav-link">About</a>
+                    <a href="contact.html" class="nav-link">Contact</a>
+                </nav>
+            </div>
+            <div class="header-right">
+                <a href="register-partner.html" class="partner-btn">Become Partner</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- PROFILE PAGE -->
+    <div class="gp-container">
+        <!-- Sidebar -->
+        <aside class="gp-sidebar">
+            <div class="gp-avatar-section">
+                <div class="gp-avatar" id="gpAvatar">??</div>
+                <h3 class="gp-name" id="gpName">Guest User</h3>
+                <p class="gp-email" id="gpEmail">guest@example.com</p>
+                <span class="gp-role-badge">Guest</span>
+            </div>
+            <nav class="gp-nav">
+                <a href="#profile" class="gp-nav-item active" data-tab="profile">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Profile
+                </a>
+                <a href="#bookings" class="gp-nav-item" data-tab="bookings">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    My Bookings
+                </a>
+                <a href="#favorites" class="gp-nav-item" data-tab="favorites">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    Favorites
+                </a>
+                <a href="#settings" class="gp-nav-item" data-tab="settings">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    Settings
+                </a>
+            </nav>
+            <button class="gp-logout-btn" id="gpLogoutBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Log Out
+            </button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="gp-main">
+
+            <!-- TAB: PROFILE -->
+            <div class="gp-tab active" id="tab-profile">
+                <div class="gp-tab-header">
+                    <h2>My Profile</h2>
+                </div>
+                <div class="gp-card">
+                    <div class="gp-info-grid">
+                        <div class="gp-info-item">
+                            <label>Full Name</label>
+                            <span id="infoName">—</span>
+                        </div>
+                        <div class="gp-info-item">
+                            <label>Email</label>
+                            <span id="infoEmail">—</span>
+                        </div>
+                        <div class="gp-info-item">
+                            <label>Phone</label>
+                            <span id="infoPhone">—</span>
+                        </div>
+                        <div class="gp-info-item">
+                            <label>Role</label>
+                            <span id="infoRole">—</span>
+                        </div>
+                        <div class="gp-info-item">
+                            <label>Member Since</label>
+                            <span id="infoDate">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="gp-stats-row">
+                    <div class="gp-stat-card">
+                        <div class="gp-stat-number" id="statBookings">0</div>
+                        <div class="gp-stat-label">Total Bookings</div>
+                    </div>
+                    <div class="gp-stat-card">
+                        <div class="gp-stat-number" id="statFavorites">0</div>
+                        <div class="gp-stat-label">Favorites</div>
+                    </div>
+                    <div class="gp-stat-card">
+                        <div class="gp-stat-number" id="statReviews">0</div>
+                        <div class="gp-stat-label">Reviews</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: BOOKINGS -->
+            <div class="gp-tab" id="tab-bookings">
+                <div class="gp-tab-header">
+                    <h2>My Bookings</h2>
+                </div>
+                <div class="gp-empty-state">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <h3>No bookings yet</h3>
+                    <p>Your rental bookings will appear here</p>
+                    <a href="vehicles.html" class="btn btn-primary">Browse Vehicles</a>
+                </div>
+            </div>
+
+            <!-- TAB: FAVORITES -->
+            <div class="gp-tab" id="tab-favorites">
+                <div class="gp-tab-header">
+                    <h2>My Favorites</h2>
+                </div>
+                <div class="gp-empty-state">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    <h3>No favorites yet</h3>
+                    <p>Save vehicles you like by clicking the heart icon</p>
+                    <a href="vehicles.html" class="btn btn-primary">Browse Vehicles</a>
+                </div>
+            </div>
+
+            <!-- TAB: SETTINGS -->
+            <div class="gp-tab" id="tab-settings">
+                <div class="gp-tab-header">
+                    <h2>Settings</h2>
+                </div>
+                <div class="gp-card">
+                    <h3 class="gp-card-title">Change Password</h3>
+                    <form class="gp-settings-form" id="changePasswordForm">
+                        <div class="gp-form-group">
+                            <label>Current Password</label>
+                            <input type="password" class="gp-input" id="currentPassword" placeholder="Enter current password">
+                        </div>
+                        <div class="gp-form-group">
+                            <label>New Password</label>
+                            <input type="password" class="gp-input" id="newPassword" placeholder="Enter new password">
+                        </div>
+                        <div class="gp-form-group">
+                            <label>Confirm New Password</label>
+                            <input type="password" class="gp-input" id="confirmNewPassword" placeholder="Confirm new password">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </form>
+                </div>
+                <div class="gp-card" style="margin-top:20px;">
+                    <h3 class="gp-card-title">Danger Zone</h3>
+                    <p style="font-size:13px;color:#64748b;margin-bottom:12px;">Once you delete your account, there is no going back.</p>
+                    <button class="btn btn-danger" id="deleteAccountBtn">Delete Account</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- FLOATING QUICK CHAT -->
+    <a href="https://wa.me/995591522299" target="_blank" class="floating-whatsapp" style="text-decoration:none;color:inherit;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        <span>Quick Chat</span>
+    </a>
+    <footer class="footer">
+        <div class="container footer-content" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="footer-column"><h4>EliteRent.ge</h4><p>Premium car rental marketplace for Georgia adventures.</p><div class="social-icons"><a href="https://www.facebook.com/profile.php?id=61583448788067" target="_blank" class="social-icon" title="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a><a href="https://www.instagram.com/eliterentalgeorgia/" target="_blank" class="social-icon" title="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a></div></div>
+            <div class="footer-column"><h4>Legal</h4><ul><li><a href="tos.html">Terms & Conditions</a></li><li><a href="privacy.html">Privacy Policy</a></li><li><a href="#" onclick="document.getElementById('contactModal').style.display='flex'; return false;">Contact</a></li></ul></div>
+            <div class="footer-column"><h4>Contact</h4><p>📧 elite.rental25@gmail.com</p><p>📞 +995 591 522 299</p><p>📍 Tbilisi, Georgia</p></div>
+        </div>
+        <div class="footer-bottom"><p>&copy; 2026 EliteRent.ge. All rights reserved.</p></div>
+    </footer>
+    <div id="contactModal" onclick="if(event.target===this)this.style.display='none';" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+        <div style="background:#fff; border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.15); text-align:center;">
+            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#64748b; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">✕</button>
+            <div style="width:64px; height:64px; background:linear-gradient(135deg,#3b82f6,#2563eb); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px;">📞</div>
+            <h2 style="font-size:24px; font-weight:800; color:#1e293b; margin-bottom:8px;">Contact Us</h2>
+            <p style="font-size:14px; color:#64748b; margin-bottom:28px;">We're here to help! Reach us anytime.</p>
+            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0'">
+                <div style="width:44px; height:44px; background:#eff6ff; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">📧</div>
+                <div style="text-align:left;"><div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div><div style="font-size:15px; color:#1e293b; font-weight:600;">elite.rental25@gmail.com</div></div>
+            </a>
+            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#e2e8f0'">
+                <div style="width:44px; height:44px; background:#f0fdf4; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="24" height="24" viewBox="0 0 24 24" fill="#22c55e"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></div>
+                <div style="text-align:left;"><div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div><div style="font-size:15px; color:#1e293b; font-weight:600;">+995 591 522 299</div></div>
+            </a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="navbar-auth.js"></script>
+    <script src="guest-profile.js"></script>
+</body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservation — Eliterent.ge</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="navbar-auth.css">
+    <link rel="stylesheet" href="reservation.css">
+    <script src="api-helper.js"></script>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header sticky-header">
+        <div class="container header-content">
+            <div class="header-left">
+                <a href="/" class="logo">
+                    <img src="images/logo.png" alt="Eliterent.ge" class="logo-img">
+                    <span class="logo-text">Eliterent.ge</span>
+                </a>
+            </div>
+            <div class="header-center">
+                <nav class="nav-menu">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="vehicles.html" class="nav-link">Vehicles</a>
+                    <a href="reviews.html" class="nav-link">Reviews</a>
+                    <a href="about.html" class="nav-link">About</a>
+                    <a href="contact.html" class="nav-link">Contact</a>
+                </nav>
+            </div>
+            <div class="header-right">
+                <a href="register-partner.html" class="partner-btn">Become Partner</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- LOADING -->
+    <div class="rv-loading" id="rvLoading">
+        <div class="rv-loading-spinner"></div>
+        <p>Loading reservation...</p>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="rv-page container" id="rvContent" style="display:none;">
+
+        <!-- LEFT COLUMN -->
+        <div class="rv-left">
+
+            <!-- Vehicle Gallery Card -->
+            <div class="rv-card rv-gallery-card">
+                <div class="rv-gallery">
+                    <div class="rv-main-img-wrap">
+                        <img id="rvMainImg" src="" alt="" class="rv-main-img">
+                        <button class="rv-gallery-prev" id="rvGalleryPrev">‹</button>
+                        <button class="rv-gallery-next" id="rvGalleryNext">›</button>
+                    </div>
+                    <div class="rv-thumbs" id="rvThumbs"></div>
+                </div>
+
+                <!-- WhatsApp / Telegram -->
+                <div class="rv-contact-row">
+                    <a class="rv-contact-btn rv-whatsapp" id="rvWhatsapp" href="#" target="_blank">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+                        WhatsApp
+                    </a>
+                    <a class="rv-contact-btn rv-telegram" id="rvTelegram" href="#" target="_blank">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0 12 12 0 0011.944 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                        Telegram
+                    </a>
+                </div>
+            </div>
+
+            <!-- Vehicle Info Expandable -->
+            <div class="rv-card rv-vehicle-info-card">
+                <div class="rv-vehicle-info-header" id="rvSpecsToggle">
+                    <div class="rv-vehicle-info-left">
+                        <div class="rv-vehicle-icon">🚗</div>
+                        <div>
+                            <div class="rv-vehicle-title" id="rvVehicleName">Loading...</div>
+                            <div class="rv-vehicle-subtitle">View specifications and features</div>
+                        </div>
+                    </div>
+                    <svg class="rv-expand-arrow" id="rvExpandArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="rv-specs-body" id="rvSpecsBody" style="display:none;">
+                    <div class="rv-specs-grid" id="rvSpecsGrid"></div>
+                </div>
+            </div>
+
+            <!-- Pick-up & Drop-off Locations (dynamic) -->
+            <div class="rv-card rv-locations-card">
+                <div class="rv-locations-grid">
+                    <div class="rv-loc-col">
+                        <div class="rv-loc-header">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 10-16 0c0 3 2.7 7 8 11.7z"/></svg>
+                            <span>Pick-up location</span>
+                        </div>
+                        <div class="rv-loc-options" id="rvPickupLocations"></div>
+                        <input type="text" class="rv-loc-custom-input" id="rvPickupCustom" placeholder="Enter your address..." style="display:none;">
+                    </div>
+                    <div class="rv-loc-col">
+                        <div class="rv-loc-header">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 10-16 0c0 3 2.7 7 8 11.7z"/></svg>
+                            <span>Drop-off location</span>
+                        </div>
+                        <div class="rv-loc-options" id="rvDropoffLocations"></div>
+                        <input type="text" class="rv-loc-custom-input" id="rvDropoffCustom" placeholder="Enter your address..." style="display:none;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Methods (dynamic) -->
+            <div class="rv-card rv-payment-card">
+                <div class="rv-section-header rv-payment-header">
+                    <span>Payment Methods</span>
+                </div>
+                <div class="rv-payment-body" id="rvPaymentBody"></div>
+            </div>
+
+            <!-- Insurance & Protection (dynamic) -->
+            <div class="rv-card rv-insurance-card">
+                <div class="rv-section-header rv-insurance-header">
+                    <span>Insurance & Protection</span>
+                    <span class="rv-included-badge" id="rvInsuranceBadge" style="display:none;">INCLUDED</span>
+                </div>
+                <div class="rv-insurance-subtitle" id="rvInsuranceSubtitle"></div>
+                <div id="rvInsuranceGrid"></div>
+                <div id="rvAddonServices"></div>
+            </div>
+
+            <!-- Additional Services -->
+            <div class="rv-card rv-services-card">
+                <div class="rv-section-header rv-services-header">
+                    <span>Additional Services</span>
+                    <svg class="rv-services-expand" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="rv-services-grid" id="rvServicesGrid"></div>
+                <div class="rv-services-empty" id="rvServicesEmpty" style="display:none;">No additional services available for this vehicle.</div>
+            </div>
+
+            <!-- Guest Notes -->
+            <div class="rv-card">
+                <div class="rv-section-header">
+                    <span>Special Requests</span>
+                </div>
+                <textarea class="rv-notes" id="rvNotes" placeholder="Any special requests or notes for the partner..." rows="3"></textarea>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN — Booking Summary (sticky) -->
+        <div class="rv-right">
+            <div class="rv-summary-panel">
+                <h2 class="rv-summary-title">Your booking details</h2>
+
+                <div class="rv-summary-row">
+                    <span>Days</span>
+                    <strong id="rvSumDays">—</strong>
+                </div>
+                <div class="rv-summary-row">
+                    <span>Pick-up location</span>
+                    <strong id="rvSumPickupLoc">Tbilisi (Office)</strong>
+                </div>
+                <div class="rv-summary-row">
+                    <span>Drop-off location</span>
+                    <strong id="rvSumDropoffLoc">Tbilisi (Office)</strong>
+                </div>
+                <div class="rv-summary-row">
+                    <span>Car</span>
+                    <strong id="rvSumCar">—</strong>
+                </div>
+                <div class="rv-summary-row">
+                    <span>Pick-up date & time</span>
+                    <strong id="rvSumPickupDate">—</strong>
+                </div>
+                <div class="rv-summary-row">
+                    <span>Drop-off date & time</span>
+                    <strong id="rvSumDropoffDate">—</strong>
+                </div>
+
+                <a href="#" class="rv-edit-dates" id="rvEditDates">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Edit dates & times
+                </a>
+
+                <div class="rv-summary-divider"></div>
+
+                <div class="rv-summary-row">
+                    <span>Car Price</span>
+                    <strong id="rvSumCarPrice">—</strong>
+                </div>
+
+                <h3 class="rv-payment-title">Payment Summary</h3>
+
+                <div class="rv-summary-row rv-highlight">
+                    <span>Pay now on website</span>
+                    <strong id="rvSumPayNow">—</strong>
+                </div>
+                <div class="rv-summary-row">
+                    <span>Pay on pickup</span>
+                    <strong id="rvSumPayPickup">—</strong>
+                </div>
+
+                <div class="rv-summary-divider"></div>
+
+                <div class="rv-summary-row rv-label">
+                    <span>Price Breakdown</span>
+                    <span></span>
+                </div>
+                <div class="rv-summary-row">
+                    <span id="rvSumRentalLabel">Car Rental</span>
+                    <strong id="rvSumRentalTotal">—</strong>
+                </div>
+                <div class="rv-summary-row rv-extras-row" id="rvSumExtrasRow" style="display:none;">
+                    <span>Extras & Services</span>
+                    <strong id="rvSumExtrasTotal">$0</strong>
+                </div>
+                <div class="rv-summary-row rv-location-row" id="rvSumLocationRow" style="display:none;">
+                    <span>Location Fees</span>
+                    <strong id="rvSumLocationTotal">$0</strong>
+                </div>
+                <div class="rv-summary-row rv-grand-total">
+                    <span>Total</span>
+                    <strong id="rvSumGrandTotal">—</strong>
+                </div>
+
+                <div class="rv-summary-divider"></div>
+
+                <div class="rv-summary-row rv-label">
+                    <span>Refundable deposit (cash) · Paid on pickup</span>
+                    <span></span>
+                </div>
+                <div class="rv-summary-row">
+                    <span>Refundable Deposit (cash)</span>
+                    <strong id="rvSumDeposit">—</strong>
+                </div>
+                <div class="rv-deposit-note">A refundable cash deposit is required at pickup</div>
+
+                <!-- Driver Requirements Warning -->
+                <div class="rv-driver-warning">
+                    <div class="rv-driver-warning-icon">⚠️</div>
+                    <div class="rv-driver-warning-content">
+                        <strong>Driver Requirements</strong>
+                        <p>Driver must be at least 21 years old with a minimum of 2 years of driving experience.</p>
+                    </div>
+                </div>
+
+                <!-- Book Now Button -->
+                <button class="rv-book-btn" id="rvBookBtn">
+                    <span class="rv-book-icon">📋</span>
+                    <span>Book now</span>
+                    <span class="rv-book-price" id="rvBookPrice">—</span>
+                </button>
+
+                <div class="rv-or-divider">OR</div>
+
+                <button class="rv-whatsapp-btn" id="rvOrderWhatsapp">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+                    ORDER VIA WHATSAPP
+                </button>
+
+                <div class="rv-secure-note">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                    Secure booking · Free cancellation available
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Approval Info Modal -->
+    <div class="rv-overlay" id="rvApprovalModal" style="display:none;">
+        <div class="rv-approval-modal">
+            <div class="rv-approval-icon">📋</div>
+            <h2>Booking Created Successfully!</h2>
+            <div class="rv-approval-content">
+                <p><strong>Next Steps:</strong></p>
+                <ol>
+                    <li>Complete your payment on the next page to secure your reservation.</li>
+                    <li>Your booking will be reviewed and approved by our admin team within <strong>15-20 minutes</strong>.</li>
+                    <li>Once approved, you'll see the confirmation on your booking page, and the vehicle owner will contact you directly.</li>
+                    <li>Please send the following documents to the owner via WhatsApp:
+                        <ul>
+                            <li>Driver's license (both sides)</li>
+                            <li>Passport photo page</li>
+                        </ul>
+                    </li>
+                </ol>
+                <p class="rv-approval-note">You will receive notifications at each step of the process.</p>
+            </div>
+            <button class="rv-approval-btn" id="rvApprovalContinue">Continue to Payment</button>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="rv-overlay" id="rvSuccessModal" style="display:none;">
+        <div class="rv-success-modal">
+            <div class="rv-success-icon">✓</div>
+            <h2>Reservation Submitted!</h2>
+            <p>Your reservation is now <strong>Pending</strong> and waiting for admin approval. You'll see updates in <strong>My Bookings</strong> in your profile.</p>
+            <div class="rv-success-actions">
+                <a href="guest-profile.html#bookings" class="rv-btn-primary">View My Bookings</a>
+                <a href="vehicles.html" class="rv-btn-secondary">Browse More</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING QUICK CHAT -->
+    <a href="https://wa.me/995591522299" target="_blank" class="floating-whatsapp" style="text-decoration:none;color:inherit;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        <span>Quick Chat</span>
+    </a>
+    <footer class="footer">
+        <div class="container footer-content" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="footer-column"><h4>EliteRent.ge</h4><p>Premium car rental marketplace for Georgia adventures.</p><div class="social-icons"><a href="https://www.facebook.com/profile.php?id=61583448788067" target="_blank" class="social-icon" title="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a><a href="https://www.instagram.com/eliterentalgeorgia/" target="_blank" class="social-icon" title="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a></div></div>
+            <div class="footer-column"><h4>Legal</h4><ul><li><a href="tos.html">Terms & Conditions</a></li><li><a href="privacy.html">Privacy Policy</a></li><li><a href="#" onclick="document.getElementById('contactModal').style.display='flex'; return false;">Contact</a></li></ul></div>
+            <div class="footer-column"><h4>Contact</h4><p>📧 elite.rental25@gmail.com</p><p>📞 +995 591 522 299</p><p>📍 Tbilisi, Georgia</p></div>
+        </div>
+        <div class="footer-bottom"><p>&copy; 2026 EliteRent.ge. All rights reserved.</p></div>
+    </footer>
+    <div id="contactModal" onclick="if(event.target===this)this.style.display='none';" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+        <div style="background:#fff; border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.15); text-align:center;">
+            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#64748b; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">✕</button>
+            <div style="width:64px; height:64px; background:linear-gradient(135deg,#3b82f6,#2563eb); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px;">📞</div>
+            <h2 style="font-size:24px; font-weight:800; color:#1e293b; margin-bottom:8px;">Contact Us</h2>
+            <p style="font-size:14px; color:#64748b; margin-bottom:28px;">We're here to help! Reach us anytime.</p>
+            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0'">
+                <div style="width:44px; height:44px; background:#eff6ff; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">📧</div>
+                <div style="text-align:left;"><div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div><div style="font-size:15px; color:#1e293b; font-weight:600;">elite.rental25@gmail.com</div></div>
+            </a>
+            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#e2e8f0'">
+                <div style="width:44px; height:44px; background:#f0fdf4; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="24" height="24" viewBox="0 0 24 24" fill="#22c55e"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></div>
+                <div style="text-align:left;"><div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div><div style="font-size:15px; color:#1e293b; font-weight:600;">+995 591 522 299</div></div>
+            </a>
+        </div>
+    </div>
+
+    <script src="reservation.js"></script>
+    <script src="navbar-auth.js"></script>
+</body>
+</html>

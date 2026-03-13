@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel — Eliterent.ge</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin.css">
+    <script src="api-helper.js"></script>
+</head>
+<body class="admin-page">
+    <div class="admin-layout">
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="admin-sidebar-header">
+                <a href="index.html" class="admin-logo">
+                    <img src="images/logo.png" alt="Eliterent.ge" class="logo-img" style="height:28px;">
+                    <span>Eliterent.ge</span>
+                </a>
+                <span class="admin-badge">Admin</span>
+            </div>
+            <nav class="admin-nav">
+                <button class="admin-nav-item active" data-tab="dashboard">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Dashboard
+                </button>
+                <button class="admin-nav-item" data-tab="users">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Users
+                </button>
+                <button class="admin-nav-item" data-tab="partners">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                    Partners
+                </button>
+                <button class="admin-nav-item" data-tab="vehicles">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Vehicles
+                </button>
+                <button class="admin-nav-item" data-tab="bookings">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Bookings
+                </button>
+                <button class="admin-nav-item" data-tab="financial">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    Financial
+                </button>
+            </nav>
+            <div class="admin-sidebar-footer">
+                <button class="admin-logout-btn" id="adminLogoutBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Log Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1 id="adminPageTitle">Dashboard</h1>
+                <div class="admin-header-user" id="adminHeaderUser"></div>
+            </header>
+
+            <!-- DASHBOARD TAB -->
+            <section class="admin-tab active" id="tabDashboard">
+                <div class="admin-stats-grid" id="statsGrid">
+                    <!-- Stats cards injected by JS -->
+                </div>
+                <div class="admin-charts-row">
+                    <div class="admin-card">
+                        <h3>Recent Vehicle Uploads (7 days)</h3>
+                        <div id="dailyUploadsChart" class="admin-chart-placeholder"></div>
+                    </div>
+                    <div class="admin-card">
+                        <h3>Monthly Uploads</h3>
+                        <div id="monthlyUploadsChart" class="admin-chart-placeholder"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- USERS TAB -->
+            <section class="admin-tab" id="tabUsers">
+                <div class="admin-toolbar">
+                    <input type="text" class="admin-search" id="userSearch" placeholder="Search users...">
+                    <select class="admin-filter-select" id="userRoleFilter">
+                        <option value="">All Roles</option>
+                        <option value="guest">Guests</option>
+                        <option value="partner">Partners</option>
+                    </select>
+                </div>
+                <div class="admin-table-wrap">
+                    <table class="admin-table" id="usersTable">
+                        <thead>
+                            <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- PARTNERS TAB -->
+            <section class="admin-tab" id="tabPartners">
+                <div class="admin-toolbar">
+                    <input type="text" class="admin-search" id="partnerSearch" placeholder="Search partners...">
+                </div>
+                <div class="admin-table-wrap">
+                    <table class="admin-table" id="partnersTable">
+                        <thead>
+                            <tr><th>ID</th><th>Name</th><th>Company</th><th>Email</th><th>Phone</th><th>Verified</th><th>Joined</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="partnersTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- VEHICLES TAB -->
+            <section class="admin-tab" id="tabVehicles">
+                <div class="admin-toolbar">
+                    <input type="text" class="admin-search" id="vehicleSearch" placeholder="Search vehicles...">
+                    <select class="admin-filter-select" id="vehicleStatusFilter">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                </div>
+                <div class="admin-table-wrap">
+                    <table class="admin-table" id="vehiclesTable">
+                        <thead>
+                            <tr><th>ID</th><th>Image</th><th>Name</th><th>Partner</th><th>Price</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="vehiclesTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="admin-tab" id="tabBookings">
+                <div class="admin-toolbar">
+                    <input type="text" class="admin-search" id="bookingSearch" placeholder="Search bookings...">
+                    <select class="admin-filter-select" id="bookingStatusFilter">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="cancel_requested">Cancel Requested</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="admin-table-wrap">
+                    <table class="admin-table" id="bookingsTable">
+                        <thead>
+                            <tr><th>ID</th><th>Vehicle</th><th>Guest</th><th>Partner</th><th>Dates</th><th>Total</th><th>Status</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="bookingsTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- FINANCIAL TAB -->
+            <section class="admin-tab" id="tabFinancial">
+                <div class="fin-summary-grid" id="finSummaryGrid">
+                    <div class="fin-card fin-card-green">
+                        <div class="fin-card-label">Total Income</div>
+                        <div class="fin-card-value" id="finTotalIncome">$0.00</div>
+                    </div>
+                    <div class="fin-card fin-card-blue">
+                        <div class="fin-card-label">Active Bookings</div>
+                        <div class="fin-card-value" id="finActiveCount">0</div>
+                    </div>
+                    <div class="fin-card fin-card-red">
+                        <div class="fin-card-label">Cancelled (Lost)</div>
+                        <div class="fin-card-value" id="finCancelledIncome">$0.00</div>
+                    </div>
+                    <div class="fin-card fin-card-purple">
+                        <div class="fin-card-label">Avg Fee / Booking</div>
+                        <div class="fin-card-value" id="finAvgFee">$0.00</div>
+                    </div>
+                </div>
+                <div class="admin-toolbar">
+                    <select class="admin-filter-select" id="finMonthFilter">
+                        <option value="">All Time</option>
+                    </select>
+                    <select class="admin-filter-select" id="finStatusFilter">
+                        <option value="">All</option>
+                        <option value="active">Active Income</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="admin-table-wrap">
+                    <table class="admin-table" id="finTable">
+                        <thead>
+                            <tr>
+                                <th>Booking</th>
+                                <th>Vehicle</th>
+                                <th>Guest</th>
+                                <th>Dates</th>
+                                <th>Rental</th>
+                                <th>Extras</th>
+                                <th>Service Fee</th>
+                                <th>Total</th>
+                                <th>Payment</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="finTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Vehicle Detail Modal -->
+    <div id="vehicleDetailModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);overflow-y:auto;">
+        <div style="max-width:720px;margin:40px auto;background:#fff;border-radius:16px;box-shadow:0 24px 48px rgba(0,0,0,0.2);overflow:hidden;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #e2e8f0;">
+                <h3 style="margin:0;font-size:18px;font-weight:700;" id="vdTitle">Vehicle Details</h3>
+                <button onclick="document.getElementById('vehicleDetailModal').style.display='none'" style="background:none;border:none;font-size:24px;cursor:pointer;color:#64748b;">&times;</button>
+            </div>
+            <div id="vdContent" style="padding:24px;"></div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+node_modules/
+.env
+*.log
+.DS_Store
+Thumbs.db
+DEPLOY-INSTRUCTIONS.md
+NETLIFY-DEPLOYMENT-GUIDE.md
+netlify.toml

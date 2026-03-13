@@ -1,0 +1,589 @@
+/* ========================================
+   ADMIN PANEL — JavaScript
+   ======================================== */
+
+(function () {
+    var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    var user = null;
+    try { user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')); } catch (e) {}
+
+    if (!token || !user || user.role !== 'admin') {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    var headerUser = document.getElementById('adminHeaderUser');
+    if (headerUser) headerUser.textContent = user.full_name || user.email;
+
+    // Tab navigation
+    var navItems = document.querySelectorAll('.admin-nav-item');
+    var tabs = document.querySelectorAll('.admin-tab');
+    var pageTitle = document.getElementById('adminPageTitle');
+
+    navItems.forEach(function (item) {
+        item.addEventListener('click', function () {
+            var tabName = this.dataset.tab;
+            navItems.forEach(function (n) { n.classList.remove('active'); });
+            tabs.forEach(function (t) { t.classList.remove('active'); });
+            this.classList.add('active');
+            var target = document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+            if (target) target.classList.add('active');
+            pageTitle.textContent = this.textContent.trim();
+
+            if (tabName === 'dashboard') loadAnalytics();
+            if (tabName === 'users') loadUsers();
+            if (tabName === 'partners') loadPartners();
+            if (tabName === 'vehicles') loadVehicles();
+            if (tabName === 'bookings') loadBookings();
+            if (tabName === 'financial') loadFinancial();
+        });
+    });
+
+    // Logout
+    document.getElementById('adminLogoutBtn').addEventListener('click', function () {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
+        window.location.href = 'login.html';
+    });
+
+    function apiGet(url) {
+        return fetch(url, { headers: { 'Authorization': 'Bearer ' + token } }).then(function (r) { return r.json(); });
+    }
+    function apiPut(url, body) {
+        return fetch(url, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) }).then(function (r) { return r.json(); });
+    }
+    function apiPatch(url, body) {
+        return fetch(url, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) }).then(function (r) { return r.json(); });
+    }
+    function apiDelete(url) {
+        return fetch(url, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }).then(function (r) { return r.json(); });
+    }
+
+    // ========================================
+    // DASHBOARD / ANALYTICS
+    // ========================================
+    function loadAnalytics() {
+        apiGet('/api/admin/analytics').then(function (data) {
+            var grid = document.getElementById('statsGrid');
+            grid.innerHTML = ''
+                + statCard('Earnings This Month', fmtMoney(data.earnings.month), 'green', data.earnings.reservationsMonth + ' reservations')
+                + statCard('Earnings Overall', fmtMoney(data.earnings.overall), 'blue', data.earnings.reservationsOverall + ' reservations')
+                + statCard('Service Fee Revenue', fmtMoney(data.earnings.overall), 'orange', 'Accepted + completed bookings')
+                + statCard('Total Users', data.users.total, 'purple', '+' + data.users.recentSignups + ' this week')
+                + statCard('Vehicles', data.vehicles.total, 'blue', data.vehicles.active + ' active, ' + data.vehicles.pending + ' pending');
+
+            renderBarChart('dailyUploadsChart', data.uploads.daily, 'date', 'count', 140);
+            renderBarChart('monthlyUploadsChart', data.uploads.monthly, 'month', 'count', 140);
+        }).catch(function () {
+            document.getElementById('statsGrid').innerHTML = '<p style="color:#ef4444;">Failed to load analytics</p>';
+        });
+    }
+
+    function fmtMoney(value) {
+        return '$' + (parseFloat(value) || 0).toFixed(2);
+    }
+
+    function statCard(label, value, color, sub) {
+        return '<div class="admin-stat-card ' + color + '">'
+            + '<div class="stat-label">' + label + '</div>'
+            + '<div class="stat-value">' + (value || 0) + '</div>'
+            + (sub ? '<div class="stat-sub">' + sub + '</div>' : '')
+            + '</div>';
+    }
+
+    function renderBarChart(containerId, data, labelKey, valueKey, maxHeight) {
+        var el = document.getElementById(containerId);
+        if (!el) return;
+        if (!data || data.length === 0) {
+            el.innerHTML = '<p style="color:#94a3b8;font-size:13px;margin:auto;">No data yet</p>';
+            return;
+        }
+        var maxVal = Math.max.apply(null, data.map(function (d) { return d[valueKey] || 0; }));
+        if (maxVal === 0) maxVal = 1;
+        el.innerHTML = '';
+        el.style.paddingBottom = '24px';
+        data.reverse().forEach(function (d) {
+            var h = Math.max(8, ((d[valueKey] || 0) / maxVal) * (maxHeight - 40));
+            var bar = document.createElement('div');
+            bar.className = 'admin-bar';
+            bar.style.height = h + 'px';
+            var lbl = (d[labelKey] || '').replace(/^\d{4}-/, '');
+            bar.innerHTML = '<span class="bar-value">' + (d[valueKey] || 0) + '</span><span class="bar-label">' + lbl + '</span>';
+            el.appendChild(bar);
+        });
+    }
+
+    // ========================================
+    // USERS
+    // ========================================
+    function loadUsers() {
+        var roleFilter = document.getElementById('userRoleFilter').value;
+        var url = '/api/admin/users' + (roleFilter ? '?role=' + roleFilter : '');
+        apiGet(url).then(function (data) {
+            var tbody = document.getElementById('usersTableBody');
+            var users = data.users || [];
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:30px;">No users found</td></tr>';
+                return;
+            }
+            tbody.innerHTML = users.map(function (u) {
+                var date = u.created_at ? new Date(u.created_at).toLocaleDateString() : '-';
+                var approvedBadge = u.is_approved
+                    ? '<span class="admin-status" style="background:#dcfce7;color:#16a34a;">Approved</span>'
+                    : '<span class="admin-status" style="background:#fef3c7;color:#d97706;">Pending</span>';
+                var approveBtn = !u.is_approved
+                    ? '<button class="admin-action-btn success" onclick="adminApproveUser(' + u.id + ')">Approve</button>'
+                      + '<button class="admin-action-btn danger" onclick="adminRejectUser(' + u.id + ')">Reject</button>'
+                    : '';
+                return '<tr>'
+                    + '<td>' + u.id + '</td>'
+                    + '<td><strong>' + (u.full_name || '-') + '</strong></td>'
+                    + '<td>' + (u.email || '-') + '</td>'
+                    + '<td>' + (u.phone || '-') + '</td>'
+                    + '<td><span class="admin-status ' + u.role + '">' + u.role + '</span></td>'
+                    + '<td>' + approvedBadge + '</td>'
+                    + '<td>' + date + '</td>'
+                    + '<td>'
+                    + approveBtn
+                    + '<button class="admin-action-btn danger" onclick="adminDeleteUser(' + u.id + ')">Delete</button>'
+                    + '</td></tr>';
+            }).join('');
+        });
+    }
+
+    window.adminApproveUser = function (id) {
+        if (!confirm('Approve this user?')) return;
+        apiPut('/api/admin/users/' + id + '/approve').then(function (data) {
+            if (data.error) { alert('Error: ' + data.error); return; }
+            loadUsers();
+        }).catch(function (err) { alert('Failed to approve user'); });
+    };
+
+    window.adminRejectUser = function (id) {
+        if (!confirm('Reject and remove this user?')) return;
+        apiPut('/api/admin/users/' + id + '/reject').then(function (data) {
+            if (data.error) { alert('Error: ' + data.error); return; }
+            loadUsers();
+        }).catch(function (err) { alert('Failed to reject user'); });
+    };
+
+    window.adminDeleteUser = function (id) {
+        if (!confirm('Delete this user? This cannot be undone.')) return;
+        apiDelete('/api/admin/users/' + id).then(function (data) {
+            if (data.error) { alert('Error: ' + data.error); return; }
+            loadUsers();
+        }).catch(function (err) { alert('Failed to delete user'); });
+    };
+
+    document.getElementById('userRoleFilter').addEventListener('change', loadUsers);
+    document.getElementById('userSearch').addEventListener('input', function () {
+        var q = this.value.toLowerCase();
+        var rows = document.querySelectorAll('#usersTableBody tr');
+        rows.forEach(function (r) {
+            r.style.display = r.textContent.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+        });
+    });
+
+    // ========================================
+    // PARTNERS
+    // ========================================
+    function loadPartners() {
+        apiGet('/api/admin/partners').then(function (data) {
+            var tbody = document.getElementById('partnersTableBody');
+            var partners = data.partners || [];
+            if (partners.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:30px;">No partners found</td></tr>';
+                return;
+            }
+            tbody.innerHTML = partners.map(function (p) {
+                var date = p.created_at ? new Date(p.created_at).toLocaleDateString() : '-';
+                var verified = p.is_verified ? 'verified' : 'unverified';
+                var verifyBtn = p.is_verified
+                    ? '<button class="admin-action-btn" onclick="adminUnverifyPartner(' + p.id + ')">Unverify</button>'
+                    : '<button class="admin-action-btn success" onclick="adminVerifyPartner(' + p.id + ')">Verify</button>';
+                return '<tr>'
+                    + '<td>' + p.id + '</td>'
+                    + '<td><strong>' + (p.full_name || '-') + '</strong></td>'
+                    + '<td>' + (p.company_name || '-') + '</td>'
+                    + '<td>' + (p.email || '-') + '</td>'
+                    + '<td>' + (p.phone || '-') + '</td>'
+                    + '<td><span class="admin-status ' + verified + '">' + verified + '</span></td>'
+                    + '<td>' + date + '</td>'
+                    + '<td>'
+                    + verifyBtn
+                    + '<button class="admin-action-btn danger" onclick="adminDeleteUser(' + p.id + ')">Delete</button>'
+                    + '</td></tr>';
+            }).join('');
+        });
+    }
+
+    window.adminVerifyPartner = function (id) {
+        apiPut('/api/admin/partners/' + id + '/verify').then(function () { loadPartners(); });
+    };
+    window.adminUnverifyPartner = function (id) {
+        apiPut('/api/admin/partners/' + id + '/unverify').then(function () { loadPartners(); });
+    };
+
+    document.getElementById('partnerSearch').addEventListener('input', function () {
+        var q = this.value.toLowerCase();
+        var rows = document.querySelectorAll('#partnersTableBody tr');
+        rows.forEach(function (r) {
+            r.style.display = r.textContent.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+        });
+    });
+
+    // ========================================
+    // VEHICLES
+    // ========================================
+    var _adminVehicles = [];
+
+    function loadVehicles() {
+        apiGet('/api/admin/vehicles').then(function (data) {
+            var tbody = document.getElementById('vehiclesTableBody');
+            var vehicles = data.vehicles || [];
+            _adminVehicles = vehicles;
+            if (vehicles.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:30px;">No vehicles found</td></tr>';
+                return;
+            }
+            tbody.innerHTML = vehicles.map(function (v) {
+                var date = v.created_at ? new Date(v.created_at).toLocaleDateString() : '-';
+                var imgSrc = v.image_url || '';
+                var imgTag = imgSrc ? '<img src="' + imgSrc + '" class="vehicle-thumb">' : '<div class="vehicle-thumb" style="display:inline-flex;align-items:center;justify-content:center;background:#e2e8f0;font-size:14px;">-</div>';
+                var status = v.status || 'active';
+                return '<tr>'
+                    + '<td>' + v.id + '</td>'
+                    + '<td>' + imgTag + '</td>'
+                    + '<td><strong>' + (v.name || '-') + '</strong></td>'
+                    + '<td>' + (v.company_name || v.partner_name || '-') + '</td>'
+                    + '<td>$' + (v.price_per_day || 0) + '</td>'
+                    + '<td><span class="admin-status ' + status + '">' + status + '</span></td>'
+                    + '<td>' + date + '</td>'
+                    + '<td>'
+                    + '<button class="admin-action-btn primary" onclick="adminViewVehicle(' + v.id + ')">View</button>'
+                    + (status !== 'active' ? '<button class="admin-action-btn success" onclick="adminSetVehicleStatus(' + v.id + ',\'active\')">Approve</button>' : '')
+                    + (status !== 'inactive' ? '<button class="admin-action-btn" onclick="adminSetVehicleStatus(' + v.id + ',\'inactive\')">Deactivate</button>' : '')
+                    + '<button class="admin-action-btn danger" onclick="adminDeleteVehicle(' + v.id + ')">Delete</button>'
+                    + '</td></tr>';
+            }).join('');
+
+            applyVehicleFilters();
+        });
+    }
+
+    window.adminSetVehicleStatus = function (id, status) {
+        apiPut('/api/admin/vehicles/' + id + '/status', { status: status }).then(function () { loadVehicles(); });
+    };
+    window.adminDeleteVehicle = function (id) {
+        if (!confirm('Delete this vehicle? This cannot be undone.')) return;
+        apiDelete('/api/admin/vehicles/' + id).then(function () { loadVehicles(); });
+    };
+
+    window.adminViewVehicle = function (id) {
+        var v = _adminVehicles.find(function (x) { return x.id === id; });
+        if (!v) return;
+        var modal = document.getElementById('vehicleDetailModal');
+        var title = document.getElementById('vdTitle');
+        var content = document.getElementById('vdContent');
+        title.textContent = v.name || 'Vehicle #' + v.id;
+
+        var extras = {}; try { extras = typeof v.extras === 'string' ? JSON.parse(v.extras || '{}') : (v.extras || {}); } catch(e) {}
+        var features = {}; try { features = typeof v.features === 'string' ? JSON.parse(v.features || '{}') : (v.features || {}); } catch(e) {}
+        var priceTiers = {}; try { priceTiers = typeof v.price_tiers === 'string' ? JSON.parse(v.price_tiers || '{}') : (v.price_tiers || {}); } catch(e) {}
+        var insurance = {}; try { insurance = typeof v.insurance === 'string' ? JSON.parse(v.insurance || '{}') : (v.insurance || {}); } catch(e) {}
+
+        var imgHtml = v.image_url
+            ? '<img src="' + v.image_url + '" style="width:100%;max-height:280px;object-fit:cover;border-radius:10px;margin-bottom:20px;">'
+            : '';
+
+        var row = function(label, val) { return val ? '<tr><td style="padding:6px 12px 6px 0;color:#64748b;font-weight:600;white-space:nowrap;">' + label + '</td><td style="padding:6px 0;">' + val + '</td></tr>' : ''; };
+
+        var specHtml = '<table style="width:100%;font-size:13px;border-collapse:collapse;">'
+            + row('Category', v.category)
+            + row('Year', v.year)
+            + row('Engine', v.engine)
+            + row('Gearbox', v.gearbox)
+            + row('Drive Type', v.drive_type)
+            + row('Interior', v.interior_type)
+            + row('Steering', v.steering_side)
+            + row('Payment', v.payment_method)
+            + row('Price/Day', '$' + (v.price_per_day || 0))
+            + row('Partner', v.company_name || v.partner_name || '-')
+            + row('Status', '<span class="admin-status ' + (v.status || 'active') + '">' + (v.status || 'active') + '</span>')
+            + '</table>';
+
+        // Price tiers
+        var tierHtml = '';
+        if (priceTiers.price_1_3 || priceTiers.price_4_7 || priceTiers.price_8_14 || priceTiers.price_15_30) {
+            tierHtml = '<h4 style="margin:16px 0 8px;font-size:14px;color:#334155;">Price Tiers</h4>'
+                + '<div style="display:flex;gap:12px;flex-wrap:wrap;">'
+                + (priceTiers.price_1_3 ? '<span style="padding:4px 12px;background:#f1f5f9;border-radius:6px;font-size:12px;">1-3d: $' + priceTiers.price_1_3 + '</span>' : '')
+                + (priceTiers.price_4_7 ? '<span style="padding:4px 12px;background:#f1f5f9;border-radius:6px;font-size:12px;">4-7d: $' + priceTiers.price_4_7 + '</span>' : '')
+                + (priceTiers.price_8_14 ? '<span style="padding:4px 12px;background:#f1f5f9;border-radius:6px;font-size:12px;">8-14d: $' + priceTiers.price_8_14 + '</span>' : '')
+                + (priceTiers.price_15_30 ? '<span style="padding:4px 12px;background:#f1f5f9;border-radius:6px;font-size:12px;">15-30d: $' + priceTiers.price_15_30 + '</span>' : '')
+                + '</div>';
+        }
+
+        // Features
+        var featKeys = Object.keys(features).filter(function(k) { return features[k]; });
+        var featHtml = '';
+        if (featKeys.length) {
+            featHtml = '<h4 style="margin:16px 0 8px;font-size:14px;color:#334155;">Features</h4>'
+                + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+                + featKeys.map(function(k) { return '<span style="padding:4px 10px;background:#dcfce7;color:#16a34a;border-radius:6px;font-size:11px;font-weight:600;">' + k.replace(/_/g, ' ') + '</span>'; }).join('')
+                + '</div>';
+        }
+
+        // Extras
+        var extKeys = Object.keys(extras).filter(function(k) { return !k.endsWith('_available') && extras[k] && extras[k] !== '0'; });
+        var extHtml = '';
+        if (extKeys.length) {
+            extHtml = '<h4 style="margin:16px 0 8px;font-size:14px;color:#334155;">Extras</h4>'
+                + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+                + extKeys.map(function(k) {
+                    var val = extras[k];
+                    var label = k.replace(/_/g, ' ');
+                    if (val === true || val === 1) return '<span style="padding:4px 10px;background:#dbeafe;color:#2563eb;border-radius:6px;font-size:11px;font-weight:600;">' + label + '</span>';
+                    return '<span style="padding:4px 10px;background:#dbeafe;color:#2563eb;border-radius:6px;font-size:11px;font-weight:600;">' + label + ': $' + val + '</span>';
+                }).join('')
+                + '</div>';
+        }
+
+        // Tech Passport Photos
+        var tpHtml = '';
+        if (v.tech_passport_front || v.tech_passport_back) {
+            tpHtml = '<h4 style="margin:20px 0 10px;font-size:14px;color:#334155;">Tech Passport</h4>'
+                + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
+            if (v.tech_passport_front) {
+                tpHtml += '<div><p style="font-size:11px;color:#64748b;margin:0 0 4px;font-weight:600;">Front</p>'
+                    + '<img src="' + v.tech_passport_front + '" style="width:100%;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;" onclick="window.open(this.src)"></div>';
+            }
+            if (v.tech_passport_back) {
+                tpHtml += '<div><p style="font-size:11px;color:#64748b;margin:0 0 4px;font-weight:600;">Back</p>'
+                    + '<img src="' + v.tech_passport_back + '" style="width:100%;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;" onclick="window.open(this.src)"></div>';
+            }
+            tpHtml += '</div>';
+        } else {
+            tpHtml = '<h4 style="margin:20px 0 10px;font-size:14px;color:#334155;">Tech Passport</h4>'
+                + '<p style="color:#94a3b8;font-size:13px;">No tech passport photos uploaded.</p>';
+        }
+
+        content.innerHTML = imgHtml + specHtml + tierHtml + featHtml + extHtml + tpHtml;
+        modal.style.display = 'block';
+    };
+
+    function applyVehicleFilters() {
+        var statusFilter = document.getElementById('vehicleStatusFilter').value;
+        var q = document.getElementById('vehicleSearch').value.toLowerCase();
+        var rows = document.querySelectorAll('#vehiclesTableBody tr');
+        rows.forEach(function (r) {
+            var matchText = !q || r.textContent.toLowerCase().indexOf(q) !== -1;
+            var statusEl = r.querySelector('.admin-status');
+            var matchStatus = !statusFilter || (statusEl && statusEl.textContent === statusFilter);
+            r.style.display = (matchText && matchStatus) ? '' : 'none';
+        });
+    }
+
+    document.getElementById('vehicleStatusFilter').addEventListener('change', applyVehicleFilters);
+    document.getElementById('vehicleSearch').addEventListener('input', applyVehicleFilters);
+
+    function loadBookings() {
+        var statusFilter = document.getElementById('bookingStatusFilter').value;
+        var url = '/api/admin/bookings' + (statusFilter ? '?status=' + encodeURIComponent(statusFilter) : '');
+        apiGet(url).then(function (data) {
+            var tbody = document.getElementById('bookingsTableBody');
+            var bookings = data.bookings || [];
+            if (bookings.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:30px;">No bookings found</td></tr>';
+                return;
+            }
+            tbody.innerHTML = bookings.map(function (b) {
+                var status = b.status || 'pending';
+                var pickupTime = b.pickup_time || '10:00';
+                var dropoffTime = b.dropoff_time || '10:00';
+                var dateRange = (b.pickup_date || '-') + ' ' + pickupTime + ' → ' + (b.dropoff_date || '-') + ' ' + dropoffTime;
+                var partnerLabel = b.partner_company || b.partner_name || '-';
+                var actions = '';
+                if (status === 'pending') {
+                    actions = '<button class="admin-action-btn success" onclick="adminUpdateBookingStatus(' + b.id + ',\'accepted\')">Accept</button>'
+                        + '<button class="admin-action-btn danger" onclick="adminUpdateBookingStatus(' + b.id + ',\'rejected\')">Reject</button>';
+                } else if (status === 'accepted') {
+                    actions = '<button class="admin-action-btn danger" onclick="adminUpdateBookingStatus(' + b.id + ',\'cancelled\')">Cancel</button>';
+                } else if (status === 'cancel_requested') {
+                    actions = '<button class="admin-action-btn danger" onclick="adminUpdateBookingStatus(' + b.id + ',\'cancelled\')">Approve Cancel</button>'
+                        + '<button class="admin-action-btn" onclick="adminUpdateBookingStatus(' + b.id + ',\'accepted\')">Deny Cancel</button>';
+                } else {
+                    actions = '<span class="admin-muted">No actions</span>';
+                }
+                var statusLabel = status === 'cancel_requested' ? 'Cancel Requested' : status;
+                var payStatus = String(b.payment_status || 'unpaid');
+                var payBadge = '';
+                if (payStatus === 'paid') {
+                    payBadge = '<span class="admin-status accepted" style="font-size:10px;">Paid</span>';
+                } else if (payStatus === 'refunded') {
+                    payBadge = '<span class="admin-status pending" style="font-size:10px;">Refunded</span>';
+                } else {
+                    payBadge = '<span class="admin-status inactive" style="font-size:10px;">Unpaid</span>';
+                }
+                // Add refund button for paid bookings that are cancelled
+                if (payStatus === 'paid' && (status === 'cancelled' || status === 'rejected')) {
+                    actions += ' <button class="admin-action-btn" style="color:#7c3aed;border-color:#c4b5fd;" onclick="adminRefundBooking(' + b.id + ')">Refund</button>';
+                }
+                return '<tr>'
+                    + '<td>' + b.id + '</td>'
+                    + '<td><strong>' + (b.vehicle_name || '-') + '</strong></td>'
+                    + '<td>' + (b.guest_name || '-') + '<br><span class="admin-subtle">' + (b.guest_email || '') + '</span></td>'
+                    + '<td>' + partnerLabel + '</td>'
+                    + '<td>' + dateRange + '</td>'
+                    + '<td><strong>' + fmtMoney(b.total_price) + '</strong><br><span class="admin-subtle">Fee ' + fmtMoney(b.service_fee) + '</span> ' + payBadge + '</td>'
+                    + '<td><span class="admin-status ' + status + '" data-status="' + status + '">' + statusLabel + '</span></td>'
+                    + '<td>' + actions + '</td>'
+                    + '</tr>';
+            }).join('');
+            applyBookingFilters();
+        });
+    }
+
+    function applyBookingFilters() {
+        var q = document.getElementById('bookingSearch').value.toLowerCase();
+        var statusFilter = document.getElementById('bookingStatusFilter').value;
+        var rows = document.querySelectorAll('#bookingsTableBody tr');
+        rows.forEach(function (r) {
+            var matchText = !q || r.textContent.toLowerCase().indexOf(q) !== -1;
+            var badge = r.querySelector('.admin-status');
+            var matchStatus = !statusFilter || (badge && (badge.getAttribute('data-status') || badge.textContent) === statusFilter);
+            r.style.display = (matchText && matchStatus) ? '' : 'none';
+        });
+    }
+
+    window.adminRefundBooking = function (id) {
+        if (!confirm('Refund the service fee for booking #' + id + '? This will send money back to the customer via PayPal.')) return;
+        fetch('/api/payments/refund', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ booking_id: id })
+        }).then(function (r) { return r.json(); }).then(function (data) {
+            if (data.error) { alert('Refund failed: ' + data.error); return; }
+            alert('Refund processed successfully!');
+            loadBookings();
+            loadAnalytics();
+        }).catch(function () { alert('Refund request failed'); });
+    };
+
+    window.adminUpdateBookingStatus = function (id, status) {
+        var questions = {
+            accepted: 'Accept this reservation?',
+            rejected: 'Reject this reservation?',
+            cancelled: 'Cancel this reservation? Dates will be unblocked.'
+        };
+        if (!confirm(questions[status] || 'Update this reservation?')) return;
+        apiPatch('/api/admin/bookings/' + id + '/status', { status: status }).then(function (data) {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            loadBookings();
+            loadAnalytics();
+        });
+    };
+
+    document.getElementById('bookingStatusFilter').addEventListener('change', loadBookings);
+    document.getElementById('bookingSearch').addEventListener('input', applyBookingFilters);
+
+    // ========================================
+    // FINANCIAL TAB
+    // ========================================
+    var finData = [];
+
+    function loadFinancial() {
+        apiGet('/api/admin/financial').then(function(data) {
+            finData = data.records || [];
+            populateFinMonthFilter();
+            renderFinancial();
+        });
+    }
+
+    function populateFinMonthFilter() {
+        var sel = document.getElementById('finMonthFilter');
+        var months = {};
+        finData.forEach(function(r) {
+            var d = r.pickup_date || '';
+            var m = d.substring(0, 7); // YYYY-MM
+            if (m) months[m] = true;
+        });
+        var sorted = Object.keys(months).sort().reverse();
+        sel.innerHTML = '<option value="">All Time</option>';
+        sorted.forEach(function(m) {
+            var parts = m.split('-');
+            var label = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(parts[1])-1] + ' ' + parts[0];
+            sel.innerHTML += '<option value="' + m + '">' + label + '</option>';
+        });
+    }
+
+    function renderFinancial() {
+        var monthFilter = document.getElementById('finMonthFilter').value;
+        var statusFilter = document.getElementById('finStatusFilter').value;
+
+        var filtered = finData.filter(function(r) {
+            if (monthFilter && (r.pickup_date || '').indexOf(monthFilter) !== 0) return false;
+            if (statusFilter === 'active' && !r.is_active) return false;
+            if (statusFilter === 'cancelled' && r.is_active) return false;
+            return true;
+        });
+
+        // Summary
+        var totalIncome = 0;
+        var cancelledIncome = 0;
+        var activeCount = 0;
+        filtered.forEach(function(r) {
+            if (r.is_active) {
+                totalIncome += r.service_fee;
+                activeCount++;
+            } else {
+                cancelledIncome += r.service_fee;
+            }
+        });
+        var avgFee = activeCount > 0 ? totalIncome / activeCount : 0;
+
+        document.getElementById('finTotalIncome').textContent = '$' + totalIncome.toFixed(2);
+        document.getElementById('finActiveCount').textContent = activeCount;
+        document.getElementById('finCancelledIncome').textContent = '$' + cancelledIncome.toFixed(2);
+        document.getElementById('finAvgFee').textContent = '$' + avgFee.toFixed(2);
+
+        // Table
+        var tbody = document.getElementById('finTableBody');
+        tbody.innerHTML = '';
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#94a3b8;">No financial records found</td></tr>';
+            return;
+        }
+        filtered.forEach(function(r) {
+            var statusCls = r.is_active ? 'fin-status-active' : 'fin-status-cancelled';
+            var statusLabel = r.is_active ? (r.status === 'cancel_requested' ? 'Pending Cancel' : 'Active') : 'Cancelled';
+            var payCls = r.payment_status === 'paid' ? 'fin-status-active' : (r.payment_status === 'refunded' ? 'fin-status-cancelled' : '');
+            var payLabel = r.payment_status === 'paid' ? 'Paid' : (r.payment_status === 'refunded' ? 'Refunded' : 'Unpaid');
+            var tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td>#' + r.id + '</td>' +
+                '<td>' + (r.vehicle_name || '') + '</td>' +
+                '<td>' + (r.guest_name || r.guest_email || '') + '</td>' +
+                '<td>' + (r.pickup_date || '') + ' → ' + (r.dropoff_date || '') + '</td>' +
+                '<td>$' + r.rental_total.toFixed(2) + '</td>' +
+                '<td>$' + r.extras_total.toFixed(2) + '</td>' +
+                '<td><strong>$' + r.service_fee.toFixed(2) + '</strong></td>' +
+                '<td>$' + r.total_price.toFixed(2) + '</td>' +
+                '<td><span class="' + payCls + '" style="' + (payCls ? '' : 'color:#94a3b8;font-size:11px;') + '">' + payLabel + '</span></td>' +
+                '<td><span class="' + statusCls + '">' + statusLabel + '</span></td>';
+            if (!r.is_active) tr.style.opacity = '0.6';
+            tbody.appendChild(tr);
+        });
+    }
+
+    document.getElementById('finMonthFilter').addEventListener('change', renderFinancial);
+    document.getElementById('finStatusFilter').addEventListener('change', renderFinancial);
+
+    // Initial load
+    loadAnalytics();
+})();
