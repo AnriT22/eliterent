@@ -2,6 +2,11 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'myrent-secret-key-change-in-production';
 
+if (process.env.NODE_ENV === 'production' && JWT_SECRET === 'myrent-secret-key-change-in-production') {
+    console.error('FATAL: JWT_SECRET must be set in production. Exiting.');
+    process.exit(1);
+}
+
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];

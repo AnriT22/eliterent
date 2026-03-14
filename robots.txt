@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin.html
+Disallow: /partner-dashboard.html
+Disallow: /partner-financials.html
+Disallow: /uploads/
+
+Sitemap: https://eliterent.ge/sitemap.xml

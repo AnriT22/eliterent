@@ -381,4 +381,69 @@ router.delete('/me', authenticateToken, async (req, res) => {
     }
 });
 
+// POST /api/forgot-password — request password reset email
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ error: 'Email is required' });
+
+        const user = queryOne('SELECT id, email, full_name FROM users WHERE email = ?', [email.trim()]);
+        // Always return success to prevent email enumeration
+        if (!user) return res.json({ message: 'If that email exists, a reset link has been sent.' });
+
+        // Generate a secure random token
+        const crypto = require('crypto');
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+
+        // Invalidate any previous tokens for this user
+        execute('UPDATE password_resets SET used = 1 WHERE user_id = ? AND used = 0', [user.id]);
+        execute('INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)', [user.id, token, expiresAt]);
+
+        // Build reset URL
+        const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+        const resetUrl = baseUrl + '/reset-password.html?token=' + token;
+
+        const { sendEmail } = require('../mailer');
+        await sendEmail({
+            to: user.email,
+            subject: 'Password Reset — Eliterent.ge',
+            text: 'Hello ' + (user.full_name || '') + ',\n\nYou requested a password reset. Click the link below to set a new password:\n\n' + resetUrl + '\n\nThis link expires in 1 hour.\n\nIf you did not request this, please ignore this email.\n\nEliterent.ge Team',
+            html: '<p>Hello ' + (user.full_name || '') + ',</p><p>You requested a password reset. Click the link below to set a new password:</p><p><a href="' + resetUrl + '" style="display:inline-block;padding:12px 28px;background:#c8a961;color:#0f172a;border-radius:8px;text-decoration:none;font-weight:700;">Reset Password</a></p><p>This link expires in 1 hour.</p><p>If you did not request this, please ignore this email.</p><p>Eliterent.ge Team</p>'
+        });
+
+        res.json({ message: 'If that email exists, a reset link has been sent.' });
+    } catch (err) {
+        console.error('Forgot password error:', err);
+        res.status(500).json({ error: 'Failed to process request' });
+    }
+});
+
+// POST /api/reset-password — set new password using token
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { token, new_password } = req.body;
+        if (!token || !new_password) return res.status(400).json({ error: 'Token and new_password are required' });
+        if (new_password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+
+        const reset = queryOne('SELECT * FROM password_resets WHERE token = ? AND used = 0', [token]);
+        if (!reset) return res.status(400).json({ error: 'Invalid or expired reset link' });
+
+        const now = new Date().toISOString();
+        if (now > reset.expires_at) {
+            execute('UPDATE password_resets SET used = 1 WHERE id = ?', [reset.id]);
+            return res.status(400).json({ error: 'Reset link has expired. Please request a new one.' });
+        }
+
+        const password_hash = await bcrypt.hash(new_password, 12);
+        execute('UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [password_hash, reset.user_id]);
+        execute('UPDATE password_resets SET used = 1 WHERE id = ?', [reset.id]);
+
+        res.json({ message: 'Password has been reset successfully. You can now log in.' });
+    } catch (err) {
+        console.error('Reset password error:', err);
+        res.status(500).json({ error: 'Failed to reset password' });
+    }
+});
+
 module.exports = router;

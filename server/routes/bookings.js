@@ -134,7 +134,7 @@ function getDailyRateByTier(vehicle, days, pickupDate) {
     return fallback;
 }
 
-router.post('/', authenticateToken, requireRole('guest'), (req, res) => {
+router.post('/', authenticateToken, requireRole('guest'), async (req, res) => {
     try {
         var body = req.body || {};
         var vehicle_id = body.vehicle_id;
@@ -238,6 +238,27 @@ router.post('/', authenticateToken, requireRole('guest'), (req, res) => {
             [req.user.id, vehicle_id, pickup_date]
         );
 
+        // Notify partner about new booking
+        try {
+            var partnerInfo = queryOne(
+                `SELECT u.email, u.full_name, pp.company_name
+                 FROM users u LEFT JOIN partner_profiles pp ON u.id = pp.user_id
+                 WHERE u.id = ?`, [vehicle.partner_id]
+            );
+            if (partnerInfo && partnerInfo.email) {
+                var { sendEmail } = require('../mailer');
+                var guestUser = queryOne('SELECT full_name FROM users WHERE id = ?', [req.user.id]);
+                await sendEmail({
+                    to: partnerInfo.email,
+                    subject: 'New Booking Request — ' + vehicle.name,
+                    text: 'Hello ' + (partnerInfo.company_name || partnerInfo.full_name || 'Partner') + ',\n\nYou have a new booking request:\n\nVehicle: ' + vehicle.name + '\nGuest: ' + (guestUser ? guestUser.full_name : 'Guest') + '\nDates: ' + pickup_date + ' → ' + dropoff_date + '\nTotal: $' + total_price.toFixed(2) + '\n\nPlease review and accept/reject in your dashboard.\n\nEliterent.ge',
+                    html: '<p>Hello ' + (partnerInfo.company_name || partnerInfo.full_name || 'Partner') + ',</p><p>You have a new booking request:</p><ul><li><strong>Vehicle:</strong> ' + vehicle.name + '</li><li><strong>Guest:</strong> ' + (guestUser ? guestUser.full_name : 'Guest') + '</li><li><strong>Dates:</strong> ' + pickup_date + ' → ' + dropoff_date + '</li><li><strong>Total:</strong> $' + total_price.toFixed(2) + '</li></ul><p>Please review and accept/reject in your dashboard.</p><p>Eliterent.ge</p>'
+                });
+            }
+        } catch (emailErr) {
+            console.error('New booking notification email error:', emailErr.message);
+        }
+
         res.status(201).json({
             message: 'Booking created successfully',
             booking_id: booking.id,
@@ -291,21 +312,44 @@ router.get('/partner', authenticateToken, requireRole('partner'), (req, res) => 
     }
 });
 
-router.patch('/:id/status', authenticateToken, (req, res) => {
+router.patch('/:id/status', authenticateToken, async (req, res) => {
     try {
         var bookingId = parseInt(req.params.id, 10);
         var status = req.body ? req.body.status : null;
-        var booking = queryOne('SELECT * FROM bookings WHERE id = ?', [bookingId]);
+        var booking = queryOne(
+            `SELECT b.*, v.name as vehicle_name,
+                    u.email as guest_email, u.full_name as guest_name,
+                    pu.email as partner_email, pu.full_name as partner_name,
+                    pp.company_name as partner_company
+             FROM bookings b
+             JOIN vehicles v ON b.vehicle_id = v.id
+             JOIN users u ON b.guest_id = u.id
+             LEFT JOIN users pu ON b.partner_id = pu.id
+             LEFT JOIN partner_profiles pp ON b.partner_id = pp.user_id
+             WHERE b.id = ?`,
+            [bookingId]
+        );
 
         if (!booking) return res.status(404).json({ error: 'Booking not found' });
 
         var allowed = [];
         var bStatus = String(booking.status || '');
+
+        // Guest actions
         if (req.user.role === 'guest' && booking.guest_id == req.user.id) {
             if (bStatus === 'pending') {
                 allowed = ['cancelled'];
             } else if (bStatus === 'accepted') {
                 allowed = ['cancel_requested'];
+            }
+        }
+
+        // Partner actions
+        if (req.user.role === 'partner' && booking.partner_id == req.user.id) {
+            if (bStatus === 'pending') {
+                allowed = ['accepted', 'rejected'];
+            } else if (bStatus === 'cancel_requested') {
+                allowed = ['cancelled'];
             }
         }
 
@@ -319,8 +363,55 @@ router.patch('/:id/status', authenticateToken, (req, res) => {
             console.error('DB update error:', dbErr.message);
             return res.status(500).json({ error: 'Database error updating status. Server may need restart to apply migrations.' });
         }
-        if (status === 'cancelled') {
+
+        // Handle date blocking/unblocking
+        if (status === 'accepted') {
+            blockDatesForBooking(booking.vehicle_id, booking.pickup_date, booking.dropoff_date);
+        }
+        if (status === 'cancelled' || status === 'rejected') {
             unblockDatesForBooking(booking.vehicle_id, booking.pickup_date, booking.dropoff_date);
+        }
+
+        // Send email notifications on status changes
+        var { sendEmail } = require('../mailer');
+        var vehicleName = booking.vehicle_name || 'Vehicle';
+        var dates = booking.pickup_date + ' → ' + booking.dropoff_date;
+
+        try {
+            if (status === 'accepted' && booking.guest_email) {
+                await sendEmail({
+                    to: booking.guest_email,
+                    subject: 'Booking Accepted — ' + vehicleName,
+                    text: 'Hello ' + (booking.guest_name || 'Guest') + ',\n\nYour reservation for ' + vehicleName + ' (' + dates + ') has been accepted by the partner.\n\nTotal: $' + (parseFloat(booking.total_price) || 0).toFixed(2) + '\n\nThank you for using Eliterent.ge!',
+                    html: '<p>Hello ' + (booking.guest_name || 'Guest') + ',</p><p>Your reservation for <strong>' + vehicleName + '</strong> (' + dates + ') has been <strong style="color:#16a34a;">accepted</strong>.</p><p>Total: <strong>$' + (parseFloat(booking.total_price) || 0).toFixed(2) + '</strong></p><p>Thank you for using Eliterent.ge!</p>'
+                });
+            }
+            if (status === 'rejected' && booking.guest_email) {
+                await sendEmail({
+                    to: booking.guest_email,
+                    subject: 'Booking Declined — ' + vehicleName,
+                    text: 'Hello ' + (booking.guest_name || 'Guest') + ',\n\nUnfortunately your reservation for ' + vehicleName + ' (' + dates + ') was not accepted.\n\nPlease try another vehicle or different dates.\n\nEliterent.ge Team',
+                    html: '<p>Hello ' + (booking.guest_name || 'Guest') + ',</p><p>Unfortunately your reservation for <strong>' + vehicleName + '</strong> (' + dates + ') was <strong style="color:#dc2626;">declined</strong>.</p><p>Please try another vehicle or different dates.</p><p>Eliterent.ge Team</p>'
+                });
+            }
+            if (status === 'cancel_requested' && booking.partner_email) {
+                await sendEmail({
+                    to: booking.partner_email,
+                    subject: 'Cancellation Requested — ' + vehicleName,
+                    text: 'Hello ' + (booking.partner_company || booking.partner_name || 'Partner') + ',\n\nGuest ' + (booking.guest_name || '') + ' has requested cancellation for ' + vehicleName + ' (' + dates + ').\n\nPlease review in your dashboard.\n\nEliterent.ge',
+                    html: '<p>Hello ' + (booking.partner_company || booking.partner_name || 'Partner') + ',</p><p>Guest <strong>' + (booking.guest_name || '') + '</strong> has requested cancellation for <strong>' + vehicleName + '</strong> (' + dates + ').</p><p>Please review in your dashboard.</p>'
+                });
+            }
+            if (status === 'cancelled' && booking.guest_email) {
+                await sendEmail({
+                    to: booking.guest_email,
+                    subject: 'Booking Cancelled — ' + vehicleName,
+                    text: 'Hello ' + (booking.guest_name || 'Guest') + ',\n\nYour reservation for ' + vehicleName + ' (' + dates + ') has been cancelled.\n\nEliterent.ge Team',
+                    html: '<p>Hello ' + (booking.guest_name || 'Guest') + ',</p><p>Your reservation for <strong>' + vehicleName + '</strong> (' + dates + ') has been <strong>cancelled</strong>.</p><p>Eliterent.ge Team</p>'
+                });
+            }
+        } catch (emailErr) {
+            console.error('Booking notification email error:', emailErr.message);
         }
 
         res.json({ message: 'Booking status updated', status: status });

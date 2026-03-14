@@ -438,6 +438,32 @@ async function initDB() {
         }
     } catch (e) { console.log('Location fee migration note:', e.message); }
 
+    // Create password_resets table for forgot password flow
+    db.run(`
+        CREATE TABLE IF NOT EXISTS password_resets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            token TEXT UNIQUE NOT NULL,
+            expires_at DATETIME NOT NULL,
+            used INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    `);
+
+    // Migration: add is_approved column to users if missing
+    try {
+        var uCols = db.exec("PRAGMA table_info(users)");
+        var uColNames = uCols.length > 0 ? uCols[0].values.map(function(c) {
+            var n = c[1]; return n instanceof Uint8Array ? new TextDecoder().decode(n) : n;
+        }) : [];
+        if (uColNames.indexOf('is_approved') === -1) {
+            db.run("ALTER TABLE users ADD COLUMN is_approved INTEGER DEFAULT 1");
+            saveDB();
+            console.log('Migration: added is_approved column to users');
+        }
+    } catch (e) { console.log('is_approved migration note:', e.message); }
+
     // Migration: add PayPal payment columns to bookings
     try {
         var cols = db.exec("PRAGMA table_info(bookings)");
