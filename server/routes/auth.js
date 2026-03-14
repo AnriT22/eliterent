@@ -109,7 +109,7 @@ router.post('/register/guest', async (req, res) => {
         const token = generateToken(newUser);
 
         res.status(201).json({
-            message: 'Account created! Approval takes 10-15 minutes.',
+            message: 'Account created successfully!',
             token,
             user: {
                 id: newUser.id,
@@ -201,8 +201,24 @@ router.post('/register/partner', async (req, res) => {
 
         const token = generateToken(newUser);
 
+        // Notify admin about new partner registration
+        try {
+            const { sendEmail } = require('../mailer');
+            const adminUser = queryOne("SELECT email FROM users WHERE role = 'admin' LIMIT 1");
+            if (adminUser && adminUser.email) {
+                await sendEmail({
+                    to: adminUser.email,
+                    subject: 'New Partner Registration — ' + company_name,
+                    text: 'A new partner just registered:\n\nName: ' + full_name + '\nCompany: ' + company_name + '\nEmail: ' + email + '\nPhone: ' + (phone || 'N/A') + '\nLocation: ' + (location || 'N/A') + '\n\nPlease verify them in the admin panel.',
+                    html: '<h3>New Partner Registration</h3><table style="font-size:14px;"><tr><td style="padding:4px 12px 4px 0;font-weight:600;">Name:</td><td>' + full_name + '</td></tr><tr><td style="padding:4px 12px 4px 0;font-weight:600;">Company:</td><td>' + company_name + '</td></tr><tr><td style="padding:4px 12px 4px 0;font-weight:600;">Email:</td><td>' + email + '</td></tr><tr><td style="padding:4px 12px 4px 0;font-weight:600;">Phone:</td><td>' + (phone || 'N/A') + '</td></tr><tr><td style="padding:4px 12px 4px 0;font-weight:600;">Location:</td><td>' + (location || 'N/A') + '</td></tr></table><p><a href="' + (process.env.BASE_URL || 'http://localhost:3000') + '/admin.html">Open Admin Panel</a></p>'
+                });
+            }
+        } catch (emailErr) {
+            console.error('Admin notification email error:', emailErr.message);
+        }
+
         res.status(201).json({
-            message: 'Partner account created! Approval takes 10-15 minutes.',
+            message: 'Partner account created! An admin will verify your account shortly.',
             token,
             user: {
                 id: newUser.id,

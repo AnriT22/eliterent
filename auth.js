@@ -619,7 +619,7 @@ async function submitRegistration() {
                 + '<p style="color:#94a3b8;margin-bottom:12px;">Your account has been created successfully.</p>'
                 + '<div style="background:rgba(136,189,242,0.1);border:1px solid rgba(136,189,242,0.2);border-radius:12px;padding:16px;margin:12px 0;text-align:left;">'
                 + '<p style="color:#BDDDFC;font-size:14px;font-weight:600;margin:0 0 6px;">Please note:</p>'
-                + '<p style="color:#94a3b8;font-size:13px;margin:0;">Account approval takes <strong style="color:#88BDF2;">10-15 minutes</strong>. Until approved, you can browse vehicles but cannot make reservations.</p>'
+                + '<p style="color:#94a3b8;font-size:13px;margin:0;">Your account is ready! You can now browse vehicles and make reservations.</p>'
                 + '</div>'
                 + '<p style="color:#64748b;font-size:12px;">Redirecting to homepage...</p>';
             successEl.style.display = 'flex';

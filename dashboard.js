@@ -49,7 +49,7 @@
         banner.style.cssText = 'background:linear-gradient(135deg,rgba(249,115,22,0.1),rgba(249,115,22,0.05));border:1px solid rgba(249,115,22,0.3);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;';
         banner.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
             + '<div><p style="margin:0;color:#f97316;font-weight:600;font-size:14px;">Your account is pending verification</p>'
-            + '<p style="margin:4px 0 0;color:#94a3b8;font-size:13px;">Approval takes <strong style="color:#f97316;">10-15 minutes</strong>. Until verified, you cannot add vehicles or receive bookings.</p></div>';
+            + '<p style="margin:4px 0 0;color:#94a3b8;font-size:13px;">An admin will review and verify your account. Until verified, you cannot add vehicles or receive bookings. This page updates automatically.</p></div>';
         var dbMain = document.querySelector('.db-main');
         if (dbMain) dbMain.insertBefore(banner, dbMain.firstChild);
     }
@@ -143,7 +143,7 @@
         popup.innerHTML = '<div style="width:64px;height:64px;background:rgba(249,115,22,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">'
             + '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>'
             + '<h3 style="margin:0 0 8px;font-size:20px;color:#1e293b;">Account Not Verified</h3>'
-            + '<p style="margin:0 0 20px;color:#64748b;font-size:14px;">You cannot add vehicles until your account is verified by an admin. Verification usually takes <strong style="color:#f97316;">10-15 minutes</strong>.</p>'
+            + '<p style="margin:0 0 20px;color:#64748b;font-size:14px;">You cannot add vehicles until your account is verified by an admin. This page updates automatically once approved.</p>'
             + '<button onclick="this.closest(\'div[style]\').parentElement.remove();" style="padding:10px 32px;background:#f97316;color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-size:14px;">OK, I understand</button>';
         overlay.appendChild(popup);
         overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.remove(); });

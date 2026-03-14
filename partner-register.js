@@ -184,7 +184,7 @@
                     + '<p style="color:#94a3b8;margin-bottom:12px;">Your partner account has been created.</p>'
                     + '<div style="background:rgba(136,189,242,0.1);border:1px solid rgba(136,189,242,0.2);border-radius:12px;padding:16px;margin:12px 0;text-align:left;">'
                     + '<p style="color:#BDDDFC;font-size:14px;font-weight:600;margin:0 0 6px;">Please note:</p>'
-                    + '<p style="color:#94a3b8;font-size:13px;margin:0;">Verification takes <strong style="color:#88BDF2;">10-15 minutes</strong>. Until verified by admin, you can access your dashboard but cannot add vehicles or receive bookings.</p>'
+                    + '<p style="color:#94a3b8;font-size:13px;margin:0;">An admin will review and verify your account. Until verified, you can access your dashboard but cannot add vehicles or receive bookings. Your dashboard updates automatically once approved.</p>'
                     + '</div>'
                     + '<p style="color:#64748b;font-size:12px;">Redirecting to your dashboard...</p>';
                 successEl.style.display = 'flex';

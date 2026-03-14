@@ -45,6 +45,14 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                     Financial
                 </button>
+                <button class="admin-nav-item" data-tab="promos">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                    Promo Codes
+                </button>
+                <button class="admin-nav-item" data-tab="activity">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    Activity
+                </button>
             </nav>
             <div class="admin-sidebar-footer">
                 <button class="admin-logout-btn" id="adminLogoutBtn">
@@ -102,6 +110,7 @@
             <section class="admin-tab" id="tabPartners">
                 <div class="admin-toolbar">
                     <input type="text" class="admin-search" id="partnerSearch" placeholder="Search partners...">
+                    <button class="admin-action-btn success" onclick="adminBulkApprovePartners()" style="margin-left:auto;white-space:nowrap;">Verify All Pending</button>
                 </div>
                 <div class="admin-table-wrap">
                     <table class="admin-table" id="partnersTable">
@@ -123,6 +132,7 @@
                         <option value="inactive">Inactive</option>
                         <option value="pending">Pending</option>
                     </select>
+                    <button class="admin-action-btn success" onclick="adminBulkApproveVehicles()" style="margin-left:auto;white-space:nowrap;">Approve All Pending</button>
                 </div>
                 <div class="admin-table-wrap">
                     <table class="admin-table" id="vehiclesTable">
@@ -138,6 +148,7 @@
                 <div class="admin-toolbar">
                     <input type="text" class="admin-search" id="bookingSearch" placeholder="Search bookings...">
                     <select class="admin-filter-select" id="bookingStatusFilter">
+
                         <option value="">All Status</option>
                         <option value="pending">Pending</option>
                         <option value="accepted">Accepted</option>
@@ -146,6 +157,7 @@
                         <option value="cancelled">Cancelled</option>
                         <option value="completed">Completed</option>
                     </select>
+                    <button class="admin-action-btn" onclick="adminExportBookingsCSV()" style="margin-left:auto;white-space:nowrap;">📥 Export CSV</button>
                 </div>
                 <div class="admin-table-wrap">
                     <table class="admin-table" id="bookingsTable">
@@ -186,6 +198,7 @@
                         <option value="active">Active Income</option>
                         <option value="cancelled">Cancelled</option>
                     </select>
+                    <button class="admin-action-btn" onclick="adminExportFinancialCSV()" style="margin-left:auto;white-space:nowrap;">📥 Export CSV</button>
                 </div>
                 <div class="admin-table-wrap">
                     <table class="admin-table" id="finTable">
@@ -207,7 +220,78 @@
                     </table>
                 </div>
             </section>
+            <!-- PROMO CODES TAB -->
+            <section class="admin-tab" id="tabPromos">
+                <div class="admin-toolbar">
+                    <button class="admin-action-btn success" id="showAddPromoBtn" style="white-space:nowrap;">+ New Promo Code</button>
+                </div>
+                <!-- Add Promo Form (hidden by default) -->
+                <div id="addPromoForm" style="display:none;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:20px;">
+                    <h4 style="margin:0 0 14px;font-size:14px;color:#334155;">Create Promo Code</h4>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+                        <div>
+                            <label style="font-size:12px;color:#64748b;font-weight:600;display:block;margin-bottom:4px;">Code</label>
+                            <input type="text" id="promoCode" placeholder="SUMMER20" style="width:100%;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:12px;color:#64748b;font-weight:600;display:block;margin-bottom:4px;">Type</label>
+                            <select id="promoType" style="width:100%;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;">
+                                <option value="percent">Percentage (%)</option>
+                                <option value="fixed">Fixed ($)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:12px;color:#64748b;font-weight:600;display:block;margin-bottom:4px;">Value</label>
+                            <input type="number" id="promoValue" placeholder="20" min="0" style="width:100%;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:12px;color:#64748b;font-weight:600;display:block;margin-bottom:4px;">Min Order ($)</label>
+                            <input type="number" id="promoMinOrder" placeholder="0" min="0" style="width:100%;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:12px;color:#64748b;font-weight:600;display:block;margin-bottom:4px;">Max Uses (0=unlimited)</label>
+                            <input type="number" id="promoMaxUses" placeholder="0" min="0" style="width:100%;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:12px;color:#64748b;font-weight:600;display:block;margin-bottom:4px;">Valid Until</label>
+                            <input type="date" id="promoValidUntil" style="width:100%;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                        </div>
+                    </div>
+                    <div style="margin-top:14px;display:flex;gap:8px;">
+                        <button class="admin-action-btn success" onclick="adminCreatePromo()">Create</button>
+                        <button class="admin-action-btn" onclick="document.getElementById('addPromoForm').style.display='none'">Cancel</button>
+                    </div>
+                </div>
+                <div class="admin-table-wrap">
+                    <table class="admin-table" id="promosTable">
+                        <thead>
+                            <tr><th>ID</th><th>Code</th><th>Discount</th><th>Min Order</th><th>Uses</th><th>Valid Until</th><th>Active</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="promosTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ACTIVITY TAB -->
+            <section class="admin-tab" id="tabActivity">
+                <div id="activityFeed" style="max-width:700px;">
+                    <p style="color:#94a3b8;text-align:center;padding:40px;">Loading activity...</p>
+                </div>
+            </section>
         </main>
+    </div>
+
+    <!-- User/Partner Detail Modal -->
+    <div id="userDetailModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);overflow-y:auto;backdrop-filter:blur(4px);">
+        <div style="max-width:800px;margin:40px auto;background:#fff;border-radius:16px;box-shadow:0 24px 48px rgba(0,0,0,0.2);overflow:hidden;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #e2e8f0;background:#f8fafc;">
+                <h3 style="margin:0;font-size:18px;font-weight:700;" id="udTitle">User Details</h3>
+                <button onclick="document.getElementById('userDetailModal').style.display='none'" style="background:none;border:none;font-size:24px;cursor:pointer;color:#64748b;">&times;</button>
+            </div>
+            <div id="udContent" style="padding:24px;">
+                <p style="color:#94a3b8;text-align:center;padding:40px;">Loading...</p>
+            </div>
+        </div>
     </div>
 
     <!-- Vehicle Detail Modal -->

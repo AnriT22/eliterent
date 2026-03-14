@@ -451,6 +451,63 @@ async function initDB() {
         )
     `);
 
+    // Migration: add admin_notes column to users if missing
+    try {
+        var notesCols = db.exec("PRAGMA table_info(users)");
+        var notesColNames = notesCols.length > 0 ? notesCols[0].values.map(function(c) {
+            var n = c[1]; return n instanceof Uint8Array ? new TextDecoder().decode(n) : n;
+        }) : [];
+        if (notesColNames.indexOf('admin_notes') === -1) {
+            db.run("ALTER TABLE users ADD COLUMN admin_notes TEXT");
+            saveDB();
+            console.log('Migration: added admin_notes column to users');
+        }
+    } catch (e) { console.log('admin_notes migration note:', e.message); }
+
+    // Create promo_codes table
+    db.run(`
+        CREATE TABLE IF NOT EXISTS promo_codes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            code TEXT UNIQUE NOT NULL,
+            discount_type TEXT NOT NULL CHECK(discount_type IN ('percent', 'fixed')),
+            discount_value REAL NOT NULL,
+            min_order REAL DEFAULT 0,
+            max_uses INTEGER DEFAULT 0,
+            used_count INTEGER DEFAULT 0,
+            valid_from DATETIME,
+            valid_until DATETIME,
+            is_active INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // Migration: add promo_code column to bookings if missing
+    try {
+        var bkPromoCols = db.exec("PRAGMA table_info(bookings)");
+        var bkPromoColNames = bkPromoCols.length > 0 ? bkPromoCols[0].values.map(function(c) {
+            var n = c[1]; return n instanceof Uint8Array ? new TextDecoder().decode(n) : n;
+        }) : [];
+        if (bkPromoColNames.indexOf('promo_code') === -1) {
+            db.run("ALTER TABLE bookings ADD COLUMN promo_code TEXT");
+            db.run("ALTER TABLE bookings ADD COLUMN promo_discount REAL DEFAULT 0");
+            saveDB();
+            console.log('Migration: added promo columns to bookings');
+        }
+    } catch (e) { console.log('promo columns migration note:', e.message); }
+
+    // Migration: add location_fee column to bookings if missing
+    try {
+        var bkLocCols = db.exec("PRAGMA table_info(bookings)");
+        var bkLocColNames = bkLocCols.length > 0 ? bkLocCols[0].values.map(function(c) {
+            var n = c[1]; return n instanceof Uint8Array ? new TextDecoder().decode(n) : n;
+        }) : [];
+        if (bkLocColNames.indexOf('location_fee') === -1) {
+            db.run("ALTER TABLE bookings ADD COLUMN location_fee REAL DEFAULT 0");
+            saveDB();
+            console.log('Migration: added location_fee column to bookings');
+        }
+    } catch (e) { console.log('location_fee migration note:', e.message); }
+
     // Migration: add is_approved column to users if missing
     try {
         var uCols = db.exec("PRAGMA table_info(users)");
