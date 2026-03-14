@@ -771,3 +771,252 @@
     .rv-specs-grid { grid-template-columns: repeat(2, 1fr); }
     .rv-services-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Mobile (480px and below) ── */
+@media (max-width: 480px) {
+    .rv-page {
+        padding-top: 16px;
+        padding-bottom: 32px;
+        gap: 16px;
+    }
+
+    .rv-card {
+        border-radius: 12px;
+        margin-bottom: 14px;
+    }
+
+    /* Section headers */
+    .rv-section-header {
+        padding: 14px 16px;
+        font-size: 14px;
+        border-radius: 10px 10px 0 0;
+    }
+
+    /* Gallery */
+    .rv-gallery {
+        padding: 14px;
+    }
+    .rv-thumbs img {
+        width: 56px;
+        height: 40px;
+    }
+
+    /* Contact row */
+    .rv-contact-row {
+        flex-direction: column;
+        gap: 8px;
+        padding: 14px 16px;
+    }
+    .rv-contact-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+
+    /* Vehicle info */
+    .rv-vehicle-info-header {
+        padding: 14px 16px;
+    }
+    .rv-vehicle-icon {
+        width: 34px;
+        height: 34px;
+        font-size: 16px;
+    }
+    .rv-vehicle-title {
+        font-size: 13px;
+    }
+    .rv-specs-body {
+        padding: 0 16px 16px;
+    }
+    .rv-spec-item {
+        padding: 10px 8px;
+    }
+    .rv-spec-label {
+        font-size: 9px;
+    }
+    .rv-spec-val {
+        font-size: 12px;
+    }
+
+    /* Locations */
+    .rv-loc-col {
+        padding: 14px;
+    }
+    .rv-loc-header {
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+    .rv-loc-option {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+    .rv-loc-name {
+        font-size: 12px;
+    }
+    .rv-loc-address {
+        font-size: 10px;
+    }
+    .rv-loc-badge {
+        font-size: 10px;
+        padding: 3px 8px;
+    }
+
+    /* Payment methods */
+    .rv-payment-body {
+        padding: 14px;
+    }
+    .rv-payment-option {
+        padding: 12px;
+        gap: 10px;
+    }
+    .rv-payment-name {
+        font-size: 13px;
+    }
+    .rv-payment-note {
+        padding: 10px 12px;
+        font-size: 11px;
+    }
+
+    /* Insurance */
+    .rv-insurance-subtitle {
+        padding: 8px 16px;
+        font-size: 11px;
+    }
+    .rv-insurance-item {
+        padding: 14px;
+    }
+    .rv-ins-name {
+        font-size: 13px;
+    }
+    .rv-ins-desc {
+        font-size: 11px;
+    }
+
+    /* Addon row — stack on mobile */
+    .rv-addon-row {
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 14px;
+    }
+    .rv-addon-info {
+        width: 100%;
+        flex: none;
+    }
+    .rv-addon-price {
+        text-align: left;
+    }
+
+    /* Services */
+    .rv-services-grid {
+        padding: 12px;
+        gap: 8px;
+    }
+    .rv-service-item {
+        padding: 10px 12px;
+    }
+    .rv-service-name {
+        font-size: 12px;
+    }
+
+    /* Notes */
+    .rv-notes {
+        padding: 12px 14px;
+        font-size: 13px;
+        min-height: 60px;
+    }
+
+    /* Summary panel */
+    .rv-summary-panel {
+        padding: 16px;
+    }
+    .rv-summary-title {
+        font-size: 16px;
+        margin-bottom: 14px;
+    }
+    .rv-summary-row {
+        font-size: 12px;
+        gap: 8px;
+    }
+    .rv-summary-row.rv-grand-total {
+        font-size: 14px;
+    }
+    .rv-summary-row.rv-grand-total strong {
+        font-size: 14px;
+    }
+
+    /* Book button */
+    .rv-book-btn {
+        padding: 12px;
+        font-size: 14px;
+    }
+    .rv-whatsapp-btn {
+        padding: 12px;
+        font-size: 13px;
+    }
+
+    /* Driver warning */
+    .rv-driver-warning {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    /* Modals */
+    .rv-approval-modal {
+        padding: 24px 20px;
+        border-radius: 16px;
+    }
+    .rv-approval-icon {
+        width: 52px;
+        height: 52px;
+        font-size: 26px;
+        margin-bottom: 16px;
+    }
+    .rv-approval-modal h2 {
+        font-size: 18px;
+        margin-bottom: 14px;
+    }
+    .rv-approval-content {
+        font-size: 13px;
+        margin-bottom: 18px;
+    }
+    .rv-approval-content ol {
+        padding-left: 18px;
+    }
+    .rv-approval-content ul {
+        padding-left: 18px;
+    }
+    .rv-approval-note {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+    .rv-approval-btn {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .rv-success-modal {
+        padding: 28px 20px;
+        border-radius: 16px;
+    }
+    .rv-success-icon {
+        width: 52px;
+        height: 52px;
+        font-size: 26px;
+    }
+    .rv-success-modal h2 {
+        font-size: 18px;
+    }
+    .rv-success-modal p {
+        font-size: 13px;
+    }
+    .rv-success-actions {
+        flex-direction: column;
+    }
+    .rv-btn-primary,
+    .rv-btn-secondary {
+        width: 100%;
+        text-align: center;
+        padding: 12px 20px;
+    }
+}
