@@ -6,3 +6,5 @@ Thumbs.db
 DEPLOY-INSTRUCTIONS.md
 NETLIFY-DEPLOYMENT-GUIDE.md
 netlify.toml
+data/
+uploads/

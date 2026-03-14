@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — Rent Cars Georgia</title>
+    <title>Login — Eliterent.ge</title>
+    <meta name="description" content="Log in to your Eliterent.ge account to manage bookings, vehicles, and more.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="auth-luxury.css">
     <script src="api-helper.js"></script>
@@ -106,7 +108,7 @@
                     <div class="form-group">
                         <div class="form-label-row">
                             <label for="password" class="form-label">Password</label>
-                            <a href="#forgot" class="form-link">Forgot?</a>
+                            <a href="#" class="form-link" id="forgotPasswordLink">Forgot?</a>
                         </div>
                         <div class="form-input-wrapper">
                             <span class="form-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
@@ -203,6 +205,46 @@
             </a>
         </div>
     </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotModal" onclick="if(event.target===this)this.style.display='none';" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+        <div style="background:#fff;border-radius:20px;padding:36px;max-width:420px;width:90%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+            <button onclick="document.getElementById('forgotModal').style.display='none';" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:#64748b;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50;">&#10005;</button>
+            <h3 style="font-size:20px;font-weight:700;color:#1e293b;margin-bottom:6px;">Reset Password</h3>
+            <p style="font-size:13px;color:#64748b;margin-bottom:20px;">Enter your email and we'll send you a reset link.</p>
+            <div id="forgotMsg" style="display:none;padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:13px;"></div>
+            <input type="email" id="forgotEmail" placeholder="your@email.com" style="width:100%;padding:12px 16px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;margin-bottom:14px;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor='#c8a961'" onblur="this.style.borderColor='#e2e8f0'">
+            <button id="forgotSubmitBtn" onclick="submitForgotPassword()" style="width:100%;padding:12px;background:linear-gradient(135deg,#c8a961,#b8943f);color:#0f172a;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Send Reset Link</button>
+        </div>
+    </div>
+
+    <script>
+    document.getElementById('forgotPasswordLink').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('forgotModal').style.display = 'flex';
+        document.getElementById('forgotEmail').value = document.getElementById('email').value || '';
+        document.getElementById('forgotMsg').style.display = 'none';
+    });
+
+    function submitForgotPassword() {
+        var email = document.getElementById('forgotEmail').value.trim();
+        var msgEl = document.getElementById('forgotMsg');
+        var btn = document.getElementById('forgotSubmitBtn');
+        if (!email) { msgEl.style.display='block'; msgEl.style.background='#fef2f2'; msgEl.style.color='#dc2626'; msgEl.textContent='Please enter your email.'; return; }
+        btn.disabled = true; btn.textContent = 'Sending...';
+        fetch('/api/forgot-password', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:email}) })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            msgEl.style.display='block'; msgEl.style.background='#f0fdf4'; msgEl.style.color='#166534'; msgEl.style.border='1px solid #bbf7d0';
+            msgEl.textContent = d.message || 'Check your email for the reset link.';
+            btn.textContent = 'Sent!';
+        })
+        .catch(function(){
+            msgEl.style.display='block'; msgEl.style.background='#fef2f2'; msgEl.style.color='#dc2626';
+            msgEl.textContent='Network error. Try again.'; btn.disabled=false; btn.textContent='Send Reset Link';
+        });
+    }
+    </script>
 
     <script src="script.js"></script>
     <script src="auth.js"></script>
