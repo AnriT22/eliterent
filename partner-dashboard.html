@@ -39,6 +39,7 @@
             <div class="db-sidebar-header">
                 <h3 id="dbCompanyName">My Company</h3>
                 <span class="db-badge db-badge-partner">Partner</span>
+                <span id="dbVerificationStatus"></span>
             </div>
             <nav class="db-nav">
                 <a href="#" class="db-nav-item active" data-tab="vehicles">
@@ -179,6 +180,7 @@
                                 <select class="db-input" id="vCategory" required>
                                     <option value="">Select</option>
                                     <option value="economy">Economy</option>
+                                    <option value="sedan">Sedan</option>
                                     <option value="standard">Standard</option>
                                     <option value="suv">SUV</option>
                                     <option value="minivan">Minivan</option>
@@ -374,10 +376,23 @@
                                 <input type="number" class="db-input" id="vThirdDriver" placeholder="0" min="0" step="0.01">
                             </div>
                             <div class="db-form-group db-col-3">
-                                <label class="db-label vf-toggle-label">
-                                    <span>Mestia and Mountain Svaneti Roads Accepted</span>
-                                    <label class="vf-switch"><input type="checkbox" id="vThirdPartyIns"><span class="vf-slider"></span></label>
-                                </label>
+                                <div class="vf-section-title" style="font-size:14px;margin-bottom:8px;">Mountain Destination Roads (Extra Cost)</div>
+                                <div style="display:flex;gap:16px;flex-wrap:wrap;">
+                                    <div style="flex:1;min-width:200px;">
+                                        <label class="db-label" style="display:flex;align-items:center;gap:8px;">
+                                            <input type="checkbox" id="vSvanetiAccepted" style="width:18px;height:18px;">
+                                            <span>Mestia / Mountain Svaneti</span>
+                                        </label>
+                                        <input type="number" class="db-input" id="vSvanetiPrice" placeholder="Extra cost ($)" min="0" step="0.01" style="margin-top:6px;" disabled>
+                                    </div>
+                                    <div style="flex:1;min-width:200px;">
+                                        <label class="db-label" style="display:flex;align-items:center;gap:8px;">
+                                            <input type="checkbox" id="vShatiliAccepted" style="width:18px;height:18px;">
+                                            <span>Shatili</span>
+                                        </label>
+                                        <input type="number" class="db-input" id="vShatiliPrice" placeholder="Extra cost ($)" min="0" step="0.01" style="margin-top:6px;" disabled>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

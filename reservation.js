@@ -350,7 +350,9 @@
             { code: 'child_seat', key: 'child_seat', availKey: 'child_seat_available', name: 'Child Seat (up to 5 years)', icon: '🍼', perDay: true },
             { code: 'snow_chains', key: 'snow_chains', availKey: 'snow_chains_available', name: 'Snow Chains', icon: '⛓️', perDay: false },
             { code: 'roof_rack', key: 'roof_rack', availKey: 'roof_rack_available', name: 'Roof Luggage Carrier', icon: '🧳', perDay: true },
-            { code: 'third_driver', key: 'third_driver', availKey: null, name: 'Additional Driver', icon: '👤', perDay: true }
+            { code: 'third_driver', key: 'third_driver', availKey: null, name: 'Additional Driver', icon: '👤', perDay: true },
+            { code: 'svaneti_roads', key: 'svaneti_price', availKey: 'svaneti_roads', name: 'Mestia / Mountain Svaneti Roads', icon: '🏔️', perDay: false },
+            { code: 'shatili_roads', key: 'shatili_price', availKey: 'shatili_roads', name: 'Shatili Mountain Roads', icon: '🏔️', perDay: false }
         ];
 
         var services = [];
@@ -517,16 +519,26 @@
             driverWarning.textContent = 'Driver must be at least ' + minAge + ' years old with a valid driving license.';
         }
 
-        // Svaneti roads info
+        // Mountain destination badges
         var ext = v.extras;
         if (typeof ext === 'string') { try { ext = JSON.parse(ext); } catch(e) { ext = {}; } }
         ext = ext || {};
+        var mountainHtml = '';
         if (ext.svaneti_roads) {
-            var svanetiEl = document.createElement('div');
-            svanetiEl.className = 'rv-svaneti-badge';
-            svanetiEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;">\u2705 Mestia and Mountain Svaneti roads accepted</span>';
+            var svPrice = parseFloat(ext.svaneti_price) || 0;
+            mountainHtml += '<span style="display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;">🏔️ Mestia / Svaneti roads accepted' + (svPrice > 0 ? ' (+$' + svPrice.toFixed(2) + ')' : '') + '</span>';
+        }
+        if (ext.shatili_roads) {
+            var shPrice = parseFloat(ext.shatili_price) || 0;
+            mountainHtml += '<span style="display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;margin-left:6px;">🏔️ Shatili roads accepted' + (shPrice > 0 ? ' (+$' + shPrice.toFixed(2) + ')' : '') + '</span>';
+        }
+        if (mountainHtml) {
+            var mountainEl = document.createElement('div');
+            mountainEl.className = 'rv-mountain-badges';
+            mountainEl.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;';
+            mountainEl.innerHTML = mountainHtml;
             var insuranceCard = document.querySelector('.rv-insurance-card');
-            if (insuranceCard) insuranceCard.parentNode.insertBefore(svanetiEl, insuranceCard.nextSibling);
+            if (insuranceCard) insuranceCard.parentNode.insertBefore(mountainEl, insuranceCard.nextSibling);
         }
 
         renderLocations();

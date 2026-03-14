@@ -43,6 +43,11 @@
                 + '        <div class="nav-profile-name">' + (user.full_name || 'User') + '</div>'
                 + '        <div class="nav-profile-email">' + (user.email || '') + '</div>'
                 + '        <span class="nav-profile-role">' + (user.role === 'partner' ? 'Partner' : 'Guest') + '</span>'
+                + (user.role === 'partner'
+                    ? (user.is_verified
+                        ? '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(34,197,94,0.15);color:#22c55e;border-radius:12px;font-size:11px;font-weight:600;margin-top:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Verified</span>'
+                        : '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(249,115,22,0.15);color:#f97316;border-radius:12px;font-size:11px;font-weight:600;margin-top:4px;">Not Approved Yet</span>')
+                    : '')
                 + '      </div>'
                 + '    </div>'
                 + '    <div class="nav-profile-divider"></div>'

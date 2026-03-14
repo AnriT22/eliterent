@@ -1,9 +1,36 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const dns = require('dns').promises;
 const { authenticateToken, generateToken } = require('../middleware/auth');
 const { queryAll, queryOne, execute } = require('../db-helpers');
 
 const router = express.Router();
+
+// GET /api/verify-email?email=test@example.com — check if email domain has valid MX records
+router.get('/verify-email', async (req, res) => {
+    try {
+        const { email } = req.query;
+        if (!email || !email.includes('@')) {
+            return res.json({ valid: false, reason: 'Invalid email format' });
+        }
+        const domain = email.split('@')[1];
+        if (!domain) {
+            return res.json({ valid: false, reason: 'Invalid email domain' });
+        }
+        try {
+            const records = await dns.resolveMx(domain);
+            if (records && records.length > 0) {
+                return res.json({ valid: true });
+            }
+            return res.json({ valid: false, reason: 'Email domain cannot receive emails' });
+        } catch (dnsErr) {
+            return res.json({ valid: false, reason: 'Email domain does not exist' });
+        }
+    } catch (err) {
+        console.error('Verify email error:', err);
+        res.status(500).json({ valid: false, reason: 'Verification failed' });
+    }
+});
 
 // GET /api/check-availability?field=email&value=test@test.com
 router.get('/check-availability', (req, res) => {
@@ -16,7 +43,14 @@ router.get('/check-availability', (req, res) => {
         if (!allowed.includes(field)) {
             return res.status(400).json({ error: 'Invalid field' });
         }
-        const existing = queryOne('SELECT id FROM users WHERE ' + field + ' = ?', [value.trim()]);
+        let existing;
+        if (field === 'phone') {
+            const digits = value.replace(/\D/g, '');
+            if (digits.length < 9) return res.json({ available: true });
+            existing = queryOne("SELECT id FROM users WHERE REPLACE(REPLACE(REPLACE(phone, ' ', ''), '+', ''), '-', '') LIKE '%' || ?", [digits.slice(-9)]);
+        } else {
+            existing = queryOne('SELECT id FROM users WHERE ' + field + ' = ?', [value.trim()]);
+        }
         res.json({ available: !existing });
     } catch (err) {
         console.error('Check availability error:', err);
@@ -37,33 +71,54 @@ router.post('/register/guest', async (req, res) => {
             return res.status(400).json({ error: 'Password must be at least 6 characters' });
         }
 
-        const existing = queryOne('SELECT id FROM users WHERE email = ?', [email]);
+        // Validate phone format if provided
+        if (phone) {
+            const digits = phone.replace(/\D/g, '');
+            if (digits.length < 9 || digits.length > 12) {
+                return res.status(400).json({ error: 'Invalid phone number format' });
+            }
+        }
+
+        const existing = queryOne('SELECT id FROM users WHERE email = ?', [email.trim()]);
         if (existing) {
             return res.status(409).json({ error: 'Email already registered' });
         }
 
         if (phone) {
-            const phoneExists = queryOne('SELECT id FROM users WHERE phone = ?', [phone]);
+            const phoneDigits = phone.replace(/\D/g, '');
+            const phoneExists = queryOne("SELECT id FROM users WHERE REPLACE(REPLACE(REPLACE(phone, ' ', ''), '+', ''), '-', '') LIKE '%' || ?", [phoneDigits.slice(-9)]);
             if (phoneExists) {
                 return res.status(409).json({ error: 'Phone number already registered' });
             }
         }
 
-        const nameExists = queryOne('SELECT id FROM users WHERE full_name = ?', [full_name]);
+        const nameExists = queryOne('SELECT id FROM users WHERE full_name = ?', [full_name.trim()]);
         if (nameExists) {
             return res.status(409).json({ error: 'Username already taken' });
         }
 
         const password_hash = await bcrypt.hash(password, 12);
 
+        // Auto-approve: user can log in immediately, but actions may be restricted
         execute(
-            'INSERT INTO users (email, password_hash, full_name, phone, role, is_approved) VALUES (?, ?, ?, ?, ?, 0)',
-            [email, password_hash, full_name, phone || null, 'guest']
+            'INSERT INTO users (email, password_hash, full_name, phone, role, is_approved) VALUES (?, ?, ?, ?, ?, 1)',
+            [email.trim(), password_hash, full_name.trim(), phone || null, 'guest']
         );
 
+        const newUser = queryOne('SELECT * FROM users WHERE email = ?', [email.trim()]);
+        const token = generateToken(newUser);
+
         res.status(201).json({
-            message: 'Account created successfully! Please wait for admin approval before logging in.',
-            pending_approval: true
+            message: 'Account created! Approval takes 10-15 minutes.',
+            token,
+            user: {
+                id: newUser.id,
+                email: newUser.email,
+                full_name: newUser.full_name,
+                role: newUser.role,
+                is_approved: newUser.is_approved
+            },
+            pending_approval: false
         });
     } catch (err) {
         console.error('Guest registration error:', err);
@@ -77,7 +132,7 @@ router.post('/register/partner', async (req, res) => {
         const {
             email, password, full_name, phone,
             company_name, description, location,
-            whatsapp, telegram
+            telegram
         } = req.body;
 
         if (!email || !password || !full_name) {
@@ -92,35 +147,44 @@ router.post('/register/partner', async (req, res) => {
             return res.status(400).json({ error: 'Company name is required for partners' });
         }
 
-        const existing = queryOne('SELECT id FROM users WHERE email = ?', [email]);
+        // Validate phone format if provided
+        if (phone) {
+            const digits = phone.replace(/\D/g, '');
+            if (digits.length < 9 || digits.length > 12) {
+                return res.status(400).json({ error: 'Invalid phone number format' });
+            }
+        }
+
+        const existing = queryOne('SELECT id FROM users WHERE email = ?', [email.trim()]);
         if (existing) {
             return res.status(409).json({ error: 'Email already registered' });
         }
 
         if (phone) {
-            const phoneExists = queryOne('SELECT id FROM users WHERE phone = ?', [phone]);
+            const phoneDigits = phone.replace(/\D/g, '');
+            const phoneExists = queryOne("SELECT id FROM users WHERE REPLACE(REPLACE(REPLACE(phone, ' ', ''), '+', ''), '-', '') LIKE '%' || ?", [phoneDigits.slice(-9)]);
             if (phoneExists) {
                 return res.status(409).json({ error: 'Phone number already registered' });
             }
         }
 
-        const nameExists = queryOne('SELECT id FROM users WHERE full_name = ?', [full_name]);
+        const nameExists = queryOne('SELECT id FROM users WHERE full_name = ?', [full_name.trim()]);
         if (nameExists) {
             return res.status(409).json({ error: 'Username already taken' });
         }
 
         const password_hash = await bcrypt.hash(password, 12);
 
-        // Insert user
+        // Auto-approve login (is_approved=1), but partner actions need is_verified via admin Partners section
         execute(
-            'INSERT INTO users (email, password_hash, full_name, phone, role, is_approved) VALUES (?, ?, ?, ?, ?, 0)',
-            [email, password_hash, full_name, phone || null, 'partner']
+            'INSERT INTO users (email, password_hash, full_name, phone, role, is_approved) VALUES (?, ?, ?, ?, ?, 1)',
+            [email.trim(), password_hash, full_name.trim(), phone || null, 'partner']
         );
 
-        const newUser = queryOne('SELECT id FROM users WHERE email = ?', [email]);
+        const newUser = queryOne('SELECT * FROM users WHERE email = ?', [email.trim()]);
         const userId = newUser.id;
 
-        // Insert partner profile
+        // Insert partner profile (is_verified=0, needs admin approval in Partners section)
         execute(`
             INSERT INTO partner_profiles 
             (user_id, company_name, description, location, whatsapp, telegram)
@@ -130,13 +194,24 @@ router.post('/register/partner', async (req, res) => {
                 company_name,
                 description || null,
                 location || null,
-                whatsapp || null,
+                phone || null,
                 telegram || null
             ]
         );
 
+        const token = generateToken(newUser);
+
         res.status(201).json({
-            message: 'Partner account created successfully! Please wait for admin approval before logging in.',
+            message: 'Partner account created! Approval takes 10-15 minutes.',
+            token,
+            user: {
+                id: newUser.id,
+                email: newUser.email,
+                full_name: newUser.full_name,
+                role: newUser.role,
+                company_name: company_name,
+                is_verified: 0
+            },
             pending_approval: true
         });
     } catch (err) {
@@ -164,9 +239,10 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
 
-        // Check if user is approved by admin (admins bypass this)
+        // Admins always pass. For others, is_approved must be 1 to log in.
+        // (New registrations auto-set is_approved=1, so this only blocks manually revoked accounts)
         if (user.role !== 'admin' && !user.is_approved) {
-            return res.status(403).json({ error: 'Your account is waiting for admin approval. Please try again later.' });
+            return res.status(403).json({ error: 'Your account has been suspended. Please contact support.' });
         }
 
         // Enforce role separation: guest cannot login as partner and vice versa
@@ -185,13 +261,15 @@ router.post('/login', async (req, res) => {
             id: user.id,
             email: user.email,
             full_name: user.full_name,
-            role: user.role
+            role: user.role,
+            is_approved: user.is_approved
         };
 
         if (user.role === 'partner') {
-            const profile = queryOne('SELECT company_name FROM partner_profiles WHERE user_id = ?', [user.id]);
+            const profile = queryOne('SELECT company_name, is_verified FROM partner_profiles WHERE user_id = ?', [user.id]);
             if (profile) {
                 responseUser.company_name = profile.company_name;
+                responseUser.is_verified = profile.is_verified;
             }
         }
 

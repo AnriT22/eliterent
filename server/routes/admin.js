@@ -170,8 +170,12 @@ router.delete('/users/:id', (req, res) => {
         const userId = parseInt(req.params.id);
         const user = queryOne('SELECT * FROM users WHERE id = ? AND role != ?', [userId, 'admin']);
         if (!user) return res.status(404).json({ error: 'User not found' });
+        // If partner, explicitly delete all their vehicles first
+        if (user.role === 'partner') {
+            execute('DELETE FROM vehicles WHERE partner_id = ?', [userId]);
+        }
         execute('DELETE FROM users WHERE id = ?', [userId]);
-        res.json({ message: 'User deleted' });
+        res.json({ message: 'User deleted' + (user.role === 'partner' ? ' (all vehicles removed)' : '') });
     } catch (err) {
         console.error('Delete user error:', err);
         res.status(500).json({ error: 'Failed to delete user' });
@@ -271,7 +275,7 @@ router.put('/vehicles/:id/status', (req, res) => {
     try {
         const vehicleId = parseInt(req.params.id);
         const { status } = req.body;
-        if (!['active', 'inactive', 'pending'].includes(status)) {
+        if (!['active', 'inactive', 'pending', 'delete_requested'].includes(status)) {
             return res.status(400).json({ error: 'Invalid status' });
         }
         execute('UPDATE vehicles SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [status, vehicleId]);
@@ -279,6 +283,30 @@ router.put('/vehicles/:id/status', (req, res) => {
     } catch (err) {
         console.error('Update vehicle status error:', err);
         res.status(500).json({ error: 'Failed to update vehicle status' });
+    }
+});
+
+// Approve a delete request — actually deletes the vehicle
+router.delete('/vehicles/:id/approve-delete', (req, res) => {
+    try {
+        const vehicleId = parseInt(req.params.id);
+        execute('DELETE FROM vehicles WHERE id = ?', [vehicleId]);
+        res.json({ message: 'Vehicle deletion approved and vehicle removed' });
+    } catch (err) {
+        console.error('Admin approve delete error:', err);
+        res.status(500).json({ error: 'Failed to approve vehicle deletion' });
+    }
+});
+
+// Reject a delete request — set status back to active
+router.put('/vehicles/:id/reject-delete', (req, res) => {
+    try {
+        const vehicleId = parseInt(req.params.id);
+        execute("UPDATE vehicles SET status = 'active', updated_at = CURRENT_TIMESTAMP WHERE id = ?", [vehicleId]);
+        res.json({ message: 'Vehicle deletion rejected, vehicle restored to active' });
+    } catch (err) {
+        console.error('Admin reject delete error:', err);
+        res.status(500).json({ error: 'Failed to reject vehicle deletion' });
     }
 });
 

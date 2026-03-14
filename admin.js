@@ -263,9 +263,12 @@
                     + '<td>' + date + '</td>'
                     + '<td>'
                     + '<button class="admin-action-btn primary" onclick="adminViewVehicle(' + v.id + ')">View</button>'
-                    + (status !== 'active' ? '<button class="admin-action-btn success" onclick="adminSetVehicleStatus(' + v.id + ',\'active\')">Approve</button>' : '')
-                    + (status !== 'inactive' ? '<button class="admin-action-btn" onclick="adminSetVehicleStatus(' + v.id + ',\'inactive\')">Deactivate</button>' : '')
-                    + '<button class="admin-action-btn danger" onclick="adminDeleteVehicle(' + v.id + ')">Delete</button>'
+                    + (status === 'pending' ? '<button class="admin-action-btn success" onclick="adminSetVehicleStatus(' + v.id + ',\'active\')">Approve</button>' : '')
+                    + (status === 'delete_requested' ? '<button class="admin-action-btn success" onclick="adminApproveDelete(' + v.id + ')">Approve Delete</button>' : '')
+                    + (status === 'delete_requested' ? '<button class="admin-action-btn" onclick="adminRejectDelete(' + v.id + ')">Reject Delete</button>' : '')
+                    + (status === 'active' ? '<button class="admin-action-btn" onclick="adminSetVehicleStatus(' + v.id + ',\'inactive\')">Deactivate</button>' : '')
+                    + (status === 'inactive' ? '<button class="admin-action-btn success" onclick="adminSetVehicleStatus(' + v.id + ',\'active\')">Activate</button>' : '')
+                    + (status !== 'delete_requested' ? '<button class="admin-action-btn danger" onclick="adminDeleteVehicle(' + v.id + ')">Delete</button>' : '')
                     + '</td></tr>';
             }).join('');
 
@@ -279,6 +282,13 @@
     window.adminDeleteVehicle = function (id) {
         if (!confirm('Delete this vehicle? This cannot be undone.')) return;
         apiDelete('/api/admin/vehicles/' + id).then(function () { loadVehicles(); });
+    };
+    window.adminApproveDelete = function (id) {
+        if (!confirm('Approve deletion of this vehicle? This cannot be undone.')) return;
+        apiDelete('/api/admin/vehicles/' + id + '/approve-delete').then(function () { loadVehicles(); });
+    };
+    window.adminRejectDelete = function (id) {
+        apiPut('/api/admin/vehicles/' + id + '/reject-delete', {}).then(function () { loadVehicles(); });
     };
 
     window.adminViewVehicle = function (id) {

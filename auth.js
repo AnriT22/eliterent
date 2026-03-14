@@ -202,17 +202,12 @@ function clearPasswordError() {
 
 function togglePasswordVisibility(e) {
     e.preventDefault();
-    const targetId = e.target.dataset.target;
-    const input = document.getElementById(targetId);
-    const btn = e.target;
-
-    if (input.type === 'password') {
-        input.type = 'text';
-        btn.textContent = '👁️‍🗨️';
-    } else {
-        input.type = 'password';
-        btn.textContent = '👁️';
-    }
+    var btn = e.target.closest('.form-toggle-password');
+    if (!btn) return;
+    var targetId = btn.getAttribute('data-target');
+    var input = document.getElementById(targetId);
+    if (!input) return;
+    input.type = input.type === 'password' ? 'text' : 'password';
 }
 
 function isValidEmail(email) {
@@ -269,6 +264,12 @@ function initRegisterPage() {
         const confirmPasswordInput = document.getElementById('confirmPassword');
         if (confirmPasswordInput) {
             confirmPasswordInput.addEventListener('input', validatePasswordMatch);
+        }
+
+        // Phone formatting
+        const phoneInput = document.getElementById('phone');
+        if (phoneInput) {
+            initPhoneFormat(phoneInput);
         }
 
         // Live availability checks for name, email, phone
@@ -350,11 +351,14 @@ function validateRegistrationStep1() {
     if (!phone.value.trim()) {
         showError('phoneError', 'Phone number is required');
         isValid = false;
-    } else if (phone.value.replace(/\D/g, '').length < 9) {
-        showError('phoneError', 'Invalid phone number');
-        isValid = false;
     } else {
-        clearError('phoneError');
+        var phoneDigits = phone.value.replace(/\D/g, '');
+        if (phoneDigits.length < 9 || phoneDigits.length > 12) {
+            showError('phoneError', 'Phone must be 9-12 digits (e.g. +995 5XX XXX XXX)');
+            isValid = false;
+        } else {
+            clearError('phoneError');
+        }
     }
 
     return isValid;
@@ -519,22 +523,48 @@ function initLiveAvailabilityCheck(inputId, fieldName, errorId) {
 
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(function () {
-            fetch('/api/check-availability?field=' + encodeURIComponent(fieldName) + '&value=' + encodeURIComponent(value))
-                .then(function (res) { return res.json(); })
-                .then(function (data) {
-                    if (input.value.trim() !== value) return; // stale
-                    if (data.available) {
-                        el.innerHTML = '<span style="color:#22c55e;font-weight:700;">&#10003;</span>';
-                        clearError(errorId);
-                    } else {
-                        el.innerHTML = '<span style="color:#ef4444;font-weight:700;">&#10007;</span>';
-                        var label = fieldName === 'full_name' ? 'Username' : fieldName === 'email' ? 'Email' : 'Phone number';
-                        showError(errorId, label + ' is already taken');
-                    }
-                })
-                .catch(function () {
-                    el.innerHTML = '';
-                });
+            // For email: first verify domain exists (MX check), then check availability
+            if (fieldName === 'email') {
+                fetch('/api/verify-email?email=' + encodeURIComponent(value))
+                    .then(function (res) { return res.json(); })
+                    .then(function (vData) {
+                        if (input.value.trim() !== value) return;
+                        if (!vData.valid) {
+                            el.innerHTML = '<span style="color:#ef4444;font-weight:700;">&#10007;</span>';
+                            showError(errorId, vData.reason || 'This email address does not exist');
+                            return;
+                        }
+                        // Email domain is valid — now check if taken
+                        return fetch('/api/check-availability?field=email&value=' + encodeURIComponent(value))
+                            .then(function (res) { return res.json(); })
+                            .then(function (data) {
+                                if (input.value.trim() !== value) return;
+                                if (data.available) {
+                                    el.innerHTML = '<span style="color:#22c55e;font-weight:700;">&#10003;</span>';
+                                    clearError(errorId);
+                                } else {
+                                    el.innerHTML = '<span style="color:#ef4444;font-weight:700;">&#10007;</span>';
+                                    showError(errorId, 'Email is already taken');
+                                }
+                            });
+                    })
+                    .catch(function () { el.innerHTML = ''; });
+            } else {
+                fetch('/api/check-availability?field=' + encodeURIComponent(fieldName) + '&value=' + encodeURIComponent(value))
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        if (input.value.trim() !== value) return;
+                        if (data.available) {
+                            el.innerHTML = '<span style="color:#22c55e;font-weight:700;">&#10003;</span>';
+                            clearError(errorId);
+                        } else {
+                            el.innerHTML = '<span style="color:#ef4444;font-weight:700;">&#10007;</span>';
+                            var label = fieldName === 'full_name' ? 'Username' : 'Phone number';
+                            showError(errorId, label + ' is already taken');
+                        }
+                    })
+                    .catch(function () { el.innerHTML = ''; });
+            }
         }, 500);
     });
 }
@@ -571,27 +601,33 @@ async function submitRegistration() {
             throw new Error(data.error || 'Registration failed');
         }
 
-        // Hide form and show success/approval message
+        // Auto-login: store token and user
+        if (data.token) {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('isLoggedIn', 'true');
+        }
+
+        // Hide form and show success message
         form.style.display = 'none';
         formActions.style.display = 'none';
 
-        if (data.pending_approval) {
-            // Show waiting for approval message
-            const successEl = document.querySelector('.success-message');
-            if (successEl) {
-                successEl.innerHTML = '<div class="success-icon">⏳</div><h3>Account Created!</h3><p>Your account needs to be approved by an admin before you can log in. This usually takes a few minutes.</p><a href="index.html" style="margin-top:16px;display:inline-block;padding:10px 24px;background:#3B82F6;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">Back to Home</a>';
-                successEl.style.display = 'flex';
-            }
-        } else {
-            // Legacy: if token returned, auto-login
-            if (data.token) {
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
-                localStorage.setItem('isLoggedIn', 'true');
-            }
-            document.querySelector('.success-message').style.display = 'flex';
-            setTimeout(() => { window.location.href = 'index.html'; }, 2500);
+        const successEl = document.querySelector('.success-message');
+        if (successEl) {
+            successEl.innerHTML = '<div class="success-icon" style="background:#88BDF2;color:#0c1117;">&#10003;</div>'
+                + '<h3 style="color:#fff;">Welcome to Rent Cars Georgia!</h3>'
+                + '<p style="color:#94a3b8;margin-bottom:12px;">Your account has been created successfully.</p>'
+                + '<div style="background:rgba(136,189,242,0.1);border:1px solid rgba(136,189,242,0.2);border-radius:12px;padding:16px;margin:12px 0;text-align:left;">'
+                + '<p style="color:#BDDDFC;font-size:14px;font-weight:600;margin:0 0 6px;">Please note:</p>'
+                + '<p style="color:#94a3b8;font-size:13px;margin:0;">Account approval takes <strong style="color:#88BDF2;">10-15 minutes</strong>. Until approved, you can browse vehicles but cannot make reservations.</p>'
+                + '</div>'
+                + '<p style="color:#64748b;font-size:12px;">Redirecting to homepage...</p>';
+            successEl.style.display = 'flex';
+            successEl.style.flexDirection = 'column';
+            successEl.style.alignItems = 'center';
         }
+
+        setTimeout(function () { window.location.href = 'index.html'; }, 4000);
 
     } catch (err) {
         nextBtn.disabled = false;
@@ -675,6 +711,40 @@ function getAge(birthDate) {
     }
 
     return age;
+}
+
+// ========================================
+// PHONE FORMAT HELPER
+// ========================================
+
+function initPhoneFormat(input) {
+    // Auto-prepend +995 for Georgian numbers
+    input.addEventListener('focus', function () {
+        if (!input.value) input.value = '+995 ';
+    });
+
+    input.addEventListener('input', function () {
+        var raw = input.value.replace(/\D/g, '');
+
+        // Enforce max length: country(3) + 9 digits = 12
+        if (raw.length > 12) raw = raw.slice(0, 12);
+
+        // Format as +995 5XX XXX XXX
+        var formatted = '';
+        if (raw.length > 0) formatted = '+' + raw.slice(0, 3);
+        if (raw.length > 3) formatted += ' ' + raw.slice(3, 6);
+        if (raw.length > 6) formatted += ' ' + raw.slice(6, 9);
+        if (raw.length > 9) formatted += ' ' + raw.slice(9, 12);
+
+        input.value = formatted;
+    });
+
+    // Prevent deleting the +995 prefix easily
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Backspace' && input.value.replace(/\D/g, '').length <= 3) {
+            e.preventDefault();
+        }
+    });
 }
 
 // ========================================

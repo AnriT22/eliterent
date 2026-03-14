@@ -40,17 +40,20 @@
     document.querySelectorAll('.form-toggle-password').forEach(function (btn) {
         btn.addEventListener('click', function (e) {
             e.preventDefault();
-            var targetId = this.getAttribute('data-target');
+            var b = e.target.closest('.form-toggle-password');
+            if (!b) return;
+            var targetId = b.getAttribute('data-target');
             var input = document.getElementById(targetId);
-            if (input.type === 'password') {
-                input.type = 'text';
-                this.textContent = '🙈';
-            } else {
-                input.type = 'password';
-                this.textContent = '👁️';
-            }
+            if (!input) return;
+            input.type = input.type === 'password' ? 'text' : 'password';
         });
     });
+
+    // Phone formatting
+    var phoneInput = document.getElementById('pPhone');
+    if (phoneInput && typeof initPhoneFormat === 'function') {
+        initPhoneFormat(phoneInput);
+    }
 
     function updatePartnerUI() {
         // Hide all steps
@@ -92,7 +95,16 @@
 
         if (!name || name.length < 2) { showErr('pFullNameError', 'Full name is required'); valid = false; } else clearErr('pFullNameError');
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('pEmailError', 'Valid email is required'); valid = false; } else clearErr('pEmailError');
-        if (!phone || phone.replace(/\D/g, '').length < 9) { showErr('pPhoneError', 'Valid phone number is required'); valid = false; } else clearErr('pPhoneError');
+
+        // Phone validation: must have 9-12 digits
+        var phoneDigits = phone.replace(/\D/g, '');
+        if (!phone || phoneDigits.length < 9 || phoneDigits.length > 12) {
+            showErr('pPhoneError', 'Phone must be 9-12 digits (e.g. +995 5XX XXX XXX)');
+            valid = false;
+        } else {
+            clearErr('pPhoneError');
+        }
+
         if (!pass || pass.length < 6) { showErr('pPasswordError', 'Password must be at least 6 characters'); valid = false; } else clearErr('pPasswordError');
         if (pass !== confirm) { showErr('pConfirmPasswordError', 'Passwords do not match'); valid = false; } else clearErr('pConfirmPasswordError');
 
@@ -135,7 +147,6 @@
             company_name: document.getElementById('pCompanyName').value.trim(),
             location: document.getElementById('pLocation').value.trim(),
             description: document.getElementById('pDescription').value.trim(),
-            whatsapp: document.getElementById('pWhatsapp').value.trim(),
             telegram: document.getElementById('pTelegram').value.trim(),
         };
 
@@ -155,27 +166,33 @@
                 throw new Error(data.error || 'Registration failed');
             }
 
+            // Auto-login: store token and user
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                localStorage.setItem('isLoggedIn', 'true');
+            }
+
             // Hide form
             form.style.display = 'none';
             formActions.style.display = 'none';
 
             var successEl = document.getElementById('partnerSuccessMessage');
-            if (data.pending_approval) {
-                // Show waiting for approval message
-                if (successEl) {
-                    successEl.innerHTML = '<div class="success-icon">⏳</div><h3>Account Created!</h3><p>Your partner account needs to be approved by an admin before you can log in. This usually takes a few minutes.</p><a href="index.html" style="margin-top:16px;display:inline-block;padding:10px 24px;background:#3B82F6;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">Back to Home</a>';
-                    successEl.style.display = 'flex';
-                }
-            } else {
-                // Legacy: if token returned, auto-login
-                if (data.token) {
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    localStorage.setItem('isLoggedIn', 'true');
-                }
-                if (successEl) successEl.style.display = 'flex';
-                setTimeout(function () { window.location.href = 'partner-dashboard.html'; }, 2500);
+            if (successEl) {
+                successEl.innerHTML = '<div class="success-icon" style="background:#88BDF2;color:#0c1117;">&#10003;</div>'
+                    + '<h3 style="color:#fff;">Welcome, Partner!</h3>'
+                    + '<p style="color:#94a3b8;margin-bottom:12px;">Your partner account has been created.</p>'
+                    + '<div style="background:rgba(136,189,242,0.1);border:1px solid rgba(136,189,242,0.2);border-radius:12px;padding:16px;margin:12px 0;text-align:left;">'
+                    + '<p style="color:#BDDDFC;font-size:14px;font-weight:600;margin:0 0 6px;">Please note:</p>'
+                    + '<p style="color:#94a3b8;font-size:13px;margin:0;">Verification takes <strong style="color:#88BDF2;">10-15 minutes</strong>. Until verified by admin, you can access your dashboard but cannot add vehicles or receive bookings.</p>'
+                    + '</div>'
+                    + '<p style="color:#64748b;font-size:12px;">Redirecting to your dashboard...</p>';
+                successEl.style.display = 'flex';
+                successEl.style.flexDirection = 'column';
+                successEl.style.alignItems = 'center';
             }
+
+            setTimeout(function () { window.location.href = 'partner-dashboard.html'; }, 4000);
 
         } catch (err) {
             nextBtn.disabled = false;
