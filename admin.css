@@ -454,7 +454,44 @@
     }
 }
 
+/* Admin mobile toggle button */
+.admin-mobile-toggle {
+    display: none;
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 10000;
+    width: 44px;
+    height: 44px;
+    background: #0f172a;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: all 0.2s;
+}
+.admin-mobile-toggle:hover {
+    background: #1e293b;
+}
+.admin-sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9998;
+}
+.admin-sidebar-overlay.open {
+    display: block;
+}
+
 @media (max-width: 600px) {
+    .admin-mobile-toggle {
+        display: flex;
+    }
     .admin-sidebar {
         position: fixed;
         left: -260px;
@@ -467,6 +504,14 @@
     }
     .admin-main {
         margin-left: 0;
+        padding-top: 60px;
+    }
+    .admin-header {
+        padding: 16px;
+        padding-left: 70px;
+    }
+    .admin-header h1 {
+        font-size: 18px;
     }
     .admin-sidebar-header span,
     .admin-badge {
@@ -477,6 +522,15 @@
     }
     .fin-summary-grid {
         grid-template-columns: 1fr;
+    }
+    .admin-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .admin-card {
+        padding: 16px;
+    }
+    .admin-tab-content {
+        padding: 16px;
     }
 }
 
