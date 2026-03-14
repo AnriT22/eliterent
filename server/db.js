@@ -454,6 +454,165 @@ async function initDB() {
         }
     } catch (e) { console.log('Payment columns migration note:', e.message); }
 
+    // Migration: expand vehicles status constraint to include 'delete_requested'
+    try {
+        var vTableInfo = db.exec("SELECT sql FROM sqlite_master WHERE type='table' AND name='vehicles'");
+        if (vTableInfo.length > 0) {
+            var vSqlRaw = vTableInfo[0].values[0][0] || '';
+            var vSql = (vSqlRaw instanceof Uint8Array) ? new TextDecoder().decode(vSqlRaw) : String(vSqlRaw);
+            if (vSql.indexOf("'delete_requested'") === -1) {
+                db.run("PRAGMA foreign_keys = OFF");
+                db.run("ALTER TABLE vehicles RENAME TO vehicles_old_mig");
+                db.run(`
+                    CREATE TABLE vehicles (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        partner_id INTEGER NOT NULL,
+                        name TEXT NOT NULL,
+                        category TEXT NOT NULL,
+                        engine TEXT NOT NULL,
+                        gearbox TEXT NOT NULL,
+                        drive_type TEXT NOT NULL,
+                        interior_type TEXT DEFAULT 'fabric',
+                        steering_side TEXT DEFAULT 'left',
+                        payment_method TEXT DEFAULT 'cash',
+                        price_per_day REAL NOT NULL,
+                        year INTEGER NOT NULL,
+                        seats INTEGER DEFAULT 5,
+                        doors INTEGER DEFAULT 4,
+                        fuel_consumption TEXT,
+                        image_url TEXT,
+                        gallery TEXT,
+                        description TEXT,
+                        features TEXT,
+                        insurance_included INTEGER DEFAULT 0,
+                        free_cancellation INTEGER DEFAULT 1,
+                        deposit_amount REAL DEFAULT 0,
+                        pickup_locations TEXT,
+                        extra_services TEXT,
+                        service_options TEXT,
+                        tech_passport_front TEXT,
+                        tech_passport_back TEXT,
+                        status TEXT DEFAULT 'pending' CHECK(status IN ('active', 'inactive', 'pending', 'delete_requested')),
+                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (partner_id) REFERENCES users(id) ON DELETE CASCADE
+                    )
+                `);
+                // Copy all columns that exist in both tables
+                var oldCols = db.exec("PRAGMA table_info(vehicles_old_mig)");
+                var newCols = db.exec("PRAGMA table_info(vehicles)");
+                var oldColNames = oldCols.length > 0 ? oldCols[0].values.map(function(c) { var n = c[1]; return n instanceof Uint8Array ? new TextDecoder().decode(n) : n; }) : [];
+                var newColNames = newCols.length > 0 ? newCols[0].values.map(function(c) { var n = c[1]; return n instanceof Uint8Array ? new TextDecoder().decode(n) : n; }) : [];
+                var commonCols = oldColNames.filter(function(c) { return newColNames.indexOf(c) !== -1; });
+                var colList = commonCols.join(', ');
+                db.run("INSERT INTO vehicles (" + colList + ") SELECT " + colList + " FROM vehicles_old_mig");
+                db.run("DROP TABLE vehicles_old_mig");
+                db.run("PRAGMA foreign_keys = ON");
+                // Re-add new columns that may have been added via ALTER TABLE
+                var newVehicleColsMig = [
+                    "brand TEXT", "model TEXT", "color TEXT", "min_age INTEGER DEFAULT 21",
+                    "location_city TEXT", "fuel_policy TEXT DEFAULT 'full_to_full'", "luggage TEXT",
+                    "region TEXT", "engine_cc INTEGER", "horsepower INTEGER",
+                    "mileage_limit_enabled INTEGER DEFAULT 0", "mileage_km INTEGER",
+                    "multimedia TEXT", "price_tiers TEXT", "extras TEXT", "insurance TEXT",
+                    "pickup_fees_enabled INTEGER DEFAULT 0", "pickup_fees TEXT",
+                    "visible_in_search INTEGER DEFAULT 1", "block_after_payment INTEGER DEFAULT 0",
+                    "custom_pricing_enabled INTEGER DEFAULT 0", "custom_pricing_ranges TEXT",
+                    "registration_number TEXT"
+                ];
+                newVehicleColsMig.forEach(function(colDef) {
+                    try { db.run("ALTER TABLE vehicles ADD COLUMN " + colDef); } catch(e) { /* already exists */ }
+                });
+                saveDB();
+                console.log('Migration: expanded vehicles status constraint to include delete_requested');
+            }
+        }
+    } catch (e) { console.log('Vehicles status migration note:', e.message); }
+
+    // Migration: fix stale FK references in vehicle_availability and bookings after vehicles table rebuild
+    try {
+        var vaInfo = db.exec("SELECT sql FROM sqlite_master WHERE type='table' AND name='vehicle_availability'");
+        if (vaInfo.length > 0) {
+            var vaSqlRaw = vaInfo[0].values[0][0] || '';
+            var vaSql = (vaSqlRaw instanceof Uint8Array) ? new TextDecoder().decode(vaSqlRaw) : String(vaSqlRaw);
+            if (vaSql.indexOf('vehicles_old_mig') !== -1) {
+                console.log('Fixing stale FK in vehicle_availability...');
+                db.run("PRAGMA foreign_keys = OFF");
+                db.run("ALTER TABLE vehicle_availability RENAME TO vehicle_availability_old_fk");
+                db.run(`CREATE TABLE vehicle_availability (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    vehicle_id INTEGER NOT NULL,
+                    date TEXT NOT NULL,
+                    status TEXT DEFAULT 'available' CHECK(status IN ('available', 'blocked', 'booked')),
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(vehicle_id, date),
+                    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE
+                )`);
+                db.run("INSERT INTO vehicle_availability (id, vehicle_id, date, status, created_at, updated_at) SELECT id, vehicle_id, date, status, created_at, updated_at FROM vehicle_availability_old_fk");
+                db.run("DROP TABLE vehicle_availability_old_fk");
+                db.run("PRAGMA foreign_keys = ON");
+                saveDB();
+                console.log('Fixed vehicle_availability FK references');
+            }
+        }
+    } catch (e) { console.log('vehicle_availability FK fix note:', e.message); }
+
+    try {
+        var bkInfo = db.exec("SELECT sql FROM sqlite_master WHERE type='table' AND name='bookings'");
+        if (bkInfo.length > 0) {
+            var bkSqlRaw = bkInfo[0].values[0][0] || '';
+            var bkSql = (bkSqlRaw instanceof Uint8Array) ? new TextDecoder().decode(bkSqlRaw) : String(bkSqlRaw);
+            if (bkSql.indexOf('vehicles_old_mig') !== -1) {
+                console.log('Fixing stale FK in bookings...');
+                db.run("PRAGMA foreign_keys = OFF");
+                // Get existing bookings columns
+                var bkCols = db.exec("PRAGMA table_info(bookings)");
+                var bkColNames = bkCols.length > 0 ? bkCols[0].values.map(function(c) { var n = c[1]; return (n instanceof Uint8Array) ? new TextDecoder().decode(n) : n; }) : [];
+                db.run("ALTER TABLE bookings RENAME TO bookings_old_fk");
+                db.run(`CREATE TABLE bookings (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    guest_id INTEGER NOT NULL,
+                    vehicle_id INTEGER NOT NULL,
+                    partner_id INTEGER NOT NULL,
+                    pickup_date TEXT NOT NULL,
+                    dropoff_date TEXT NOT NULL,
+                    pickup_time TEXT DEFAULT '10:00',
+                    dropoff_time TEXT DEFAULT '10:00',
+                    rental_days INTEGER DEFAULT 1,
+                    pickup_location TEXT,
+                    dropoff_location TEXT,
+                    extras_json TEXT,
+                    extras_total REAL DEFAULT 0,
+                    service_fee REAL DEFAULT 0,
+                    total_price REAL NOT NULL,
+                    deposit_paid REAL DEFAULT 0,
+                    status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'accepted', 'rejected', 'completed', 'cancelled', 'cancel_requested')),
+                    guest_notes TEXT,
+                    partner_notes TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (guest_id) REFERENCES users(id) ON DELETE CASCADE,
+                    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE,
+                    FOREIGN KEY (partner_id) REFERENCES users(id) ON DELETE CASCADE
+                )`);
+                // Add extra columns that were added via ALTER TABLE
+                var extraBkCols = ["payment_status TEXT DEFAULT 'unpaid'", "paypal_order_id TEXT", "paypal_capture_id TEXT", "payment_date DATETIME"];
+                extraBkCols.forEach(function(cd) { try { db.run("ALTER TABLE bookings ADD COLUMN " + cd); } catch(e) {} });
+                // Get new columns list
+                var newBkCols = db.exec("PRAGMA table_info(bookings)");
+                var newBkColNames = newBkCols.length > 0 ? newBkCols[0].values.map(function(c) { var n = c[1]; return (n instanceof Uint8Array) ? new TextDecoder().decode(n) : n; }) : [];
+                var commonBkCols = bkColNames.filter(function(c) { return newBkColNames.indexOf(c) !== -1; });
+                var bkColList = commonBkCols.join(', ');
+                db.run("INSERT INTO bookings (" + bkColList + ") SELECT " + bkColList + " FROM bookings_old_fk");
+                db.run("DROP TABLE bookings_old_fk");
+                db.run("PRAGMA foreign_keys = ON");
+                saveDB();
+                console.log('Fixed bookings FK references');
+            }
+        }
+    } catch (e) { console.log('bookings FK fix note:', e.message); }
+
     // Cleanup: rebuild booked dates from scratch based on active bookings
     // Pending + accepted + completed + cancel_requested all block dates
     try {

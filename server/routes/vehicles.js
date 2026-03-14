@@ -152,7 +152,7 @@ router.post('/', authenticateToken, requireRole('partner'), (req, res) => {
              custom_pricing_enabled, custom_pricing_ranges, registration_number,
              deposit_amount,
              tech_passport_front, tech_passport_back, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')`,
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
             [
                 req.user.id,
                 b.name,
@@ -205,7 +205,7 @@ router.post('/', authenticateToken, requireRole('partner'), (req, res) => {
             [req.user.id]
         );
 
-        res.status(201).json({ message: 'Vehicle added successfully', vehicle: newVehicle });
+        res.status(201).json({ message: 'Vehicle added successfully! It will appear on the site after admin approval.', vehicle: newVehicle });
     } catch (err) {
         console.error('Add vehicle error:', err);
         res.status(500).json({ error: 'Failed to add vehicle' });
@@ -300,7 +300,8 @@ router.put('/:id', authenticateToken, requireRole('partner'), (req, res) => {
     }
 });
 
-// DELETE /api/vehicles/:id — delete a vehicle (partner only, own vehicles)
+// DELETE /api/vehicles/:id — request vehicle deletion (partner only, own vehicles)
+// Partners cannot directly delete — they request deletion, admin approves
 router.delete('/:id', authenticateToken, requireRole('partner'), (req, res) => {
     try {
         var vehicleId = parseInt(req.params.id);
@@ -310,12 +311,22 @@ router.delete('/:id', authenticateToken, requireRole('partner'), (req, res) => {
             return res.status(404).json({ error: 'Vehicle not found or not yours' });
         }
 
-        execute('DELETE FROM vehicles WHERE id = ? AND partner_id = ?', [vehicleId, req.user.id]);
+        // Check for active reservations (pending, accepted, cancel_requested)
+        var activeBooking = queryOne(
+            "SELECT id FROM bookings WHERE vehicle_id = ? AND status IN ('pending', 'accepted', 'cancel_requested')",
+            [vehicleId]
+        );
+        if (activeBooking) {
+            return res.status(400).json({ error: 'Cannot request deletion — this vehicle has active reservations. Please wait until all bookings are completed or cancelled.' });
+        }
 
-        res.json({ message: 'Vehicle deleted' });
+        // Set status to delete_requested instead of actually deleting
+        execute("UPDATE vehicles SET status = 'delete_requested', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND partner_id = ?", [vehicleId, req.user.id]);
+
+        res.json({ message: 'Deletion requested. Admin will review and approve your request.' });
     } catch (err) {
-        console.error('Delete vehicle error:', err);
-        res.status(500).json({ error: 'Failed to delete vehicle' });
+        console.error('Delete vehicle request error:', err);
+        res.status(500).json({ error: 'Failed to request vehicle deletion' });
     }
 });
 

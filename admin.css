@@ -361,6 +361,7 @@
 .admin-status.active { background: #dcfce7; color: #166534; }
 .admin-status.inactive { background: #fee2e2; color: #991b1b; }
 .admin-status.pending { background: #fef3c7; color: #92400e; }
+.admin-status.delete_requested { background: #fce7f3; color: #9d174d; }
 .admin-status.accepted { background: #dcfce7; color: #166534; }
 .admin-status.rejected { background: #fee2e2; color: #991b1b; }
 .admin-status.cancelled { background: #fee2e2; color: #991b1b; }

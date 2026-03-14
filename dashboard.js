@@ -20,6 +20,87 @@
     var companyEl = document.getElementById('dbCompanyName');
     if (companyEl) companyEl.textContent = user.company_name || 'My Company';
 
+    // ========================================
+    // VERIFICATION STATUS
+    // ========================================
+    var isVerified = user.is_verified === 1 || user.is_verified === true;
+
+    function renderVerificationBadge(verified) {
+        var statusEl = document.getElementById('dbVerificationStatus');
+        if (!statusEl) return;
+        if (verified) {
+            statusEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(34,197,94,0.15);color:#22c55e;border-radius:20px;font-size:12px;font-weight:600;margin-top:6px;">'
+                + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>'
+                + 'Verified</span>';
+        } else {
+            statusEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(249,115,22,0.15);color:#f97316;border-radius:20px;font-size:12px;font-weight:600;margin-top:6px;">'
+                + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+                + 'Not Approved Yet</span>';
+        }
+    }
+
+    renderVerificationBadge(isVerified);
+
+    // Show restriction banner for unverified partners
+    function showRestrictionBanner() {
+        if (isVerified) return;
+        var banner = document.createElement('div');
+        banner.id = 'verificationBanner';
+        banner.style.cssText = 'background:linear-gradient(135deg,rgba(249,115,22,0.1),rgba(249,115,22,0.05));border:1px solid rgba(249,115,22,0.3);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;';
+        banner.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+            + '<div><p style="margin:0;color:#f97316;font-weight:600;font-size:14px;">Your account is pending verification</p>'
+            + '<p style="margin:4px 0 0;color:#94a3b8;font-size:13px;">Approval takes <strong style="color:#f97316;">10-15 minutes</strong>. Until verified, you cannot add vehicles or receive bookings.</p></div>';
+        var dbMain = document.querySelector('.db-main');
+        if (dbMain) dbMain.insertBefore(banner, dbMain.firstChild);
+    }
+    showRestrictionBanner();
+
+    // Poll for verification status change (every 30s) if not yet verified
+    var pollInterval = null;
+    function startVerificationPoll() {
+        if (isVerified || pollInterval) return;
+        pollInterval = setInterval(function () {
+            fetch('/api/me', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.user && data.user.partner_profile && data.user.partner_profile.is_verified) {
+                    clearInterval(pollInterval);
+                    pollInterval = null;
+                    isVerified = true;
+                    // Update stored user
+                    user.is_verified = 1;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    // Update UI
+                    renderVerificationBadge(true);
+                    // Remove restriction banner
+                    var banner = document.getElementById('verificationBanner');
+                    if (banner) banner.remove();
+                    // Show congratulations popup
+                    showVerifiedPopup();
+                }
+            })
+            .catch(function () {});
+        }, 30000);
+    }
+    startVerificationPoll();
+
+    function showVerifiedPopup() {
+        var overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+        var popup = document.createElement('div');
+        popup.style.cssText = 'background:#fff;border-radius:20px;padding:40px;max-width:400px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:fadeInUp 0.3s ease;';
+        popup.innerHTML = '<div style="width:64px;height:64px;background:rgba(34,197,94,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">'
+            + '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>'
+            + '<h3 style="margin:0 0 8px;font-size:20px;color:#1e293b;">Account Verified!</h3>'
+            + '<p style="margin:0 0 20px;color:#64748b;font-size:14px;">Congratulations! Your partner account has been verified. You can now add vehicles and receive bookings.</p>'
+            + '<button onclick="this.closest(\'div[style]\').parentElement.remove();" style="padding:10px 32px;background:#22c55e;color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-size:14px;">Got it!</button>';
+        overlay.appendChild(popup);
+        overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.remove(); });
+        document.body.appendChild(overlay);
+    }
+
     // Logout (handled by navbar-auth.js, but keep fallback if element exists)
     var logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
@@ -40,6 +121,11 @@
     var tabs = document.querySelectorAll('.db-tab');
 
     function switchTab(tabName) {
+        // Block add-vehicle tab if not verified
+        if (tabName === 'add-vehicle' && !isVerified) {
+            showNotVerifiedAlert();
+            return;
+        }
         navItems.forEach(function (n) { n.classList.remove('active'); });
         tabs.forEach(function (t) { t.classList.remove('active'); });
 
@@ -47,6 +133,21 @@
         var activeTab = document.getElementById('tab-' + tabName);
         if (activeNav) activeNav.classList.add('active');
         if (activeTab) activeTab.classList.add('active');
+    }
+
+    function showNotVerifiedAlert() {
+        var overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+        var popup = document.createElement('div');
+        popup.style.cssText = 'background:#fff;border-radius:20px;padding:40px;max-width:400px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2);';
+        popup.innerHTML = '<div style="width:64px;height:64px;background:rgba(249,115,22,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">'
+            + '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>'
+            + '<h3 style="margin:0 0 8px;font-size:20px;color:#1e293b;">Account Not Verified</h3>'
+            + '<p style="margin:0 0 20px;color:#64748b;font-size:14px;">You cannot add vehicles until your account is verified by an admin. Verification usually takes <strong style="color:#f97316;">10-15 minutes</strong>.</p>'
+            + '<button onclick="this.closest(\'div[style]\').parentElement.remove();" style="padding:10px 32px;background:#f97316;color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-size:14px;">OK, I understand</button>';
+        overlay.appendChild(popup);
+        overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.remove(); });
+        document.body.appendChild(overlay);
     }
 
     navItems.forEach(function (item) {
@@ -60,8 +161,14 @@
     // Quick links to add vehicle tab
     var addFromList = document.getElementById('addVehicleFromList');
     var addFirst = document.getElementById('addFirstVehicle');
-    if (addFromList) addFromList.addEventListener('click', function () { resetVehicleForm(); switchTab('add-vehicle'); });
-    if (addFirst) addFirst.addEventListener('click', function () { resetVehicleForm(); switchTab('add-vehicle'); });
+    if (addFromList) addFromList.addEventListener('click', function () {
+        if (!isVerified) { showNotVerifiedAlert(); return; }
+        resetVehicleForm(); switchTab('add-vehicle');
+    });
+    if (addFirst) addFirst.addEventListener('click', function () {
+        if (!isVerified) { showNotVerifiedAlert(); return; }
+        resetVehicleForm(); switchTab('add-vehicle');
+    });
 
     // Cancel button on form
     document.getElementById('cancelVehicleForm').addEventListener('click', function () {
@@ -83,6 +190,22 @@
         pickupToggle.addEventListener('change', function () {
             var c = document.getElementById('pickupFeesContainer');
             if (c) c.classList.toggle('vf-hidden', !this.checked);
+        });
+    }
+
+    // Mountain destination toggles
+    var svanetiToggle = document.getElementById('vSvanetiAccepted');
+    if (svanetiToggle) {
+        svanetiToggle.addEventListener('change', function () {
+            var p = document.getElementById('vSvanetiPrice');
+            if (p) { p.disabled = !this.checked; if (!this.checked) p.value = ''; }
+        });
+    }
+    var shatiliToggle = document.getElementById('vShatiliAccepted');
+    if (shatiliToggle) {
+        shatiliToggle.addEventListener('change', function () {
+            var p = document.getElementById('vShatiliPrice');
+            if (p) { p.disabled = !this.checked; if (!this.checked) p.value = ''; }
         });
     }
 
@@ -417,6 +540,19 @@
             var imgSrc = v.image_url || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240'%3E%3Crect fill='%23e2e8f0' width='400' height='240'/%3E%3Ctext x='200' y='125' text-anchor='middle' fill='%2394a3b8' font-size='16' font-family='sans-serif'%3ENo Image%3C/text%3E%3C/svg%3E";
             var statusClass = v.status || 'active';
 
+            // Verification badge
+            var verBadge = '';
+            if (statusClass === 'active') {
+                verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(34,197,94,0.15);color:#22c55e;border-radius:12px;font-size:11px;font-weight:600;">'
+                    + '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Verified</span>';
+            } else if (statusClass === 'pending') {
+                verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(249,115,22,0.15);color:#f97316;border-radius:12px;font-size:11px;font-weight:600;">Unverified</span>';
+            } else if (statusClass === 'delete_requested') {
+                verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(239,68,68,0.15);color:#ef4444;border-radius:12px;font-size:11px;font-weight:600;">Delete Requested</span>';
+            } else {
+                verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(100,116,139,0.15);color:#64748b;border-radius:12px;font-size:11px;font-weight:600;">' + statusClass.toUpperCase() + '</span>';
+            }
+
             html += '<div class="db-vehicle-card" data-id="' + v.id + '">';
             html += '<img class="db-vehicle-img" src="' + imgSrc + '" alt="' + (v.name || '') + '">';
             html += '<div class="db-vehicle-body">';
@@ -428,11 +564,15 @@
             html += '<span class="db-vehicle-tag">' + (v.year || '—') + '</span>';
             html += '</div>';
             html += '<div class="db-vehicle-price">$' + (v.price_per_day || 0) + ' <span>/day</span></div>';
-            html += '<span class="db-vehicle-status ' + statusClass + '">' + statusClass.toUpperCase() + '</span>';
+            html += verBadge;
             html += '<div class="db-vehicle-actions">';
-            html += '<button class="db-btn-edit" onclick="editVehicle(' + v.id + ')">Edit</button>';
-            html += '<button class="db-btn-dates" onclick="openAvailabilityCalendar(' + v.id + ')">DATES</button>';
-            html += '<button class="db-btn-delete" onclick="deleteVehicle(' + v.id + ')">Delete</button>';
+            if (statusClass !== 'delete_requested') {
+                html += '<button class="db-btn-edit" onclick="editVehicle(' + v.id + ')">Edit</button>';
+                html += '<button class="db-btn-dates" onclick="openAvailabilityCalendar(' + v.id + ')">DATES</button>';
+                html += '<button class="db-btn-delete" onclick="deleteVehicle(' + v.id + ')">Request Delete</button>';
+            } else {
+                html += '<span style="color:#ef4444;font-size:12px;font-style:italic;">Awaiting admin approval for deletion</span>';
+            }
             html += '</div>';
             html += '</div></div>';
         });
@@ -527,7 +667,10 @@
                 roof_rack: getChecked('vRoofRackAvail') ? getFloat('vRoofRack') : 0,
                 roof_rack_available: getChecked('vRoofRackAvail'),
                 third_driver: getFloat('vThirdDriver'),
-                svaneti_roads: getChecked('vThirdPartyIns')
+                svaneti_roads: getChecked('vSvanetiAccepted'),
+                svaneti_price: getChecked('vSvanetiAccepted') ? getFloat('vSvanetiPrice') : 0,
+                shatili_roads: getChecked('vShatiliAccepted'),
+                shatili_price: getChecked('vShatiliAccepted') ? getFloat('vShatiliPrice') : 0
             },
             insurance: {
                 tpl: getFloat('vInsTPL'),
@@ -780,14 +923,21 @@
             setCheck('vRoofRackAvail', ext.roof_rack_available || (ext.roof_rack > 0));
             setVal('vRoofRack', ext.roof_rack || '');
             setVal('vThirdDriver', ext.third_driver || '');
-            setCheck('vThirdPartyIns', ext.svaneti_roads || ext.third_party_insurance);
+            setCheck('vSvanetiAccepted', ext.svaneti_roads || ext.third_party_insurance);
+            setVal('vSvanetiPrice', ext.svaneti_price || '');
+            setCheck('vShatiliAccepted', ext.shatili_roads);
+            setVal('vShatiliPrice', ext.shatili_price || '');
             // Enable price inputs if checkboxes are checked
             var cs = document.getElementById('vChildSeatAvail');
             var ch = document.getElementById('vChainsAvail');
             var rr = document.getElementById('vRoofRackAvail');
+            var sv = document.getElementById('vSvanetiAccepted');
+            var sh = document.getElementById('vShatiliAccepted');
             if (cs && cs.checked) document.getElementById('vChildSeat').disabled = false;
             if (ch && ch.checked) document.getElementById('vChains').disabled = false;
             if (rr && rr.checked) document.getElementById('vRoofRack').disabled = false;
+            if (sv && sv.checked) document.getElementById('vSvanetiPrice').disabled = false;
+            if (sh && sh.checked) document.getElementById('vShatiliPrice').disabled = false;
 
             // Insurance
             var ins = (typeof v.insurance === 'string') ? JSON.parse(v.insurance || '{}') : (v.insurance || {});
@@ -880,18 +1030,23 @@
     // DELETE VEHICLE (global function)
     // ========================================
     window.deleteVehicle = function (id) {
-        if (!confirm('Are you sure you want to delete this vehicle?')) return;
+        if (!confirm('Request deletion of this vehicle? Admin will review and approve your request.')) return;
 
         fetch('/api/vehicles/' + id, {
             method: 'DELETE',
             headers: { 'Authorization': 'Bearer ' + token }
         })
-        .then(function (res) { return res.json(); })
-        .then(function () {
+        .then(function (res) { return res.json().then(function (d) { return { ok: res.ok, data: d }; }); })
+        .then(function (result) {
+            if (!result.ok) {
+                alert(result.data.error || 'Failed to request deletion');
+                return;
+            }
+            alert(result.data.message || 'Deletion requested');
             loadVehicles();
         })
         .catch(function (err) {
-            alert('Failed to delete vehicle');
+            alert('Failed to request vehicle deletion');
         });
     };
 
