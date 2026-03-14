@@ -1043,17 +1043,21 @@ body {
 
 /* ========================================
    RESPONSIVE PREMIUM OVERRIDES
+   Perfect for S24 Ultra (412px), iPhone 15 (393px),
+   Pixel 8 (412px), iPhone SE (375px), and all phones
    ======================================== */
 
 /* --- TABLET (1024px) --- */
 @media (max-width: 1024px) {
     .hero-main {
+        display: flex;
         flex-direction: column;
         text-align: center;
+        gap: 20px;
     }
 
     .hero-right {
-        max-width: 400px;
+        max-width: 380px;
         margin: 0 auto;
     }
 
@@ -1070,33 +1074,51 @@ body {
         grid-template-columns: 1fr 1fr;
         gap: 12px;
     }
+
+    .hero-headline {
+        font-size: 40px;
+    }
 }
 
 /* --- MOBILE (768px) --- */
 @media (max-width: 768px) {
-    /* Hero */
-    .hero-headline {
-        font-size: 28px;
-        letter-spacing: -0.5px;
-        line-height: 1.2;
+
+    /* === GLOBAL === */
+    .container {
+        padding-left: 16px;
+        padding-right: 16px;
     }
 
+    /* === HEADER / NAVBAR === */
+    .header {
+        padding: 10px 0;
+    }
+
+    .header-content {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .header-left .logo img.logo-img,
+    .header-left .logo svg,
+    .header-left .logo .logo-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .header-left .logo {
+        font-size: 15px;
+        gap: 8px;
+    }
+
+    /* === HERO SECTION === */
     .hero {
-        padding-top: 20px;
+        padding-top: 16px;
         min-height: auto;
         height: auto;
-    }
-
-    .hero-right {
-        display: flex;
-        max-width: 260px;
-        margin: 0 auto 10px;
-        order: -1;
-    }
-
-    .car-image {
-        max-width: 100%;
-        filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.4));
+        overflow: hidden;
     }
 
     .hero-main {
@@ -1104,8 +1126,25 @@ body {
         flex-direction: column;
         align-items: center;
         text-align: center;
-        gap: 10px;
-        padding-bottom: 20px;
+        gap: 12px;
+        padding-bottom: 16px;
+    }
+
+    .hero-right {
+        display: flex;
+        max-width: 240px;
+        margin: 0 auto 8px;
+        order: -1;
+    }
+
+    .car-image {
+        max-width: 100%;
+        height: auto;
+        filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.5));
+    }
+
+    .car-image:hover {
+        transform: none;
     }
 
     .hero-left {
@@ -1114,9 +1153,22 @@ body {
         align-items: center;
     }
 
+    .hero-headline {
+        font-size: 26px;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+        margin-bottom: 12px;
+    }
+
+    .hero-headline br {
+        display: none;
+    }
+
     .hero-subtext {
         font-size: 14px;
         color: rgba(255, 255, 255, 0.85);
+        margin-bottom: 12px;
+        line-height: 1.5;
     }
 
     .rating-source,
@@ -1125,9 +1177,11 @@ body {
     }
 
     .rating-section {
-        font-size: 12px;
+        font-size: 11px;
         gap: 6px;
         flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 10px;
     }
 
     .rating-section .divider {
@@ -1138,10 +1192,17 @@ body {
         font-size: 11px;
     }
 
-    /* Booking form */
+    .rating-stars {
+        font-size: 14px;
+        letter-spacing: 1px;
+    }
+
+    /* === BOOKING FORM === */
     .booking-form-container {
         padding: 16px;
-        border-radius: var(--radius-md);
+        border-radius: 14px;
+        margin-left: -4px;
+        margin-right: -4px;
     }
 
     .form-group-row {
@@ -1149,172 +1210,419 @@ body {
         gap: 10px;
     }
 
+    .input-wrapper {
+        padding: 0 12px;
+    }
+
+    .booking-input {
+        padding: 11px 0;
+        font-size: 14px;
+    }
+
     .search-btn {
         width: 100%;
+        padding: 14px;
+        font-size: 15px;
         justify-content: center;
     }
 
-    /* Sections */
+    .advanced-filters-toggle {
+        font-size: 12px;
+        margin-top: 8px;
+    }
+
+    /* === CALENDAR MODAL === */
+    .calendar-content {
+        padding: 16px;
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .calendar-body {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .calendar-header {
+        margin-bottom: 16px;
+    }
+
+    .month-year-selector {
+        gap: 8px;
+    }
+
+    .month-year-selector select {
+        padding: 6px 8px;
+        font-size: 13px;
+    }
+
+    .calendar-grid {
+        gap: 4px;
+    }
+
+    .calendar-day {
+        font-size: 13px;
+    }
+
+    .time-selectors {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .calendar-actions {
+        flex-direction: column;
+    }
+
+    .calendar-actions button {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+
+    /* === FILTERS MODAL === */
+    .filters-content {
+        width: 95%;
+        padding: 16px;
+        max-height: 90vh;
+    }
+
+    .filters-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .filters-header {
+        padding: 12px 0;
+    }
+
+    .filters-actions {
+        flex-direction: column;
+    }
+
+    .filters-actions button {
+        width: 100%;
+    }
+
+    /* === SECTION TITLES === */
+    .carousel-section {
+        padding: 50px 0;
+    }
+
     .carousel-title {
-        font-size: 24px;
+        font-size: 22px;
+        letter-spacing: -0.5px;
     }
 
     .section-title {
-        font-size: 24px;
+        font-size: 22px;
+        margin-bottom: 24px;
     }
 
+    /* === PAGE HERO (About, Reviews, Contact) === */
     .page-hero {
-        height: 280px;
+        height: auto;
+        min-height: 200px;
+        padding: 40px 0;
         margin-top: 0;
     }
 
     .page-hero h1 {
-        font-size: 26px;
+        font-size: 24px;
+        line-height: 1.3;
     }
 
     .page-hero p {
         font-size: 14px;
     }
 
-    /* Fleet / vehicle cards */
+    /* === FLEET / VEHICLE CARDS === */
     .fleet-card-img {
-        height: 170px;
+        height: 180px;
+    }
+
+    .fleet-card-body {
+        padding: 16px;
+    }
+
+    .fleet-card-title {
+        font-size: 15px;
+    }
+
+    .fleet-price-amount {
+        font-size: 22px;
+    }
+
+    .fleet-card-btn {
+        padding: 11px;
+        font-size: 12px;
+    }
+
+    .fleet-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
 
     .vehicle-image {
         height: 180px;
     }
 
-    .fleet-grid {
+    .vehicles-grid {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 16px;
     }
 
-    /* CTA */
-    .cta-section {
+    .fleet-card:hover,
+    .vehicle-card:hover {
+        transform: none;
+    }
+
+    /* === FEATURES BENTO === */
+    .features-section {
         padding: 50px 0;
     }
 
+    .bento-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .bento-tile {
+        border-radius: 16px;
+        padding: 20px;
+        min-height: auto;
+    }
+
+    .bento-tile.large,
+    .bento-tile.medium,
+    .bento-tile.small {
+        grid-column: auto;
+        grid-row: auto;
+    }
+
+    .bento-tile:hover {
+        transform: none;
+    }
+
+    /* === HOW IT WORKS === */
+    .how-it-works {
+        padding: 50px 0;
+    }
+
+    .steps-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .step-card {
+        padding: 20px 16px;
+    }
+
+    .step-card:hover {
+        transform: none;
+    }
+
+    .step-arrow {
+        transform: rotate(90deg);
+        margin: 0 auto;
+    }
+
+    /* === TESTIMONIALS === */
+    .testimonials-section {
+        padding: 50px 0;
+    }
+
+    .testimonials-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .testimonial-card {
+        padding: 20px;
+    }
+
+    .testimonial-card:hover {
+        transform: none;
+    }
+
+    /* === PARTNER CTA === */
+    .partner-cta-section {
+        padding: 50px 0;
+    }
+
+    .partner-cta-card {
+        padding: 28px 16px;
+        text-align: center;
+    }
+
+    .partner-cta-card h2 {
+        font-size: 20px;
+    }
+
+    .partner-cta-card p {
+        font-size: 14px;
+    }
+
+    /* === PARTNERS SLIDER === */
+    .partners-slider {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .partner-logo {
+        padding: 16px;
+    }
+
+    .partner-logo:hover {
+        transform: none;
+    }
+
+    /* === CTA SECTION === */
+    .cta-section {
+        padding: 40px 0;
+    }
+
     .cta-section h2 {
-        font-size: 22px;
+        font-size: 20px;
     }
 
     .cta-section p {
         font-size: 14px;
     }
 
-    /* Bento tiles */
-    .bento-tile {
-        border-radius: var(--radius-lg);
-        padding: 20px;
-    }
-
-    /* Footer */
+    /* === FOOTER === */
     .footer {
-        padding: 40px 0 16px;
+        padding: 36px 0 16px;
     }
 
     .footer-content {
+        grid-template-columns: 1fr;
         gap: 24px;
     }
 
-    /* Contact page */
+    .footer-column h4 {
+        font-size: 15px;
+        margin-bottom: 12px;
+    }
+
+    .footer-column p,
+    .footer-column li,
+    .footer-column a {
+        font-size: 13px;
+    }
+
+    .footer-bottom {
+        padding-top: 16px;
+        margin-top: 24px;
+    }
+
+    .footer-bottom p {
+        font-size: 12px;
+    }
+
+    /* === CONTACT PAGE === */
     .contact-grid {
         grid-template-columns: 1fr;
     }
 
     .contact-form {
-        padding: 24px;
+        padding: 20px;
     }
 
-    /* About page */
+    .contact-info-card {
+        padding: 20px;
+    }
+
+    /* === ABOUT PAGE === */
     .about-grid {
         grid-template-columns: 1fr;
     }
 
     .values-grid {
         grid-template-columns: 1fr;
-        gap: 16px;
+        gap: 12px;
     }
 
     .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
     }
 
     .team-grid {
         grid-template-columns: 1fr;
     }
 
-    /* Reviews page */
+    /* === REVIEWS PAGE === */
     .reviews-stats {
         flex-direction: column;
-        gap: 16px;
+        gap: 12px;
     }
 
-    /* Write review card */
+    .reviews-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .reviews-list {
+        grid-template-columns: 1fr;
+    }
+
+    /* Write review */
     .write-review-card {
-        padding: 24px 20px;
+        padding: 20px 16px;
     }
 
-    /* Floating elements - smaller on mobile */
+    .write-review-card h2 {
+        font-size: 20px;
+    }
+
+    /* === FLOATING ELEMENTS === */
     .floating-whatsapp {
         padding: 10px 14px;
         font-size: 12px;
         bottom: 16px;
         right: 16px;
+        gap: 6px;
+    }
+
+    .floating-whatsapp span {
+        display: none;
     }
 
     .floating-whatsapp svg {
-        width: 18px;
-        height: 18px;
+        width: 20px;
+        height: 20px;
     }
 
     .floating-support {
         bottom: 16px;
         left: 16px;
+        padding: 10px;
     }
 
     .floating-map-widget {
-        bottom: 80px;
-        left: 16px;
-        padding: 10px 14px;
+        display: none;
     }
 
-    /* FAQ */
+    /* === FAQ === */
     .faq-grid {
-        gap: 12px;
+        gap: 10px;
     }
 
-    /* Modals - full width on mobile */
+    .faq-item {
+        padding: 16px;
+    }
+
+    /* === MODALS === */
     .modal-content {
         max-width: 95%;
         padding: 20px;
         border-radius: 16px;
     }
 
-    /* Container padding */
-    .container {
-        padding-left: 16px;
-        padding-right: 16px;
-    }
-
-    /* Partner CTA */
-    .partner-cta-card {
-        padding: 30px 20px;
-    }
-
-    .partner-cta-card h2 {
-        font-size: 22px;
-    }
-
-    /* How it works steps */
-    .step-card {
-        padding: 20px 16px;
-    }
-
-    /* Vehicles page filters */
+    /* === FILTER ROW (old vehicles page) === */
     .filter-row {
+        grid-template-columns: 1fr;
         gap: 10px;
     }
 
@@ -1322,16 +1630,276 @@ body {
     .filter-row input {
         font-size: 13px;
     }
+
+    /* === LEGAL PAGES (TOS, Privacy) === */
+    .legal-hero {
+        padding: 32px 16px 24px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+    }
+
+    .legal-hero h1 {
+        font-size: 24px;
+    }
+
+    .legal-section h2 {
+        font-size: 18px;
+    }
+
+    .legal-section p,
+    .legal-section li {
+        font-size: 14px;
+    }
+
+    /* === PAYMENT PAGE === */
+    .pay-container {
+        margin: 16px auto;
+        padding: 0 12px;
+    }
+
+    .pay-header,
+    .pay-body {
+        padding: 20px 16px;
+    }
+
+    /* === RESERVATION PAGE === */
+    .rv-page {
+        grid-template-columns: 1fr;
+        padding: 16px;
+        gap: 16px;
+    }
+
+    .rv-right {
+        position: static;
+    }
+
+    .rv-card {
+        padding: 16px;
+    }
+
+    .rv-locations-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rv-specs-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .rv-services-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rv-insurance-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* === VEHICLE DETAIL PAGE === */
+    .vd-container {
+        grid-template-columns: 1fr;
+        padding: 16px;
+        gap: 16px;
+    }
+
+    .vd-booking-panel {
+        position: static;
+    }
+
+    .vd-specs-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .vd-gallery-main img {
+        height: 220px;
+    }
+
+    /* === ABOUT PAGE EXTRA === */
+    .about-section {
+        padding: 40px 0;
+    }
+
+    .about-image {
+        height: 220px;
+    }
+
+    .about-content h2 {
+        font-size: 24px;
+    }
+
+    .about-content p {
+        font-size: 14px;
+    }
+
+    .values-section {
+        padding: 40px 0;
+    }
+
+    .value-card {
+        padding: 20px;
+    }
+
+    .value-card:hover {
+        transform: none;
+    }
+
+    .value-icon {
+        font-size: 36px;
+    }
+
+    .value-card h3 {
+        font-size: 17px;
+    }
+
+    .company-stats {
+        padding: 40px 0;
+    }
+
+    .stat-item .stat-number {
+        font-size: 32px;
+    }
+
+    .stat-item .stat-text {
+        font-size: 14px;
+    }
+
+    .team-section {
+        padding: 40px 0;
+    }
+
+    .team-member {
+        padding: 20px;
+    }
+
+    .member-avatar {
+        font-size: 48px;
+    }
+
+    /* === REVIEWS PAGE EXTRA === */
+    .reviews-stats {
+        padding: 40px 0;
+    }
+
+    .reviews-section {
+        padding: 40px 0;
+    }
+
+    .reviews-header h2 {
+        font-size: 22px;
+    }
+
+    .reviews-filter {
+        gap: 6px;
+    }
+
+    .filter-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .reviews-list {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .review-card {
+        padding: 16px;
+    }
+
+    .review-card:hover {
+        transform: none;
+    }
+
+    .review-title {
+        font-size: 16px;
+    }
+
+    .stat-card {
+        padding: 20px;
+    }
+
+    .stat-number {
+        font-size: 26px;
+    }
+
+    /* === CONTACT PAGE EXTRA === */
+    .contact-section {
+        padding: 40px 0;
+    }
+
+    .contact-form-wrapper h2 {
+        font-size: 22px;
+    }
+
+    .contact-info {
+        position: static;
+        padding: 20px;
+    }
+
+    .contact-info h2 {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+
+    /* === FORM INPUTS — TOUCH FRIENDLY === */
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 14px 12px;
+        font-size: 16px;
+        border-radius: 10px;
+    }
+
+    /* === GENERAL OVERFLOW PROTECTION === */
+    img, svg, video, iframe {
+        max-width: 100%;
+        height: auto;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* === WHY US / FEATURES === */
+    .why-us-section {
+        padding: 40px 0;
+    }
+
+    .feature-item {
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .feature-item:hover {
+        transform: none;
+    }
 }
 
-/* --- SMALL MOBILE (480px) --- */
-@media (max-width: 480px) {
+/* --- SMALL MOBILE (430px — S24 Ultra and similar) --- */
+@media (max-width: 430px) {
     .hero-headline {
         font-size: 24px;
+        letter-spacing: -0.3px;
     }
 
     .hero-subtext {
         font-size: 13px;
+    }
+
+    .hero-right {
+        max-width: 220px;
+    }
+
+    .header-left .logo {
+        font-size: 14px;
+        gap: 6px;
+    }
+
+    .header-left .logo img.logo-img,
+    .header-left .logo svg,
+    .header-left .logo .logo-icon {
+        width: 28px;
+        height: 28px;
     }
 
     .fleet-card-body {
@@ -1342,24 +1910,43 @@ body {
         font-size: 20px;
     }
 
-    .page-hero {
-        height: 240px;
+    .fleet-card-title {
+        font-size: 14px;
     }
 
-    .page-hero h1 {
-        font-size: 22px;
+    .fleet-tag {
+        font-size: 10px;
+        padding: 3px 8px;
     }
 
     .section-title {
         font-size: 20px;
     }
 
-    .cta-section h2 {
+    .carousel-title {
         font-size: 20px;
+    }
+
+    .page-hero {
+        min-height: 160px;
+        padding: 32px 0;
+    }
+
+    .page-hero h1 {
+        font-size: 22px;
+    }
+
+    .cta-section h2 {
+        font-size: 18px;
+    }
+
+    .partner-cta-card h2 {
+        font-size: 18px;
     }
 
     .stats-grid {
         grid-template-columns: 1fr 1fr;
+        gap: 8px;
     }
 
     .booking-form-container {
@@ -1371,8 +1958,92 @@ body {
         font-size: 13px;
     }
 
-    .partner-cta-card h2 {
+    .testimonial-card {
+        padding: 16px;
+    }
+
+    .bento-tile {
+        padding: 16px;
+    }
+
+    .step-card {
+        padding: 16px 12px;
+    }
+
+    .partner-logo {
+        padding: 14px;
+    }
+
+    .modal-content {
+        max-width: 98%;
+        padding: 16px;
+        border-radius: 12px;
+    }
+
+    .write-review-card {
+        padding: 16px 12px;
+    }
+
+    .calendar-content {
+        padding: 12px;
+        width: 98%;
+    }
+
+    .filters-content {
+        padding: 12px;
+        width: 98%;
+    }
+
+    .footer-column p,
+    .footer-column li,
+    .footer-column a {
+        font-size: 12px;
+    }
+
+    .contact-form {
+        padding: 16px;
+    }
+}
+
+/* --- VERY SMALL MOBILE (360px — Galaxy S series, older phones) --- */
+@media (max-width: 360px) {
+    .hero-headline {
+        font-size: 22px;
+    }
+
+    .hero-right {
+        max-width: 200px;
+    }
+
+    .header-left .logo span {
+        font-size: 13px;
+    }
+
+    .booking-form-container {
+        padding: 10px;
+    }
+
+    .booking-input {
+        font-size: 13px;
+        padding: 10px 0;
+    }
+
+    .search-btn {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .page-hero h1 {
+        font-size: 20px;
+    }
+
+    .section-title {
         font-size: 18px;
+    }
+
+    .fleet-card-btn {
+        padding: 10px;
+        font-size: 11px;
     }
 }
 
