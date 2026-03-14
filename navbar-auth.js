@@ -194,7 +194,9 @@
         document.body.appendChild(panel);
 
         hamburger.addEventListener('click', openMobileNav);
-        document.getElementById('mobileNavClose').addEventListener('click', closeMobileNav);
+        var closeBtn = document.getElementById('mobileNavClose');
+        closeBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); closeMobileNav(); });
+        closeBtn.addEventListener('touchend', function(e) { e.preventDefault(); e.stopPropagation(); closeMobileNav(); });
 
         if (token && user) {
             var logoutBtn = document.getElementById('mobileLogoutBtn');

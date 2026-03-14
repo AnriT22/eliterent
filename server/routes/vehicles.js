@@ -11,7 +11,7 @@ router.get('/', (req, res) => {
                    FROM vehicles v
                    JOIN users u ON v.partner_id = u.id
                    LEFT JOIN partner_profiles pp ON u.id = pp.user_id
-                   WHERE v.status = 'active'`;
+                   WHERE v.status = 'active' AND pp.is_verified = 1`;
         var params = [];
 
         // Optional filters
@@ -102,7 +102,7 @@ router.get('/:id', (req, res) => {
              FROM vehicles v
              JOIN users u ON v.partner_id = u.id
              LEFT JOIN partner_profiles pp ON u.id = pp.user_id
-             WHERE v.id = ?`,
+             WHERE v.id = ? AND pp.is_verified = 1`,
             [parseInt(req.params.id)]
         );
 

@@ -2314,18 +2314,16 @@ body {
     }
 
     .header-content {
-        grid-template-columns: 1fr;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         gap: 12px;
     }
 
-    .header-left .logo span {
-        display: none;
-    }
-
-    .header-center,
     .header-right {
-        grid-column: 1 / -1;
-        order: 2;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
     .trip-toggle-header {
@@ -2337,7 +2335,8 @@ body {
     }
 
     .hero {
-        min-height: 500px;
+        min-height: auto;
+        height: auto;
     }
 
     .booking-widget {
@@ -2531,7 +2530,7 @@ body {
     justify-content: center;
     overflow: hidden;
     background: linear-gradient(135deg, var(--forest-green) 0%, #111827 100%);
-    margin-top: 80px;
+    margin-top: 0;
 }
 
 .page-hero-overlay {
@@ -3452,7 +3451,7 @@ body {
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.5);
-    z-index: 998;
+    z-index: 10000;
 }
 .mobile-nav-overlay.open { display: block; }
 
@@ -3462,7 +3461,7 @@ body {
     width: 280px;
     height: 100%;
     background: #1e293b;
-    z-index: 999;
+    z-index: 10001;
     padding: 0;
     transition: right 0.32s cubic-bezier(0.4,0,0.2,1);
     display: flex;
@@ -3485,15 +3484,22 @@ body {
 }
 .mobile-nav-header .logo img { width: 32px; height: 32px; object-fit: contain; }
 .mobile-nav-close {
-    width: 32px; height: 32px;
-    background: rgba(255,255,255,0.1);
-    border: none; border-radius: 50%;
-    color: #fff; font-size: 16px;
+    width: 44px; height: 44px;
+    min-width: 44px; min-height: 44px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 50%;
+    color: #fff; font-size: 20px;
     cursor: pointer; display: flex;
     align-items: center; justify-content: center;
-    transition: background 0.2s;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    position: relative;
+    z-index: 10002;
 }
-.mobile-nav-close:hover { background: rgba(255,255,255,0.2); }
+.mobile-nav-close:hover,
+.mobile-nav-close:active { background: rgba(255,255,255,0.25); transform: scale(0.95); }
 
 .mobile-nav-links {
     flex: 1;
@@ -3539,9 +3545,23 @@ body {
 
 @media (max-width: 768px) {
     .hamburger-btn { display: flex; }
-    .header-center { display: none; }
+    .header-center { display: none !important; }
     .header-right .partner-btn { display: none; }
-    .header-content { grid-template-columns: 1fr auto; gap: 12px; }
+    .header-right .selector-group { display: none; }
+    .header-content {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+    .header-right {
+        display: flex !important;
+        align-items: center;
+        gap: 8px;
+        order: 0;
+        grid-column: auto;
+    }
+    .header-left .logo span { display: inline; }
 
     .page-hero h1 {
         font-size: 32px;

@@ -364,11 +364,57 @@ router.put('/partners/:id/verify', (req, res) => {
     }
 });
 
-router.put('/partners/:id/unverify', (req, res) => {
+router.put('/partners/:id/unverify', async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
+
+        // Find all active bookings for this partner's vehicles
+        const activeBookings = queryAll(
+            `SELECT b.id, b.vehicle_id, b.pickup_date, b.dropoff_date, b.guest_id,
+                    v.name as vehicle_name,
+                    u.email as guest_email, u.full_name as guest_name
+             FROM bookings b
+             JOIN vehicles v ON b.vehicle_id = v.id
+             JOIN users u ON b.guest_id = u.id
+             WHERE b.partner_id = ? AND b.status IN ('pending', 'accepted', 'cancel_requested')`,
+            [userId]
+        );
+
+        // Cancel all active bookings
+        if (activeBookings.length > 0) {
+            execute(
+                "UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE partner_id = ? AND status IN ('pending', 'accepted', 'cancel_requested')",
+                [userId]
+            );
+
+            // Unblock dates and notify guests
+            for (var i = 0; i < activeBookings.length; i++) {
+                var bk = activeBookings[i];
+                unblockDatesForBooking(bk.vehicle_id, bk.pickup_date, bk.dropoff_date);
+
+                // Notify guest
+                if (bk.guest_email) {
+                    try {
+                        await sendEmail({
+                            to: bk.guest_email,
+                            subject: 'Reservation Cancelled — ' + (bk.vehicle_name || 'Vehicle'),
+                            text: 'Hello ' + (bk.guest_name || 'Guest') + ',\n\nYour reservation for ' + (bk.vehicle_name || 'a vehicle') + ' (' + bk.pickup_date + ' → ' + bk.dropoff_date + ') has been cancelled because the partner is no longer verified.\n\nWe apologize for the inconvenience. Please book another vehicle on Eliterent.ge.\n\nBest regards,\nEliterent.ge Team',
+                            html: '<p>Hello ' + (bk.guest_name || 'Guest') + ',</p><p>Your reservation for <strong>' + (bk.vehicle_name || 'a vehicle') + '</strong> (' + bk.pickup_date + ' → ' + bk.dropoff_date + ') has been cancelled because the partner is no longer verified.</p><p>We apologize for the inconvenience. Please book another vehicle on <a href="' + (process.env.BASE_URL || 'http://localhost:3000') + '">Eliterent.ge</a>.</p>'
+                        });
+                    } catch (emailErr) {
+                        console.error('Failed to notify guest #' + bk.guest_id + ':', emailErr.message);
+                    }
+                }
+            }
+        }
+
+        // Unverify the partner
         execute('UPDATE partner_profiles SET is_verified = 0 WHERE user_id = ?', [userId]);
-        res.json({ message: 'Partner unverified' });
+
+        res.json({
+            message: 'Partner unverified' + (activeBookings.length > 0 ? '. ' + activeBookings.length + ' active booking(s) cancelled and guests notified.' : ''),
+            cancelled_bookings: activeBookings.length
+        });
     } catch (err) {
         console.error('Unverify partner error:', err);
         res.status(500).json({ error: 'Failed to unverify partner' });

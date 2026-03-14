@@ -1,4 +1,4 @@
-/* ========================================
+﻿/* ========================================
    RESERVATION PAGE — JAVASCRIPT
    ======================================== */
 
@@ -27,7 +27,7 @@
     var EXTRA_ICONS = {
         baby_seat: '🍼',
         additional_driver: '👤',
-        gps_controlled: '�',
+        gps_controlled: '📍',
         android_auto_carplay: '📱'
     };
 
