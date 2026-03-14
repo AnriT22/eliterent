@@ -444,6 +444,15 @@
         white-space: nowrap;
         padding: 8px 14px;
         font-size: 13px;
+        background: #e2e8f0;
+        color: #1e293b;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .gp-nav-item.active {
+        background: #3B82F6;
+        color: #fff;
     }
 
     .gp-nav-item svg {

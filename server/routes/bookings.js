@@ -161,9 +161,9 @@ router.post('/', authenticateToken, requireRole('guest'), async (req, res) => {
         }
 
         var vehicle = queryOne(
-            `SELECT v.*, pp.company_name FROM vehicles v
+            `SELECT v.*, pp.company_name, pp.is_verified FROM vehicles v
              LEFT JOIN partner_profiles pp ON v.partner_id = pp.user_id
-             WHERE v.id = ? AND v.status = 'active'`,
+             WHERE v.id = ? AND v.status = 'active' AND pp.is_verified = 1`,
             [vehicle_id]
         );
         if (!vehicle) return res.status(404).json({ error: 'Vehicle not found or inactive' });

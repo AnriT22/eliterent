@@ -1,11 +1,12 @@
-﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Partner Dashboard — Eliterent.ge</title>
+    <title>Partner Dashboard - Eliterent.ge</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="premium.css">
     <link rel="stylesheet" href="navbar-auth.css">
     <link rel="stylesheet" href="dashboard.css">
     <script src="api-helper.js"></script>
@@ -92,7 +93,7 @@
                 </div>
                 <form class="db-form" id="vehicleForm">
 
-                    <!-- ——— SECTION 1 — PHOTOS ——— -->
+                    <!-- SECTION 1 - PHOTOS --- -->
                     <div class="vf-section">
                         <div class="vf-section-title">Vehicle Photos</div>
                         <div class="db-form-grid">
@@ -103,7 +104,7 @@
                                     <div class="db-upload-placeholder" id="uploadPlaceholder">
                                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                                         <span>Click or drag images here</span>
-                                        <span class="db-upload-hint">JPG, PNG, WebP — max 20 MB each</span>
+                                        <span class="db-upload-hint">JPG, PNG, WebP - max 20 MB each</span>
                                     </div>
                                     <input type="file" id="vImageFiles" accept=".jpg,.jpeg,.png,.webp" multiple style="display:none;">
                                     <div class="db-upload-preview" id="uploadPreview"></div>
@@ -114,7 +115,7 @@
                         </div>
                     </div>
 
-                    <!-- ——— SECTION 2 — BASIC INFORMATION ——— -->
+                    <!-- SECTION 2 - BASIC INFORMATION --- -->
                     <div class="vf-section">
                         <div class="vf-section-title">Basic Information</div>
                         <div class="db-form-grid">
@@ -172,7 +173,7 @@
                         </div>
                     </div>
 
-                    <!-- ——— SECTION 3 — CAR SPECIFICATIONS ——— -->
+                    <!-- SECTION 3 - CAR SPECIFICATIONS --- -->
                     <div class="vf-section">
                         <div class="vf-section-title">Car Specifications</div>
                         <div class="db-form-grid-3">
@@ -192,8 +193,8 @@
                                 <label class="db-label">Luggage Capacity *</label>
                                 <select class="db-input" id="vLuggage" required>
                                     <option value="">Select</option>
-                                    <option value="small">Small (1–2 bags)</option>
-                                    <option value="medium">Medium (3–4 bags)</option>
+                                    <option value="small">Small (1-2 bags)</option>
+                                    <option value="medium">Medium (3-4 bags)</option>
                                     <option value="large">Large (5+ bags)</option>
                                 </select>
                             </div>
@@ -221,7 +222,7 @@
                         </div>
                     </div>
 
-                    <!-- ——— SECTION 4 — VEHICLE CHARACTERISTICS ——— -->
+                    <!-- SECTION 4 - VEHICLE CHARACTERISTICS --- -->
                     <div class="vf-section">
                         <div class="vf-section-title">Vehicle Characteristics</div>
                         <div class="db-form-grid-3">
@@ -306,7 +307,7 @@
                         </div>
                     </div>
 
-                    <!-- ——— SECTION 5 — PRICING ——— -->
+                    <!-- SECTION 5 - PRICING --- -->
                     <div class="vf-section">
                         <div class="vf-section-title">Pricing</div>
                         <div class="db-form-grid">
@@ -331,24 +332,24 @@
                         </div>
                     </div>
 
-                    <!-- ——— SECTION 6 — PRICE TIERS & EXTRAS ——— -->
+                    <!-- SECTION 6 - PRICE TIERS & EXTRAS --- -->
                     <div class="vf-section">
                         <div class="vf-section-title">Price Tiers & Extras</div>
                         <div class="db-form-grid-3">
                             <div class="db-form-group">
-                                <label class="db-label">Price 1–3 Days ($/day)</label>
+                                <label class="db-label">Price 1-3 Days ($/day)</label>
                                 <input type="number" class="db-input" id="vPrice1_3" placeholder="0" min="0" step="0.01">
                             </div>
                             <div class="db-form-group">
-                                <label class="db-label">Price 4–7 Days ($/day)</label>
+                                <label class="db-label">Price 4-7 Days ($/day)</label>
                                 <input type="number" class="db-input" id="vPrice4_7" placeholder="0" min="0" step="0.01">
                             </div>
                             <div class="db-form-group">
-                                <label class="db-label">Price 8–14 Days ($/day)</label>
+                                <label class="db-label">Price 8-14 Days ($/day)</label>
                                 <input type="number" class="db-input" id="vPrice8_14" placeholder="0" min="0" step="0.01">
                             </div>
                             <div class="db-form-group">
-                                <label class="db-label">Price 15–30 Days ($/day)</label>
+                                <label class="db-label">Price 15-30 Days ($/day)</label>
                                 <input type="number" class="db-input" id="vPrice15_30" placeholder="0" min="0" step="0.01">
                             </div>
                             <div class="db-form-group">
@@ -398,23 +399,23 @@
                         </div>
                     </div>
 
-                    <!-- ——— SECTION 7 — INSURANCE & OPTIONS ——— -->
+                    <!-- SECTION 7 - INSURANCE & OPTIONS --- -->
                     <div class="vf-section">
                         <div class="vf-section-title">Insurance & Options</div>
                         <div class="vf-info-box">
                             <strong>Insurance Information:</strong>
-                            <p><b>TPL – Third Party Liability:</b><br>Covers damage caused to other vehicles. Does not cover: your rented vehicle.</p>
-                            <p><b>CDW – Collision Damage Waiver:</b><br>Covers damage to the rented vehicle in case of an accident. Does not cover: tires, glass, or interior damage.</p>
+                            <p><b>TPL - Third Party Liability:</b><br>Covers damage caused to other vehicles. Does not cover: your rented vehicle.</p>
+                            <p><b>CDW - Collision Damage Waiver:</b><br>Covers damage to the rented vehicle in case of an accident. Does not cover: tires, glass, or interior damage.</p>
                             <p><b>Full Coverage:</b><br>Covers all damages, theft, and roadside assistance.<br>Includes: TPL + CDW + full protection.</p>
                             <p style="color:#64748b;font-size:12px;">If not offered, leave it blank. For free options enter 0, or specify the price per day.</p>
                         </div>
                         <div class="db-form-grid-3">
                             <div class="db-form-group">
-                                <label class="db-label">TPL – Third Party Liability ($/day)</label>
+                                <label class="db-label">TPL - Third Party Liability ($/day)</label>
                                 <input type="number" class="db-input" id="vInsTPL" placeholder="0" min="0" step="0.01">
                             </div>
                             <div class="db-form-group">
-                                <label class="db-label">CDW – Collision Damage Waiver ($/day)</label>
+                                <label class="db-label">CDW - Collision Damage Waiver ($/day)</label>
                                 <input type="number" class="db-input" id="vInsCDW" placeholder="0" min="0" step="0.01">
                             </div>
                             <div class="db-form-group">
@@ -424,7 +425,7 @@
                         </div>
                     </div>
 
-                    <!-- ——— SECTION 8 — PICKUP & DROP OFF ——— -->
+                    <!-- SECTION 8 - PICKUP & DROP OFF --- -->
                     <div class="vf-section">
                         <div class="vf-section-title">Pickup & Drop Off</div>
                         <div class="db-form-grid">
@@ -454,7 +455,7 @@
                         </div>
                     </div>
 
-                    <!-- ——— SECTION 9 — FILTER OPTIONS ——— -->
+                    <!-- SECTION 9 - FILTER OPTIONS --- -->
                     <div class="vf-section">
                         <div class="vf-section-title">Filter Options</div>
                         <div class="db-form-grid-3">
@@ -490,7 +491,7 @@
                         </div>
                     </div>
 
-                    <!-- ——— SECTION 10 — AVAILABILITY & STATUS ——— -->
+                    <!-- SECTION 10 - AVAILABILITY & STATUS --- -->
                     <div class="vf-section">
                         <div class="vf-section-title">Availability & Status</div>
                         <div class="vf-toggles-row">
@@ -505,7 +506,7 @@
                         </div>
                     </div>
 
-                    <!-- ——— SECTION 11 — DOCUMENTATION ——— -->
+                    <!-- SECTION 11 - DOCUMENTATION --- -->
                     <div class="vf-section">
                         <div class="vf-section-title">Ownership Confirmation</div>
                         <p class="db-field-hint">This is required for vehicle ownership verification. Information will not be published.</p>
@@ -558,12 +559,12 @@
                     <h2>Partner Profile</h2>
                 </div>
                 <div class="db-profile-card" id="profileCard">
-                    <div class="db-profile-row"><strong>Name:</strong> <span id="profileName">—</span></div>
-                    <div class="db-profile-row"><strong>Email:</strong> <span id="profileEmail">—</span></div>
-                    <div class="db-profile-row"><strong>Phone:</strong> <span id="profilePhone">—</span></div>
-                    <div class="db-profile-row"><strong>Company:</strong> <span id="profileCompany">—</span></div>
-                    <div class="db-profile-row"><strong>Location:</strong> <span id="profileLocation">—</span></div>
-                    <div class="db-profile-row"><strong>Member since:</strong> <span id="profileDate">—</span></div>
+                    <div class="db-profile-row"><strong>Name:</strong> <span id="profileName">-</span></div>
+                    <div class="db-profile-row"><strong>Email:</strong> <span id="profileEmail">-</span></div>
+                    <div class="db-profile-row"><strong>Phone:</strong> <span id="profilePhone">-</span></div>
+                    <div class="db-profile-row"><strong>Company:</strong> <span id="profileCompany">-</span></div>
+                    <div class="db-profile-row"><strong>Location:</strong> <span id="profileLocation">-</span></div>
+                    <div class="db-profile-row"><strong>Member since:</strong> <span id="profileDate">-</span></div>
                 </div>
             </div>
 
@@ -576,7 +577,7 @@
         <div class="availability-modal-content">
             <div class="availability-modal-header">
                 <h3>Manage Vehicle Availability</h3>
-                <button class="availability-modal-close" onclick="closeAvailabilityCalendar()">×</button>
+                <button class="availability-modal-close" onclick="closeAvailabilityCalendar()">&#x2715;</button>
             </div>
             <div class="availability-modal-body">
                 <div class="availability-calendar-header">
@@ -612,5 +613,6 @@
     <script src="script.js"></script>
     <script src="navbar-auth.js"></script>
     <script src="dashboard.js"></script>
+<script src="premium-animations.js"></script>
 </body>
 </html>

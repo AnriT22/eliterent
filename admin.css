@@ -454,6 +454,32 @@
     }
 }
 
+@media (max-width: 600px) {
+    .admin-sidebar {
+        position: fixed;
+        left: -260px;
+        width: 260px;
+        z-index: 9999;
+        transition: left 0.3s;
+    }
+    .admin-sidebar.open {
+        left: 0;
+    }
+    .admin-main {
+        margin-left: 0;
+    }
+    .admin-sidebar-header span,
+    .admin-badge {
+        display: inline;
+    }
+    .admin-nav-item span {
+        display: inline;
+    }
+    .fin-summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* FINANCIAL TAB */
 .fin-summary-grid {
     display: grid;
