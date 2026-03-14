@@ -139,6 +139,101 @@ router.get('/users', (req, res) => {
     }
 });
 
+// GET /api/admin/users/:id/detail — full detail view for a user or partner
+router.get('/users/:id/detail', (req, res) => {
+    try {
+        const userId = parseInt(req.params.id);
+        const user = queryOne(
+            'SELECT id, email, full_name, phone, role, avatar_url, is_approved, admin_notes, created_at, updated_at FROM users WHERE id = ?',
+            [userId]
+        );
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        // Partner profile if applicable
+        let partnerProfile = null;
+        if (user.role === 'partner') {
+            partnerProfile = queryOne(
+                'SELECT company_name, description, location, whatsapp, telegram, categories, is_verified, created_at FROM partner_profiles WHERE user_id = ?',
+                [userId]
+            );
+        }
+
+        // Vehicles owned by this user (if partner)
+        const vehicles = user.role === 'partner'
+            ? queryAll(
+                'SELECT id, name, category, engine, gearbox, price_per_day, year, status, image_url, created_at FROM vehicles WHERE partner_id = ? ORDER BY created_at DESC',
+                [userId]
+            )
+            : [];
+
+        // Bookings — as guest or as partner
+        let bookings = [];
+        if (user.role === 'guest') {
+            bookings = queryAll(
+                `SELECT b.id, b.pickup_date, b.dropoff_date, b.total_price, b.service_fee, b.status, b.payment_status, b.created_at,
+                        v.name as vehicle_name, v.image_url,
+                        pp.company_name as partner_company
+                 FROM bookings b
+                 JOIN vehicles v ON b.vehicle_id = v.id
+                 LEFT JOIN partner_profiles pp ON b.partner_id = pp.user_id
+                 WHERE b.guest_id = ?
+                 ORDER BY b.created_at DESC`,
+                [userId]
+            );
+        } else if (user.role === 'partner') {
+            bookings = queryAll(
+                `SELECT b.id, b.pickup_date, b.dropoff_date, b.total_price, b.service_fee, b.status, b.payment_status, b.created_at,
+                        v.name as vehicle_name, v.image_url,
+                        u.full_name as guest_name, u.email as guest_email
+                 FROM bookings b
+                 JOIN vehicles v ON b.vehicle_id = v.id
+                 JOIN users u ON b.guest_id = u.id
+                 WHERE b.partner_id = ?
+                 ORDER BY b.created_at DESC`,
+                [userId]
+            );
+        }
+
+        // Stats
+        const totalBookings = bookings.length;
+        const activeBookings = bookings.filter(b => ['pending', 'accepted', 'cancel_requested'].includes(b.status)).length;
+        const totalRevenue = bookings
+            .filter(b => ['accepted', 'completed'].includes(b.status))
+            .reduce((sum, b) => sum + (parseFloat(b.total_price) || 0), 0);
+        const totalServiceFees = bookings
+            .filter(b => ['accepted', 'completed'].includes(b.status))
+            .reduce((sum, b) => sum + (parseFloat(b.service_fee) || 0), 0);
+
+        // Reviews (if guest)
+        let reviews = [];
+        if (user.role === 'guest') {
+            reviews = queryAll(
+                'SELECT id, rating, title, body, created_at FROM reviews WHERE user_id = ? ORDER BY created_at DESC',
+                [userId]
+            );
+        }
+
+        res.json({
+            user,
+            partner_profile: partnerProfile,
+            vehicles,
+            bookings,
+            reviews,
+            stats: {
+                total_bookings: totalBookings,
+                active_bookings: activeBookings,
+                total_revenue: totalRevenue,
+                total_service_fees: totalServiceFees,
+                total_vehicles: vehicles.length,
+                active_vehicles: vehicles.filter(v => v.status === 'active').length
+            }
+        });
+    } catch (err) {
+        console.error('Admin user detail error:', err);
+        res.status(500).json({ error: 'Failed to load user details' });
+    }
+});
+
 router.put('/users/:id/approve', (req, res) => {
     try {
         const userId = parseInt(req.params.id);
@@ -182,31 +277,59 @@ router.delete('/users/:id', (req, res) => {
     }
 });
 
-router.put('/users/:id/ban', (req, res) => {
+// Suspend user (set is_approved = 0)
+router.put('/users/:id/suspend', (req, res) => {
     try {
         const userId = parseInt(req.params.id);
         const user = queryOne('SELECT * FROM users WHERE id = ? AND role != ?', [userId, 'admin']);
         if (!user) return res.status(404).json({ error: 'User not found' });
-        // Toggle ban by changing role to 'banned' or restoring
-        // For simplicity, we use a 'banned' status approach — set role to original + suffix
-        // Actually, let's add a simple banned flag approach via a convention
-        // We'll just delete for now and add suspend later if needed
-        execute("UPDATE users SET role = 'banned_' || role WHERE id = ? AND role NOT LIKE 'banned_%'", [userId]);
+        execute('UPDATE users SET is_approved = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [userId]);
         res.json({ message: 'User suspended' });
     } catch (err) {
-        console.error('Ban user error:', err);
+        console.error('Suspend user error:', err);
         res.status(500).json({ error: 'Failed to suspend user' });
     }
 });
 
-router.put('/users/:id/unban', (req, res) => {
+// Unsuspend user (set is_approved = 1)
+router.put('/users/:id/unsuspend', (req, res) => {
     try {
         const userId = parseInt(req.params.id);
-        execute("UPDATE users SET role = REPLACE(role, 'banned_', '') WHERE id = ?", [userId]);
+        execute('UPDATE users SET is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [userId]);
         res.json({ message: 'User unsuspended' });
     } catch (err) {
-        console.error('Unban user error:', err);
+        console.error('Unsuspend user error:', err);
         res.status(500).json({ error: 'Failed to unsuspend user' });
+    }
+});
+
+// Edit user profile from admin
+router.put('/users/:id/edit', (req, res) => {
+    try {
+        const userId = parseInt(req.params.id);
+        const user = queryOne('SELECT * FROM users WHERE id = ? AND role != ?', [userId, 'admin']);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        const { full_name, email, phone } = req.body;
+        if (full_name) execute('UPDATE users SET full_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [full_name.trim(), userId]);
+        if (email) execute('UPDATE users SET email = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [email.trim(), userId]);
+        if (phone !== undefined) execute('UPDATE users SET phone = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [phone || null, userId]);
+        res.json({ message: 'User updated' });
+    } catch (err) {
+        console.error('Edit user error:', err);
+        res.status(500).json({ error: 'Failed to update user' });
+    }
+});
+
+// Save admin notes on a user
+router.put('/users/:id/notes', (req, res) => {
+    try {
+        const userId = parseInt(req.params.id);
+        const { notes } = req.body;
+        execute('UPDATE users SET admin_notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [notes || null, userId]);
+        res.json({ message: 'Notes saved' });
+    } catch (err) {
+        console.error('Save notes error:', err);
+        res.status(500).json({ error: 'Failed to save notes' });
     }
 });
 
@@ -431,7 +554,7 @@ router.patch('/bookings/:id/status', async (req, res) => {
 // ========================================
 // FINANCIAL DATA
 // ========================================
-router.get('/financial', authenticateToken, requireRole('admin'), (req, res) => {
+router.get('/financial', (req, res) => {
     try {
         var records = queryAll(`
             SELECT b.id, b.vehicle_id, b.pickup_date, b.dropoff_date, b.rental_days,
@@ -478,6 +601,205 @@ router.get('/financial', authenticateToken, requireRole('admin'), (req, res) => 
     } catch (err) {
         console.error('Admin financial error:', err);
         res.status(500).json({ error: 'Failed to load financial data' });
+    }
+});
+
+// ========================================
+// PROMO CODES
+// ========================================
+router.get('/promo-codes', (req, res) => {
+    try {
+        const codes = queryAll('SELECT * FROM promo_codes ORDER BY created_at DESC');
+        res.json({ codes });
+    } catch (err) {
+        console.error('Get promo codes error:', err);
+        res.status(500).json({ error: 'Failed to get promo codes' });
+    }
+});
+
+router.post('/promo-codes', (req, res) => {
+    try {
+        const { code, discount_type, discount_value, min_order, max_uses, valid_from, valid_until } = req.body;
+        if (!code || !discount_type || !discount_value) {
+            return res.status(400).json({ error: 'Code, discount type, and value are required' });
+        }
+        if (!['percent', 'fixed'].includes(discount_type)) {
+            return res.status(400).json({ error: 'Discount type must be percent or fixed' });
+        }
+        const existing = queryOne('SELECT id FROM promo_codes WHERE code = ?', [code.toUpperCase()]);
+        if (existing) return res.status(409).json({ error: 'Code already exists' });
+        execute(
+            'INSERT INTO promo_codes (code, discount_type, discount_value, min_order, max_uses, valid_from, valid_until) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [code.toUpperCase(), discount_type, parseFloat(discount_value), parseFloat(min_order) || 0, parseInt(max_uses) || 0, valid_from || null, valid_until || null]
+        );
+        res.status(201).json({ message: 'Promo code created' });
+    } catch (err) {
+        console.error('Create promo code error:', err);
+        res.status(500).json({ error: 'Failed to create promo code' });
+    }
+});
+
+router.put('/promo-codes/:id', (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const { is_active, max_uses, valid_until } = req.body;
+        if (is_active !== undefined) execute('UPDATE promo_codes SET is_active = ? WHERE id = ?', [is_active ? 1 : 0, id]);
+        if (max_uses !== undefined) execute('UPDATE promo_codes SET max_uses = ? WHERE id = ?', [parseInt(max_uses) || 0, id]);
+        if (valid_until !== undefined) execute('UPDATE promo_codes SET valid_until = ? WHERE id = ?', [valid_until || null, id]);
+        res.json({ message: 'Promo code updated' });
+    } catch (err) {
+        console.error('Update promo code error:', err);
+        res.status(500).json({ error: 'Failed to update promo code' });
+    }
+});
+
+router.delete('/promo-codes/:id', (req, res) => {
+    try {
+        execute('DELETE FROM promo_codes WHERE id = ?', [parseInt(req.params.id)]);
+        res.json({ message: 'Promo code deleted' });
+    } catch (err) {
+        console.error('Delete promo code error:', err);
+        res.status(500).json({ error: 'Failed to delete promo code' });
+    }
+});
+
+// ========================================
+// CSV EXPORT
+// ========================================
+router.get('/export/bookings', (req, res) => {
+    try {
+        const rows = queryAll(
+            `SELECT b.id, b.pickup_date, b.dropoff_date, b.rental_days, b.total_price, b.service_fee, b.extras_total, b.status, b.payment_status, b.created_at,
+                    v.name as vehicle_name,
+                    u.full_name as guest_name, u.email as guest_email,
+                    pp.company_name as partner_company
+             FROM bookings b
+             JOIN vehicles v ON b.vehicle_id = v.id
+             JOIN users u ON b.guest_id = u.id
+             LEFT JOIN partner_profiles pp ON b.partner_id = pp.user_id
+             ORDER BY b.created_at DESC`
+        );
+        var csv = 'ID,Vehicle,Guest,Guest Email,Partner,Pickup,Dropoff,Days,Total,Service Fee,Extras,Status,Payment,Created\n';
+        rows.forEach(function(r) {
+            csv += [r.id, '"'+(r.vehicle_name||'')+'"', '"'+(r.guest_name||'')+'"', r.guest_email||'', '"'+(r.partner_company||'')+'"',
+                r.pickup_date||'', r.dropoff_date||'', r.rental_days||'', (r.total_price||0), (r.service_fee||0), (r.extras_total||0),
+                r.status||'', r.payment_status||'', r.created_at||''].join(',') + '\n';
+        });
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=bookings_export.csv');
+        res.send(csv);
+    } catch (err) {
+        console.error('Export bookings error:', err);
+        res.status(500).json({ error: 'Export failed' });
+    }
+});
+
+router.get('/export/financial', (req, res) => {
+    try {
+        const rows = queryAll(
+            `SELECT b.id, b.pickup_date, b.dropoff_date, b.rental_days, b.total_price, b.service_fee, b.extras_total, b.status, b.payment_status, b.payment_date,
+                    v.name as vehicle_name,
+                    u.full_name as guest_name, u.email as guest_email
+             FROM bookings b
+             JOIN vehicles v ON b.vehicle_id = v.id
+             JOIN users u ON b.guest_id = u.id
+             WHERE b.status IN ('accepted', 'completed', 'cancelled', 'cancel_requested')
+             ORDER BY b.updated_at DESC`
+        );
+        var csv = 'ID,Vehicle,Guest,Guest Email,Pickup,Dropoff,Days,Rental Total,Extras,Service Fee,Total,Status,Payment Status,Payment Date\n';
+        rows.forEach(function(r) {
+            var rental = Math.round(((r.total_price||0) - (r.extras_total||0) - (r.service_fee||0)) * 100) / 100;
+            csv += [r.id, '"'+(r.vehicle_name||'')+'"', '"'+(r.guest_name||'')+'"', r.guest_email||'',
+                r.pickup_date||'', r.dropoff_date||'', r.rental_days||'', rental, (r.extras_total||0), (r.service_fee||0), (r.total_price||0),
+                r.status||'', r.payment_status||'unpaid', r.payment_date||''].join(',') + '\n';
+        });
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=financial_export.csv');
+        res.send(csv);
+    } catch (err) {
+        console.error('Export financial error:', err);
+        res.status(500).json({ error: 'Export failed' });
+    }
+});
+
+// ========================================
+// BULK ACTIONS
+// ========================================
+router.post('/bulk/approve-vehicles', (req, res) => {
+    try {
+        const result = execute("UPDATE vehicles SET status = 'active', updated_at = CURRENT_TIMESTAMP WHERE status = 'pending'");
+        const count = queryOne("SELECT changes() as count");
+        res.json({ message: 'All pending vehicles approved', count: count ? count.count : 0 });
+    } catch (err) {
+        console.error('Bulk approve vehicles error:', err);
+        res.status(500).json({ error: 'Failed to bulk approve' });
+    }
+});
+
+router.post('/bulk/approve-partners', (req, res) => {
+    try {
+        execute('UPDATE partner_profiles SET is_verified = 1 WHERE is_verified = 0');
+        const count = queryOne("SELECT changes() as count");
+        res.json({ message: 'All unverified partners approved', count: count ? count.count : 0 });
+    } catch (err) {
+        console.error('Bulk approve partners error:', err);
+        res.status(500).json({ error: 'Failed to bulk approve' });
+    }
+});
+
+// ========================================
+// ACTIVITY FEED
+// ========================================
+router.get('/activity', (req, res) => {
+    try {
+        var activities = [];
+
+        // Recent registrations (last 7 days)
+        var recentUsers = queryAll(
+            "SELECT id, full_name, email, role, created_at FROM users WHERE created_at >= datetime('now', '-7 days') AND role != 'admin' ORDER BY created_at DESC LIMIT 20"
+        );
+        recentUsers.forEach(function(u) {
+            activities.push({ type: 'registration', icon: 'user', text: (u.full_name || u.email) + ' registered as ' + u.role, time: u.created_at, id: u.id });
+        });
+
+        // Recent bookings (last 7 days)
+        var recentBookings = queryAll(
+            `SELECT b.id, b.status, b.created_at, b.updated_at, v.name as vehicle_name, u.full_name as guest_name
+             FROM bookings b JOIN vehicles v ON b.vehicle_id = v.id JOIN users u ON b.guest_id = u.id
+             WHERE b.created_at >= datetime('now', '-7 days') ORDER BY b.created_at DESC LIMIT 20`
+        );
+        recentBookings.forEach(function(b) {
+            activities.push({ type: 'booking', icon: 'calendar', text: (b.guest_name || 'Guest') + ' booked ' + (b.vehicle_name || 'vehicle') + ' — ' + b.status, time: b.created_at, id: b.id });
+        });
+
+        // Recent vehicle uploads (last 7 days)
+        var recentVehicles = queryAll(
+            `SELECT v.id, v.name, v.status, v.created_at, u.full_name as partner_name
+             FROM vehicles v JOIN users u ON v.partner_id = u.id
+             WHERE v.created_at >= datetime('now', '-7 days') ORDER BY v.created_at DESC LIMIT 20`
+        );
+        recentVehicles.forEach(function(v) {
+            activities.push({ type: 'vehicle', icon: 'car', text: (v.partner_name || 'Partner') + ' added ' + (v.name || 'vehicle') + ' — ' + v.status, time: v.created_at, id: v.id });
+        });
+
+        // Recent status changes (bookings updated in last 7 days that differ from created)
+        var recentChanges = queryAll(
+            `SELECT b.id, b.status, b.updated_at, v.name as vehicle_name, u.full_name as guest_name
+             FROM bookings b JOIN vehicles v ON b.vehicle_id = v.id JOIN users u ON b.guest_id = u.id
+             WHERE b.updated_at >= datetime('now', '-7 days') AND b.updated_at != b.created_at AND b.status != 'pending'
+             ORDER BY b.updated_at DESC LIMIT 20`
+        );
+        recentChanges.forEach(function(b) {
+            activities.push({ type: 'status_change', icon: 'check', text: (b.vehicle_name || 'Booking') + ' → ' + b.status + ' (guest: ' + (b.guest_name || '') + ')', time: b.updated_at, id: b.id });
+        });
+
+        // Sort by time descending
+        activities.sort(function(a, b) { return new Date(b.time) - new Date(a.time); });
+
+        res.json({ activities: activities.slice(0, 30) });
+    } catch (err) {
+        console.error('Activity feed error:', err);
+        res.status(500).json({ error: 'Failed to load activity feed' });
     }
 });
 
