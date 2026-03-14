@@ -303,7 +303,8 @@
 .admin-table-wrap {
     background: #fff;
     border-radius: 12px;
-    overflow: hidden;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     border: 1px solid #e2e8f0;
 }
