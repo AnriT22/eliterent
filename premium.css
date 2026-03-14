@@ -1673,10 +1673,6 @@ body {
         position: static;
     }
 
-    .rv-card {
-        padding: 16px;
-    }
-
     .rv-locations-grid {
         grid-template-columns: 1fr;
     }
