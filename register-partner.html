@@ -112,9 +112,42 @@
 
                         <div class="form-group">
                             <label for="pPhone" class="form-label">Phone Number</label>
-                            <div class="form-input-wrapper">
-                                <span class="form-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span>
-                                <input type="tel" id="pPhone" name="phone" class="form-input" placeholder="+995 5XX XXX XXX" required>
+                            <div class="phone-row">
+                                <select id="pPhoneCode" class="phone-code-select form-input">
+                                    <option value="+995">🇬🇪 +995</option>
+                                    <option value="+1">🇺🇸 +1</option>
+                                    <option value="+44">🇬🇧 +44</option>
+                                    <option value="+49">🇩🇪 +49</option>
+                                    <option value="+33">🇫🇷 +33</option>
+                                    <option value="+34">🇪🇸 +34</option>
+                                    <option value="+39">🇮🇹 +39</option>
+                                    <option value="+90">🇹🇷 +90</option>
+                                    <option value="+7">🇷🇺 +7</option>
+                                    <option value="+380">🇺🇦 +380</option>
+                                    <option value="+48">🇵🇱 +48</option>
+                                    <option value="+31">🇳🇱 +31</option>
+                                    <option value="+46">🇸🇪 +46</option>
+                                    <option value="+41">🇨🇭 +41</option>
+                                    <option value="+43">🇦🇹 +43</option>
+                                    <option value="+32">🇧🇪 +32</option>
+                                    <option value="+351">🇵🇹 +351</option>
+                                    <option value="+30">🇬🇷 +30</option>
+                                    <option value="+972">🇮🇱 +972</option>
+                                    <option value="+971">🇦🇪 +971</option>
+                                    <option value="+966">🇸🇦 +966</option>
+                                    <option value="+91">🇮🇳 +91</option>
+                                    <option value="+86">🇨🇳 +86</option>
+                                    <option value="+81">🇯🇵 +81</option>
+                                    <option value="+82">🇰🇷 +82</option>
+                                    <option value="+61">🇦🇺 +61</option>
+                                    <option value="+55">🇧🇷 +55</option>
+                                    <option value="+374">🇦🇲 +374</option>
+                                    <option value="+994">🇦🇿 +994</option>
+                                </select>
+                                <div class="form-input-wrapper" style="flex:1;">
+                                    <span class="form-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></span>
+                                    <input type="tel" id="pPhone" name="phone" class="form-input" placeholder="5XX XXX XXX" required>
+                                </div>
                             </div>
                             <span class="form-error" id="pPhoneError"></span>
                         </div>

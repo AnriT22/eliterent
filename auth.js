@@ -353,8 +353,8 @@ function validateRegistrationStep1() {
         isValid = false;
     } else {
         var phoneDigits = phone.value.replace(/\D/g, '');
-        if (phoneDigits.length < 9 || phoneDigits.length > 12) {
-            showError('phoneError', 'Phone must be 9-12 digits (e.g. +995 5XX XXX XXX)');
+        if (phoneDigits.length < 5 || phoneDigits.length > 12) {
+            showError('phoneError', 'Please enter a valid phone number');
             isValid = false;
         } else {
             clearError('phoneError');
@@ -516,7 +516,7 @@ function initLiveAvailabilityCheck(inputId, fieldName, errorId) {
         // Minimum length check
         if (fieldName === 'email' && (!value || value.length < 5)) return;
         if (fieldName === 'full_name' && (!value || value.length < 3)) return;
-        if (fieldName === 'phone' && (!value || value.replace(/\D/g, '').length < 9)) return;
+        if (fieldName === 'phone' && (!value || value.replace(/\D/g, '').length < 5)) return;
 
         // Show spinner
         el.innerHTML = '<span class="avail-spinner"></span>';
@@ -550,7 +550,13 @@ function initLiveAvailabilityCheck(inputId, fieldName, errorId) {
                     })
                     .catch(function () { el.innerHTML = ''; });
             } else {
-                fetch('/api/check-availability?field=' + encodeURIComponent(fieldName) + '&value=' + encodeURIComponent(value))
+                var checkValue = value;
+                // For phone: combine country code from dropdown with local number
+                if (fieldName === 'phone') {
+                    var codeEl = document.getElementById('phoneCode') || document.getElementById('pPhoneCode');
+                    if (codeEl) checkValue = codeEl.value + ' ' + value;
+                }
+                fetch('/api/check-availability?field=' + encodeURIComponent(fieldName) + '&value=' + encodeURIComponent(checkValue))
                     .then(function (res) { return res.json(); })
                     .then(function (data) {
                         if (input.value.trim() !== value) return;
@@ -574,10 +580,14 @@ async function submitRegistration() {
     const nextBtn = document.getElementById('nextStep');
     const formActions = document.getElementById('formActions');
 
+    var phoneCode = document.getElementById('phoneCode');
+    var phoneVal = document.getElementById('phone').value.trim();
+    var fullPhone = phoneCode ? (phoneCode.value + ' ' + phoneVal) : phoneVal;
+
     const formData = {
         full_name: document.getElementById('fullName').value,
         email: document.getElementById('registerEmail').value,
-        phone: document.getElementById('phone').value,
+        phone: fullPhone,
         password: document.getElementById('registerPassword').value
     };
 
@@ -718,32 +728,20 @@ function getAge(birthDate) {
 // ========================================
 
 function initPhoneFormat(input) {
-    // Auto-prepend +995 for Georgian numbers
-    input.addEventListener('focus', function () {
-        if (!input.value) input.value = '+995 ';
-    });
-
+    // Format local phone digits only (country code is in separate dropdown)
     input.addEventListener('input', function () {
         var raw = input.value.replace(/\D/g, '');
 
-        // Enforce max length: country(3) + 9 digits = 12
-        if (raw.length > 12) raw = raw.slice(0, 12);
+        // Enforce max length: 10 digits for local number
+        if (raw.length > 10) raw = raw.slice(0, 10);
 
-        // Format as +995 5XX XXX XXX
+        // Format as 5XX XXX XXX
         var formatted = '';
-        if (raw.length > 0) formatted = '+' + raw.slice(0, 3);
+        if (raw.length > 0) formatted = raw.slice(0, 3);
         if (raw.length > 3) formatted += ' ' + raw.slice(3, 6);
-        if (raw.length > 6) formatted += ' ' + raw.slice(6, 9);
-        if (raw.length > 9) formatted += ' ' + raw.slice(9, 12);
+        if (raw.length > 6) formatted += ' ' + raw.slice(6, 10);
 
         input.value = formatted;
-    });
-
-    // Prevent deleting the +995 prefix easily
-    input.addEventListener('keydown', function (e) {
-        if (e.key === 'Backspace' && input.value.replace(/\D/g, '').length <= 3) {
-            e.preventDefault();
-        }
     });
 }
 
