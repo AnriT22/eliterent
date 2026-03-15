@@ -96,10 +96,10 @@
         if (!name || name.length < 2) { showErr('pFullNameError', 'Full name is required'); valid = false; } else clearErr('pFullNameError');
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('pEmailError', 'Valid email is required'); valid = false; } else clearErr('pEmailError');
 
-        // Phone validation: must have 9-12 digits
+        // Phone validation: local digits only (country code is in separate dropdown)
         var phoneDigits = phone.replace(/\D/g, '');
-        if (!phone || phoneDigits.length < 9 || phoneDigits.length > 12) {
-            showErr('pPhoneError', 'Phone must be 9-12 digits (e.g. +995 5XX XXX XXX)');
+        if (!phone || phoneDigits.length < 5 || phoneDigits.length > 12) {
+            showErr('pPhoneError', 'Please enter a valid phone number');
             valid = false;
         } else {
             clearErr('pPhoneError');
@@ -139,10 +139,14 @@
     async function submitPartnerRegistration() {
         var formActions = document.getElementById('pFormActions');
 
+        var pCodeEl = document.getElementById('pPhoneCode');
+        var pLocalPhone = document.getElementById('pPhone').value.trim();
+        var pFullPhone = pCodeEl ? (pCodeEl.value + ' ' + pLocalPhone) : pLocalPhone;
+
         var payload = {
             full_name: document.getElementById('pFullName').value.trim(),
             email: document.getElementById('pEmail').value.trim(),
-            phone: document.getElementById('pPhone').value.trim(),
+            phone: pFullPhone,
             password: document.getElementById('pPassword').value,
             company_name: document.getElementById('pCompanyName').value.trim(),
             location: document.getElementById('pLocation').value.trim(),

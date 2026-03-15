@@ -46,7 +46,7 @@ router.get('/check-availability', (req, res) => {
         let existing;
         if (field === 'phone') {
             const digits = value.replace(/\D/g, '');
-            if (digits.length < 9) return res.json({ available: true });
+            if (digits.length < 7) return res.json({ available: true });
             existing = queryOne("SELECT id FROM users WHERE REPLACE(REPLACE(REPLACE(phone, ' ', ''), '+', ''), '-', '') LIKE '%' || ?", [digits.slice(-9)]);
         } else {
             existing = queryOne('SELECT id FROM users WHERE ' + field + ' = ?', [value.trim()]);
@@ -71,10 +71,10 @@ router.post('/register/guest', async (req, res) => {
             return res.status(400).json({ error: 'Password must be at least 6 characters' });
         }
 
-        // Validate phone format if provided
+        // Validate phone format if provided (7-15 digits covers all international formats)
         if (phone) {
             const digits = phone.replace(/\D/g, '');
-            if (digits.length < 9 || digits.length > 12) {
+            if (digits.length < 7 || digits.length > 15) {
                 return res.status(400).json({ error: 'Invalid phone number format' });
             }
         }
@@ -147,10 +147,10 @@ router.post('/register/partner', async (req, res) => {
             return res.status(400).json({ error: 'Company name is required for partners' });
         }
 
-        // Validate phone format if provided
+        // Validate phone format if provided (7-15 digits covers all international formats)
         if (phone) {
             const digits = phone.replace(/\D/g, '');
-            if (digits.length < 9 || digits.length > 12) {
+            if (digits.length < 7 || digits.length > 15) {
                 return res.status(400).json({ error: 'Invalid phone number format' });
             }
         }

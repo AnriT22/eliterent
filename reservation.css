@@ -1020,3 +1020,142 @@
         padding: 12px 20px;
     }
 }
+
+/* ── Very narrow mobile (412px and below — S24 Ultra) ── */
+@media (max-width: 420px) {
+    .rv-page {
+        padding-top: 12px;
+        padding-bottom: 24px;
+        gap: 12px;
+    }
+
+    .rv-card {
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    .rv-gallery {
+        padding: 10px;
+    }
+
+    .rv-section-header {
+        padding: 12px 14px;
+        font-size: 13px;
+    }
+
+    .rv-specs-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+    }
+
+    .rv-spec-item {
+        padding: 8px 6px;
+    }
+
+    .rv-spec-label {
+        font-size: 8px;
+    }
+
+    .rv-spec-val {
+        font-size: 11px;
+    }
+
+    .rv-specs-body {
+        padding: 0 12px 12px;
+    }
+
+    .rv-vehicle-info-header {
+        padding: 12px 14px;
+    }
+
+    .rv-loc-col {
+        padding: 12px;
+    }
+
+    .rv-loc-option {
+        padding: 8px 10px;
+    }
+
+    .rv-payment-body {
+        padding: 12px;
+    }
+
+    .rv-payment-option {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .rv-addon-row {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .rv-services-grid {
+        padding: 10px;
+        gap: 6px;
+    }
+
+    .rv-service-item {
+        padding: 8px 10px;
+    }
+
+    .rv-summary-panel {
+        padding: 14px;
+    }
+
+    .rv-summary-title {
+        font-size: 15px;
+    }
+
+    .rv-summary-row {
+        font-size: 11px;
+    }
+
+    .rv-book-btn {
+        padding: 11px;
+        font-size: 13px;
+    }
+
+    .rv-whatsapp-btn {
+        padding: 11px;
+        font-size: 12px;
+    }
+
+    .rv-contact-row {
+        padding: 12px 14px;
+    }
+
+    .rv-insurance-item {
+        padding: 12px;
+    }
+
+    .rv-ins-name {
+        font-size: 12px;
+    }
+
+    .rv-ins-desc {
+        font-size: 10px;
+    }
+
+    .rv-notes {
+        padding: 10px 12px;
+        font-size: 12px;
+        min-height: 50px;
+    }
+
+    .rv-approval-modal {
+        padding: 20px 16px;
+    }
+
+    .rv-approval-modal h2 {
+        font-size: 16px;
+    }
+
+    .rv-approval-content {
+        font-size: 12px;
+    }
+
+    .rv-success-modal {
+        padding: 24px 16px;
+    }
+}
