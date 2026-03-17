@@ -1236,6 +1236,7 @@ body {
         padding: 16px;
         width: 95%;
         max-height: 90vh;
+        overflow-y: auto;
     }
 
     .calendar-body {
