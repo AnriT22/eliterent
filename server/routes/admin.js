@@ -346,6 +346,7 @@ router.get('/partners', (req, res) => {
              WHERE u.role = 'partner'
              ORDER BY u.created_at DESC`
         );
+        console.log('[Admin] GET /partners — found', partners.length, 'partner(s)');
         res.json({ partners, count: partners.length });
     } catch (err) {
         console.error('Get partners error:', err);
