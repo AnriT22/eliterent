@@ -1,10 +1,11 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'myrent-secret-key-change-in-production';
+let JWT_SECRET = process.env.JWT_SECRET;
 
-if (process.env.NODE_ENV === 'production' && JWT_SECRET === 'myrent-secret-key-change-in-production') {
-    console.error('FATAL: JWT_SECRET must be set in production. Exiting.');
-    process.exit(1);
+if (!JWT_SECRET) {
+    JWT_SECRET = crypto.randomBytes(48).toString('hex');
+    console.warn('WARNING: JWT_SECRET not set — generated a random secret. Sessions will reset on each deploy. Set JWT_SECRET env var for persistent sessions.');
 }
 
 function authenticateToken(req, res, next) {
