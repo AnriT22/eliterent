@@ -20,7 +20,7 @@ router.post('/create-order', authenticateToken, requireRole('guest'), async (req
         var bookingId = req.body.booking_id;
         if (!bookingId) return res.status(400).json({ error: 'booking_id required' });
 
-        var booking = queryOne('SELECT * FROM bookings WHERE id = ?', [bookingId]);
+        var booking = await queryOne('SELECT * FROM bookings WHERE id = $1', [bookingId]);
         if (!booking) return res.status(404).json({ error: 'Booking not found' });
         if (booking.guest_id != req.user.id) return res.status(403).json({ error: 'Not your booking' });
 
@@ -34,13 +34,12 @@ router.post('/create-order', authenticateToken, requireRole('guest'), async (req
             return res.status(503).json({ error: 'Payment system not configured. Contact admin.' });
         }
 
-        var vehicle = queryOne('SELECT name FROM vehicles WHERE id = ?', [booking.vehicle_id]);
+        var vehicle = await queryOne('SELECT name FROM vehicles WHERE id = $1', [booking.vehicle_id]);
         var desc = 'Eliterent.ge — ' + (vehicle ? vehicle.name : 'Vehicle') + ' booking #' + bookingId;
 
         var order = await paypal.createOrder(bookingId, serviceFee, 'USD', desc);
 
-        // Store the PayPal order ID on the booking
-        execute('UPDATE bookings SET paypal_order_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+        await execute('UPDATE bookings SET paypal_order_id = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
             [order.id, bookingId]);
 
         res.json({ orderId: order.id });
@@ -57,7 +56,7 @@ router.post('/capture-order', authenticateToken, requireRole('guest'), async (re
         var bookingId = req.body.booking_id;
         if (!orderId || !bookingId) return res.status(400).json({ error: 'order_id and booking_id required' });
 
-        var booking = queryOne('SELECT * FROM bookings WHERE id = ?', [bookingId]);
+        var booking = await queryOne('SELECT * FROM bookings WHERE id = $1', [bookingId]);
         if (!booking) return res.status(404).json({ error: 'Booking not found' });
         if (booking.guest_id != req.user.id) return res.status(403).json({ error: 'Not your booking' });
 
@@ -68,21 +67,20 @@ router.post('/capture-order', authenticateToken, requireRole('guest'), async (re
         var capture = await paypal.captureOrder(orderId);
 
         if (capture.status === 'COMPLETED') {
-            // Extract capture ID for potential refunds
             var captureId = '';
             try {
                 captureId = capture.purchase_units[0].payments.captures[0].id;
             } catch (e) {}
 
-            execute(
+            await execute(
                 `UPDATE bookings SET
                     payment_status = 'paid',
-                    paypal_order_id = ?,
-                    paypal_capture_id = ?,
+                    paypal_order_id = $1,
+                    paypal_capture_id = $2,
                     payment_date = CURRENT_TIMESTAMP,
-                    deposit_paid = ?,
+                    deposit_paid = $3,
                     updated_at = CURRENT_TIMESTAMP
-                WHERE id = ?`,
+                WHERE id = $4`,
                 [orderId, captureId, parseFloat(booking.service_fee) || 0, bookingId]
             );
 
@@ -109,7 +107,7 @@ router.post('/refund', authenticateToken, requireRole('admin'), async (req, res)
         var bookingId = req.body.booking_id;
         if (!bookingId) return res.status(400).json({ error: 'booking_id required' });
 
-        var booking = queryOne('SELECT * FROM bookings WHERE id = ?', [bookingId]);
+        var booking = await queryOne('SELECT * FROM bookings WHERE id = $1', [bookingId]);
         if (!booking) return res.status(404).json({ error: 'Booking not found' });
 
         var pStatus = String(booking.payment_status || 'unpaid');
@@ -124,11 +122,11 @@ router.post('/refund', authenticateToken, requireRole('admin'), async (req, res)
 
         var refund = await paypal.refundPayment(captureId, booking.service_fee, 'USD');
 
-        execute(
+        await execute(
             `UPDATE bookings SET
                 payment_status = 'refunded',
                 updated_at = CURRENT_TIMESTAMP
-            WHERE id = ?`,
+            WHERE id = $1`,
             [bookingId]
         );
 
@@ -144,13 +142,12 @@ router.post('/refund', authenticateToken, requireRole('admin'), async (req, res)
 });
 
 // GET /api/payments/status/:bookingId — check payment status for a booking
-router.get('/status/:bookingId', authenticateToken, (req, res) => {
+router.get('/status/:bookingId', authenticateToken, async (req, res) => {
     try {
         var bookingId = parseInt(req.params.bookingId);
-        var booking = queryOne('SELECT id, guest_id, partner_id, service_fee, payment_status, paypal_order_id, payment_date FROM bookings WHERE id = ?', [bookingId]);
+        var booking = await queryOne('SELECT id, guest_id, partner_id, service_fee, payment_status, paypal_order_id, payment_date FROM bookings WHERE id = $1', [bookingId]);
         if (!booking) return res.status(404).json({ error: 'Booking not found' });
 
-        // Only the guest, partner, or admin can check
         if (booking.guest_id != req.user.id && booking.partner_id != req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ error: 'Access denied' });
         }

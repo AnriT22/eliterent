@@ -1,12 +1,11 @@
 const express = require('express');
-const { getDB, saveDB } = require('../db');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const { queryAll, queryOne, execute } = require('../db-helpers');
 
 const router = express.Router();
 
 // GET /api/reviews — public list (optionally filter by vehicle_id)
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
     try {
         var sql = `
             SELECT r.*, u.full_name as guest_name,
@@ -16,13 +15,13 @@ router.get('/', (req, res) => {
             LEFT JOIN vehicles v ON r.vehicle_id = v.id`;
         var params = [];
         if (req.query.vehicle_id) {
-            sql += ' WHERE r.vehicle_id = ?';
+            sql += ' WHERE r.vehicle_id = $1';
             params.push(parseInt(req.query.vehicle_id));
         }
         sql += ' ORDER BY r.created_at DESC';
         if (req.query.limit) sql += ' LIMIT ' + Math.min(parseInt(req.query.limit) || 20, 100);
 
-        var reviews = queryAll(sql, params.length ? params : undefined);
+        var reviews = await queryAll(sql, params);
         var avgRating = reviews.length
             ? Math.round(reviews.reduce(function(s, r) { return s + r.rating; }, 0) / reviews.length * 10) / 10
             : 0;
@@ -35,9 +34,9 @@ router.get('/', (req, res) => {
 });
 
 // GET /api/reviews/stats — overall rating stats
-router.get('/stats', (req, res) => {
+router.get('/stats', async (req, res) => {
     try {
-        var reviews = queryAll('SELECT rating FROM reviews');
+        var reviews = await queryAll('SELECT rating FROM reviews');
         var total = reviews.length;
         var avg = total ? Math.round(reviews.reduce(function(s, r) { return s + r.rating; }, 0) / total * 10) / 10 : 0;
         var dist = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
@@ -49,7 +48,7 @@ router.get('/stats', (req, res) => {
 });
 
 // POST /api/reviews — guest submits a review
-router.post('/', authenticateToken, requireRole('guest'), (req, res) => {
+router.post('/', authenticateToken, requireRole('guest'), async (req, res) => {
     try {
         var { vehicle_id, booking_id, rating, title, body } = req.body;
 
@@ -63,25 +62,25 @@ router.post('/', authenticateToken, requireRole('guest'), (req, res) => {
 
         // If booking_id given, verify ownership
         if (booking_id) {
-            var booking = queryOne('SELECT * FROM bookings WHERE id = ? AND guest_id = ?', [booking_id, req.user.id]);
+            var booking = await queryOne('SELECT * FROM bookings WHERE id = $1 AND guest_id = $2', [booking_id, req.user.id]);
             if (!booking) return res.status(403).json({ error: 'Booking not found or not yours' });
             if (booking.status !== 'confirmed' && booking.status !== 'completed') {
                 return res.status(400).json({ error: 'Can only review confirmed or completed bookings' });
             }
             // Check not already reviewed
-            var existing = queryOne('SELECT id FROM reviews WHERE booking_id = ? AND guest_id = ?', [booking_id, req.user.id]);
+            var existing = await queryOne('SELECT id FROM reviews WHERE booking_id = $1 AND guest_id = $2', [booking_id, req.user.id]);
             if (existing) return res.status(409).json({ error: 'You already reviewed this booking' });
             if (!vehicle_id) vehicle_id = booking.vehicle_id;
         }
 
-        execute(
+        await execute(
             `INSERT INTO reviews (guest_id, vehicle_id, booking_id, rating, title, body)
-             VALUES (?, ?, ?, ?, ?, ?)`,
+             VALUES ($1, $2, $3, $4, $5, $6)`,
             [req.user.id, vehicle_id || null, booking_id || null, rating, title || null, body]
         );
 
-        var review = queryOne(
-            'SELECT id FROM reviews WHERE guest_id = ? ORDER BY id DESC LIMIT 1',
+        var review = await queryOne(
+            'SELECT id FROM reviews WHERE guest_id = $1 ORDER BY id DESC LIMIT 1',
             [req.user.id]
         );
 
@@ -93,15 +92,15 @@ router.post('/', authenticateToken, requireRole('guest'), (req, res) => {
 });
 
 // DELETE /api/reviews/:id — guest deletes own review
-router.delete('/:id', authenticateToken, (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
     try {
         var reviewId = parseInt(req.params.id);
-        var review = queryOne('SELECT * FROM reviews WHERE id = ?', [reviewId]);
+        var review = await queryOne('SELECT * FROM reviews WHERE id = $1', [reviewId]);
         if (!review) return res.status(404).json({ error: 'Review not found' });
         if (review.guest_id !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ error: 'Not your review' });
         }
-        execute('DELETE FROM reviews WHERE id = ?', [reviewId]);
+        await execute('DELETE FROM reviews WHERE id = $1', [reviewId]);
         res.json({ message: 'Review deleted' });
     } catch (err) {
         res.status(500).json({ error: 'Failed to delete review' });

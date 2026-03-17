@@ -8,3 +8,4 @@ NETLIFY-DEPLOYMENT-GUIDE.md
 netlify.toml
 data/
 uploads/
+*-sqlite-backup.js

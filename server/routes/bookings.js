@@ -1,5 +1,4 @@
 const express = require('express');
-const { getDB, saveDB } = require('../db');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const { queryAll, queryOne, execute } = require('../db-helpers');
 
@@ -30,27 +29,30 @@ function formatDateUtc(date) {
     return date.getUTCFullYear() + '-' + String(date.getUTCMonth() + 1).padStart(2, '0') + '-' + String(date.getUTCDate()).padStart(2, '0');
 }
 
-function blockDatesForBooking(vehicleId, startStr, endStr) {
-    var db = getDB();
+async function blockDatesForBooking(vehicleId, startStr, endStr) {
+    var dates = [];
     eachBookingDate(startStr, endStr, function(date) {
-        var dateStr = formatDateUtc(date);
-        var existing = queryOne('SELECT id FROM vehicle_availability WHERE vehicle_id = ? AND date = ?', [vehicleId, dateStr]);
-        if (existing) {
-            db.run('UPDATE vehicle_availability SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE vehicle_id = ? AND date = ?', ['booked', vehicleId, dateStr]);
-        } else {
-            db.run('INSERT INTO vehicle_availability (vehicle_id, date, status) VALUES (?, ?, ?)', [vehicleId, dateStr, 'booked']);
-        }
+        dates.push(formatDateUtc(date));
     });
-    saveDB();
+    for (var i = 0; i < dates.length; i++) {
+        var dateStr = dates[i];
+        var existing = await queryOne('SELECT id FROM vehicle_availability WHERE vehicle_id = $1 AND date = $2', [vehicleId, dateStr]);
+        if (existing) {
+            await execute('UPDATE vehicle_availability SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE vehicle_id = $2 AND date = $3', ['booked', vehicleId, dateStr]);
+        } else {
+            await execute('INSERT INTO vehicle_availability (vehicle_id, date, status) VALUES ($1, $2, $3)', [vehicleId, dateStr, 'booked']);
+        }
+    }
 }
 
-function unblockDatesForBooking(vehicleId, startStr, endStr) {
-    var db = getDB();
+async function unblockDatesForBooking(vehicleId, startStr, endStr) {
+    var dates = [];
     eachBookingDate(startStr, endStr, function(date) {
-        var dateStr = formatDateUtc(date);
-        db.run("DELETE FROM vehicle_availability WHERE vehicle_id = ? AND date = ? AND status = 'booked'", [vehicleId, dateStr]);
+        dates.push(formatDateUtc(date));
     });
-    saveDB();
+    for (var i = 0; i < dates.length; i++) {
+        await execute("DELETE FROM vehicle_availability WHERE vehicle_id = $1 AND date = $2 AND status = 'booked'", [vehicleId, dates[i]]);
+    }
 }
 
 function parseJsonArray(value) {
@@ -65,7 +67,6 @@ function parseJsonArray(value) {
 }
 
 function normalizeVehicleServices(vehicle) {
-    // New structure: extras is a JSON object with named keys
     var ext = vehicle.extras;
     if (typeof ext === 'string') { try { ext = JSON.parse(ext); } catch(e) { ext = {}; } }
     ext = ext || {};
@@ -85,7 +86,6 @@ function normalizeVehicleServices(vehicle) {
         }
     });
 
-    // Backward compat: fall back to old extra_services array
     if (services.length === 0) {
         var old = parseJsonArray(vehicle.extra_services);
         old.filter(function(item) { return item && item.enabled !== false; }).forEach(function(item) {
@@ -109,7 +109,6 @@ function buildSelectedExtras(vehicleServices, selectedExtras) {
 }
 
 function getDailyRateByTier(vehicle, days, pickupDate) {
-    // Check custom date-based pricing first
     if (vehicle.custom_pricing_enabled) {
         var ranges = vehicle.custom_pricing_ranges;
         if (typeof ranges === 'string') { try { ranges = JSON.parse(ranges); } catch(e) { ranges = []; } }
@@ -160,17 +159,17 @@ router.post('/', authenticateToken, requireRole('guest'), async (req, res) => {
             return res.status(400).json({ error: 'dropoff_date must be after pickup_date' });
         }
 
-        var vehicle = queryOne(
+        var vehicle = await queryOne(
             `SELECT v.*, pp.company_name, pp.is_verified FROM vehicles v
              LEFT JOIN partner_profiles pp ON v.partner_id = pp.user_id
-             WHERE v.id = ? AND v.status = 'active' AND pp.is_verified = 1`,
+             WHERE v.id = $1 AND v.status = 'active' AND pp.is_verified = 1`,
             [vehicle_id]
         );
         if (!vehicle) return res.status(404).json({ error: 'Vehicle not found or inactive' });
 
-        var conflicts = queryAll(
+        var conflicts = await queryAll(
             `SELECT date FROM vehicle_availability
-             WHERE vehicle_id = ? AND date >= ? AND date < ? AND status IN ('blocked', 'booked')`,
+             WHERE vehicle_id = $1 AND date >= $2 AND date < $3 AND status IN ('blocked', 'booked')`,
             [vehicle_id, pickup_date, dropoff_date]
         );
         if (conflicts.length > 0) {
@@ -180,12 +179,12 @@ router.post('/', authenticateToken, requireRole('guest'), async (req, res) => {
             });
         }
 
-        var overlapBooking = queryOne(
+        var overlapBooking = await queryOne(
             `SELECT id FROM bookings
-             WHERE vehicle_id = ?
+             WHERE vehicle_id = $1
              AND status IN ('pending', 'accepted', 'completed', 'cancel_requested')
-             AND pickup_date <= ?
-             AND dropoff_date >= ?`,
+             AND pickup_date <= $2
+             AND dropoff_date >= $3`,
             [vehicle_id, dropoff_date, pickup_date]
         );
         if (overlapBooking) {
@@ -204,12 +203,12 @@ router.post('/', authenticateToken, requireRole('guest'), async (req, res) => {
         var serviceFee = Math.round(dailyPrice * WEBSITE_FEE_PERCENT * 100) / 100;
         var total_price = Math.round((rentalTotal + extrasTotal + location_fee) * 100) / 100;
 
-        execute(
+        await execute(
             `INSERT INTO bookings
              (guest_id, vehicle_id, partner_id, pickup_date, dropoff_date, pickup_time, dropoff_time, rental_days,
               pickup_location, dropoff_location, extras_json, extras_total, location_fee, service_fee,
               total_price, status, guest_notes)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`,
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 'pending', $16)`,
             [
                 req.user.id,
                 vehicle_id,
@@ -230,24 +229,23 @@ router.post('/', authenticateToken, requireRole('guest'), async (req, res) => {
             ]
         );
 
-        // Block dates immediately so partner can see them in calendar
-        blockDatesForBooking(vehicle_id, pickup_date, dropoff_date);
+        await blockDatesForBooking(vehicle_id, pickup_date, dropoff_date);
 
-        var booking = queryOne(
-            'SELECT id FROM bookings WHERE guest_id = ? AND vehicle_id = ? AND pickup_date = ? ORDER BY id DESC',
+        var booking = await queryOne(
+            'SELECT id FROM bookings WHERE guest_id = $1 AND vehicle_id = $2 AND pickup_date = $3 ORDER BY id DESC LIMIT 1',
             [req.user.id, vehicle_id, pickup_date]
         );
 
         // Notify partner about new booking
         try {
-            var partnerInfo = queryOne(
+            var partnerInfo = await queryOne(
                 `SELECT u.email, u.full_name, pp.company_name
                  FROM users u LEFT JOIN partner_profiles pp ON u.id = pp.user_id
-                 WHERE u.id = ?`, [vehicle.partner_id]
+                 WHERE u.id = $1`, [vehicle.partner_id]
             );
             if (partnerInfo && partnerInfo.email) {
                 var { sendEmail } = require('../mailer');
-                var guestUser = queryOne('SELECT full_name FROM users WHERE id = ?', [req.user.id]);
+                var guestUser = await queryOne('SELECT full_name FROM users WHERE id = $1', [req.user.id]);
                 await sendEmail({
                     to: partnerInfo.email,
                     subject: 'New Booking Request — ' + vehicle.name,
@@ -274,15 +272,15 @@ router.post('/', authenticateToken, requireRole('guest'), async (req, res) => {
     }
 });
 
-router.get('/my', authenticateToken, requireRole('guest'), (req, res) => {
+router.get('/my', authenticateToken, requireRole('guest'), async (req, res) => {
     try {
-        var bookings = queryAll(
+        var bookings = await queryAll(
             `SELECT b.*, v.name as vehicle_name, v.image_url, v.price_per_day,
                     v.category, v.year, pp.company_name as partner_company
              FROM bookings b
              JOIN vehicles v ON b.vehicle_id = v.id
              LEFT JOIN partner_profiles pp ON b.partner_id = pp.user_id
-             WHERE b.guest_id = ?
+             WHERE b.guest_id = $1
              ORDER BY b.created_at DESC`,
             [req.user.id]
         );
@@ -293,15 +291,15 @@ router.get('/my', authenticateToken, requireRole('guest'), (req, res) => {
     }
 });
 
-router.get('/partner', authenticateToken, requireRole('partner'), (req, res) => {
+router.get('/partner', authenticateToken, requireRole('partner'), async (req, res) => {
     try {
-        var bookings = queryAll(
+        var bookings = await queryAll(
             `SELECT b.*, v.name as vehicle_name, v.image_url, v.price_per_day,
                     u.full_name as guest_name, u.email as guest_email, u.phone as guest_phone
              FROM bookings b
              JOIN vehicles v ON b.vehicle_id = v.id
              JOIN users u ON b.guest_id = u.id
-             WHERE b.partner_id = ?
+             WHERE b.partner_id = $1
              ORDER BY b.created_at DESC`,
             [req.user.id]
         );
@@ -316,7 +314,7 @@ router.patch('/:id/status', authenticateToken, async (req, res) => {
     try {
         var bookingId = parseInt(req.params.id, 10);
         var status = req.body ? req.body.status : null;
-        var booking = queryOne(
+        var booking = await queryOne(
             `SELECT b.*, v.name as vehicle_name,
                     u.email as guest_email, u.full_name as guest_name,
                     pu.email as partner_email, pu.full_name as partner_name,
@@ -326,7 +324,7 @@ router.patch('/:id/status', authenticateToken, async (req, res) => {
              JOIN users u ON b.guest_id = u.id
              LEFT JOIN users pu ON b.partner_id = pu.id
              LEFT JOIN partner_profiles pp ON b.partner_id = pp.user_id
-             WHERE b.id = ?`,
+             WHERE b.id = $1`,
             [bookingId]
         );
 
@@ -335,7 +333,6 @@ router.patch('/:id/status', authenticateToken, async (req, res) => {
         var allowed = [];
         var bStatus = String(booking.status || '');
 
-        // Guest actions
         if (req.user.role === 'guest' && booking.guest_id == req.user.id) {
             if (bStatus === 'pending') {
                 allowed = ['cancelled'];
@@ -344,7 +341,6 @@ router.patch('/:id/status', authenticateToken, async (req, res) => {
             }
         }
 
-        // Partner actions
         if (req.user.role === 'partner' && booking.partner_id == req.user.id) {
             if (bStatus === 'pending') {
                 allowed = ['accepted', 'rejected'];
@@ -358,21 +354,19 @@ router.patch('/:id/status', authenticateToken, async (req, res) => {
         }
 
         try {
-            execute('UPDATE bookings SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [status, bookingId]);
+            await execute('UPDATE bookings SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [status, bookingId]);
         } catch (dbErr) {
             console.error('DB update error:', dbErr.message);
-            return res.status(500).json({ error: 'Database error updating status. Server may need restart to apply migrations.' });
+            return res.status(500).json({ error: 'Database error updating status.' });
         }
 
-        // Handle date blocking/unblocking
         if (status === 'accepted') {
-            blockDatesForBooking(booking.vehicle_id, booking.pickup_date, booking.dropoff_date);
+            await blockDatesForBooking(booking.vehicle_id, booking.pickup_date, booking.dropoff_date);
         }
         if (status === 'cancelled' || status === 'rejected') {
-            unblockDatesForBooking(booking.vehicle_id, booking.pickup_date, booking.dropoff_date);
+            await unblockDatesForBooking(booking.vehicle_id, booking.pickup_date, booking.dropoff_date);
         }
 
-        // Send email notifications on status changes
         var { sendEmail } = require('../mailer');
         var vehicleName = booking.vehicle_name || 'Vehicle';
         var dates = booking.pickup_date + ' → ' + booking.dropoff_date;
@@ -421,10 +415,10 @@ router.patch('/:id/status', authenticateToken, async (req, res) => {
     }
 });
 
-router.get('/:id', authenticateToken, (req, res) => {
+router.get('/:id', authenticateToken, async (req, res) => {
     try {
         var bookingId = parseInt(req.params.id, 10);
-        var booking = queryOne(
+        var booking = await queryOne(
             `SELECT b.*, v.name as vehicle_name, v.image_url, v.price_per_day, v.category, v.year,
                     u.full_name as guest_name, u.email as guest_email, u.phone as guest_phone,
                     pp.company_name as partner_company
@@ -432,7 +426,7 @@ router.get('/:id', authenticateToken, (req, res) => {
              JOIN vehicles v ON b.vehicle_id = v.id
              JOIN users u ON b.guest_id = u.id
              LEFT JOIN partner_profiles pp ON b.partner_id = pp.user_id
-             WHERE b.id = ?`,
+             WHERE b.id = $1`,
             [bookingId]
         );
 

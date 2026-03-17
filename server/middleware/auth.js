@@ -34,13 +34,8 @@ function requireRole(role) {
 }
 
 function generateToken(user) {
-    // Ensure all values are proper strings (sql.js can return Uint8Array for TEXT columns)
-    function str(val) {
-        if (val instanceof Uint8Array) return new TextDecoder().decode(val);
-        return val != null ? String(val) : '';
-    }
     return jwt.sign(
-        { id: user.id, email: str(user.email), role: str(user.role), full_name: str(user.full_name) },
+        { id: user.id, email: String(user.email || ''), role: String(user.role || ''), full_name: String(user.full_name || '') },
         JWT_SECRET,
         { expiresIn: '7d' }
     );
