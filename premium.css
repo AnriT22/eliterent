@@ -1263,6 +1263,8 @@ body {
 
     .calendar-day {
         font-size: 13px;
+        min-height: 36px;
+        min-width: 36px;
     }
 
     .time-selectors {
@@ -1270,14 +1272,23 @@ body {
         gap: 16px;
     }
 
+    .time-selectors select {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
     .calendar-actions {
         flex-direction: column;
+        gap: 8px;
+        padding: 12px 0 0;
     }
 
     .calendar-actions button {
         width: 100%;
         text-align: center;
         justify-content: center;
+        padding: 14px;
+        font-size: 14px;
     }
 
     /* === FILTERS MODAL === */
@@ -2004,6 +2015,32 @@ body {
 
 /* --- VERY SMALL MOBILE (360px — Galaxy S series, older phones) --- */
 @media (max-width: 360px) {
+    .calendar-content {
+        padding: 10px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .calendar-day {
+        font-size: 12px;
+        min-height: 32px;
+        min-width: 32px;
+    }
+
+    .calendar-grid {
+        gap: 2px;
+    }
+
+    .month-year-selector select {
+        padding: 5px 6px;
+        font-size: 12px;
+    }
+
+    .calendar-actions button {
+        padding: 12px;
+        font-size: 13px;
+    }
+
     .hero-headline {
         font-size: 22px;
     }
