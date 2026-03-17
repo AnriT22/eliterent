@@ -33,7 +33,7 @@ router.get('/verify-email', async (req, res) => {
 });
 
 // GET /api/check-availability?field=email&value=test@test.com
-router.get('/check-availability', (req, res) => {
+router.get('/check-availability', async (req, res) => {
     try {
         const { field, value } = req.query;
         if (!field || !value) {
@@ -47,9 +47,12 @@ router.get('/check-availability', (req, res) => {
         if (field === 'phone') {
             const digits = value.replace(/\D/g, '');
             if (digits.length < 7) return res.json({ available: true });
-            existing = queryOne("SELECT id FROM users WHERE REPLACE(REPLACE(REPLACE(phone, ' ', ''), '+', ''), '-', '') LIKE '%' || ?", [digits.slice(-9)]);
+            existing = await queryOne(
+                "SELECT id FROM users WHERE REPLACE(REPLACE(REPLACE(phone, ' ', ''), '+', ''), '-', '') LIKE '%' || $1",
+                [digits.slice(-9)]
+            );
         } else {
-            existing = queryOne('SELECT id FROM users WHERE ' + field + ' = ?', [value.trim()]);
+            existing = await queryOne('SELECT id FROM users WHERE ' + field + ' = $1', [value.trim()]);
         }
         res.json({ available: !existing });
     } catch (err) {
@@ -79,20 +82,23 @@ router.post('/register/guest', async (req, res) => {
             }
         }
 
-        const existing = queryOne('SELECT id FROM users WHERE email = ?', [email.trim()]);
+        const existing = await queryOne('SELECT id FROM users WHERE email = $1', [email.trim()]);
         if (existing) {
             return res.status(409).json({ error: 'Email already registered' });
         }
 
         if (phone) {
             const phoneDigits = phone.replace(/\D/g, '');
-            const phoneExists = queryOne("SELECT id FROM users WHERE REPLACE(REPLACE(REPLACE(phone, ' ', ''), '+', ''), '-', '') LIKE '%' || ?", [phoneDigits.slice(-9)]);
+            const phoneExists = await queryOne(
+                "SELECT id FROM users WHERE REPLACE(REPLACE(REPLACE(phone, ' ', ''), '+', ''), '-', '') LIKE '%' || $1",
+                [phoneDigits.slice(-9)]
+            );
             if (phoneExists) {
                 return res.status(409).json({ error: 'Phone number already registered' });
             }
         }
 
-        const nameExists = queryOne('SELECT id FROM users WHERE full_name = ?', [full_name.trim()]);
+        const nameExists = await queryOne('SELECT id FROM users WHERE full_name = $1', [full_name.trim()]);
         if (nameExists) {
             return res.status(409).json({ error: 'Username already taken' });
         }
@@ -100,12 +106,12 @@ router.post('/register/guest', async (req, res) => {
         const password_hash = await bcrypt.hash(password, 12);
 
         // Auto-approve: user can log in immediately, but actions may be restricted
-        execute(
-            'INSERT INTO users (email, password_hash, full_name, phone, role, is_approved) VALUES (?, ?, ?, ?, ?, 1)',
+        await execute(
+            'INSERT INTO users (email, password_hash, full_name, phone, role, is_approved) VALUES ($1, $2, $3, $4, $5, 1)',
             [email.trim(), password_hash, full_name.trim(), phone || null, 'guest']
         );
 
-        const newUser = queryOne('SELECT * FROM users WHERE email = ?', [email.trim()]);
+        const newUser = await queryOne('SELECT * FROM users WHERE email = $1', [email.trim()]);
         const token = generateToken(newUser);
 
         res.status(201).json({
@@ -155,20 +161,23 @@ router.post('/register/partner', async (req, res) => {
             }
         }
 
-        const existing = queryOne('SELECT id FROM users WHERE email = ?', [email.trim()]);
+        const existing = await queryOne('SELECT id FROM users WHERE email = $1', [email.trim()]);
         if (existing) {
             return res.status(409).json({ error: 'Email already registered' });
         }
 
         if (phone) {
             const phoneDigits = phone.replace(/\D/g, '');
-            const phoneExists = queryOne("SELECT id FROM users WHERE REPLACE(REPLACE(REPLACE(phone, ' ', ''), '+', ''), '-', '') LIKE '%' || ?", [phoneDigits.slice(-9)]);
+            const phoneExists = await queryOne(
+                "SELECT id FROM users WHERE REPLACE(REPLACE(REPLACE(phone, ' ', ''), '+', ''), '-', '') LIKE '%' || $1",
+                [phoneDigits.slice(-9)]
+            );
             if (phoneExists) {
                 return res.status(409).json({ error: 'Phone number already registered' });
             }
         }
 
-        const nameExists = queryOne('SELECT id FROM users WHERE full_name = ?', [full_name.trim()]);
+        const nameExists = await queryOne('SELECT id FROM users WHERE full_name = $1', [full_name.trim()]);
         if (nameExists) {
             return res.status(409).json({ error: 'Username already taken' });
         }
@@ -176,19 +185,19 @@ router.post('/register/partner', async (req, res) => {
         const password_hash = await bcrypt.hash(password, 12);
 
         // Auto-approve login (is_approved=1), but partner actions need is_verified via admin Partners section
-        execute(
-            'INSERT INTO users (email, password_hash, full_name, phone, role, is_approved) VALUES (?, ?, ?, ?, ?, 1)',
+        await execute(
+            'INSERT INTO users (email, password_hash, full_name, phone, role, is_approved) VALUES ($1, $2, $3, $4, $5, 1)',
             [email.trim(), password_hash, full_name.trim(), phone || null, 'partner']
         );
 
-        const newUser = queryOne('SELECT * FROM users WHERE email = ?', [email.trim()]);
+        const newUser = await queryOne('SELECT * FROM users WHERE email = $1', [email.trim()]);
         const userId = newUser.id;
 
         // Insert partner profile (is_verified=0, needs admin approval in Partners section)
-        execute(`
+        await execute(`
             INSERT INTO partner_profiles 
             (user_id, company_name, description, location, whatsapp, telegram)
-            VALUES (?, ?, ?, ?, ?, ?)`,
+            VALUES ($1, $2, $3, $4, $5, $6)`,
             [
                 userId,
                 company_name,
@@ -204,7 +213,7 @@ router.post('/register/partner', async (req, res) => {
         // Notify admin about new partner registration
         try {
             const { sendEmail } = require('../mailer');
-            const adminUser = queryOne("SELECT email FROM users WHERE role = 'admin' LIMIT 1");
+            const adminUser = await queryOne("SELECT email FROM users WHERE role = 'admin' LIMIT 1");
             if (adminUser && adminUser.email) {
                 await sendEmail({
                     to: adminUser.email,
@@ -245,7 +254,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ error: 'Email and password are required' });
         }
 
-        const user = queryOne('SELECT * FROM users WHERE email = ?', [email]);
+        const user = await queryOne('SELECT * FROM users WHERE email = $1', [email]);
         if (!user) {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
@@ -282,7 +291,7 @@ router.post('/login', async (req, res) => {
         };
 
         if (user.role === 'partner') {
-            const profile = queryOne('SELECT company_name, is_verified FROM partner_profiles WHERE user_id = ?', [user.id]);
+            const profile = await queryOne('SELECT company_name, is_verified FROM partner_profiles WHERE user_id = $1', [user.id]);
             if (profile) {
                 responseUser.company_name = profile.company_name;
                 responseUser.is_verified = profile.is_verified;
@@ -301,10 +310,10 @@ router.post('/login', async (req, res) => {
 });
 
 // GET /api/me — get current user profile
-router.get('/me', authenticateToken, (req, res) => {
+router.get('/me', authenticateToken, async (req, res) => {
     try {
-        const user = queryOne(
-            'SELECT id, email, full_name, phone, role, avatar_url, created_at FROM users WHERE id = ?',
+        const user = await queryOne(
+            'SELECT id, email, full_name, phone, role, avatar_url, created_at FROM users WHERE id = $1',
             [req.user.id]
         );
 
@@ -313,7 +322,7 @@ router.get('/me', authenticateToken, (req, res) => {
         }
 
         if (user.role === 'partner') {
-            const profile = queryOne('SELECT * FROM partner_profiles WHERE user_id = ?', [user.id]);
+            const profile = await queryOne('SELECT * FROM partner_profiles WHERE user_id = $1', [user.id]);
             if (profile) {
                 user.partner_profile = {
                     company_name: profile.company_name,
@@ -350,14 +359,14 @@ router.put('/me/password', authenticateToken, async (req, res) => {
         if (new_password.length < 6) {
             return res.status(400).json({ error: 'New password must be at least 6 characters' });
         }
-        const user = queryOne('SELECT * FROM users WHERE id = ?', [req.user.id]);
+        const user = await queryOne('SELECT * FROM users WHERE id = $1', [req.user.id]);
         if (!user) return res.status(404).json({ error: 'User not found' });
 
         const valid = await bcrypt.compare(current_password, user.password_hash);
         if (!valid) return res.status(401).json({ error: 'Current password is incorrect' });
 
         const new_hash = await bcrypt.hash(new_password, 12);
-        execute('UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [new_hash, req.user.id]);
+        await execute('UPDATE users SET password_hash = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [new_hash, req.user.id]);
         res.json({ message: 'Password updated successfully' });
     } catch (err) {
         console.error('Password change error:', err);
@@ -370,9 +379,9 @@ router.put('/me', authenticateToken, async (req, res) => {
     try {
         const { full_name, phone } = req.body;
         if (!full_name) return res.status(400).json({ error: 'full_name is required' });
-        execute('UPDATE users SET full_name = ?, phone = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+        await execute('UPDATE users SET full_name = $1, phone = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3',
             [full_name, phone || null, req.user.id]);
-        const user = queryOne('SELECT id, email, full_name, phone, role FROM users WHERE id = ?', [req.user.id]);
+        const user = await queryOne('SELECT id, email, full_name, phone, role FROM users WHERE id = $1', [req.user.id]);
         res.json({ message: 'Profile updated', user });
     } catch (err) {
         console.error('Update profile error:', err);
@@ -385,11 +394,11 @@ router.delete('/me', authenticateToken, async (req, res) => {
     try {
         const { password } = req.body;
         if (!password) return res.status(400).json({ error: 'password is required to confirm deletion' });
-        const user = queryOne('SELECT * FROM users WHERE id = ?', [req.user.id]);
+        const user = await queryOne('SELECT * FROM users WHERE id = $1', [req.user.id]);
         if (!user) return res.status(404).json({ error: 'User not found' });
         const valid = await bcrypt.compare(password, user.password_hash);
         if (!valid) return res.status(401).json({ error: 'Password is incorrect' });
-        execute('DELETE FROM users WHERE id = ?', [req.user.id]);
+        await execute('DELETE FROM users WHERE id = $1', [req.user.id]);
         res.json({ message: 'Account deleted successfully' });
     } catch (err) {
         console.error('Delete account error:', err);
@@ -403,7 +412,7 @@ router.post('/forgot-password', async (req, res) => {
         const { email } = req.body;
         if (!email) return res.status(400).json({ error: 'Email is required' });
 
-        const user = queryOne('SELECT id, email, full_name FROM users WHERE email = ?', [email.trim()]);
+        const user = await queryOne('SELECT id, email, full_name FROM users WHERE email = $1', [email.trim()]);
         // Always return success to prevent email enumeration
         if (!user) return res.json({ message: 'If that email exists, a reset link has been sent.' });
 
@@ -413,8 +422,8 @@ router.post('/forgot-password', async (req, res) => {
         const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
 
         // Invalidate any previous tokens for this user
-        execute('UPDATE password_resets SET used = 1 WHERE user_id = ? AND used = 0', [user.id]);
-        execute('INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)', [user.id, token, expiresAt]);
+        await execute('UPDATE password_resets SET used = 1 WHERE user_id = $1 AND used = 0', [user.id]);
+        await execute('INSERT INTO password_resets (user_id, token, expires_at) VALUES ($1, $2, $3)', [user.id, token, expiresAt]);
 
         // Build reset URL
         const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
@@ -442,18 +451,18 @@ router.post('/reset-password', async (req, res) => {
         if (!token || !new_password) return res.status(400).json({ error: 'Token and new_password are required' });
         if (new_password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
 
-        const reset = queryOne('SELECT * FROM password_resets WHERE token = ? AND used = 0', [token]);
+        const reset = await queryOne('SELECT * FROM password_resets WHERE token = $1 AND used = 0', [token]);
         if (!reset) return res.status(400).json({ error: 'Invalid or expired reset link' });
 
         const now = new Date().toISOString();
         if (now > reset.expires_at) {
-            execute('UPDATE password_resets SET used = 1 WHERE id = ?', [reset.id]);
+            await execute('UPDATE password_resets SET used = 1 WHERE id = $1', [reset.id]);
             return res.status(400).json({ error: 'Reset link has expired. Please request a new one.' });
         }
 
         const password_hash = await bcrypt.hash(new_password, 12);
-        execute('UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [password_hash, reset.user_id]);
-        execute('UPDATE password_resets SET used = 1 WHERE id = ?', [reset.id]);
+        await execute('UPDATE users SET password_hash = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [password_hash, reset.user_id]);
+        await execute('UPDATE password_resets SET used = 1 WHERE id = $1', [reset.id]);
 
         res.json({ message: 'Password has been reset successfully. You can now log in.' });
     } catch (err) {

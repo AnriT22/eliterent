@@ -1,5 +1,4 @@
 const express = require('express');
-const { getDB, saveDB } = require('../db');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const { queryAll, queryOne, execute } = require('../db-helpers');
 const { sendEmail } = require('../mailer');
@@ -17,33 +16,29 @@ function parseExtras(value) {
     }
 }
 
-function blockDatesForBooking(vehicleId, startStr, endStr) {
-    var db = getDB();
+async function blockDatesForBooking(vehicleId, startStr, endStr) {
     var cur = new Date(startStr + 'T00:00:00Z');
     var end = new Date(endStr + 'T00:00:00Z');
     while (cur <= end) {
         var dateStr = cur.getUTCFullYear() + '-' + String(cur.getUTCMonth() + 1).padStart(2, '0') + '-' + String(cur.getUTCDate()).padStart(2, '0');
-        var existing = queryOne('SELECT id FROM vehicle_availability WHERE vehicle_id = ? AND date = ?', [vehicleId, dateStr]);
+        var existing = await queryOne('SELECT id FROM vehicle_availability WHERE vehicle_id = $1 AND date = $2', [vehicleId, dateStr]);
         if (existing) {
-            db.run('UPDATE vehicle_availability SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE vehicle_id = ? AND date = ?', ['booked', vehicleId, dateStr]);
+            await execute('UPDATE vehicle_availability SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE vehicle_id = $2 AND date = $3', ['booked', vehicleId, dateStr]);
         } else {
-            db.run('INSERT INTO vehicle_availability (vehicle_id, date, status) VALUES (?, ?, ?)', [vehicleId, dateStr, 'booked']);
+            await execute('INSERT INTO vehicle_availability (vehicle_id, date, status) VALUES ($1, $2, $3)', [vehicleId, dateStr, 'booked']);
         }
         cur.setUTCDate(cur.getUTCDate() + 1);
     }
-    saveDB();
 }
 
-function unblockDatesForBooking(vehicleId, startStr, endStr) {
-    var db = getDB();
+async function unblockDatesForBooking(vehicleId, startStr, endStr) {
     var cur = new Date(startStr + 'T00:00:00Z');
     var end = new Date(endStr + 'T00:00:00Z');
     while (cur <= end) {
         var dateStr = cur.getUTCFullYear() + '-' + String(cur.getUTCMonth() + 1).padStart(2, '0') + '-' + String(cur.getUTCDate()).padStart(2, '0');
-        db.run("DELETE FROM vehicle_availability WHERE vehicle_id = ? AND date = ? AND status = 'booked'", [vehicleId, dateStr]);
+        await execute("DELETE FROM vehicle_availability WHERE vehicle_id = $1 AND date = $2 AND status = 'booked'", [vehicleId, dateStr]);
         cur.setUTCDate(cur.getUTCDate() + 1);
     }
-    saveDB();
 }
 
 function formatMoney(value) {
@@ -69,49 +64,49 @@ router.use(authenticateToken, requireRole('admin'));
 // ========================================
 // ANALYTICS
 // ========================================
-router.get('/analytics', (req, res) => {
+router.get('/analytics', async (req, res) => {
     try {
-        const totalUsers = queryOne('SELECT COUNT(*) as count FROM users WHERE role != ?', ['admin']);
-        const totalGuests = queryOne('SELECT COUNT(*) as count FROM users WHERE role = ?', ['guest']);
-        const totalPartners = queryOne('SELECT COUNT(*) as count FROM users WHERE role = ?', ['partner']);
-        const totalVehicles = queryOne('SELECT COUNT(*) as count FROM vehicles');
-        const activeVehicles = queryOne("SELECT COUNT(*) as count FROM vehicles WHERE status = 'active'");
-        const pendingVehicles = queryOne("SELECT COUNT(*) as count FROM vehicles WHERE status = 'pending'");
-        const totalBookings = queryOne('SELECT COUNT(*) as count FROM bookings');
-        const verifiedPartners = queryOne('SELECT COUNT(*) as count FROM partner_profiles WHERE is_verified = 1');
+        const totalUsers = await queryOne("SELECT COUNT(*) as count FROM users WHERE role != $1", ['admin']);
+        const totalGuests = await queryOne("SELECT COUNT(*) as count FROM users WHERE role = $1", ['guest']);
+        const totalPartners = await queryOne("SELECT COUNT(*) as count FROM users WHERE role = $1", ['partner']);
+        const totalVehicles = await queryOne('SELECT COUNT(*) as count FROM vehicles');
+        const activeVehicles = await queryOne("SELECT COUNT(*) as count FROM vehicles WHERE status = 'active'");
+        const pendingVehicles = await queryOne("SELECT COUNT(*) as count FROM vehicles WHERE status = 'pending'");
+        const totalBookings = await queryOne('SELECT COUNT(*) as count FROM bookings');
+        const verifiedPartners = await queryOne('SELECT COUNT(*) as count FROM partner_profiles WHERE is_verified = 1');
 
         // Uploads per day (last 7 days)
-        const dailyUploads = queryAll(
-            "SELECT DATE(created_at) as date, COUNT(*) as count FROM vehicles WHERE created_at >= DATE('now', '-7 days') GROUP BY DATE(created_at) ORDER BY date DESC"
+        const dailyUploads = await queryAll(
+            "SELECT created_at::date as date, COUNT(*) as count FROM vehicles WHERE created_at >= CURRENT_DATE - INTERVAL '7 days' GROUP BY created_at::date ORDER BY date DESC"
         );
 
         // Uploads per week (last 4 weeks)
-        const weeklyUploads = queryAll(
-            "SELECT strftime('%Y-W%W', created_at) as week, COUNT(*) as count FROM vehicles WHERE created_at >= DATE('now', '-28 days') GROUP BY week ORDER BY week DESC"
+        const weeklyUploads = await queryAll(
+            "SELECT to_char(created_at, 'IYYY-\"W\"IW') as week, COUNT(*) as count FROM vehicles WHERE created_at >= CURRENT_DATE - INTERVAL '28 days' GROUP BY week ORDER BY week DESC"
         );
 
         // Uploads per month (last 6 months)
-        const monthlyUploads = queryAll(
-            "SELECT strftime('%Y-%m', created_at) as month, COUNT(*) as count FROM vehicles WHERE created_at >= DATE('now', '-180 days') GROUP BY month ORDER BY month DESC"
+        const monthlyUploads = await queryAll(
+            "SELECT to_char(created_at, 'YYYY-MM') as month, COUNT(*) as count FROM vehicles WHERE created_at >= CURRENT_DATE - INTERVAL '180 days' GROUP BY month ORDER BY month DESC"
         );
 
         // Recent registrations (last 7 days)
-        const recentUsers = queryOne("SELECT COUNT(*) as count FROM users WHERE created_at >= DATE('now', '-7 days') AND role != 'admin'");
-        const earningsOverall = queryOne("SELECT COALESCE(SUM(service_fee), 0) as amount FROM bookings WHERE status IN ('accepted', 'completed')");
-        const earningsMonth = queryOne("SELECT COALESCE(SUM(service_fee), 0) as amount FROM bookings WHERE status IN ('accepted', 'completed') AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')");
-        const reservationsOverall = queryOne('SELECT COUNT(*) as count FROM bookings');
-        const reservationsMonth = queryOne("SELECT COUNT(*) as count FROM bookings WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')");
+        const recentUsers = await queryOne("SELECT COUNT(*) as count FROM users WHERE created_at >= CURRENT_DATE - INTERVAL '7 days' AND role != 'admin'");
+        const earningsOverall = await queryOne("SELECT COALESCE(SUM(service_fee), 0) as amount FROM bookings WHERE status IN ('accepted', 'completed')");
+        const earningsMonth = await queryOne("SELECT COALESCE(SUM(service_fee), 0) as amount FROM bookings WHERE status IN ('accepted', 'completed') AND to_char(created_at, 'YYYY-MM') = to_char(NOW(), 'YYYY-MM')");
+        const reservationsOverall = await queryOne('SELECT COUNT(*) as count FROM bookings');
+        const reservationsMonth = await queryOne("SELECT COUNT(*) as count FROM bookings WHERE to_char(created_at, 'YYYY-MM') = to_char(NOW(), 'YYYY-MM')");
 
         res.json({
-            users: { total: totalUsers.count, guests: totalGuests.count, partners: totalPartners.count, recentSignups: recentUsers.count },
-            vehicles: { total: totalVehicles.count, active: activeVehicles.count, pending: pendingVehicles.count },
-            partners: { total: totalPartners.count, verified: verifiedPartners.count },
-            bookings: { total: totalBookings.count },
+            users: { total: parseInt(totalUsers.count), guests: parseInt(totalGuests.count), partners: parseInt(totalPartners.count), recentSignups: parseInt(recentUsers.count) },
+            vehicles: { total: parseInt(totalVehicles.count), active: parseInt(activeVehicles.count), pending: parseInt(pendingVehicles.count) },
+            partners: { total: parseInt(totalPartners.count), verified: parseInt(verifiedPartners.count) },
+            bookings: { total: parseInt(totalBookings.count) },
             earnings: {
-                month: earningsMonth.amount,
-                overall: earningsOverall.amount,
-                reservationsMonth: reservationsMonth.count,
-                reservationsOverall: reservationsOverall.count
+                month: parseFloat(earningsMonth.amount) || 0,
+                overall: parseFloat(earningsOverall.amount) || 0,
+                reservationsMonth: parseInt(reservationsMonth.count),
+                reservationsOverall: parseInt(reservationsOverall.count)
             },
             uploads: { daily: dailyUploads, weekly: weeklyUploads, monthly: monthlyUploads }
         });
@@ -124,14 +119,15 @@ router.get('/analytics', (req, res) => {
 // ========================================
 // USER MANAGEMENT
 // ========================================
-router.get('/users', (req, res) => {
+router.get('/users', async (req, res) => {
     try {
         const role = req.query.role;
         let sql = "SELECT id, email, full_name, phone, role, avatar_url, is_approved, created_at FROM users WHERE role != 'admin'";
         let params = [];
-        if (role) { sql += ' AND role = ?'; params.push(role); }
+        let paramIdx = 1;
+        if (role) { sql += ' AND role = $' + paramIdx++; params.push(role); }
         sql += ' ORDER BY created_at DESC';
-        const users = queryAll(sql, params.length ? params : undefined);
+        const users = await queryAll(sql, params);
         res.json({ users, count: users.length });
     } catch (err) {
         console.error('Get users error:', err);
@@ -140,61 +136,57 @@ router.get('/users', (req, res) => {
 });
 
 // GET /api/admin/users/:id/detail — full detail view for a user or partner
-router.get('/users/:id/detail', (req, res) => {
+router.get('/users/:id/detail', async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
-        const user = queryOne(
-            'SELECT id, email, full_name, phone, role, avatar_url, is_approved, admin_notes, created_at, updated_at FROM users WHERE id = ?',
+        const user = await queryOne(
+            'SELECT id, email, full_name, phone, role, avatar_url, is_approved, admin_notes, created_at, updated_at FROM users WHERE id = $1',
             [userId]
         );
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        // Partner profile if applicable
         let partnerProfile = null;
         if (user.role === 'partner') {
-            partnerProfile = queryOne(
-                'SELECT company_name, description, location, whatsapp, telegram, categories, is_verified, created_at FROM partner_profiles WHERE user_id = ?',
+            partnerProfile = await queryOne(
+                'SELECT company_name, description, location, whatsapp, telegram, categories, is_verified, created_at FROM partner_profiles WHERE user_id = $1',
                 [userId]
             );
         }
 
-        // Vehicles owned by this user (if partner)
         const vehicles = user.role === 'partner'
-            ? queryAll(
-                'SELECT id, name, category, engine, gearbox, price_per_day, year, status, image_url, created_at FROM vehicles WHERE partner_id = ? ORDER BY created_at DESC',
+            ? await queryAll(
+                'SELECT id, name, category, engine, gearbox, price_per_day, year, status, image_url, created_at FROM vehicles WHERE partner_id = $1 ORDER BY created_at DESC',
                 [userId]
             )
             : [];
 
-        // Bookings — as guest or as partner
         let bookings = [];
         if (user.role === 'guest') {
-            bookings = queryAll(
+            bookings = await queryAll(
                 `SELECT b.id, b.pickup_date, b.dropoff_date, b.total_price, b.service_fee, b.status, b.payment_status, b.created_at,
                         v.name as vehicle_name, v.image_url,
                         pp.company_name as partner_company
                  FROM bookings b
                  JOIN vehicles v ON b.vehicle_id = v.id
                  LEFT JOIN partner_profiles pp ON b.partner_id = pp.user_id
-                 WHERE b.guest_id = ?
+                 WHERE b.guest_id = $1
                  ORDER BY b.created_at DESC`,
                 [userId]
             );
         } else if (user.role === 'partner') {
-            bookings = queryAll(
+            bookings = await queryAll(
                 `SELECT b.id, b.pickup_date, b.dropoff_date, b.total_price, b.service_fee, b.status, b.payment_status, b.created_at,
                         v.name as vehicle_name, v.image_url,
                         u.full_name as guest_name, u.email as guest_email
                  FROM bookings b
                  JOIN vehicles v ON b.vehicle_id = v.id
                  JOIN users u ON b.guest_id = u.id
-                 WHERE b.partner_id = ?
+                 WHERE b.partner_id = $1
                  ORDER BY b.created_at DESC`,
                 [userId]
             );
         }
 
-        // Stats
         const totalBookings = bookings.length;
         const activeBookings = bookings.filter(b => ['pending', 'accepted', 'cancel_requested'].includes(b.status)).length;
         const totalRevenue = bookings
@@ -204,11 +196,10 @@ router.get('/users/:id/detail', (req, res) => {
             .filter(b => ['accepted', 'completed'].includes(b.status))
             .reduce((sum, b) => sum + (parseFloat(b.service_fee) || 0), 0);
 
-        // Reviews (if guest)
         let reviews = [];
         if (user.role === 'guest') {
-            reviews = queryAll(
-                'SELECT id, rating, title, body, created_at FROM reviews WHERE user_id = ? ORDER BY created_at DESC',
+            reviews = await queryAll(
+                'SELECT id, rating, title, body, created_at FROM reviews WHERE guest_id = $1 ORDER BY created_at DESC',
                 [userId]
             );
         }
@@ -234,12 +225,12 @@ router.get('/users/:id/detail', (req, res) => {
     }
 });
 
-router.put('/users/:id/approve', (req, res) => {
+router.put('/users/:id/approve', async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
-        const user = queryOne('SELECT * FROM users WHERE id = ? AND role != ?', [userId, 'admin']);
+        const user = await queryOne('SELECT * FROM users WHERE id = $1 AND role != $2', [userId, 'admin']);
         if (!user) return res.status(404).json({ error: 'User not found' });
-        execute('UPDATE users SET is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [userId]);
+        await execute('UPDATE users SET is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
         res.json({ message: 'User approved' });
     } catch (err) {
         console.error('Approve user error:', err);
@@ -247,12 +238,12 @@ router.put('/users/:id/approve', (req, res) => {
     }
 });
 
-router.put('/users/:id/reject', (req, res) => {
+router.put('/users/:id/reject', async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
-        const user = queryOne('SELECT * FROM users WHERE id = ? AND role != ?', [userId, 'admin']);
+        const user = await queryOne('SELECT * FROM users WHERE id = $1 AND role != $2', [userId, 'admin']);
         if (!user) return res.status(404).json({ error: 'User not found' });
-        execute('DELETE FROM users WHERE id = ?', [userId]);
+        await execute('DELETE FROM users WHERE id = $1', [userId]);
         res.json({ message: 'User rejected and removed' });
     } catch (err) {
         console.error('Reject user error:', err);
@@ -260,16 +251,15 @@ router.put('/users/:id/reject', (req, res) => {
     }
 });
 
-router.delete('/users/:id', (req, res) => {
+router.delete('/users/:id', async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
-        const user = queryOne('SELECT * FROM users WHERE id = ? AND role != ?', [userId, 'admin']);
+        const user = await queryOne('SELECT * FROM users WHERE id = $1 AND role != $2', [userId, 'admin']);
         if (!user) return res.status(404).json({ error: 'User not found' });
-        // If partner, explicitly delete all their vehicles first
         if (user.role === 'partner') {
-            execute('DELETE FROM vehicles WHERE partner_id = ?', [userId]);
+            await execute('DELETE FROM vehicles WHERE partner_id = $1', [userId]);
         }
-        execute('DELETE FROM users WHERE id = ?', [userId]);
+        await execute('DELETE FROM users WHERE id = $1', [userId]);
         res.json({ message: 'User deleted' + (user.role === 'partner' ? ' (all vehicles removed)' : '') });
     } catch (err) {
         console.error('Delete user error:', err);
@@ -277,13 +267,12 @@ router.delete('/users/:id', (req, res) => {
     }
 });
 
-// Suspend user (set is_approved = 0)
-router.put('/users/:id/suspend', (req, res) => {
+router.put('/users/:id/suspend', async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
-        const user = queryOne('SELECT * FROM users WHERE id = ? AND role != ?', [userId, 'admin']);
+        const user = await queryOne('SELECT * FROM users WHERE id = $1 AND role != $2', [userId, 'admin']);
         if (!user) return res.status(404).json({ error: 'User not found' });
-        execute('UPDATE users SET is_approved = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [userId]);
+        await execute('UPDATE users SET is_approved = 0, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
         res.json({ message: 'User suspended' });
     } catch (err) {
         console.error('Suspend user error:', err);
@@ -291,11 +280,10 @@ router.put('/users/:id/suspend', (req, res) => {
     }
 });
 
-// Unsuspend user (set is_approved = 1)
-router.put('/users/:id/unsuspend', (req, res) => {
+router.put('/users/:id/unsuspend', async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
-        execute('UPDATE users SET is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [userId]);
+        await execute('UPDATE users SET is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
         res.json({ message: 'User unsuspended' });
     } catch (err) {
         console.error('Unsuspend user error:', err);
@@ -303,16 +291,15 @@ router.put('/users/:id/unsuspend', (req, res) => {
     }
 });
 
-// Edit user profile from admin
-router.put('/users/:id/edit', (req, res) => {
+router.put('/users/:id/edit', async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
-        const user = queryOne('SELECT * FROM users WHERE id = ? AND role != ?', [userId, 'admin']);
+        const user = await queryOne('SELECT * FROM users WHERE id = $1 AND role != $2', [userId, 'admin']);
         if (!user) return res.status(404).json({ error: 'User not found' });
         const { full_name, email, phone } = req.body;
-        if (full_name) execute('UPDATE users SET full_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [full_name.trim(), userId]);
-        if (email) execute('UPDATE users SET email = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [email.trim(), userId]);
-        if (phone !== undefined) execute('UPDATE users SET phone = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [phone || null, userId]);
+        if (full_name) await execute('UPDATE users SET full_name = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [full_name.trim(), userId]);
+        if (email) await execute('UPDATE users SET email = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [email.trim(), userId]);
+        if (phone !== undefined) await execute('UPDATE users SET phone = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [phone || null, userId]);
         res.json({ message: 'User updated' });
     } catch (err) {
         console.error('Edit user error:', err);
@@ -320,12 +307,11 @@ router.put('/users/:id/edit', (req, res) => {
     }
 });
 
-// Save admin notes on a user
-router.put('/users/:id/notes', (req, res) => {
+router.put('/users/:id/notes', async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
         const { notes } = req.body;
-        execute('UPDATE users SET admin_notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [notes || null, userId]);
+        await execute('UPDATE users SET admin_notes = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [notes || null, userId]);
         res.json({ message: 'Notes saved' });
     } catch (err) {
         console.error('Save notes error:', err);
@@ -336,9 +322,9 @@ router.put('/users/:id/notes', (req, res) => {
 // ========================================
 // PARTNER MANAGEMENT
 // ========================================
-router.get('/partners', (req, res) => {
+router.get('/partners', async (req, res) => {
     try {
-        const partners = queryAll(
+        const partners = await queryAll(
             `SELECT u.id, u.email, u.full_name, u.phone, u.created_at,
                     pp.company_name, pp.location, pp.is_verified, pp.description
              FROM users u
@@ -354,10 +340,10 @@ router.get('/partners', (req, res) => {
     }
 });
 
-router.put('/partners/:id/verify', (req, res) => {
+router.put('/partners/:id/verify', async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
-        execute('UPDATE partner_profiles SET is_verified = 1 WHERE user_id = ?', [userId]);
+        await execute('UPDATE partner_profiles SET is_verified = 1 WHERE user_id = $1', [userId]);
         res.json({ message: 'Partner verified' });
     } catch (err) {
         console.error('Verify partner error:', err);
@@ -369,31 +355,27 @@ router.put('/partners/:id/unverify', async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
 
-        // Find all active bookings for this partner's vehicles
-        const activeBookings = queryAll(
+        const activeBookings = await queryAll(
             `SELECT b.id, b.vehicle_id, b.pickup_date, b.dropoff_date, b.guest_id,
                     v.name as vehicle_name,
                     u.email as guest_email, u.full_name as guest_name
              FROM bookings b
              JOIN vehicles v ON b.vehicle_id = v.id
              JOIN users u ON b.guest_id = u.id
-             WHERE b.partner_id = ? AND b.status IN ('pending', 'accepted', 'cancel_requested')`,
+             WHERE b.partner_id = $1 AND b.status IN ('pending', 'accepted', 'cancel_requested')`,
             [userId]
         );
 
-        // Cancel all active bookings
         if (activeBookings.length > 0) {
-            execute(
-                "UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE partner_id = ? AND status IN ('pending', 'accepted', 'cancel_requested')",
+            await execute(
+                "UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE partner_id = $1 AND status IN ('pending', 'accepted', 'cancel_requested')",
                 [userId]
             );
 
-            // Unblock dates and notify guests
             for (var i = 0; i < activeBookings.length; i++) {
                 var bk = activeBookings[i];
-                unblockDatesForBooking(bk.vehicle_id, bk.pickup_date, bk.dropoff_date);
+                await unblockDatesForBooking(bk.vehicle_id, bk.pickup_date, bk.dropoff_date);
 
-                // Notify guest
                 if (bk.guest_email) {
                     try {
                         await sendEmail({
@@ -409,8 +391,7 @@ router.put('/partners/:id/unverify', async (req, res) => {
             }
         }
 
-        // Unverify the partner
-        execute('UPDATE partner_profiles SET is_verified = 0 WHERE user_id = ?', [userId]);
+        await execute('UPDATE partner_profiles SET is_verified = 0 WHERE user_id = $1', [userId]);
 
         res.json({
             message: 'Partner unverified' + (activeBookings.length > 0 ? '. ' + activeBookings.length + ' active booking(s) cancelled and guests notified.' : ''),
@@ -425,9 +406,9 @@ router.put('/partners/:id/unverify', async (req, res) => {
 // ========================================
 // VEHICLE MANAGEMENT
 // ========================================
-router.get('/vehicles', (req, res) => {
+router.get('/vehicles', async (req, res) => {
     try {
-        const vehicles = queryAll(
+        const vehicles = await queryAll(
             `SELECT v.*, u.full_name as partner_name, pp.company_name
              FROM vehicles v
              JOIN users u ON v.partner_id = u.id
@@ -441,14 +422,14 @@ router.get('/vehicles', (req, res) => {
     }
 });
 
-router.put('/vehicles/:id/status', (req, res) => {
+router.put('/vehicles/:id/status', async (req, res) => {
     try {
         const vehicleId = parseInt(req.params.id);
         const { status } = req.body;
         if (!['active', 'inactive', 'pending', 'delete_requested'].includes(status)) {
             return res.status(400).json({ error: 'Invalid status' });
         }
-        execute('UPDATE vehicles SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [status, vehicleId]);
+        await execute('UPDATE vehicles SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [status, vehicleId]);
         res.json({ message: 'Vehicle status updated' });
     } catch (err) {
         console.error('Update vehicle status error:', err);
@@ -456,11 +437,10 @@ router.put('/vehicles/:id/status', (req, res) => {
     }
 });
 
-// Approve a delete request — actually deletes the vehicle
-router.delete('/vehicles/:id/approve-delete', (req, res) => {
+router.delete('/vehicles/:id/approve-delete', async (req, res) => {
     try {
         const vehicleId = parseInt(req.params.id);
-        execute('DELETE FROM vehicles WHERE id = ?', [vehicleId]);
+        await execute('DELETE FROM vehicles WHERE id = $1', [vehicleId]);
         res.json({ message: 'Vehicle deletion approved and vehicle removed' });
     } catch (err) {
         console.error('Admin approve delete error:', err);
@@ -468,11 +448,10 @@ router.delete('/vehicles/:id/approve-delete', (req, res) => {
     }
 });
 
-// Reject a delete request — set status back to active
-router.put('/vehicles/:id/reject-delete', (req, res) => {
+router.put('/vehicles/:id/reject-delete', async (req, res) => {
     try {
         const vehicleId = parseInt(req.params.id);
-        execute("UPDATE vehicles SET status = 'active', updated_at = CURRENT_TIMESTAMP WHERE id = ?", [vehicleId]);
+        await execute("UPDATE vehicles SET status = 'active', updated_at = CURRENT_TIMESTAMP WHERE id = $1", [vehicleId]);
         res.json({ message: 'Vehicle deletion rejected, vehicle restored to active' });
     } catch (err) {
         console.error('Admin reject delete error:', err);
@@ -480,10 +459,10 @@ router.put('/vehicles/:id/reject-delete', (req, res) => {
     }
 });
 
-router.delete('/vehicles/:id', (req, res) => {
+router.delete('/vehicles/:id', async (req, res) => {
     try {
         const vehicleId = parseInt(req.params.id);
-        execute('DELETE FROM vehicles WHERE id = ?', [vehicleId]);
+        await execute('DELETE FROM vehicles WHERE id = $1', [vehicleId]);
         res.json({ message: 'Vehicle deleted' });
     } catch (err) {
         console.error('Admin delete vehicle error:', err);
@@ -494,7 +473,7 @@ router.delete('/vehicles/:id', (req, res) => {
 // ========================================
 // BOOKING MANAGEMENT
 // ========================================
-router.get('/bookings', (req, res) => {
+router.get('/bookings', async (req, res) => {
     try {
         let sql = `SELECT b.*, v.name as vehicle_name, v.image_url,
                           u.full_name as guest_name, u.email as guest_email,
@@ -506,9 +485,9 @@ router.get('/bookings', (req, res) => {
                    LEFT JOIN users pu ON b.partner_id = pu.id
                    LEFT JOIN partner_profiles pp ON b.partner_id = pp.user_id`;
         let params = [];
-        if (req.query.status) { sql += ' WHERE b.status = ?'; params.push(req.query.status); }
+        if (req.query.status) { sql += ' WHERE b.status = $1'; params.push(req.query.status); }
         sql += ' ORDER BY b.created_at DESC';
-        const bookings = queryAll(sql, params.length ? params : undefined);
+        const bookings = await queryAll(sql, params);
         res.json({ bookings, count: bookings.length });
     } catch (err) {
         console.error('Admin get bookings error:', err);
@@ -524,7 +503,7 @@ router.patch('/bookings/:id/status', async (req, res) => {
             return res.status(400).json({ error: 'Invalid status' });
         }
 
-        var booking = queryOne(
+        var booking = await queryOne(
             `SELECT b.*, v.name as vehicle_name,
                     u.email as guest_email, u.full_name as guest_name,
                     pu.email as partner_email, pu.full_name as partner_name,
@@ -534,11 +513,11 @@ router.patch('/bookings/:id/status', async (req, res) => {
              JOIN users u ON b.guest_id = u.id
              JOIN users pu ON b.partner_id = pu.id
              LEFT JOIN partner_profiles pp ON b.partner_id = pp.user_id
-             WHERE b.id = ?`,
+             WHERE b.id = $1`,
             [bookingId]
         );
         if (!booking) return res.status(404).json({ error: 'Booking not found' });
-        // Allow: pending -> accepted/rejected, accepted/cancel_requested -> cancelled
+
         var validTransitions = {
             pending: ['accepted', 'rejected'],
             accepted: ['cancelled'],
@@ -549,27 +528,25 @@ router.patch('/bookings/:id/status', async (req, res) => {
             return res.status(400).json({ error: 'Cannot change from ' + booking.status + ' to ' + status });
         }
 
-        execute('UPDATE bookings SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [status, bookingId]);
+        await execute('UPDATE bookings SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [status, bookingId]);
 
         if (status === 'rejected' || status === 'cancelled') {
-            unblockDatesForBooking(booking.vehicle_id, booking.pickup_date, booking.dropoff_date);
+            await unblockDatesForBooking(booking.vehicle_id, booking.pickup_date, booking.dropoff_date);
 
-            // Auto-refund if booking was paid
             var pStatus = String(booking.payment_status || 'unpaid');
             if (pStatus === 'paid' && booking.paypal_capture_id && paypal.isConfigured()) {
                 try {
                     await paypal.refundPayment(booking.paypal_capture_id, booking.service_fee, 'USD');
-                    execute("UPDATE bookings SET payment_status = 'refunded', updated_at = CURRENT_TIMESTAMP WHERE id = ?", [bookingId]);
+                    await execute("UPDATE bookings SET payment_status = 'refunded', updated_at = CURRENT_TIMESTAMP WHERE id = $1", [bookingId]);
                     console.log('Auto-refund processed for booking #' + bookingId);
                 } catch (refundErr) {
                     console.error('Auto-refund failed for booking #' + bookingId + ':', refundErr.message);
-                    // Don't fail the cancellation — admin can manually refund later
                 }
             }
         }
 
         if (status === 'accepted') {
-            blockDatesForBooking(booking.vehicle_id, booking.pickup_date, booking.dropoff_date);
+            await blockDatesForBooking(booking.vehicle_id, booking.pickup_date, booking.dropoff_date);
             var guestText = buildApprovalEmailText(booking, booking.guest_name || 'Guest');
             var partnerText = buildApprovalEmailText(booking, booking.partner_company || booking.partner_name || 'Partner');
 
@@ -601,9 +578,9 @@ router.patch('/bookings/:id/status', async (req, res) => {
 // ========================================
 // FINANCIAL DATA
 // ========================================
-router.get('/financial', (req, res) => {
+router.get('/financial', async (req, res) => {
     try {
-        var records = queryAll(`
+        var records = await queryAll(`
             SELECT b.id, b.vehicle_id, b.pickup_date, b.dropoff_date, b.rental_days,
                    b.extras_total, b.service_fee, b.total_price, b.status, b.created_at, b.updated_at,
                    b.payment_status, b.payment_date,
@@ -616,11 +593,7 @@ router.get('/financial', (req, res) => {
             ORDER BY b.updated_at DESC
         `);
 
-        // Only include bookings that were accepted at some point
-        // cancelled bookings that were never accepted (rejected directly) won't have service_fee income
         var financial = records.filter(function(r) {
-            // If status is cancelled but service_fee is 0, it was likely rejected, not a cancelled accepted booking
-            // We include all accepted/completed/cancel_requested + cancelled with service_fee > 0
             return r.status !== 'cancelled' || (parseFloat(r.service_fee) || 0) > 0;
         }).map(function(r) {
             var rentalTotal = Math.round((r.total_price - (r.extras_total || 0) - (r.service_fee || 0)) * 100) / 100;
@@ -654,9 +627,9 @@ router.get('/financial', (req, res) => {
 // ========================================
 // PROMO CODES
 // ========================================
-router.get('/promo-codes', (req, res) => {
+router.get('/promo-codes', async (req, res) => {
     try {
-        const codes = queryAll('SELECT * FROM promo_codes ORDER BY created_at DESC');
+        const codes = await queryAll('SELECT * FROM promo_codes ORDER BY created_at DESC');
         res.json({ codes });
     } catch (err) {
         console.error('Get promo codes error:', err);
@@ -664,7 +637,7 @@ router.get('/promo-codes', (req, res) => {
     }
 });
 
-router.post('/promo-codes', (req, res) => {
+router.post('/promo-codes', async (req, res) => {
     try {
         const { code, discount_type, discount_value, min_order, max_uses, valid_from, valid_until } = req.body;
         if (!code || !discount_type || !discount_value) {
@@ -673,10 +646,10 @@ router.post('/promo-codes', (req, res) => {
         if (!['percent', 'fixed'].includes(discount_type)) {
             return res.status(400).json({ error: 'Discount type must be percent or fixed' });
         }
-        const existing = queryOne('SELECT id FROM promo_codes WHERE code = ?', [code.toUpperCase()]);
+        const existing = await queryOne('SELECT id FROM promo_codes WHERE code = $1', [code.toUpperCase()]);
         if (existing) return res.status(409).json({ error: 'Code already exists' });
-        execute(
-            'INSERT INTO promo_codes (code, discount_type, discount_value, min_order, max_uses, valid_from, valid_until) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        await execute(
+            'INSERT INTO promo_codes (code, discount_type, discount_value, min_order, max_uses, valid_from, valid_until) VALUES ($1, $2, $3, $4, $5, $6, $7)',
             [code.toUpperCase(), discount_type, parseFloat(discount_value), parseFloat(min_order) || 0, parseInt(max_uses) || 0, valid_from || null, valid_until || null]
         );
         res.status(201).json({ message: 'Promo code created' });
@@ -686,13 +659,13 @@ router.post('/promo-codes', (req, res) => {
     }
 });
 
-router.put('/promo-codes/:id', (req, res) => {
+router.put('/promo-codes/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);
         const { is_active, max_uses, valid_until } = req.body;
-        if (is_active !== undefined) execute('UPDATE promo_codes SET is_active = ? WHERE id = ?', [is_active ? 1 : 0, id]);
-        if (max_uses !== undefined) execute('UPDATE promo_codes SET max_uses = ? WHERE id = ?', [parseInt(max_uses) || 0, id]);
-        if (valid_until !== undefined) execute('UPDATE promo_codes SET valid_until = ? WHERE id = ?', [valid_until || null, id]);
+        if (is_active !== undefined) await execute('UPDATE promo_codes SET is_active = $1 WHERE id = $2', [is_active ? 1 : 0, id]);
+        if (max_uses !== undefined) await execute('UPDATE promo_codes SET max_uses = $1 WHERE id = $2', [parseInt(max_uses) || 0, id]);
+        if (valid_until !== undefined) await execute('UPDATE promo_codes SET valid_until = $1 WHERE id = $2', [valid_until || null, id]);
         res.json({ message: 'Promo code updated' });
     } catch (err) {
         console.error('Update promo code error:', err);
@@ -700,9 +673,9 @@ router.put('/promo-codes/:id', (req, res) => {
     }
 });
 
-router.delete('/promo-codes/:id', (req, res) => {
+router.delete('/promo-codes/:id', async (req, res) => {
     try {
-        execute('DELETE FROM promo_codes WHERE id = ?', [parseInt(req.params.id)]);
+        await execute('DELETE FROM promo_codes WHERE id = $1', [parseInt(req.params.id)]);
         res.json({ message: 'Promo code deleted' });
     } catch (err) {
         console.error('Delete promo code error:', err);
@@ -713,9 +686,9 @@ router.delete('/promo-codes/:id', (req, res) => {
 // ========================================
 // CSV EXPORT
 // ========================================
-router.get('/export/bookings', (req, res) => {
+router.get('/export/bookings', async (req, res) => {
     try {
-        const rows = queryAll(
+        const rows = await queryAll(
             `SELECT b.id, b.pickup_date, b.dropoff_date, b.rental_days, b.total_price, b.service_fee, b.extras_total, b.status, b.payment_status, b.created_at,
                     v.name as vehicle_name,
                     u.full_name as guest_name, u.email as guest_email,
@@ -741,9 +714,9 @@ router.get('/export/bookings', (req, res) => {
     }
 });
 
-router.get('/export/financial', (req, res) => {
+router.get('/export/financial', async (req, res) => {
     try {
-        const rows = queryAll(
+        const rows = await queryAll(
             `SELECT b.id, b.pickup_date, b.dropoff_date, b.rental_days, b.total_price, b.service_fee, b.extras_total, b.status, b.payment_status, b.payment_date,
                     v.name as vehicle_name,
                     u.full_name as guest_name, u.email as guest_email
@@ -772,22 +745,20 @@ router.get('/export/financial', (req, res) => {
 // ========================================
 // BULK ACTIONS
 // ========================================
-router.post('/bulk/approve-vehicles', (req, res) => {
+router.post('/bulk/approve-vehicles', async (req, res) => {
     try {
-        const result = execute("UPDATE vehicles SET status = 'active', updated_at = CURRENT_TIMESTAMP WHERE status = 'pending'");
-        const count = queryOne("SELECT changes() as count");
-        res.json({ message: 'All pending vehicles approved', count: count ? count.count : 0 });
+        var result = await execute("UPDATE vehicles SET status = 'active', updated_at = CURRENT_TIMESTAMP WHERE status = 'pending'");
+        res.json({ message: 'All pending vehicles approved', count: result.rowCount || 0 });
     } catch (err) {
         console.error('Bulk approve vehicles error:', err);
         res.status(500).json({ error: 'Failed to bulk approve' });
     }
 });
 
-router.post('/bulk/approve-partners', (req, res) => {
+router.post('/bulk/approve-partners', async (req, res) => {
     try {
-        execute('UPDATE partner_profiles SET is_verified = 1 WHERE is_verified = 0');
-        const count = queryOne("SELECT changes() as count");
-        res.json({ message: 'All unverified partners approved', count: count ? count.count : 0 });
+        var result = await execute('UPDATE partner_profiles SET is_verified = 1 WHERE is_verified = 0');
+        res.json({ message: 'All unverified partners approved', count: result.rowCount || 0 });
     } catch (err) {
         console.error('Bulk approve partners error:', err);
         res.status(500).json({ error: 'Failed to bulk approve' });
@@ -797,50 +768,45 @@ router.post('/bulk/approve-partners', (req, res) => {
 // ========================================
 // ACTIVITY FEED
 // ========================================
-router.get('/activity', (req, res) => {
+router.get('/activity', async (req, res) => {
     try {
         var activities = [];
 
-        // Recent registrations (last 7 days)
-        var recentUsers = queryAll(
-            "SELECT id, full_name, email, role, created_at FROM users WHERE created_at >= datetime('now', '-7 days') AND role != 'admin' ORDER BY created_at DESC LIMIT 20"
+        var recentUsers = await queryAll(
+            "SELECT id, full_name, email, role, created_at FROM users WHERE created_at >= NOW() - INTERVAL '7 days' AND role != 'admin' ORDER BY created_at DESC LIMIT 20"
         );
         recentUsers.forEach(function(u) {
             activities.push({ type: 'registration', icon: 'user', text: (u.full_name || u.email) + ' registered as ' + u.role, time: u.created_at, id: u.id });
         });
 
-        // Recent bookings (last 7 days)
-        var recentBookings = queryAll(
+        var recentBookings = await queryAll(
             `SELECT b.id, b.status, b.created_at, b.updated_at, v.name as vehicle_name, u.full_name as guest_name
              FROM bookings b JOIN vehicles v ON b.vehicle_id = v.id JOIN users u ON b.guest_id = u.id
-             WHERE b.created_at >= datetime('now', '-7 days') ORDER BY b.created_at DESC LIMIT 20`
+             WHERE b.created_at >= NOW() - INTERVAL '7 days' ORDER BY b.created_at DESC LIMIT 20`
         );
         recentBookings.forEach(function(b) {
             activities.push({ type: 'booking', icon: 'calendar', text: (b.guest_name || 'Guest') + ' booked ' + (b.vehicle_name || 'vehicle') + ' — ' + b.status, time: b.created_at, id: b.id });
         });
 
-        // Recent vehicle uploads (last 7 days)
-        var recentVehicles = queryAll(
+        var recentVehicles = await queryAll(
             `SELECT v.id, v.name, v.status, v.created_at, u.full_name as partner_name
              FROM vehicles v JOIN users u ON v.partner_id = u.id
-             WHERE v.created_at >= datetime('now', '-7 days') ORDER BY v.created_at DESC LIMIT 20`
+             WHERE v.created_at >= NOW() - INTERVAL '7 days' ORDER BY v.created_at DESC LIMIT 20`
         );
         recentVehicles.forEach(function(v) {
             activities.push({ type: 'vehicle', icon: 'car', text: (v.partner_name || 'Partner') + ' added ' + (v.name || 'vehicle') + ' — ' + v.status, time: v.created_at, id: v.id });
         });
 
-        // Recent status changes (bookings updated in last 7 days that differ from created)
-        var recentChanges = queryAll(
+        var recentChanges = await queryAll(
             `SELECT b.id, b.status, b.updated_at, v.name as vehicle_name, u.full_name as guest_name
              FROM bookings b JOIN vehicles v ON b.vehicle_id = v.id JOIN users u ON b.guest_id = u.id
-             WHERE b.updated_at >= datetime('now', '-7 days') AND b.updated_at != b.created_at AND b.status != 'pending'
+             WHERE b.updated_at >= NOW() - INTERVAL '7 days' AND b.updated_at != b.created_at AND b.status != 'pending'
              ORDER BY b.updated_at DESC LIMIT 20`
         );
         recentChanges.forEach(function(b) {
             activities.push({ type: 'status_change', icon: 'check', text: (b.vehicle_name || 'Booking') + ' → ' + b.status + ' (guest: ' + (b.guest_name || '') + ')', time: b.updated_at, id: b.id });
         });
 
-        // Sort by time descending
         activities.sort(function(a, b) { return new Date(b.time) - new Date(a.time); });
 
         res.json({ activities: activities.slice(0, 30) });

@@ -5,7 +5,7 @@ const { queryAll, queryOne, execute } = require('../db-helpers');
 const router = express.Router();
 
 // GET /api/vehicles — list all active vehicles (public)
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
     try {
         var sql = `SELECT v.*, u.full_name as partner_name, pp.company_name
                    FROM vehicles v
@@ -13,48 +13,48 @@ router.get('/', (req, res) => {
                    LEFT JOIN partner_profiles pp ON u.id = pp.user_id
                    WHERE v.status = 'active' AND pp.is_verified = 1`;
         var params = [];
+        var paramIdx = 1;
 
         // Optional filters
         if (req.query.category) {
-            sql += ' AND v.category = ?';
+            sql += ' AND v.category = $' + paramIdx++;
             params.push(req.query.category);
         }
         if (req.query.engine) {
-            sql += ' AND v.engine = ?';
+            sql += ' AND v.engine = $' + paramIdx++;
             params.push(req.query.engine);
         }
         if (req.query.gearbox) {
-            sql += ' AND v.gearbox = ?';
+            sql += ' AND v.gearbox = $' + paramIdx++;
             params.push(req.query.gearbox);
         }
         if (req.query.drive_type) {
-            sql += ' AND v.drive_type = ?';
+            sql += ' AND v.drive_type = $' + paramIdx++;
             params.push(req.query.drive_type);
         }
         if (req.query.min_price) {
-            sql += ' AND v.price_per_day >= ?';
+            sql += ' AND v.price_per_day >= $' + paramIdx++;
             params.push(parseFloat(req.query.min_price));
         }
         if (req.query.max_price) {
-            sql += ' AND v.price_per_day <= ?';
+            sql += ' AND v.price_per_day <= $' + paramIdx++;
             params.push(parseFloat(req.query.max_price));
         }
         if (req.query.year_min) {
-            sql += ' AND v.year >= ?';
+            sql += ' AND v.year >= $' + paramIdx++;
             params.push(parseInt(req.query.year_min));
         }
         if (req.query.year_max) {
-            sql += ' AND v.year <= ?';
+            sql += ' AND v.year <= $' + paramIdx++;
             params.push(parseInt(req.query.year_max));
         }
 
         // Availability filtering
         if (req.query.pickup_date && req.query.dropoff_date) {
-            // Filter out vehicles that are blocked or booked during the requested period
             sql += ` AND v.id NOT IN (
                 SELECT DISTINCT va.vehicle_id 
                 FROM vehicle_availability va 
-                WHERE va.date >= ? AND va.date < ? 
+                WHERE va.date >= $${paramIdx++} AND va.date < $${paramIdx++} 
                 AND va.status IN ('blocked', 'booked')
             )`;
             params.push(req.query.pickup_date, req.query.dropoff_date);
@@ -71,7 +71,7 @@ router.get('/', (req, res) => {
         var sort = sortMap[req.query.sort] || 'v.created_at DESC';
         sql += ' ORDER BY ' + sort;
 
-        var vehicles = queryAll(sql, params.length > 0 ? params : undefined);
+        var vehicles = await queryAll(sql, params);
 
         res.json({ vehicles, count: vehicles.length });
     } catch (err) {
@@ -81,10 +81,10 @@ router.get('/', (req, res) => {
 });
 
 // GET /api/vehicles/my — get partner's own vehicles (protected, partner only)
-router.get('/my', authenticateToken, requireRole('partner'), (req, res) => {
+router.get('/my', authenticateToken, requireRole('partner'), async (req, res) => {
     try {
-        var vehicles = queryAll(
-            'SELECT * FROM vehicles WHERE partner_id = ? ORDER BY created_at DESC',
+        var vehicles = await queryAll(
+            'SELECT * FROM vehicles WHERE partner_id = $1 ORDER BY created_at DESC',
             [req.user.id]
         );
         res.json({ vehicles, count: vehicles.length });
@@ -95,14 +95,14 @@ router.get('/my', authenticateToken, requireRole('partner'), (req, res) => {
 });
 
 // GET /api/vehicles/:id — get single vehicle (public)
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
-        var vehicle = queryOne(
+        var vehicle = await queryOne(
             `SELECT v.*, u.full_name as partner_name, pp.company_name, pp.whatsapp, pp.telegram, pp.location as partner_location
              FROM vehicles v
              JOIN users u ON v.partner_id = u.id
              LEFT JOIN partner_profiles pp ON u.id = pp.user_id
-             WHERE v.id = ? AND pp.is_verified = 1`,
+             WHERE v.id = $1 AND pp.is_verified = 1`,
             [parseInt(req.params.id)]
         );
 
@@ -118,9 +118,9 @@ router.get('/:id', (req, res) => {
 });
 
 // POST /api/vehicles — add a new vehicle (partner only, must be verified)
-router.post('/', authenticateToken, requireRole('partner'), (req, res) => {
+router.post('/', authenticateToken, requireRole('partner'), async (req, res) => {
     try {
-        var partnerProfile = queryOne('SELECT is_verified FROM partner_profiles WHERE user_id = ?', [req.user.id]);
+        var partnerProfile = await queryOne('SELECT is_verified FROM partner_profiles WHERE user_id = $1', [req.user.id]);
         if (!partnerProfile || !partnerProfile.is_verified) {
             return res.status(403).json({ error: 'Your partner account must be verified by admin before you can add vehicles. Please wait for verification.' });
         }
@@ -135,7 +135,7 @@ router.post('/', authenticateToken, requireRole('partner'), (req, res) => {
             return res.status(400).json({ error: 'Technical passport image is required' });
         }
 
-        execute(`
+        await execute(`
             INSERT INTO vehicles
             (partner_id, name, brand, model, color, min_age, location_city,
              category, engine, gearbox, drive_type,
@@ -152,7 +152,7 @@ router.post('/', authenticateToken, requireRole('partner'), (req, res) => {
              custom_pricing_enabled, custom_pricing_ranges, registration_number,
              deposit_amount,
              tech_passport_front, tech_passport_back, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,'pending')`,
             [
                 req.user.id,
                 b.name,
@@ -200,8 +200,8 @@ router.post('/', authenticateToken, requireRole('partner'), (req, res) => {
             ]
         );
 
-        var newVehicle = queryOne(
-            'SELECT * FROM vehicles WHERE partner_id = ? ORDER BY id DESC LIMIT 1',
+        var newVehicle = await queryOne(
+            'SELECT * FROM vehicles WHERE partner_id = $1 ORDER BY id DESC LIMIT 1',
             [req.user.id]
         );
 
@@ -213,10 +213,10 @@ router.post('/', authenticateToken, requireRole('partner'), (req, res) => {
 });
 
 // PUT /api/vehicles/:id — update a vehicle (partner only, own vehicles)
-router.put('/:id', authenticateToken, requireRole('partner'), (req, res) => {
+router.put('/:id', authenticateToken, requireRole('partner'), async (req, res) => {
     try {
         var vehicleId = parseInt(req.params.id);
-        var existing = queryOne('SELECT * FROM vehicles WHERE id = ? AND partner_id = ?', [vehicleId, req.user.id]);
+        var existing = await queryOne('SELECT * FROM vehicles WHERE id = $1 AND partner_id = $2', [vehicleId, req.user.id]);
 
         if (!existing) {
             return res.status(404).json({ error: 'Vehicle not found or not yours' });
@@ -224,25 +224,25 @@ router.put('/:id', authenticateToken, requireRole('partner'), (req, res) => {
 
         var b = req.body;
 
-        execute(`
+        await execute(`
             UPDATE vehicles SET
-                name = ?, brand = ?, model = ?, color = ?, min_age = ?, location_city = ?,
-                category = ?, engine = ?, gearbox = ?, drive_type = ?,
-                interior_type = ?, steering_side = ?,
-                price_per_day = ?, year = ?, seats = ?, doors = ?,
-                fuel_policy = ?, luggage = ?, region = ?,
-                fuel_consumption = ?, engine_cc = ?, horsepower = ?,
-                mileage_limit_enabled = ?, mileage_km = ?,
-                image_url = ?, gallery = ?, description = ?,
-                features = ?, multimedia = ?,
-                price_tiers = ?, extras = ?, insurance = ?,
-                pickup_fees_enabled = ?, pickup_fees = ?,
-                visible_in_search = ?, block_after_payment = ?,
-                custom_pricing_enabled = ?, custom_pricing_ranges = ?, registration_number = ?,
-                deposit_amount = ?,
-                tech_passport_front = ?, tech_passport_back = ?,
-                status = ?, updated_at = CURRENT_TIMESTAMP
-            WHERE id = ? AND partner_id = ?`,
+                name = $1, brand = $2, model = $3, color = $4, min_age = $5, location_city = $6,
+                category = $7, engine = $8, gearbox = $9, drive_type = $10,
+                interior_type = $11, steering_side = $12,
+                price_per_day = $13, year = $14, seats = $15, doors = $16,
+                fuel_policy = $17, luggage = $18, region = $19,
+                fuel_consumption = $20, engine_cc = $21, horsepower = $22,
+                mileage_limit_enabled = $23, mileage_km = $24,
+                image_url = $25, gallery = $26, description = $27,
+                features = $28, multimedia = $29,
+                price_tiers = $30, extras = $31, insurance = $32,
+                pickup_fees_enabled = $33, pickup_fees = $34,
+                visible_in_search = $35, block_after_payment = $36,
+                custom_pricing_enabled = $37, custom_pricing_ranges = $38, registration_number = $39,
+                deposit_amount = $40,
+                tech_passport_front = $41, tech_passport_back = $42,
+                status = $43, updated_at = CURRENT_TIMESTAMP
+            WHERE id = $44 AND partner_id = $45`,
             [
                 b.name || existing.name,
                 b.brand !== undefined ? b.brand : existing.brand,
@@ -292,7 +292,7 @@ router.put('/:id', authenticateToken, requireRole('partner'), (req, res) => {
             ]
         );
 
-        var updated = queryOne('SELECT * FROM vehicles WHERE id = ?', [vehicleId]);
+        var updated = await queryOne('SELECT * FROM vehicles WHERE id = $1', [vehicleId]);
         res.json({ message: 'Vehicle updated', vehicle: updated });
     } catch (err) {
         console.error('Update vehicle error:', err);
@@ -302,18 +302,18 @@ router.put('/:id', authenticateToken, requireRole('partner'), (req, res) => {
 
 // DELETE /api/vehicles/:id — request vehicle deletion (partner only, own vehicles)
 // Partners cannot directly delete — they request deletion, admin approves
-router.delete('/:id', authenticateToken, requireRole('partner'), (req, res) => {
+router.delete('/:id', authenticateToken, requireRole('partner'), async (req, res) => {
     try {
         var vehicleId = parseInt(req.params.id);
-        var existing = queryOne('SELECT * FROM vehicles WHERE id = ? AND partner_id = ?', [vehicleId, req.user.id]);
+        var existing = await queryOne('SELECT * FROM vehicles WHERE id = $1 AND partner_id = $2', [vehicleId, req.user.id]);
 
         if (!existing) {
             return res.status(404).json({ error: 'Vehicle not found or not yours' });
         }
 
         // Check for active reservations (pending, accepted, cancel_requested)
-        var activeBooking = queryOne(
-            "SELECT id FROM bookings WHERE vehicle_id = ? AND status IN ('pending', 'accepted', 'cancel_requested')",
+        var activeBooking = await queryOne(
+            "SELECT id FROM bookings WHERE vehicle_id = $1 AND status IN ('pending', 'accepted', 'cancel_requested')",
             [vehicleId]
         );
         if (activeBooking) {
@@ -321,7 +321,7 @@ router.delete('/:id', authenticateToken, requireRole('partner'), (req, res) => {
         }
 
         // Set status to delete_requested instead of actually deleting
-        execute("UPDATE vehicles SET status = 'delete_requested', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND partner_id = ?", [vehicleId, req.user.id]);
+        await execute("UPDATE vehicles SET status = 'delete_requested', updated_at = CURRENT_TIMESTAMP WHERE id = $1 AND partner_id = $2", [vehicleId, req.user.id]);
 
         res.json({ message: 'Deletion requested. Admin will review and approve your request.' });
     } catch (err) {
