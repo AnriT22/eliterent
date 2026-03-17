@@ -553,6 +553,28 @@
     line-height: 1.5;
 }
 
+/* ── Required Documents Notice ── */
+.rv-docs-notice {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+}
+.rv-docs-title {
+    color: #dc2626;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 6px;
+}
+.rv-docs-list {
+    color: #dc2626;
+    font-size: 13px;
+    margin: 0;
+    padding-left: 20px;
+    line-height: 1.7;
+}
+
 /* ── Book Button ── */
 .rv-book-btn {
     width: 100%;
@@ -770,6 +792,10 @@
     .rv-insurance-grid .rv-insurance-item:first-child { border-right: none; }
     .rv-specs-grid { grid-template-columns: repeat(2, 1fr); }
     .rv-services-grid { grid-template-columns: 1fr; }
+    .rv-summary-row strong {
+        max-width: 60%;
+        word-break: break-word;
+    }
 }
 
 /* ── Mobile (480px and below) ── */
@@ -783,6 +809,7 @@
     .rv-card {
         border-radius: 12px;
         margin-bottom: 14px;
+        overflow: hidden;
     }
 
     /* Section headers */
@@ -796,9 +823,17 @@
     .rv-gallery {
         padding: 14px;
     }
+    .rv-main-img-wrap {
+        aspect-ratio: 16 / 10;
+    }
     .rv-thumbs img {
         width: 56px;
         height: 40px;
+    }
+    .rv-gallery-prev, .rv-gallery-next {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
     }
 
     /* Contact row */
@@ -810,8 +845,9 @@
     .rv-contact-btn {
         width: 100%;
         justify-content: center;
-        padding: 10px 16px;
+        padding: 12px 16px;
         font-size: 13px;
+        border-radius: 12px;
     }
 
     /* Vehicle info */
@@ -825,6 +861,9 @@
     }
     .rv-vehicle-title {
         font-size: 13px;
+    }
+    .rv-vehicle-subtitle {
+        font-size: 11px;
     }
     .rv-specs-body {
         padding: 0 16px 16px;
@@ -850,6 +889,7 @@
     .rv-loc-option {
         padding: 10px 12px;
         gap: 8px;
+        flex-wrap: wrap;
     }
     .rv-loc-name {
         font-size: 12px;
@@ -860,6 +900,10 @@
     .rv-loc-badge {
         font-size: 10px;
         padding: 3px 8px;
+    }
+    .rv-loc-custom-input {
+        box-sizing: border-box;
+        font-size: 13px;
     }
 
     /* Payment methods */
@@ -872,6 +916,9 @@
     }
     .rv-payment-name {
         font-size: 13px;
+    }
+    .rv-payment-desc {
+        font-size: 11px;
     }
     .rv-payment-note {
         padding: 10px 12px;
@@ -886,11 +933,19 @@
     .rv-insurance-item {
         padding: 14px;
     }
+    .rv-ins-header-row {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
     .rv-ins-name {
         font-size: 13px;
     }
     .rv-ins-desc {
         font-size: 11px;
+    }
+    .rv-ins-status {
+        flex-wrap: wrap;
+        gap: 4px;
     }
 
     /* Addon row — stack on mobile */
@@ -911,6 +966,7 @@
     .rv-services-grid {
         padding: 12px;
         gap: 8px;
+        grid-template-columns: 1fr;
     }
     .rv-service-item {
         padding: 10px 12px;
@@ -918,17 +974,22 @@
     .rv-service-name {
         font-size: 12px;
     }
+    .rv-service-price {
+        font-size: 10px;
+    }
 
     /* Notes */
     .rv-notes {
         padding: 12px 14px;
         font-size: 13px;
         min-height: 60px;
+        box-sizing: border-box;
     }
 
     /* Summary panel */
     .rv-summary-panel {
         padding: 16px;
+        border-radius: 14px;
     }
     .rv-summary-title {
         font-size: 16px;
@@ -938,20 +999,36 @@
         font-size: 12px;
         gap: 8px;
     }
+    .rv-summary-row strong {
+        max-width: 60%;
+        word-break: break-word;
+        font-size: 12px;
+    }
     .rv-summary-row.rv-grand-total {
         font-size: 14px;
     }
     .rv-summary-row.rv-grand-total strong {
         font-size: 14px;
     }
+    .rv-payment-title {
+        font-size: 14px;
+    }
+    .rv-edit-dates {
+        font-size: 12px;
+    }
 
     /* Book button */
     .rv-book-btn {
-        padding: 12px;
+        padding: 14px 12px;
         font-size: 14px;
+        border-radius: 12px;
+    }
+    .rv-book-price {
+        font-size: 13px;
+        padding: 3px 10px;
     }
     .rv-whatsapp-btn {
-        padding: 12px;
+        padding: 13px 12px;
         font-size: 13px;
     }
 
@@ -960,11 +1037,46 @@
         padding: 12px;
         gap: 10px;
     }
+    .rv-driver-warning-icon {
+        font-size: 18px;
+    }
+    .rv-driver-warning-content strong {
+        font-size: 12px;
+    }
+    .rv-driver-warning-content p {
+        font-size: 11px;
+    }
+
+    /* Documents notice */
+    .rv-docs-notice {
+        padding: 10px 14px;
+        border-radius: 8px;
+    }
+    .rv-docs-title {
+        font-size: 12px;
+    }
+    .rv-docs-list {
+        font-size: 12px;
+        padding-left: 16px;
+    }
+
+    /* Mountain badges inline styles override */
+    .rv-mountain-badges {
+        padding: 0 14px;
+    }
+    .rv-mountain-badges span {
+        font-size: 12px !important;
+        padding: 5px 10px !important;
+    }
 
     /* Modals */
+    .rv-overlay {
+        padding: 16px;
+    }
     .rv-approval-modal {
         padding: 24px 20px;
         border-radius: 16px;
+        max-height: 85vh;
     }
     .rv-approval-icon {
         width: 52px;
@@ -991,7 +1103,7 @@
         font-size: 12px;
     }
     .rv-approval-btn {
-        padding: 12px;
+        padding: 14px;
         font-size: 14px;
     }
 
@@ -1017,7 +1129,7 @@
     .rv-btn-secondary {
         width: 100%;
         text-align: center;
-        padding: 12px 20px;
+        padding: 14px 20px;
     }
 }
 
@@ -1076,6 +1188,10 @@
         padding: 8px 10px;
     }
 
+    .rv-loc-name {
+        font-size: 11px;
+    }
+
     .rv-payment-body {
         padding: 12px;
     }
@@ -1083,6 +1199,14 @@
     .rv-payment-option {
         padding: 10px;
         gap: 8px;
+    }
+
+    .rv-pm-icon {
+        font-size: 18px;
+    }
+
+    .rv-payment-name {
+        font-size: 12px;
     }
 
     .rv-addon-row {
@@ -1099,6 +1223,10 @@
         padding: 8px 10px;
     }
 
+    .rv-service-icon {
+        font-size: 16px;
+    }
+
     .rv-summary-panel {
         padding: 14px;
     }
@@ -1111,13 +1239,17 @@
         font-size: 11px;
     }
 
+    .rv-summary-row strong {
+        max-width: 55%;
+    }
+
     .rv-book-btn {
-        padding: 11px;
+        padding: 13px;
         font-size: 13px;
     }
 
     .rv-whatsapp-btn {
-        padding: 11px;
+        padding: 12px;
         font-size: 12px;
     }
 
@@ -1135,6 +1267,11 @@
 
     .rv-ins-desc {
         font-size: 10px;
+    }
+
+    .rv-ins-badge {
+        font-size: 9px;
+        padding: 2px 6px;
     }
 
     .rv-notes {
@@ -1157,5 +1294,221 @@
 
     .rv-success-modal {
         padding: 24px 16px;
+    }
+
+    .rv-docs-notice {
+        padding: 8px 12px;
+    }
+    .rv-docs-title {
+        font-size: 11px;
+    }
+    .rv-docs-list {
+        font-size: 11px;
+        padding-left: 14px;
+        line-height: 1.5;
+    }
+
+    .rv-deposit-note {
+        font-size: 10px;
+    }
+
+    .rv-payment-title {
+        font-size: 13px;
+    }
+
+    .rv-or-divider {
+        font-size: 11px;
+        margin: 10px 0;
+    }
+
+    .rv-secure-note {
+        font-size: 11px;
+    }
+}
+
+/* ── Smallest phones (320px — iPhone SE, Galaxy A) ── */
+@media (max-width: 360px) {
+    .rv-page {
+        padding-top: 10px;
+        padding-bottom: 20px;
+        gap: 10px;
+    }
+
+    .rv-card {
+        border-radius: 8px;
+        margin-bottom: 8px;
+    }
+
+    .rv-gallery {
+        padding: 8px;
+    }
+
+    .rv-thumbs img {
+        width: 46px;
+        height: 34px;
+    }
+
+    .rv-section-header {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+
+    .rv-specs-grid {
+        gap: 4px;
+    }
+
+    .rv-spec-item {
+        padding: 6px 4px;
+    }
+
+    .rv-spec-label {
+        font-size: 7px;
+    }
+
+    .rv-spec-val {
+        font-size: 10px;
+    }
+
+    .rv-vehicle-info-header {
+        padding: 10px 12px;
+    }
+
+    .rv-vehicle-info-left {
+        gap: 10px;
+    }
+
+    .rv-vehicle-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+    }
+
+    .rv-vehicle-title {
+        font-size: 12px;
+    }
+
+    .rv-loc-col {
+        padding: 10px;
+    }
+
+    .rv-loc-option {
+        padding: 8px;
+    }
+
+    .rv-loc-name {
+        font-size: 11px;
+    }
+
+    .rv-loc-badge {
+        font-size: 9px;
+        padding: 2px 6px;
+    }
+
+    .rv-payment-body {
+        padding: 10px;
+    }
+
+    .rv-payment-option {
+        padding: 10px 8px;
+        gap: 6px;
+    }
+
+    .rv-summary-panel {
+        padding: 12px;
+    }
+
+    .rv-summary-title {
+        font-size: 14px;
+    }
+
+    .rv-summary-row {
+        font-size: 10px;
+        gap: 6px;
+    }
+
+    .rv-summary-row strong {
+        max-width: 50%;
+        font-size: 10px;
+    }
+
+    .rv-summary-row.rv-grand-total {
+        font-size: 13px;
+    }
+
+    .rv-summary-row.rv-grand-total strong {
+        font-size: 13px;
+    }
+
+    .rv-book-btn {
+        padding: 12px;
+        font-size: 12px;
+    }
+
+    .rv-book-price {
+        font-size: 11px;
+        padding: 2px 8px;
+    }
+
+    .rv-whatsapp-btn {
+        padding: 11px;
+        font-size: 11px;
+    }
+
+    .rv-driver-warning {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .rv-driver-warning-icon {
+        font-size: 16px;
+    }
+
+    .rv-driver-warning-content strong {
+        font-size: 11px;
+    }
+
+    .rv-driver-warning-content p {
+        font-size: 10px;
+    }
+
+    .rv-mountain-badges span {
+        font-size: 11px !important;
+        padding: 4px 8px !important;
+    }
+
+    .rv-overlay {
+        padding: 10px;
+    }
+
+    .rv-approval-modal {
+        padding: 16px 14px;
+    }
+
+    .rv-approval-modal h2 {
+        font-size: 15px;
+    }
+
+    .rv-approval-content {
+        font-size: 11px;
+    }
+
+    .rv-success-modal {
+        padding: 20px 14px;
+    }
+
+    .rv-success-modal h2 {
+        font-size: 16px;
+    }
+
+    .rv-docs-notice {
+        padding: 8px 10px;
+    }
+    .rv-docs-title {
+        font-size: 10px;
+    }
+    .rv-docs-list {
+        font-size: 10px;
+        padding-left: 14px;
+        line-height: 1.5;
     }
 }
