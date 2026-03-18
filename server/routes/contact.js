@@ -46,7 +46,7 @@ This message was sent from the contact form at Eliterent.ge`;
 </div>`;
 
         await sendEmail({
-            to: 'elite.rental25@gmail.com',
+            to: process.env.CONTACT_EMAIL || process.env.SMTP_USER || 'elite.rental25@gmail.com',
             subject: `Contact Form: ${subject}`,
             text: emailText,
             html: emailHtml
