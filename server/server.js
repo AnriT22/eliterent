@@ -48,7 +48,8 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 app.use(cors({
     origin: function (origin, cb) {
         if (!origin || allowedOrigins.indexOf(origin) !== -1) return cb(null, true);
-        cb(null, true); // allow all in dev; in production set strict list
+        if (process.env.NODE_ENV === 'production') return cb(new Error('Not allowed by CORS'));
+        cb(null, true); // allow all only in development
     },
     credentials: true
 }));
@@ -68,6 +69,11 @@ app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads'), {
     maxAge: '7d',
     etag: true
 }));
+
+// Health check
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', uptime: process.uptime(), timestamp: new Date().toISOString() });
+});
 
 // API Routes
 app.use('/api/login', authLimiter);
