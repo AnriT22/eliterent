@@ -1,4 +1,4 @@
-const { getPool } = require('./db-pg');
+const { getPool } = require('./db');
 
 // Run SELECT and return array of row objects
 async function queryAll(sql, params) {
