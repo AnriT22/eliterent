@@ -711,8 +711,8 @@
                 alert('Booking failed: ' + data.error);
                 return;
             }
-            // Show approval modal before redirecting to payment
-            if (data.booking_id && data.service_fee > 0) {
+            // Show approval modal before redirecting to payment (only if PayPal is configured)
+            if (data.booking_id && data.payment_required) {
                 sessionStorage.setItem('pending_booking_id', data.booking_id);
                 sessionStorage.setItem('pending_service_fee', data.service_fee);
                 document.getElementById('rvApprovalModal').style.display = 'flex';
