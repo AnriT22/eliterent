@@ -775,7 +775,7 @@ function initPhoneFormat(input, codeSelectId) {
         if (raw.length > rule.digits) raw = raw.slice(0, rule.digits);
 
         // Build format pattern from placeholder (groups separated by spaces)
-        var groups = rule.placeholder.replace(/[^X ]/g, '').split(' ');
+        var groups = rule.placeholder.split(' ');
         var formatted = '';
         var pos = 0;
         for (var i = 0; i < groups.length && pos < raw.length; i++) {
