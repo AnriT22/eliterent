@@ -14,7 +14,7 @@
 
 There are **two root causes**, not one:
 
-#### 🔴 BUG #1: Fatal Import Error — `db-helpers.js` (CRITICAL — APP CANNOT START)
+#### 🔴 BUG #1: Fatal Import Error — `db-helpers.js` (CRITIC+AL — APP CANNOT START)
 
 ```
 File: server/db-helpers.js, Line 1

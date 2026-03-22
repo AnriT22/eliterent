@@ -347,14 +347,16 @@ function validateRegistrationStep1() {
         clearError('emailError');
     }
 
-    // Phone
+    // Phone — validate per-country digit count
     if (!phone.value.trim()) {
         showError('phoneError', 'Phone number is required');
         isValid = false;
     } else {
         var phoneDigits = phone.value.replace(/\D/g, '');
-        if (phoneDigits.length < 5 || phoneDigits.length > 12) {
-            showError('phoneError', 'Please enter a valid phone number');
+        var codeEl = document.getElementById('phoneCode');
+        var rule = getPhoneRule(codeEl ? codeEl.value : '+995');
+        if (phoneDigits.length !== rule.digits) {
+            showError('phoneError', 'Phone number must be exactly ' + rule.digits + ' digits for ' + (codeEl ? codeEl.value : '+995'));
             isValid = false;
         } else {
             clearError('phoneError');
@@ -727,22 +729,81 @@ function getAge(birthDate) {
 // PHONE FORMAT HELPER
 // ========================================
 
-function initPhoneFormat(input) {
-    // Format local phone digits only (country code is in separate dropdown)
-    input.addEventListener('input', function () {
+// Country code → { digits: exact local digit count, placeholder: display hint }
+var PHONE_COUNTRY_RULES = {
+    '+995':  { digits: 9,  placeholder: '5XX XXX XXX' },        // Georgia
+    '+1':    { digits: 10, placeholder: 'XXX XXX XXXX' },       // USA / Canada
+    '+44':   { digits: 10, placeholder: 'XXXX XXXXXX' },        // UK
+    '+49':   { digits: 11, placeholder: 'XXX XXXXXXXX' },       // Germany
+    '+33':   { digits: 9,  placeholder: 'X XX XX XX XX' },      // France
+    '+34':   { digits: 9,  placeholder: 'XXX XXX XXX' },        // Spain
+    '+39':   { digits: 10, placeholder: 'XXX XXX XXXX' },       // Italy
+    '+90':   { digits: 10, placeholder: 'XXX XXX XXXX' },       // Turkey
+    '+7':    { digits: 10, placeholder: 'XXX XXX XX XX' },      // Russia
+    '+380':  { digits: 9,  placeholder: 'XX XXX XX XX' },       // Ukraine
+    '+48':   { digits: 9,  placeholder: 'XXX XXX XXX' },        // Poland
+    '+31':   { digits: 9,  placeholder: 'X XXXX XXXX' },        // Netherlands
+    '+46':   { digits: 9,  placeholder: 'XX XXX XX XX' },       // Sweden
+    '+41':   { digits: 9,  placeholder: 'XX XXX XX XX' },       // Switzerland
+    '+43':   { digits: 10, placeholder: 'XXX XXXXXXX' },        // Austria
+    '+32':   { digits: 9,  placeholder: 'XXX XX XX XX' },       // Belgium
+    '+351':  { digits: 9,  placeholder: 'XXX XXX XXX' },        // Portugal
+    '+30':   { digits: 10, placeholder: 'XXX XXX XXXX' },       // Greece
+    '+972':  { digits: 9,  placeholder: 'XX XXX XXXX' },        // Israel
+    '+971':  { digits: 9,  placeholder: 'XX XXX XXXX' },        // UAE
+    '+966':  { digits: 9,  placeholder: 'XX XXX XXXX' },        // Saudi Arabia
+    '+91':   { digits: 10, placeholder: 'XXXXX XXXXX' },        // India
+    '+86':   { digits: 11, placeholder: 'XXX XXXX XXXX' },      // China
+    '+81':   { digits: 10, placeholder: 'XX XXXX XXXX' },       // Japan
+    '+82':   { digits: 10, placeholder: 'XX XXXX XXXX' },       // South Korea
+    '+61':   { digits: 9,  placeholder: 'XXX XXX XXX' },        // Australia
+    '+55':   { digits: 11, placeholder: 'XX XXXXX XXXX' },      // Brazil
+    '+374':  { digits: 8,  placeholder: 'XX XXX XXX' },         // Armenia
+    '+994':  { digits: 9,  placeholder: 'XX XXX XX XX' }        // Azerbaijan
+};
+
+function getPhoneRule(codeValue) {
+    return PHONE_COUNTRY_RULES[codeValue] || { digits: 10, placeholder: 'Phone number' };
+}
+
+function initPhoneFormat(input, codeSelectId) {
+    var codeSelect = document.getElementById(codeSelectId || 'phoneCode');
+
+    function applyFormat() {
+        var rule = getPhoneRule(codeSelect ? codeSelect.value : '+995');
         var raw = input.value.replace(/\D/g, '');
+        if (raw.length > rule.digits) raw = raw.slice(0, rule.digits);
 
-        // Enforce max length: 10 digits for local number
-        if (raw.length > 10) raw = raw.slice(0, 10);
-
-        // Format as 5XX XXX XXX
+        // Build format pattern from placeholder (groups separated by spaces)
+        var groups = rule.placeholder.replace(/[^X ]/g, '').split(' ');
         var formatted = '';
-        if (raw.length > 0) formatted = raw.slice(0, 3);
-        if (raw.length > 3) formatted += ' ' + raw.slice(3, 6);
-        if (raw.length > 6) formatted += ' ' + raw.slice(6, 10);
-
+        var pos = 0;
+        for (var i = 0; i < groups.length && pos < raw.length; i++) {
+            var len = groups[i].length;
+            if (i > 0) formatted += ' ';
+            formatted += raw.slice(pos, pos + len);
+            pos += len;
+        }
         input.value = formatted;
-    });
+    }
+
+    function updatePlaceholder() {
+        var rule = getPhoneRule(codeSelect ? codeSelect.value : '+995');
+        input.placeholder = rule.placeholder;
+        input.setAttribute('maxlength', rule.digits + Math.floor(rule.digits / 3));
+    }
+
+    input.addEventListener('input', applyFormat);
+
+    if (codeSelect) {
+        codeSelect.addEventListener('change', function () {
+            updatePlaceholder();
+            input.value = '';
+            input.focus();
+        });
+    }
+
+    updatePlaceholder();
 }
 
 // ========================================

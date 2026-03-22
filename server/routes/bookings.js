@@ -10,10 +10,22 @@ function parseUtcDate(dateStr) {
     return new Date(dateStr + 'T00:00:00Z');
 }
 
-function daysBetween(startStr, endStr) {
+function daysBetween(startStr, endStr, pickupTime, dropoffTime) {
     var s = parseUtcDate(startStr);
     var e = parseUtcDate(endStr);
-    return Math.max(1, Math.round((e - s) / 86400000));
+    var baseDays = Math.max(1, Math.round((e - s) / 86400000));
+
+    // If return time exceeds pickup time by more than 2 hours, charge an extra day
+    if (pickupTime && dropoffTime) {
+        var pParts = pickupTime.split(':');
+        var dParts = dropoffTime.split(':');
+        var pickupMinutes = parseInt(pParts[0], 10) * 60 + parseInt(pParts[1] || '0', 10);
+        var dropoffMinutes = parseInt(dParts[0], 10) * 60 + parseInt(dParts[1] || '0', 10);
+        if (dropoffMinutes - pickupMinutes > 120) {
+            baseDays += 1;
+        }
+    }
+    return baseDays;
 }
 
 function eachBookingDate(startStr, endStr, cb) {
@@ -191,7 +203,7 @@ router.post('/', authenticateToken, requireRole('guest'), async (req, res) => {
             return res.status(409).json({ error: 'Vehicle already has an overlapping reservation for these dates' });
         }
 
-        var days = daysBetween(pickup_date, dropoff_date);
+        var days = daysBetween(pickup_date, dropoff_date, pickup_time, dropoff_time);
         var dailyPrice = getDailyRateByTier(vehicle, days, pickup_date);
         var rentalTotal = Math.round(days * dailyPrice * 100) / 100;
         var vehicleServices = normalizeVehicleServices(vehicle);

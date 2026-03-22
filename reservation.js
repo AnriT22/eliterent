@@ -72,7 +72,17 @@
     function getRentalDays() {
         var start = new Date(pickupStr + 'T00:00:00Z');
         var end = new Date(dropoffStr + 'T00:00:00Z');
-        return Math.max(1, Math.round((end - start) / 86400000));
+        var baseDays = Math.max(1, Math.round((end - start) / 86400000));
+
+        // If return time exceeds pickup time by more than 2 hours, charge an extra day
+        var pParts = pickupTime.split(':');
+        var dParts = dropoffTime.split(':');
+        var pickupMinutes = parseInt(pParts[0], 10) * 60 + parseInt(pParts[1] || '0', 10);
+        var dropoffMinutes = parseInt(dParts[0], 10) * 60 + parseInt(dParts[1] || '0', 10);
+        if (dropoffMinutes - pickupMinutes > 120) {
+            baseDays += 1;
+        }
+        return baseDays;
     }
 
     function getDailyRateByTier(days) {
