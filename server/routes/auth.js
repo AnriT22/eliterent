@@ -6,6 +6,32 @@ const { queryAll, queryOne, execute } = require('../db-helpers');
 
 const router = express.Router();
 
+// Per-country phone digit rules (local digits only, excluding country code)
+const PHONE_RULES = {
+    '+995': 9, '+1': 10, '+44': 10, '+49': 11, '+33': 9, '+34': 9, '+39': 10,
+    '+90': 10, '+7': 10, '+380': 9, '+48': 9, '+31': 9, '+46': 9, '+41': 9,
+    '+43': 10, '+32': 9, '+351': 9, '+30': 10, '+972': 9, '+971': 9, '+966': 9,
+    '+91': 10, '+86': 11, '+81': 10, '+82': 10, '+61': 9, '+55': 11, '+374': 8, '+994': 9
+};
+
+function validatePhone(phone) {
+    if (!phone) return { valid: true };
+    // Phone is stored as "+CODE LOCALDIGITS" e.g. "+995 592522299"
+    var parts = phone.trim().split(/\s+/);
+    var code = parts[0] || '';
+    var local = parts.slice(1).join('').replace(/\D/g, '');
+    var expectedDigits = PHONE_RULES[code];
+    if (expectedDigits && local.length !== expectedDigits) {
+        return { valid: false, error: 'Phone number must be exactly ' + expectedDigits + ' digits for ' + code };
+    }
+    // Fallback: accept 7-15 digits total for unknown codes
+    var allDigits = phone.replace(/\D/g, '');
+    if (allDigits.length < 7 || allDigits.length > 15) {
+        return { valid: false, error: 'Invalid phone number format' };
+    }
+    return { valid: true };
+}
+
 // GET /api/verify-email?email=test@example.com — check if email domain has valid MX records
 router.get('/verify-email', async (req, res) => {
     try {
@@ -74,11 +100,11 @@ router.post('/register/guest', async (req, res) => {
             return res.status(400).json({ error: 'Password must be at least 6 characters' });
         }
 
-        // Validate phone format if provided (7-15 digits covers all international formats)
+        // Validate phone format per country rules
         if (phone) {
-            const digits = phone.replace(/\D/g, '');
-            if (digits.length < 7 || digits.length > 15) {
-                return res.status(400).json({ error: 'Invalid phone number format' });
+            var phoneCheck = validatePhone(phone);
+            if (!phoneCheck.valid) {
+                return res.status(400).json({ error: phoneCheck.error });
             }
         }
 
@@ -153,11 +179,11 @@ router.post('/register/partner', async (req, res) => {
             return res.status(400).json({ error: 'Company name is required for partners' });
         }
 
-        // Validate phone format if provided (7-15 digits covers all international formats)
+        // Validate phone format per country rules
         if (phone) {
-            const digits = phone.replace(/\D/g, '');
-            if (digits.length < 7 || digits.length > 15) {
-                return res.status(400).json({ error: 'Invalid phone number format' });
+            var phoneCheck = validatePhone(phone);
+            if (!phoneCheck.valid) {
+                return res.status(400).json({ error: phoneCheck.error });
             }
         }
 

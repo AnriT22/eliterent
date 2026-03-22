@@ -52,7 +52,7 @@
     // Phone formatting
     var phoneInput = document.getElementById('pPhone');
     if (phoneInput && typeof initPhoneFormat === 'function') {
-        initPhoneFormat(phoneInput);
+        initPhoneFormat(phoneInput, 'pPhoneCode');
     }
 
     function updatePartnerUI() {
@@ -96,10 +96,12 @@
         if (!name || name.length < 2) { showErr('pFullNameError', 'Full name is required'); valid = false; } else clearErr('pFullNameError');
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('pEmailError', 'Valid email is required'); valid = false; } else clearErr('pEmailError');
 
-        // Phone validation: local digits only (country code is in separate dropdown)
+        // Phone validation: per-country digit count
         var phoneDigits = phone.replace(/\D/g, '');
-        if (!phone || phoneDigits.length < 5 || phoneDigits.length > 12) {
-            showErr('pPhoneError', 'Please enter a valid phone number');
+        var pCodeEl = document.getElementById('pPhoneCode');
+        var pRule = (typeof getPhoneRule === 'function') ? getPhoneRule(pCodeEl ? pCodeEl.value : '+995') : { digits: 9 };
+        if (!phone || phoneDigits.length !== pRule.digits) {
+            showErr('pPhoneError', 'Phone number must be exactly ' + pRule.digits + ' digits for ' + (pCodeEl ? pCodeEl.value : '+995'));
             valid = false;
         } else {
             clearErr('pPhoneError');

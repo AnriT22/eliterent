@@ -269,10 +269,22 @@
     function vdFmtDisplay(d) {
         return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
-    function vdDayCount(startDate, endDate) {
+    function vdDayCount(startDate, endDate, pickupTime, dropoffTime) {
         var start = new Date(Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()));
         var end = new Date(Date.UTC(endDate.getFullYear(), endDate.getMonth(), endDate.getDate()));
-        return Math.max(1, Math.round((end - start) / 86400000));
+        var baseDays = Math.max(1, Math.round((end - start) / 86400000));
+
+        // If return time exceeds pickup time by more than 2 hours, charge an extra day
+        if (pickupTime && dropoffTime) {
+            var pParts = pickupTime.split(':');
+            var dParts = dropoffTime.split(':');
+            var pickupMinutes = parseInt(pParts[0], 10) * 60 + parseInt(pParts[1] || '0', 10);
+            var dropoffMinutes = parseInt(dParts[0], 10) * 60 + parseInt(dParts[1] || '0', 10);
+            if (dropoffMinutes - pickupMinutes > 120) {
+                baseDays += 1;
+            }
+        }
+        return baseDays;
     }
 
     function vdGetDailyRateByTier(days) {
@@ -427,7 +439,9 @@
 
         var clearBtn = document.getElementById('vdClearBtn');
         if (vdPickupDate && vdDropoffDate && vehicleData) {
-            var days = vdDayCount(vdPickupDate, vdDropoffDate);
+            var pTime = document.getElementById('vdPickupTime').value || '10:00';
+            var dTime = document.getElementById('vdDropoffTime').value || '10:00';
+            var days = vdDayCount(vdPickupDate, vdDropoffDate, pTime, dTime);
             var dailyRate = vdGetDailyRateByTier(days);
             var total = (days * dailyRate).toFixed(2);
             totalAmt.textContent = '$' + total + ' (' + days + ' day' + (days !== 1 ? 's' : '') + ' × $' + dailyRate.toFixed(2) + ')';
@@ -440,6 +454,10 @@
             clearBtn.style.display = (vdPickupDate || vdDropoffDate) ? 'block' : 'none';
         }
     }
+
+    // Recalculate price when time changes
+    document.getElementById('vdPickupTime').addEventListener('change', updateDateDisplay);
+    document.getElementById('vdDropoffTime').addEventListener('change', updateDateDisplay);
 
     // Clear Dates button
     document.getElementById('vdClearBtn').addEventListener('click', function() {
