@@ -599,22 +599,24 @@ body.auth-page .form-actions {
 /* ===== LICENSE OPTIONS ===== */
 body.auth-page .license-options {
     display: flex;
+    flex-direction: column;
     gap: 10px;
-    flex-wrap: wrap;
 }
 
 body.auth-page .license-option {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 10px 16px;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 14px 18px;
     background: rgba(136, 189, 242, 0.06);
     border: 1.5px solid rgba(136, 189, 242, 0.12);
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s;
-    font-size: 13px;
+    font-size: 14px;
     color: #94a3b8;
+    width: 100%;
 }
 
 body.auth-page .license-option:hover {

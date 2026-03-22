@@ -390,4 +390,17 @@
 @media (max-width: 480px) {
     .vd-specs-grid { grid-template-columns: 1fr 1fr; }
     .vd-date-row { flex-direction: column; }
+
+    /* Calendar mobile fix — prevent last column overflow */
+    .vd-cal-overlay { padding: 8px; }
+    .vd-cal-modal { padding: 18px 14px 14px; border-radius: 20px; max-width: 100%; box-sizing: border-box; }
+    .vd-cal-header { grid-template-columns: 36px 1fr 36px 36px; gap: 6px; margin-bottom: 16px; }
+    .vd-cal-nav, .vd-cal-close { width: 36px; height: 36px; font-size: 18px; border-radius: 10px; }
+    .vd-cal-month-label { font-size: 16px; }
+    .vd-cal-days-header span { font-size: 11px; padding: 4px 2px; }
+    .vd-cal-grid { gap: 3px; }
+    .vd-cal-day { min-height: 40px; font-size: 14px; border-radius: 10px; }
+    .vd-cal-footer { margin-top: 16px; padding-top: 12px; }
+    .vd-cal-footer span { font-size: 13px; }
+    .vd-cal-apply { padding: 10px 22px; font-size: 15px; border-radius: 10px; }
 }

@@ -269,6 +269,9 @@ router.post('/', authenticateToken, requireRole('guest'), async (req, res) => {
             console.error('New booking notification email error:', emailErr.message);
         }
 
+        var paypalConfigured = false;
+        try { paypalConfigured = require('../paypal').isConfigured(); } catch (e) {}
+
         res.status(201).json({
             message: 'Booking created successfully',
             booking_id: booking.id,
@@ -276,6 +279,7 @@ router.post('/', authenticateToken, requireRole('guest'), async (req, res) => {
             rental_days: days,
             extras_total: extrasTotal,
             service_fee: serviceFee,
+            payment_required: paypalConfigured && serviceFee > 0,
             status: 'pending'
         });
     } catch (err) {
