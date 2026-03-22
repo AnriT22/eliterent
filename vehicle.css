@@ -279,6 +279,8 @@
     padding: 28px 24px 18px;
     width: 100%;
     max-width: 470px;
+    box-sizing: border-box;
+    overflow: hidden;
     box-shadow: 0 28px 80px rgba(0,0,0,0.24);
 }
 .vd-cal-header {
@@ -313,7 +315,7 @@
 .vd-cal-days-header span { font-size: 12px; font-weight: 700; color: #94a3b8; padding: 8px 4px; }
 .vd-cal-grid {
     display: grid; grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
+    gap: 4px;
 }
 .vd-cal-day {
     aspect-ratio: 1;
@@ -321,7 +323,6 @@
     font-size: 16px; border-radius: 14px;
     cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s;
     color: #1e293b;
-    min-height: 58px;
 }
 .vd-cal-day:hover:not(.empty):not(.past):not(.blocked) { background: #eff6ff; color: #3B82F6; }
 .vd-cal-day.empty { cursor: default; }
