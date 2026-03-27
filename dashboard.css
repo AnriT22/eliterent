@@ -744,6 +744,56 @@ select.db-input {
     padding-top: 16px;
 }
 
+/* Filter Options cards */
+.vf-filter-options-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.vf-filter-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: #f8fafc;
+    border: 1.5px solid #e8ecf1;
+    border-radius: 12px;
+    padding: 16px 18px;
+    transition: border-color 0.2s;
+}
+
+.vf-filter-card:focus-within {
+    border-color: #3B82F6;
+    background: #f0f7ff;
+}
+
+.vf-filter-card-icon {
+    width: 38px;
+    height: 38px;
+    background: #e0eaff;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #3B82F6;
+}
+
+.vf-filter-card-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.vf-filter-card-body .db-label {
+    margin-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+    .vf-filter-options-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .vf-sub-title {
     font-size: 14px;
     font-weight: 700;
