@@ -326,9 +326,20 @@
         var priceTiers = {}; try { priceTiers = typeof v.price_tiers === 'string' ? JSON.parse(v.price_tiers || '{}') : (v.price_tiers || {}); } catch(e) {}
         var insurance = {}; try { insurance = typeof v.insurance === 'string' ? JSON.parse(v.insurance || '{}') : (v.insurance || {}); } catch(e) {}
 
-        var imgHtml = v.image_url
-            ? '<img src="' + v.image_url + '" style="width:100%;max-height:280px;object-fit:cover;border-radius:10px;margin-bottom:20px;">'
-            : '';
+        var gallery = []; try { gallery = typeof v.gallery === 'string' ? JSON.parse(v.gallery || '[]') : (v.gallery || []); } catch(e) {}
+        if (!Array.isArray(gallery)) gallery = [];
+        var allImages = [];
+        if (v.image_url) allImages.push(v.image_url);
+        gallery.forEach(function(url) { if (url && allImages.indexOf(url) === -1) allImages.push(url); });
+
+        var imgHtml = '';
+        if (allImages.length > 0) {
+            imgHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:20px;">'
+                + allImages.map(function(url, i) {
+                    return '<img src="' + url + '" style="width:100%;height:180px;object-fit:cover;border-radius:10px;cursor:pointer;border:1px solid #e2e8f0;" onclick="window.open(this.src)">';
+                }).join('')
+                + '</div>';
+        }
 
         var row = function(label, val) { return val ? '<tr><td style="padding:6px 12px 6px 0;color:#64748b;font-weight:600;white-space:nowrap;">' + label + '</td><td style="padding:6px 0;">' + val + '</td></tr>' : ''; };
 

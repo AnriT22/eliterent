@@ -1309,8 +1309,24 @@
                     + ' &middot; <a href="mailto:' + (b.guest_email||'') + '" style="color:#3B82F6;">' + (b.guest_email||'') + '</a></div>'
                     + '<div class="db-booking-dates">' + pickup + ' &rarr; ' + dropoff + ' &middot; ' + days + ' day' + (days!==1?'s':'') + '</div>'
                     + (b.pickup_location ? '<div class="db-booking-loc">&#128205; ' + b.pickup_location + (b.dropoff_location && b.dropoff_location !== b.pickup_location ? ' &rarr; ' + b.dropoff_location : '') + '</div>' : '')
+                    + (function() {
+                        var extrasArr = [];
+                        try { extrasArr = typeof b.extras_json === 'string' ? JSON.parse(b.extras_json || '[]') : (b.extras_json || []); } catch(e) {}
+                        if (!Array.isArray(extrasArr)) extrasArr = [];
+                        if (extrasArr.length > 0) {
+                            return '<div style="margin:6px 0;display:flex;gap:6px;flex-wrap:wrap;">'
+                                + extrasArr.map(function(ex) {
+                                    var price = parseFloat(ex.price) || 0;
+                                    return '<span style="padding:3px 8px;background:#dbeafe;color:#2563eb;border-radius:6px;font-size:11px;font-weight:600;">'
+                                        + (ex.name || ex.code || 'Extra') + (price > 0 ? ' $' + price : '') + '</span>';
+                                }).join('') + '</div>';
+                        }
+                        return '';
+                    })()
                     + (b.guest_notes ? '<div class="db-booking-notes">Note: ' + b.guest_notes + '</div>' : '')
-                    + '<div class="db-booking-price">Total: <strong>$' + (b.total_price || 0) + '</strong> &middot; <span style="color:#94a3b8;font-size:12px;">Booked ' + created + '</span></div>'
+                    + '<div class="db-booking-price">Total: <strong>$' + (b.total_price || 0) + '</strong>'
+                    + (b.extras_total && parseFloat(b.extras_total) > 0 ? ' <span style="color:#64748b;font-size:12px;">(extras: $' + parseFloat(b.extras_total).toFixed(2) + ')</span>' : '')
+                    + ' &middot; <span style="color:#94a3b8;font-size:12px;">Booked ' + created + '</span></div>'
                     + '</div>';
 
                 if (b.status === 'pending') {
