@@ -131,6 +131,20 @@ router.post('/', authenticateToken, requireRole('partner'), async (req, res) => 
             return res.status(400).json({ error: 'Name, category, engine, gearbox, drive type, price, and year are required' });
         }
 
+        var price = parseFloat(b.price_per_day);
+        if (!price || price <= 0 || price > 100000) {
+            return res.status(400).json({ error: 'Price must be between $1 and $100,000 per day' });
+        }
+
+        var year = parseInt(b.year);
+        if (!year || year < 1990 || year > new Date().getFullYear() + 1) {
+            return res.status(400).json({ error: 'Vehicle year must be between 1990 and ' + (new Date().getFullYear() + 1) });
+        }
+
+        if (b.deposit_amount !== undefined && parseFloat(b.deposit_amount) < 0) {
+            return res.status(400).json({ error: 'Deposit amount cannot be negative' });
+        }
+
         if (!b.tech_passport_front) {
             return res.status(400).json({ error: 'Technical passport image is required' });
         }

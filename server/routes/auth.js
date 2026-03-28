@@ -6,6 +6,27 @@ const { queryAll, queryOne, execute } = require('../db-helpers');
 
 const router = express.Router();
 
+// Email format validation
+function isValidEmail(email) {
+    if (!email || email.length > 254) return false;
+    var re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    return re.test(email);
+}
+
+// Password strength validation
+function validatePassword(password) {
+    if (!password || password.length < 8) return { valid: false, error: 'Password must be at least 8 characters' };
+    if (!/[A-Z]/.test(password)) return { valid: false, error: 'Password must contain at least one uppercase letter' };
+    if (!/[0-9]/.test(password)) return { valid: false, error: 'Password must contain at least one number' };
+    if (!/[^A-Za-z0-9]/.test(password)) return { valid: false, error: 'Password must contain at least one special character' };
+    return { valid: true };
+}
+
+// Escape LIKE wildcards
+function escapeLikeWildcards(str) {
+    return String(str || '').replace(/%/g, '').replace(/_/g, '');
+}
+
 // Per-country phone digit rules (local digits only, excluding country code)
 const PHONE_RULES = {
     '+995': 9, '+1': 10, '+44': 10, '+49': 11, '+33': 9, '+34': 9, '+39': 10,
@@ -96,8 +117,13 @@ router.post('/register/guest', async (req, res) => {
             return res.status(400).json({ error: 'Email, password, and full name are required' });
         }
 
-        if (password.length < 6) {
-            return res.status(400).json({ error: 'Password must be at least 6 characters' });
+        if (!isValidEmail(email)) {
+            return res.status(400).json({ error: 'Invalid email format' });
+        }
+
+        var pwCheck = validatePassword(password);
+        if (!pwCheck.valid) {
+            return res.status(400).json({ error: pwCheck.error });
         }
 
         // Validate phone format per country rules
@@ -115,9 +141,10 @@ router.post('/register/guest', async (req, res) => {
 
         if (phone) {
             const phoneDigits = phone.replace(/\D/g, '');
+            const safeLast9 = escapeLikeWildcards(phoneDigits.slice(-9));
             const phoneExists = await queryOne(
                 "SELECT id FROM users WHERE REPLACE(REPLACE(REPLACE(phone, ' ', ''), '+', ''), '-', '') LIKE '%' || $1",
-                [phoneDigits.slice(-9)]
+                [safeLast9]
             );
             if (phoneExists) {
                 return res.status(409).json({ error: 'Phone number already registered' });
@@ -137,7 +164,7 @@ router.post('/register/guest', async (req, res) => {
             [email.trim(), password_hash, full_name.trim(), phone || null, 'guest']
         );
 
-        const newUser = await queryOne('SELECT * FROM users WHERE email = $1', [email.trim()]);
+        const newUser = await queryOne('SELECT id, email, full_name, role, is_approved FROM users WHERE email = $1', [email.trim()]);
         const token = generateToken(newUser);
 
         res.status(201).json({
@@ -171,8 +198,13 @@ router.post('/register/partner', async (req, res) => {
             return res.status(400).json({ error: 'Email, password, and full name are required' });
         }
 
-        if (password.length < 6) {
-            return res.status(400).json({ error: 'Password must be at least 6 characters' });
+        if (!isValidEmail(email)) {
+            return res.status(400).json({ error: 'Invalid email format' });
+        }
+
+        var pwCheck = validatePassword(password);
+        if (!pwCheck.valid) {
+            return res.status(400).json({ error: pwCheck.error });
         }
 
         if (!company_name) {
@@ -194,9 +226,10 @@ router.post('/register/partner', async (req, res) => {
 
         if (phone) {
             const phoneDigits = phone.replace(/\D/g, '');
+            const safeLast9 = escapeLikeWildcards(phoneDigits.slice(-9));
             const phoneExists = await queryOne(
                 "SELECT id FROM users WHERE REPLACE(REPLACE(REPLACE(phone, ' ', ''), '+', ''), '-', '') LIKE '%' || $1",
-                [phoneDigits.slice(-9)]
+                [safeLast9]
             );
             if (phoneExists) {
                 return res.status(409).json({ error: 'Phone number already registered' });
@@ -216,7 +249,7 @@ router.post('/register/partner', async (req, res) => {
             [email.trim(), password_hash, full_name.trim(), phone || null, 'partner']
         );
 
-        const newUser = await queryOne('SELECT * FROM users WHERE email = $1', [email.trim()]);
+        const newUser = await queryOne('SELECT id, email, full_name, role, is_approved FROM users WHERE email = $1', [email.trim()]);
         const userId = newUser.id;
 
         // Insert partner profile (is_verified=0, needs admin approval in Partners section)
@@ -382,8 +415,9 @@ router.put('/me/password', authenticateToken, async (req, res) => {
         if (!current_password || !new_password) {
             return res.status(400).json({ error: 'current_password and new_password are required' });
         }
-        if (new_password.length < 6) {
-            return res.status(400).json({ error: 'New password must be at least 6 characters' });
+        var pwCheck = validatePassword(new_password);
+        if (!pwCheck.valid) {
+            return res.status(400).json({ error: pwCheck.error });
         }
         const user = await queryOne('SELECT * FROM users WHERE id = $1', [req.user.id]);
         if (!user) return res.status(404).json({ error: 'User not found' });
@@ -475,7 +509,8 @@ router.post('/reset-password', async (req, res) => {
     try {
         const { token, new_password } = req.body;
         if (!token || !new_password) return res.status(400).json({ error: 'Token and new_password are required' });
-        if (new_password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+        var pwCheck = validatePassword(new_password);
+        if (!pwCheck.valid) return res.status(400).json({ error: pwCheck.error });
 
         const reset = await queryOne('SELECT * FROM password_resets WHERE token = $1 AND used = 0', [token]);
         if (!reset) return res.status(400).json({ error: 'Invalid or expired reset link' });
