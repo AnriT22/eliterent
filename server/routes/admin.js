@@ -1,7 +1,7 @@
 const express = require('express');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const { queryAll, queryOne, execute } = require('../db-helpers');
-const { sendEmail } = require('../mailer');
+const { sendEmail, escapeHtml } = require('../mailer');
 const paypal = require('../paypal');
 
 const router = express.Router();
@@ -43,6 +43,12 @@ async function unblockDatesForBooking(vehicleId, startStr, endStr) {
 
 function formatMoney(value) {
     return '$' + (parseFloat(value) || 0).toFixed(2);
+}
+
+function csvSafe(val) {
+    val = String(val || '');
+    if (/^[=+\-@\t\r]/.test(val)) val = "'" + val;
+    return '"' + val.replace(/"/g, '""') + '"';
 }
 
 function buildApprovalEmailText(booking, recipientLabel) {
@@ -382,7 +388,7 @@ router.put('/partners/:id/unverify', async (req, res) => {
                             to: bk.guest_email,
                             subject: 'Reservation Cancelled — ' + (bk.vehicle_name || 'Vehicle'),
                             text: 'Hello ' + (bk.guest_name || 'Guest') + ',\n\nYour reservation for ' + (bk.vehicle_name || 'a vehicle') + ' (' + bk.pickup_date + ' → ' + bk.dropoff_date + ') has been cancelled because the partner is no longer verified.\n\nWe apologize for the inconvenience. Please book another vehicle on Eliterent.ge.\n\nBest regards,\nEliterent.ge Team',
-                            html: '<p>Hello ' + (bk.guest_name || 'Guest') + ',</p><p>Your reservation for <strong>' + (bk.vehicle_name || 'a vehicle') + '</strong> (' + bk.pickup_date + ' → ' + bk.dropoff_date + ') has been cancelled because the partner is no longer verified.</p><p>We apologize for the inconvenience. Please book another vehicle on <a href="' + (process.env.BASE_URL || 'http://localhost:3000') + '">Eliterent.ge</a>.</p>'
+                            html: '<p>Hello ' + escapeHtml(bk.guest_name || 'Guest') + ',</p><p>Your reservation for <strong>' + escapeHtml(bk.vehicle_name || 'a vehicle') + '</strong> (' + escapeHtml(bk.pickup_date) + ' → ' + escapeHtml(bk.dropoff_date) + ') has been cancelled because the partner is no longer verified.</p><p>We apologize for the inconvenience. Please book another vehicle on <a href="' + (process.env.BASE_URL || 'http://localhost:3000') + '">Eliterent.ge</a>.</p>'
                         });
                     } catch (emailErr) {
                         console.error('Failed to notify guest #' + bk.guest_id + ':', emailErr.message);
@@ -701,7 +707,7 @@ router.get('/export/bookings', async (req, res) => {
         );
         var csv = 'ID,Vehicle,Guest,Guest Email,Partner,Pickup,Dropoff,Days,Total,Service Fee,Extras,Status,Payment,Created\n';
         rows.forEach(function(r) {
-            csv += [r.id, '"'+(r.vehicle_name||'')+'"', '"'+(r.guest_name||'')+'"', r.guest_email||'', '"'+(r.partner_company||'')+'"',
+            csv += [r.id, csvSafe(r.vehicle_name), csvSafe(r.guest_name), csvSafe(r.guest_email), csvSafe(r.partner_company),
                 r.pickup_date||'', r.dropoff_date||'', r.rental_days||'', (r.total_price||0), (r.service_fee||0), (r.extras_total||0),
                 r.status||'', r.payment_status||'', r.created_at||''].join(',') + '\n';
         });
@@ -729,7 +735,7 @@ router.get('/export/financial', async (req, res) => {
         var csv = 'ID,Vehicle,Guest,Guest Email,Pickup,Dropoff,Days,Rental Total,Extras,Service Fee,Total,Status,Payment Status,Payment Date\n';
         rows.forEach(function(r) {
             var rental = Math.round(((r.total_price||0) - (r.extras_total||0) - (r.service_fee||0)) * 100) / 100;
-            csv += [r.id, '"'+(r.vehicle_name||'')+'"', '"'+(r.guest_name||'')+'"', r.guest_email||'',
+            csv += [r.id, csvSafe(r.vehicle_name), csvSafe(r.guest_name), csvSafe(r.guest_email),
                 r.pickup_date||'', r.dropoff_date||'', r.rental_days||'', rental, (r.extras_total||0), (r.service_fee||0), (r.total_price||0),
                 r.status||'', r.payment_status||'unpaid', r.payment_date||''].join(',') + '\n';
         });

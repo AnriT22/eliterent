@@ -1,6 +1,7 @@
 const express = require('express');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const { queryAll, queryOne, execute } = require('../db-helpers');
+const { escapeHtml } = require('../mailer');
 
 const WEBSITE_FEE_PERCENT = 0.30;
 
@@ -171,6 +172,16 @@ router.post('/', authenticateToken, requireRole('guest'), async (req, res) => {
             return res.status(400).json({ error: 'dropoff_date must be after pickup_date' });
         }
 
+        var today = new Date().toISOString().split('T')[0];
+        if (pickup_date < today) {
+            return res.status(400).json({ error: 'Pickup date must be today or in the future' });
+        }
+
+        var days_check = daysBetween(pickup_date, dropoff_date);
+        if (days_check > 365) {
+            return res.status(400).json({ error: 'Maximum booking duration is 365 days' });
+        }
+
         var vehicle = await queryOne(
             `SELECT v.*, pp.company_name, pp.is_verified FROM vehicles v
              LEFT JOIN partner_profiles pp ON v.partner_id = pp.user_id
@@ -262,7 +273,7 @@ router.post('/', authenticateToken, requireRole('guest'), async (req, res) => {
                     to: partnerInfo.email,
                     subject: 'New Booking Request — ' + vehicle.name,
                     text: 'Hello ' + (partnerInfo.company_name || partnerInfo.full_name || 'Partner') + ',\n\nYou have a new booking request:\n\nVehicle: ' + vehicle.name + '\nGuest: ' + (guestUser ? guestUser.full_name : 'Guest') + '\nDates: ' + pickup_date + ' → ' + dropoff_date + '\nTotal: $' + total_price.toFixed(2) + '\n\nPlease review and accept/reject in your dashboard.\n\nEliterent.ge',
-                    html: '<p>Hello ' + (partnerInfo.company_name || partnerInfo.full_name || 'Partner') + ',</p><p>You have a new booking request:</p><ul><li><strong>Vehicle:</strong> ' + vehicle.name + '</li><li><strong>Guest:</strong> ' + (guestUser ? guestUser.full_name : 'Guest') + '</li><li><strong>Dates:</strong> ' + pickup_date + ' → ' + dropoff_date + '</li><li><strong>Total:</strong> $' + total_price.toFixed(2) + '</li></ul><p>Please review and accept/reject in your dashboard.</p><p>Eliterent.ge</p>'
+                    html: '<p>Hello ' + escapeHtml(partnerInfo.company_name || partnerInfo.full_name || 'Partner') + ',</p><p>You have a new booking request:</p><ul><li><strong>Vehicle:</strong> ' + escapeHtml(vehicle.name) + '</li><li><strong>Guest:</strong> ' + escapeHtml(guestUser ? guestUser.full_name : 'Guest') + '</li><li><strong>Dates:</strong> ' + escapeHtml(pickup_date) + ' → ' + escapeHtml(dropoff_date) + '</li><li><strong>Total:</strong> $' + total_price.toFixed(2) + '</li></ul><p>Please review and accept/reject in your dashboard.</p><p>Eliterent.ge</p>'
                 });
             }
         } catch (emailErr) {
@@ -393,7 +404,7 @@ router.patch('/:id/status', authenticateToken, async (req, res) => {
                     to: booking.guest_email,
                     subject: 'Booking Accepted — ' + vehicleName,
                     text: 'Hello ' + (booking.guest_name || 'Guest') + ',\n\nYour reservation for ' + vehicleName + ' (' + dates + ') has been accepted by the partner.\n\nTotal: $' + (parseFloat(booking.total_price) || 0).toFixed(2) + '\n\nThank you for using Eliterent.ge!',
-                    html: '<p>Hello ' + (booking.guest_name || 'Guest') + ',</p><p>Your reservation for <strong>' + vehicleName + '</strong> (' + dates + ') has been <strong style="color:#16a34a;">accepted</strong>.</p><p>Total: <strong>$' + (parseFloat(booking.total_price) || 0).toFixed(2) + '</strong></p><p>Thank you for using Eliterent.ge!</p>'
+                    html: '<p>Hello ' + escapeHtml(booking.guest_name || 'Guest') + ',</p><p>Your reservation for <strong>' + escapeHtml(vehicleName) + '</strong> (' + escapeHtml(dates) + ') has been <strong style="color:#16a34a;">accepted</strong>.</p><p>Total: <strong>$' + (parseFloat(booking.total_price) || 0).toFixed(2) + '</strong></p><p>Thank you for using Eliterent.ge!</p>'
                 });
             }
             if (status === 'rejected' && booking.guest_email) {
@@ -401,7 +412,7 @@ router.patch('/:id/status', authenticateToken, async (req, res) => {
                     to: booking.guest_email,
                     subject: 'Booking Declined — ' + vehicleName,
                     text: 'Hello ' + (booking.guest_name || 'Guest') + ',\n\nUnfortunately your reservation for ' + vehicleName + ' (' + dates + ') was not accepted.\n\nPlease try another vehicle or different dates.\n\nEliterent.ge Team',
-                    html: '<p>Hello ' + (booking.guest_name || 'Guest') + ',</p><p>Unfortunately your reservation for <strong>' + vehicleName + '</strong> (' + dates + ') was <strong style="color:#dc2626;">declined</strong>.</p><p>Please try another vehicle or different dates.</p><p>Eliterent.ge Team</p>'
+                    html: '<p>Hello ' + escapeHtml(booking.guest_name || 'Guest') + ',</p><p>Unfortunately your reservation for <strong>' + escapeHtml(vehicleName) + '</strong> (' + escapeHtml(dates) + ') was <strong style="color:#dc2626;">declined</strong>.</p><p>Please try another vehicle or different dates.</p><p>Eliterent.ge Team</p>'
                 });
             }
             if (status === 'cancel_requested' && booking.partner_email) {
@@ -409,7 +420,7 @@ router.patch('/:id/status', authenticateToken, async (req, res) => {
                     to: booking.partner_email,
                     subject: 'Cancellation Requested — ' + vehicleName,
                     text: 'Hello ' + (booking.partner_company || booking.partner_name || 'Partner') + ',\n\nGuest ' + (booking.guest_name || '') + ' has requested cancellation for ' + vehicleName + ' (' + dates + ').\n\nPlease review in your dashboard.\n\nEliterent.ge',
-                    html: '<p>Hello ' + (booking.partner_company || booking.partner_name || 'Partner') + ',</p><p>Guest <strong>' + (booking.guest_name || '') + '</strong> has requested cancellation for <strong>' + vehicleName + '</strong> (' + dates + ').</p><p>Please review in your dashboard.</p>'
+                    html: '<p>Hello ' + escapeHtml(booking.partner_company || booking.partner_name || 'Partner') + ',</p><p>Guest <strong>' + escapeHtml(booking.guest_name || '') + '</strong> has requested cancellation for <strong>' + escapeHtml(vehicleName) + '</strong> (' + escapeHtml(dates) + ').</p><p>Please review in your dashboard.</p>'
                 });
             }
             if (status === 'cancelled' && booking.guest_email) {
@@ -417,7 +428,7 @@ router.patch('/:id/status', authenticateToken, async (req, res) => {
                     to: booking.guest_email,
                     subject: 'Booking Cancelled — ' + vehicleName,
                     text: 'Hello ' + (booking.guest_name || 'Guest') + ',\n\nYour reservation for ' + vehicleName + ' (' + dates + ') has been cancelled.\n\nEliterent.ge Team',
-                    html: '<p>Hello ' + (booking.guest_name || 'Guest') + ',</p><p>Your reservation for <strong>' + vehicleName + '</strong> (' + dates + ') has been <strong>cancelled</strong>.</p><p>Eliterent.ge Team</p>'
+                    html: '<p>Hello ' + escapeHtml(booking.guest_name || 'Guest') + ',</p><p>Your reservation for <strong>' + escapeHtml(vehicleName) + '</strong> (' + escapeHtml(dates) + ') has been <strong>cancelled</strong>.</p><p>Eliterent.ge Team</p>'
                 });
             }
         } catch (emailErr) {

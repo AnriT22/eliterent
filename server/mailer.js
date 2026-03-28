@@ -1,5 +1,10 @@
 const nodemailer = require('nodemailer');
 
+function escapeHtml(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 let transporter = null;
 
 function getTransporter() {
@@ -47,4 +52,4 @@ async function sendEmail(options) {
     return { sent: true, fallback: false };
 }
 
-module.exports = { sendEmail };
+module.exports = { sendEmail, escapeHtml };

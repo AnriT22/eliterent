@@ -13,9 +13,13 @@ router.get('/overview', authenticateToken, requireRole('partner'), async functio
         var period = req.query.period || '30';
 
         var dateFilter = '';
+        var extraParams = [];
+        var paramOffset = 2;
         if (period !== 'all') {
-            var days = parseInt(period) || 30;
-            dateFilter = "AND b.created_at >= NOW() - INTERVAL '" + days + " days'";
+            var days = Math.max(1, Math.min(parseInt(period) || 30, 365));
+            dateFilter = "AND b.created_at >= NOW() - INTERVAL '1 day' * $" + paramOffset;
+            extraParams.push(days);
+            paramOffset++;
         }
 
         var activeVehiclesRow = await queryOne(
@@ -26,7 +30,7 @@ router.get('/overview', authenticateToken, requireRole('partner'), async functio
         var bookingsRow = await queryOne(
             "SELECT COUNT(*) as count, COALESCE(SUM(b.rental_days), 0) as total_days " +
             "FROM bookings b WHERE b.partner_id = $1 AND b.status IN " + EARNING_STATUSES + " " + dateFilter,
-            [partnerId]
+            [partnerId].concat(extraParams)
         );
 
         var upcomingRow = await queryOne(
@@ -38,18 +42,18 @@ router.get('/overview', authenticateToken, requireRole('partner'), async functio
         var earningsRow = await queryOne(
             "SELECT COALESCE(SUM(b.total_price * " + PARTNER_SHARE + "), 0) as total " +
             "FROM bookings b WHERE b.partner_id = $1 AND b.status IN " + EARNING_STATUSES + " " + dateFilter,
-            [partnerId]
+            [partnerId].concat(extraParams)
         );
 
         var previousEarnings = 0;
         if (period !== 'all') {
-            var d = parseInt(period) || 30;
+            var d = Math.max(1, Math.min(parseInt(period) || 30, 365));
             var prevRow = await queryOne(
                 "SELECT COALESCE(SUM(b.total_price * " + PARTNER_SHARE + "), 0) as total " +
                 "FROM bookings b WHERE b.partner_id = $1 AND b.status IN " + EARNING_STATUSES + " " +
-                "AND b.created_at >= NOW() - INTERVAL '" + (d * 2) + " days' " +
-                "AND b.created_at < NOW() - INTERVAL '" + d + " days'",
-                [partnerId]
+                "AND b.created_at >= NOW() - INTERVAL '1 day' * $2 " +
+                "AND b.created_at < NOW() - INTERVAL '1 day' * $3",
+                [partnerId, d * 2, d]
             );
             previousEarnings = (prevRow && prevRow.total) || 0;
         }

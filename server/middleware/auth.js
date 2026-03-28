@@ -27,7 +27,7 @@ function authenticateToken(req, res, next) {
 
 function requireRole(role) {
     return function (req, res, next) {
-        if (req.user.role !== role) {
+        if (req.user.role !== role && req.user.role !== 'admin') {
             return res.status(403).json({ error: 'Insufficient permissions' });
         }
         next();
@@ -38,7 +38,7 @@ function generateToken(user) {
     return jwt.sign(
         { id: user.id, email: String(user.email || ''), role: String(user.role || ''), full_name: String(user.full_name || '') },
         JWT_SECRET,
-        { expiresIn: '7d' }
+        { expiresIn: '7d', issuer: 'royalcar.rent', audience: 'royalcar-api' }
     );
 }
 

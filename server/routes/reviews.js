@@ -14,12 +14,16 @@ router.get('/', async (req, res) => {
             JOIN users u ON r.guest_id = u.id
             LEFT JOIN vehicles v ON r.vehicle_id = v.id`;
         var params = [];
+        var paramIdx = 1;
         if (req.query.vehicle_id) {
-            sql += ' WHERE r.vehicle_id = $1';
+            sql += ' WHERE r.vehicle_id = $' + paramIdx++;
             params.push(parseInt(req.query.vehicle_id));
         }
         sql += ' ORDER BY r.created_at DESC';
-        if (req.query.limit) sql += ' LIMIT ' + Math.min(parseInt(req.query.limit) || 20, 100);
+        if (req.query.limit) {
+            sql += ' LIMIT $' + paramIdx++;
+            params.push(Math.min(parseInt(req.query.limit) || 20, 100));
+        }
 
         var reviews = await queryAll(sql, params);
         var avgRating = reviews.length

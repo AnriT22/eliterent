@@ -109,9 +109,13 @@ router.delete('/:vehicleId/:date', authenticateToken, requireRole('partner'), as
         }
 
         // Check if record exists before deleting
-        var existing = await queryOne('SELECT id FROM vehicle_availability WHERE vehicle_id = $1 AND date = $2', [vehicleId, date]);
+        var existing = await queryOne('SELECT id, status FROM vehicle_availability WHERE vehicle_id = $1 AND date = $2', [vehicleId, date]);
         if (!existing) {
             return res.status(404).json({ error: 'Availability record not found' });
+        }
+
+        if (existing.status === 'booked') {
+            return res.status(400).json({ error: 'Cannot remove booked dates. Cancel the booking first.' });
         }
 
         // Delete availability record
