@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rent a Car in Georgia — Browse Vehicles | Eliterent.ge</title>
+    <title>Rent a Car in Georgia — Browse Vehicles | RoyalCar.rent</title>
     <meta name="description" content="Browse our full fleet of rental cars in Georgia. Filter by category, price, and features. SUVs, sedans, economy cars and more from verified partners.">
-    <link rel="canonical" href="https://eliterent.ge/vehicles.html">
+    <link rel="canonical" href="https://RoyalCar.rent/vehicles.html">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <meta property="og:title" content="Browse Rental Cars — Eliterent.ge">
+    <meta property="og:title" content="Browse Rental Cars — RoyalCar.rent">
     <meta property="og:description" content="Find the perfect rental car in Georgia from verified partners.">
-    <meta property="og:url" content="https://eliterent.ge/vehicles.html">
-    <meta property="og:site_name" content="Eliterent.ge">
+    <meta property="og:url" content="https://RoyalCar.rent/vehicles.html">
+    <meta property="og:site_name" content="RoyalCar.rent">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="premium.css">
     <link rel="stylesheet" href="vehicles.css">
@@ -24,8 +24,8 @@
         <div class="container header-content">
             <div class="header-left">
                 <a href="/" class="logo">
-                    <img src="images/logo.png" alt="Eliterent.ge" class="logo-img">
-                    <span class="logo-text">Eliterent.ge</span>
+                    <img src="images/logo.png" alt="RoyalCar.rent" class="logo-img">
+                    <span class="logo-text">RoyalCar.rent</span>
                 </a>
             </div>
             <div class="header-center">
@@ -321,7 +321,7 @@
     <footer class="footer">
         <div class="container footer-content">
             <div class="footer-column">
-                <h4>EliteRent.ge</h4>
+                <h4>RoyalCar.rent</h4>
                 <p>Premium car rental marketplace for Georgia adventures.</p>
                 <div class="social-icons">
                     <a href="https://www.facebook.com/profile.php?id=61583448788067" target="_blank" class="social-icon" title="Facebook">
@@ -348,7 +348,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 EliteRent.ge. All rights reserved.</p>
+            <p>&copy; 2026 RoyalCar.rent. All rights reserved.</p>
         </div>
     </footer>
 
@@ -752,6 +752,11 @@
                 var fill = document.querySelector('.vf-range-fill');
                 if (fill) { fill.style.left = '0%'; fill.style.width = '100%'; }
                 document.getElementById('vpSort').value = 'default';
+                // Reset calendar dates
+                vcSelStart = null; vcSelEnd = null;
+                vcTempStart = null; vcTempEnd = null;
+                var dtText = document.getElementById('vfDateText');
+                if (dtText) dtText.textContent = 'Select dates';
                 applyFilters();
             });
         }
