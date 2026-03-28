@@ -1987,8 +1987,8 @@ body {
 
 .social-icons {
     display: flex;
-    gap: 12px;
-    margin-top: 12px;
+    gap: 8px;
+    margin-top: 8px;
 }
 
 .social-icon {
