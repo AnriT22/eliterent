@@ -26,8 +26,8 @@
     gap: 10px;
     position: sticky;
     top: 70px;
-    height: calc(100vh - 70px);
-    overflow-y: scroll;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: #cbd5e1 transparent;
     box-sizing: border-box;
