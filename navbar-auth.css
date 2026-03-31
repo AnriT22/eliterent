@@ -300,3 +300,57 @@
     background: #c9a84c !important;
     border-color: #c9a84c !important;
 }
+
+/* ============================================================
+   MOBILE RESPONSIVE FIXES — NAVBAR AUTH (all phones)
+   ============================================================ */
+
+/* Profile button safety net — always renders correctly */
+.nav-profile-btn {
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+}
+
+/* Login button safety */
+.nav-login-btn {
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+@media (max-width: 600px) {
+    /* Dropdown width on tablet */
+    .nav-profile-dropdown {
+        right: 0 !important;
+        width: 220px !important;
+    }
+}
+
+@media (max-width: 430px) {
+    /* Hide username text, show avatar only */
+    .nav-username { display: none !important; }
+    .nav-profile-arrow { display: none !important; }
+    .nav-profile-btn {
+        padding: 4px !important;
+        border-radius: 50% !important;
+        background: transparent !important;
+        border: none !important;
+    }
+    /* Login button — compact */
+    .nav-login-btn {
+        padding: 6px 12px !important;
+        font-size: 12px !important;
+    }
+    /* Dropdown position on small screens */
+    .nav-profile-dropdown {
+        right: -8px !important;
+        width: 200px !important;
+    }
+    .nav-profile-item {
+        padding: 9px 14px !important;
+        font-size: 13px !important;
+    }
+    .nav-profile-name { font-size: 13px !important; }
+    .nav-profile-email { font-size: 11px !important; }
+}
