@@ -181,7 +181,7 @@ body > *:not(.header):not(.footer):not(script):not(link):not(style):not(.floatin
    PREMIUM HERO
    ======================================== */
 .hero {
-    padding-top: 60px;
+    padding-top: 0;
 }
 
 .hero-background {
@@ -1150,7 +1150,7 @@ body > *:not(.header):not(.footer):not(script):not(link):not(style):not(.floatin
 
     /* === HERO SECTION === */
     .hero {
-        padding-top: 16px;
+        padding-top: 0;
         min-height: auto;
         height: auto;
         overflow: hidden;
