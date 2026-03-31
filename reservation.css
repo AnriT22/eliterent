@@ -1622,3 +1622,110 @@
 
 /* Contact row border */
 .rv-contact-row { border-top-color: #e8e6e0 !important; }
+
+/* ============================================================
+   MOBILE RESPONSIVE FIXES — RESERVATION PAGE (all phones)
+   ============================================================ */
+
+/* Confirm button safety net */
+.rv-confirm-btn {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+}
+
+@media (max-width: 900px) {
+    .rv-page-layout {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+    .rv-summary-panel {
+        position: static !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .rv-page-layout {
+        padding: 12px !important;
+    }
+    .rv-card {
+        border-radius: 12px !important;
+    }
+    .rv-section-header {
+        padding: 12px 14px !important;
+        font-size: 13px !important;
+    }
+    .rv-section-body {
+        padding: 14px !important;
+    }
+    /* Location columns stack */
+    .rv-loc-row {
+        flex-direction: column !important;
+        gap: 0 !important;
+    }
+    .rv-loc-col:first-child {
+        border-right: none !important;
+        border-bottom: 1px solid #e8e6e0 !important;
+    }
+    /* Payment options */
+    .rv-payment-options {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
+    /* Gallery thumbs — horizontal scroll */
+    .rv-thumbs {
+        display: flex !important;
+        overflow-x: auto !important;
+        gap: 6px !important;
+    }
+    .rv-thumbs img {
+        width: 72px !important;
+        height: 52px !important;
+        flex-shrink: 0 !important;
+    }
+    /* Summary panel */
+    .rv-summary-header {
+        padding: 12px 14px !important;
+        font-size: 13px !important;
+    }
+    .rv-summary-body {
+        padding: 14px !important;
+    }
+    .rv-total-amount { font-size: 28px !important; }
+    .rv-confirm-btn {
+        padding: 14px !important;
+        font-size: 15px !important;
+        border-radius: 10px !important;
+    }
+}
+
+@media (max-width: 430px) {
+    .rv-vehicle-title { font-size: 16px !important; }
+    .rv-spec-item { padding: 8px 10px !important; }
+    .rv-spec-label { font-size: 10px !important; }
+    .rv-spec-val { font-size: 13px !important; }
+    .rv-loc-option { padding: 10px 12px !important; }
+    .rv-loc-name { font-size: 13px !important; }
+    .rv-loc-address { font-size: 11px !important; }
+    .rv-extra-item { padding: 10px 12px !important; }
+    .rv-total-amount { font-size: 24px !important; }
+    .rv-confirm-btn { padding: 13px !important; font-size: 14px !important; }
+    /* Contact buttons */
+    .rv-contact-row {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+    .rv-whatsapp-btn,
+    .rv-telegram-btn {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+    /* Modals */
+    .rv-approval-modal,
+    .rv-success-modal {
+        padding: 20px 14px !important;
+        width: 94% !important;
+    }
+}

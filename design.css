@@ -1305,3 +1305,128 @@ textarea:focus-visible {
 
   .container { padding: 0 16px; }
 }
+
+/* ============================================================
+   20. GLOBAL BUTTON SAFETY NET — all screens
+   Ensures no button ever clips, hides, or renders as circle
+   ============================================================ */
+button,
+a.btn,
+.btn,
+.btn-primary,
+.btn-outline,
+.search-btn,
+.vc-book-btn,
+.fleet-card-btn,
+.rv-confirm-btn,
+.vd-book-btn,
+.nav-login-btn,
+.nav-auth-btn,
+.partner-btn {
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  min-width: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+/* Full-width block buttons must stay block, not inline-flex */
+.vc-book-btn,
+.rv-confirm-btn,
+.search-btn {
+  display: block !important;
+  width: 100% !important;
+}
+
+/* ============================================================
+   21. RESPONSIVE — S24 Ultra & all modern phones (430px)
+   ============================================================ */
+@media (max-width: 430px) {
+  /* Navbar — hide selectors, keep logo + hamburger */
+  .header-right .selector-group { display: none !important; }
+  .header-right .partner-btn    { display: none !important; }
+
+  .header-left .logo { font-size: 14px !important; gap: 6px !important; }
+  .header-left .logo img.logo-img,
+  .header-left .logo .logo-icon { width: 28px !important; height: 28px !important; }
+
+  /* Hero */
+  .hero-content { padding: 28px 0 20px !important; }
+  .hero-headline { font-size: 26px !important; letter-spacing: -0.5px !important; }
+  .hero-subtext  { font-size: 13px !important; }
+  .rating-section { gap: 4px !important; font-size: 11px !important; }
+  .badge { display: none !important; }
+
+  /* Booking form — single column stack */
+  .booking-form-container { padding: 4px !important; border-radius: 14px !important; }
+  .form-group-row {
+    flex-direction: column !important;
+    gap: 0 !important;
+  }
+  .form-group + .form-group::before { display: none !important; }
+  .input-wrapper {
+    border-bottom: 1px solid var(--rc-border) !important;
+    border-radius: 0 !important;
+    padding: 12px 14px !important;
+  }
+  .search-btn {
+    width: 100% !important;
+    border-radius: 10px !important;
+    padding: 13px !important;
+    font-size: 14px !important;
+    margin: 6px 0 4px !important;
+    display: flex !important;
+  }
+
+  /* Fleet grid — single col */
+  .fleet-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+  .fleet-card-body { padding: 14px 16px !important; }
+  .fleet-card-title { font-size: 15px !important; }
+  .fleet-price-amount { font-size: 22px !important; }
+  /* Arrow CTA button stays circular — just ensure it doesn't clip */
+  .fleet-card-btn {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Section titles */
+  .section-title,
+  .carousel-title { font-size: 22px !important; }
+  .carousel-section,
+  .features-section,
+  .testimonials-section { padding: 40px 0 !important; }
+
+  /* Bento grid */
+  .bento-grid { grid-template-columns: 1fr !important; }
+  .bento-tile.large { grid-column: span 1 !important; }
+  .bento-tile { padding: 20px !important; }
+
+  /* Testimonials */
+  .testimonials-grid { grid-template-columns: 1fr !important; }
+
+  /* Footer */
+  .footer { padding: 24px 0 10px !important; }
+  .footer-content { grid-template-columns: 1fr !important; gap: 16px !important; }
+
+  /* Floating WhatsApp — icon only */
+  .floating-whatsapp { padding: 10px 12px !important; }
+  .floating-whatsapp span { display: none !important; }
+}
+
+/* ============================================================
+   22. RESPONSIVE — Very small phones (360px and below)
+   ============================================================ */
+@media (max-width: 360px) {
+  .hero-headline { font-size: 22px !important; }
+  .booking-form-container { margin: 0 -4px !important; }
+  .fleet-card-img { height: 150px !important; }
+  .container { padding: 0 12px !important; }
+  .section-title, .carousel-title { font-size: 19px !important; }
+}

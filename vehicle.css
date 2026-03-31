@@ -597,3 +597,71 @@
     .vd-cal-footer span { font-size: 13px; }
     .vd-cal-apply { padding: 10px 22px; font-size: 15px; border-radius: 10px; }
 }
+
+/* ============================================================
+   MOBILE RESPONSIVE FIXES — VEHICLE DETAIL PAGE
+   ============================================================ */
+
+/* Ensure booking panel button never clips */
+.vd-book-btn {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    white-space: nowrap !important;
+}
+
+/* Booking modal buttons always full-width */
+.bk-submit-btn,
+.bk-cancel-btn {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    display: block !important;
+}
+
+@media (max-width: 768px) {
+    .vd-container {
+        grid-template-columns: 1fr !important;
+        padding: 16px 12px !important;
+        gap: 20px !important;
+    }
+    .vd-right { order: -1; }
+    .vd-booking-panel {
+        position: static !important;
+        border-radius: 14px !important;
+    }
+    .vd-specs-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+    .vd-section-title { font-size: 15px !important; }
+    .vd-title { font-size: 22px !important; }
+}
+
+@media (max-width: 430px) {
+    .vd-container { padding: 10px 10px !important; gap: 16px !important; }
+    .vd-title { font-size: 20px !important; }
+    .vd-price-big { font-size: 28px !important; }
+    .vd-specs-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 6px !important; }
+    .vd-spec-val { font-size: 13px !important; }
+    .vd-booking-panel { padding: 16px !important; }
+    .vd-book-btn {
+        padding: 13px !important;
+        font-size: 15px !important;
+        border-radius: 10px !important;
+    }
+    /* Booking modal on small screens */
+    .bk-modal {
+        padding: 20px 16px !important;
+        border-radius: 16px !important;
+    }
+    .bk-title { font-size: 18px !important; }
+    .bk-dates-row { gap: 6px !important; }
+    .bk-date-box { padding: 8px 10px !important; }
+    .bk-price-total { font-size: 20px !important; }
+    .bk-submit-btn { padding: 13px !important; font-size: 15px !important; }
+    /* Gallery thumbs — horizontal scroll */
+    .vd-thumbs {
+        display: flex !important;
+        gap: 6px !important;
+        overflow-x: auto !important;
+        padding-bottom: 4px !important;
+    }
+    .vd-thumbs img { width: 64px !important; height: 48px !important; flex-shrink: 0 !important; }
+}

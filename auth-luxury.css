@@ -1047,3 +1047,79 @@ body.auth-page input[type="date"].form-input { color-scheme: light !important; }
         width: 32px;
     }
 }
+
+/* ============================================================
+   MOBILE RESPONSIVE FIXES — AUTH PAGES (all phones)
+   ============================================================ */
+
+/* Buttons always safe */
+body.auth-page .btn-primary,
+body.auth-page button[type="submit"],
+body.auth-page .auth-submit-btn {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    white-space: nowrap !important;
+    padding: 14px !important;
+    font-size: 15px !important;
+}
+
+@media (max-width: 430px) {
+    body.auth-page .auth-container {
+        padding: 20px 12px !important;
+        align-items: flex-start !important;
+    }
+    body.auth-page .auth-right-panel {
+        padding: 28px 18px !important;
+        border-radius: 14px !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+    }
+    body.auth-page .auth-form-header h2 {
+        font-size: 20px !important;
+    }
+    body.auth-page .auth-form-header p {
+        font-size: 13px !important;
+    }
+    body.auth-page .login-role-tabs {
+        grid-template-columns: 1fr 1fr !important;
+    }
+    body.auth-page .login-role-tab {
+        font-size: 13px !important;
+        padding: 9px 8px !important;
+    }
+    body.auth-page .form-input-wrapper input,
+    body.auth-page .form-input-wrapper select {
+        font-size: 14px !important;
+        padding: 11px 12px 11px 40px !important;
+    }
+    body.auth-page .phone-code-select {
+        width: 120px !important;
+        min-width: 120px !important;
+        max-width: 120px !important;
+        font-size: 12px !important;
+    }
+    body.auth-page .social-login {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
+    body.auth-page .progress-steps {
+        gap: 4px !important;
+    }
+    body.auth-page .progress-step-label {
+        font-size: 10px !important;
+    }
+    body.auth-page .license-options {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+}
+
+@media (max-width: 360px) {
+    body.auth-page .auth-right-panel {
+        padding: 22px 14px !important;
+    }
+    body.auth-page .login-role-tabs {
+        grid-template-columns: 1fr !important;
+    }
+}
