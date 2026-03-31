@@ -1512,3 +1512,113 @@
         line-height: 1.5;
     }
 }
+
+/* ============================================================
+   ROYALCAR DESIGN SYSTEM OVERRIDES — RESERVATION PAGE
+   ============================================================ */
+
+.rv-card {
+    background: #ffffff !important;
+    border-color: #e8e6e0 !important;
+    border-radius: 14px !important;
+}
+
+/* Section headers — replace blue with dark */
+.rv-section-header {
+    background: #111111 !important;
+    color: #ffffff !important;
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.rv-loading-spinner { border-top-color: #c9a84c !important; }
+
+/* Gallery thumbs */
+.rv-thumbs img.active,
+.rv-thumbs img:hover { border-color: #c9a84c !important; }
+
+/* Contact buttons */
+.rv-whatsapp { background: #dcfce7 !important; color: #16a34a !important; }
+.rv-telegram { background: rgba(201,168,76,0.10) !important; color: #a8872e !important; }
+
+/* Vehicle info header */
+.rv-vehicle-info-header:hover { background: #f4f1eb !important; }
+.rv-vehicle-icon { background: rgba(201,168,76,0.10) !important; }
+.rv-vehicle-title { color: #111111 !important; }
+.rv-spec-item { background: #fafaf8 !important; border-radius: 10px !important; }
+.rv-spec-label { color: #aaaaaa !important; }
+.rv-spec-val { color: #111111 !important; }
+
+/* Location options */
+.rv-loc-option { border-color: #e8e6e0 !important; border-radius: 10px !important; }
+.rv-loc-option:hover { border-color: #c9a84c !important; }
+.rv-loc-option.selected { border-color: #c9a84c !important; background: rgba(201,168,76,0.06) !important; }
+.rv-loc-col:first-child { border-right-color: #e8e6e0 !important; }
+.rv-loc-name { color: #111111 !important; }
+.rv-loc-address { color: #aaaaaa !important; }
+.rv-loc-badge.free { background: rgba(22,163,74,0.08) !important; color: #15803d !important; }
+.rv-loc-badge.paid { background: rgba(201,168,76,0.10) !important; color: #a8872e !important; }
+.rv-loc-custom-input { border-color: #e8e6e0 !important; border-radius: 10px !important; }
+.rv-loc-custom-input:focus { border-color: #c9a84c !important; }
+
+/* Payment */
+.rv-payment-header { background: #111111 !important; }
+.rv-payment-option { border-color: #e8e6e0 !important; border-radius: 10px !important; }
+.rv-payment-option:hover { border-color: #c9a84c !important; }
+.rv-payment-option.selected { border-color: #c9a84c !important; background: rgba(201,168,76,0.06) !important; }
+.rv-payment-name { color: #111111 !important; }
+.rv-payment-desc { color: #666666 !important; }
+.rv-payment-note { background: rgba(201,168,76,0.08) !important; color: #a8872e !important; border-radius: 10px !important; }
+
+/* Insurance header */
+.rv-insurance-header { background: #111111 !important; }
+
+/* Extras */
+.rv-extra-item {
+    border-color: #e8e6e0 !important;
+    border-radius: 10px !important;
+}
+.rv-extra-item:hover { border-color: #c9a84c !important; }
+.rv-extra-item.selected { border-color: #c9a84c !important; background: rgba(201,168,76,0.06) !important; }
+
+/* Summary panel */
+.rv-summary-panel {
+    background: #ffffff !important;
+    border-color: #e8e6e0 !important;
+    border-radius: 14px !important;
+}
+.rv-summary-header { background: #111111 !important; color: #ffffff !important; }
+.rv-summary-vehicle-name { color: #111111 !important; font-family: 'DM Sans', 'Inter', sans-serif !important; }
+.rv-price-row { border-top-color: #e8e6e0 !important; }
+.rv-price-total-row { border-top-color: #e8e6e0 !important; }
+.rv-total-label { color: #111111 !important; font-family: 'DM Sans', 'Inter', sans-serif !important; }
+.rv-total-amount {
+    color: #111111 !important;
+    font-family: 'DM Sans', 'Inter', sans-serif !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.5px;
+}
+
+/* Confirm button */
+.rv-confirm-btn {
+    background: #111111 !important;
+    background-image: none !important;
+    border-radius: 10px !important;
+    font-family: 'DM Sans', 'Inter', sans-serif !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    box-shadow: none !important;
+}
+.rv-confirm-btn:hover {
+    background: #c9a84c !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 20px rgba(201,168,76,0.30) !important;
+}
+.rv-confirm-btn:disabled { background: #888888 !important; }
+
+/* Success / approval modals */
+.rv-approval-modal { border-radius: 16px !important; }
+.rv-success-modal { border-radius: 16px !important; }
+.rv-success-icon { background: rgba(201,168,76,0.12) !important; color: #a8872e !important; }
+
+/* Contact row border */
+.rv-contact-row { border-top-color: #e8e6e0 !important; }

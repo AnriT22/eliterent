@@ -379,6 +379,198 @@
 .bk-success-icon { width: 72px; height: 72px; background: #dcfce7; color: #16a34a; border-radius: 50%; font-size: 32px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
 .bk-success-msg { color: #374151; font-size: 15px; line-height: 1.6; margin-bottom: 24px; }
 
+/* ============================================================
+   ROYALCAR DESIGN SYSTEM OVERRIDES — VEHICLE DETAIL PAGE
+   ============================================================ */
+
+.vd-breadcrumb {
+    background: #f4f1eb !important;
+    border-bottom-color: #e8e6e0 !important;
+    color: #666666 !important;
+}
+.vd-breadcrumb a { color: #c9a84c !important; }
+.vd-breadcrumb a:hover { color: #a8872e !important; text-decoration: none !important; }
+
+.vd-section-title {
+    font-family: 'DM Sans', 'Inter', sans-serif !important;
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    color: #111111 !important;
+    border-bottom-color: #e8e6e0 !important;
+}
+
+.vd-spec-item {
+    background: #fafaf8 !important;
+    border-color: #e8e6e0 !important;
+    border-radius: 10px !important;
+}
+.vd-spec-label { color: #aaaaaa !important; }
+.vd-spec-val { color: #111111 !important; }
+
+.vd-description { color: #444444 !important; }
+
+.vd-feature-tag {
+    background: rgba(201,168,76,0.10) !important;
+    border-color: rgba(201,168,76,0.30) !important;
+    color: #a8872e !important;
+    border-radius: 20px !important;
+}
+
+.vd-year-badge {
+    background: rgba(26,26,46,0.80) !important;
+    border-radius: 20px !important;
+}
+
+.vd-thumb.active { border-color: #c9a84c !important; }
+
+/* Booking panel */
+.vd-booking-panel {
+    background: #ffffff !important;
+    border-color: #e8e6e0 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08) !important;
+    top: 76px !important;
+}
+
+.vd-vehicle-name {
+    font-family: 'DM Sans', 'Inter', sans-serif !important;
+    font-size: 20px !important;
+    font-weight: 900 !important;
+    color: #111111 !important;
+}
+.vd-vehicle-meta { color: #666666 !important; }
+
+.vd-price-amount {
+    font-family: 'DM Sans', 'Inter', sans-serif !important;
+    font-size: 30px !important;
+    font-weight: 900 !important;
+    color: #111111 !important;
+    letter-spacing: -0.5px;
+}
+.vd-price-unit { color: #aaaaaa !important; }
+
+.vd-partner-info {
+    background: #f4f1eb !important;
+    border-radius: 8px !important;
+    color: #666666 !important;
+}
+
+.vd-date-box {
+    border-color: #e8e6e0 !important;
+    background: #fafaf8 !important;
+    border-radius: 10px !important;
+}
+.vd-date-box:hover, .vd-date-box.active {
+    border-color: #c9a84c !important;
+    background: rgba(201,168,76,0.06) !important;
+}
+.vd-date-label { color: #aaaaaa !important; }
+.vd-date-val { color: #111111 !important; }
+
+.vd-time-select {
+    border-color: #e8e6e0 !important;
+    background: #fafaf8 !important;
+    color: #111111 !important;
+    border-radius: 10px !important;
+}
+.vd-time-select:hover, .vd-time-select:focus { border-color: #c9a84c !important; }
+.vd-time-label { color: #aaaaaa !important; }
+
+.vd-total-row {
+    background: rgba(201,168,76,0.08) !important;
+    border-color: rgba(201,168,76,0.30) !important;
+    border-radius: 10px !important;
+}
+.vd-total-label { color: #a8872e !important; }
+.vd-total-amount {
+    font-family: 'DM Sans', 'Inter', sans-serif !important;
+    font-size: 20px !important;
+    font-weight: 900 !important;
+    color: #a8872e !important;
+}
+
+.vd-badge {
+    background: #f4f1eb !important;
+    color: #666666 !important;
+    border-color: #e8e6e0 !important;
+    border-radius: 20px !important;
+}
+.vd-badge.green {
+    background: rgba(22,163,74,0.08) !important;
+    color: #15803d !important;
+    border-color: rgba(22,163,74,0.25) !important;
+}
+
+.vd-book-btn {
+    background: #111111 !important;
+    border-radius: 10px !important;
+    font-family: 'DM Sans', 'Inter', sans-serif !important;
+    font-size: 16px !important;
+}
+.vd-book-btn:hover { background: #c9a84c !important; }
+
+.vd-back-btn {
+    background: #111111 !important;
+    border-radius: 10px !important;
+}
+.vd-back-btn:hover { background: #c9a84c !important; }
+
+.vd-clear-btn {
+    background: #f4f1eb !important;
+    border-color: #e8e6e0 !important;
+    color: #666666 !important;
+    border-radius: 10px !important;
+}
+.vd-clear-btn:hover { background: #e8e6e0 !important; }
+
+/* Calendar modal */
+.vd-cal-modal { border-radius: 20px !important; }
+.vd-cal-month-label { color: #111111 !important; }
+.vd-cal-nav, .vd-cal-close {
+    border-color: #e8e6e0 !important;
+    border-radius: 10px !important;
+}
+.vd-cal-day:hover:not(.empty):not(.past):not(.blocked) {
+    background: rgba(201,168,76,0.10) !important;
+    color: #a8872e !important;
+}
+.vd-cal-day.selected {
+    background: #111111 !important;
+    color: #fff !important;
+}
+.vd-cal-day.today { border-color: #c9a84c !important; color: #c9a84c !important; }
+.vd-cal-apply {
+    background: #111111 !important;
+    border-radius: 10px !important;
+}
+.vd-cal-apply:hover { background: #c9a84c !important; }
+
+/* Booking modal overrides */
+.bk-vehicle-row { background: #f4f1eb !important; border-radius: 10px !important; }
+.bk-vehicle-name { color: #111111 !important; }
+.bk-date-box { background: rgba(201,168,76,0.08) !important; border-color: rgba(201,168,76,0.25) !important; }
+.bk-days-box { background: #f4f1eb !important; border-color: #e8e6e0 !important; }
+.bk-price-row {
+    background: rgba(201,168,76,0.08) !important;
+    border-color: rgba(201,168,76,0.30) !important;
+}
+.bk-price-label { color: #a8872e !important; }
+.bk-price-total { color: #a8872e !important; }
+.bk-input { border-color: #e8e6e0 !important; color: #111111 !important; border-radius: 8px !important; }
+.bk-input:focus { border-color: #c9a84c !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.15) !important; }
+.bk-submit-btn {
+    background: #111111 !important;
+    border-radius: 10px !important;
+}
+.bk-submit-btn:hover { background: #c9a84c !important; }
+.bk-submit-btn:disabled { background: #888888 !important; }
+.bk-cancel-btn { background: #f4f1eb !important; color: #444444 !important; border-radius: 10px !important; }
+.bk-cancel-btn:hover { background: #e8e6e0 !important; }
+.bk-title {
+    font-family: 'DM Sans', 'Inter', sans-serif !important;
+    color: #111111 !important;
+}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
     .vd-container {
