@@ -288,7 +288,7 @@ body {
     align-items: center;
     justify-content: flex-start;
     overflow: visible;
-    padding-top: 80px;
+    padding-top: 0;
     margin-bottom: 0;
 }
 
