@@ -1,7 +1,9 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const { queryAll, queryOne, execute } = require('../db-helpers');
 const { escapeHtml } = require('../mailer');
+const { sendOTPSMS } = require('../services/sms');
 
 const WEBSITE_FEE_PERCENT = 0.30;
 
@@ -226,12 +228,13 @@ router.post('/', authenticateToken, requireRole('guest'), async (req, res) => {
         var serviceFee = Math.round(dailyPrice * WEBSITE_FEE_PERCENT * 100) / 100;
         var total_price = Math.round((rentalTotal + extrasTotal + location_fee) * 100) / 100;
 
+        // Create booking with pending_verification status (requires OTP to confirm)
         await execute(
             `INSERT INTO bookings
              (guest_id, vehicle_id, partner_id, pickup_date, dropoff_date, pickup_time, dropoff_time, rental_days,
               pickup_location, dropoff_location, extras_json, extras_total, location_fee, service_fee,
               total_price, status, guest_notes)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 'pending', $16)`,
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 'pending_verification', $16)`,
             [
                 req.user.id,
                 vehicle_id,
@@ -252,15 +255,160 @@ router.post('/', authenticateToken, requireRole('guest'), async (req, res) => {
             ]
         );
 
-        await blockDatesForBooking(vehicle_id, pickup_date, dropoff_date);
-
         var booking = await queryOne(
             'SELECT id FROM bookings WHERE guest_id = $1 AND vehicle_id = $2 AND pickup_date = $3 ORDER BY id DESC LIMIT 1',
             [req.user.id, vehicle_id, pickup_date]
         );
 
+        // Get user's phone for OTP
+        var guestUser = await queryOne('SELECT phone, full_name FROM users WHERE id = $1', [req.user.id]);
+        
+        if (!guestUser || !guestUser.phone) {
+            // If no phone, auto-confirm (legacy flow)
+            await execute("UPDATE bookings SET status = 'pending' WHERE id = $1", [booking.id]);
+            await blockDatesForBooking(vehicle_id, pickup_date, dropoff_date);
+            
+            var paypalConfigured = false;
+            try { paypalConfigured = require('../paypal').isConfigured(); } catch (e) {}
+
+            return res.status(201).json({
+                message: 'Booking created successfully',
+                booking_id: booking.id,
+                total_price: total_price,
+                rental_days: days,
+                extras_total: extrasTotal,
+                service_fee: serviceFee,
+                payment_required: paypalConfigured && serviceFee > 0,
+                status: 'pending'
+            });
+        }
+
+        // Generate OTP for booking verification
+        var otp = Math.floor(100000 + Math.random() * 900000).toString();
+        var otpHash = await bcrypt.hash(otp, 10);
+        var expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+        await execute(
+            `INSERT INTO otp_codes (user_id, phone, code_hash, type, reference_id, expires_at)
+             VALUES ($1, $2, $3, 'reservation', $4, $5)`,
+            [req.user.id, guestUser.phone, otpHash, booking.id, expiresAt]
+        );
+
+        // Send OTP via SMS
+        await sendOTPSMS(guestUser.phone, otp, 'reservation');
+
+        console.log(`[OTP] Booking ${booking.id} verification code for ${guestUser.phone}: ${otp}`);
+
+        var paypalConfigured = false;
+        try { paypalConfigured = require('../paypal').isConfigured(); } catch (e) {}
+
+        res.status(201).json({
+            message: 'Booking created! Please verify with the code sent to your phone.',
+            booking_id: booking.id,
+            total_price: total_price,
+            rental_days: days,
+            extras_total: extrasTotal,
+            service_fee: serviceFee,
+            payment_required: paypalConfigured && serviceFee > 0,
+            status: 'pending_verification',
+            requiresVerification: true,
+            phoneLast4: guestUser.phone.slice(-4),
+            expiresIn: 300
+        });
+    } catch (err) {
+        console.error('Create booking error:', err);
+        res.status(500).json({ error: 'Failed to create booking' });
+    }
+});
+
+// POST /api/bookings/verify - Verify booking with OTP
+router.post('/verify', authenticateToken, requireRole('guest'), async (req, res) => {
+    try {
+        var { booking_id, code } = req.body;
+
+        if (!booking_id || !code) {
+            return res.status(400).json({ error: 'Booking ID and verification code are required' });
+        }
+
+        // Get booking
+        var booking = await queryOne(
+            "SELECT * FROM bookings WHERE id = $1 AND guest_id = $2",
+            [booking_id, req.user.id]
+        );
+
+        if (!booking) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+
+        if (booking.status !== 'pending_verification') {
+            return res.status(400).json({ error: 'Booking is not pending verification' });
+        }
+
+        // Find the OTP record
+        var otpRecord = await queryOne(
+            `SELECT * FROM otp_codes 
+             WHERE reference_id = $1 AND type = 'reservation' AND verified = 0 AND expires_at > NOW()
+             ORDER BY created_at DESC LIMIT 1`,
+            [booking_id]
+        );
+
+        if (!otpRecord) {
+            // Auto-cancel booking if OTP expired
+            await execute(
+                "UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+                [booking_id]
+            );
+            return res.status(400).json({ 
+                error: 'Verification code expired. Booking has been cancelled.',
+                cancelled: true
+            });
+        }
+
+        // Check max attempts
+        if (otpRecord.attempts >= otpRecord.max_attempts) {
+            await execute("UPDATE otp_codes SET verified = -1 WHERE id = $1", [otpRecord.id]);
+            await execute(
+                "UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+                [booking_id]
+            );
+            return res.status(429).json({
+                error: 'Too many failed attempts. Booking has been cancelled.',
+                cancelled: true
+            });
+        }
+
+        // Verify the code
+        var isValid = await bcrypt.compare(code, otpRecord.code_hash);
+
+        if (!isValid) {
+            await execute(
+                "UPDATE otp_codes SET attempts = attempts + 1 WHERE id = $1",
+                [otpRecord.id]
+            );
+
+            var remainingAttempts = otpRecord.max_attempts - otpRecord.attempts - 1;
+
+            return res.status(400).json({
+                error: 'Invalid verification code',
+                remainingAttempts: remainingAttempts
+            });
+        }
+
+        // Mark OTP as verified
+        await execute("UPDATE otp_codes SET verified = 1 WHERE id = $1", [otpRecord.id]);
+
+        // Update booking status to pending (awaiting partner approval)
+        await execute(
+            "UPDATE bookings SET status = 'pending', updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+            [booking_id]
+        );
+
+        // Block dates for the booking
+        await blockDatesForBooking(booking.vehicle_id, booking.pickup_date, booking.dropoff_date);
+
         // Notify partner about new booking
         try {
+            var vehicle = await queryOne('SELECT name, partner_id FROM vehicles WHERE id = $1', [booking.vehicle_id]);
             var partnerInfo = await queryOne(
                 `SELECT u.email, u.full_name, pp.company_name
                  FROM users u LEFT JOIN partner_profiles pp ON u.id = pp.user_id
@@ -272,30 +420,87 @@ router.post('/', authenticateToken, requireRole('guest'), async (req, res) => {
                 await sendEmail({
                     to: partnerInfo.email,
                     subject: 'New Booking Request — ' + vehicle.name,
-                    text: 'Hello ' + (partnerInfo.company_name || partnerInfo.full_name || 'Partner') + ',\n\nYou have a new booking request:\n\nVehicle: ' + vehicle.name + '\nGuest: ' + (guestUser ? guestUser.full_name : 'Guest') + '\nDates: ' + pickup_date + ' → ' + dropoff_date + '\nTotal: $' + total_price.toFixed(2) + '\n\nPlease review and accept/reject in your dashboard.\n\nEliterent.ge',
-                    html: '<p>Hello ' + escapeHtml(partnerInfo.company_name || partnerInfo.full_name || 'Partner') + ',</p><p>You have a new booking request:</p><ul><li><strong>Vehicle:</strong> ' + escapeHtml(vehicle.name) + '</li><li><strong>Guest:</strong> ' + escapeHtml(guestUser ? guestUser.full_name : 'Guest') + '</li><li><strong>Dates:</strong> ' + escapeHtml(pickup_date) + ' → ' + escapeHtml(dropoff_date) + '</li><li><strong>Total:</strong> $' + total_price.toFixed(2) + '</li></ul><p>Please review and accept/reject in your dashboard.</p><p>Eliterent.ge</p>'
+                    text: 'Hello ' + (partnerInfo.company_name || partnerInfo.full_name || 'Partner') + ',\n\nYou have a new booking request:\n\nVehicle: ' + vehicle.name + '\nGuest: ' + (guestUser ? guestUser.full_name : 'Guest') + '\nDates: ' + booking.pickup_date + ' → ' + booking.dropoff_date + '\nTotal: $' + booking.total_price.toFixed(2) + '\n\nPlease review and accept/reject in your dashboard.\n\nRoyalCar.rent',
+                    html: '<p>Hello ' + escapeHtml(partnerInfo.company_name || partnerInfo.full_name || 'Partner') + ',</p><p>You have a new booking request:</p><ul><li><strong>Vehicle:</strong> ' + escapeHtml(vehicle.name) + '</li><li><strong>Guest:</strong> ' + escapeHtml(guestUser ? guestUser.full_name : 'Guest') + '</li><li><strong>Dates:</strong> ' + escapeHtml(booking.pickup_date) + ' → ' + escapeHtml(booking.dropoff_date) + '</li><li><strong>Total:</strong> $' + booking.total_price.toFixed(2) + '</li></ul><p>Please review and accept/reject in your dashboard.</p><p>RoyalCar.rent</p>'
                 });
             }
         } catch (emailErr) {
             console.error('New booking notification email error:', emailErr.message);
         }
 
-        var paypalConfigured = false;
-        try { paypalConfigured = require('../paypal').isConfigured(); } catch (e) {}
-
-        res.status(201).json({
-            message: 'Booking created successfully',
-            booking_id: booking.id,
-            total_price: total_price,
-            rental_days: days,
-            extras_total: extrasTotal,
-            service_fee: serviceFee,
-            payment_required: paypalConfigured && serviceFee > 0,
+        res.json({
+            success: true,
+            message: 'Booking verified successfully!',
+            booking_id: booking_id,
             status: 'pending'
         });
+
     } catch (err) {
-        console.error('Create booking error:', err);
-        res.status(500).json({ error: 'Failed to create booking' });
+        console.error('Verify booking error:', err);
+        res.status(500).json({ error: 'Verification failed' });
+    }
+});
+
+// POST /api/bookings/resend-otp - Resend booking verification OTP
+router.post('/resend-otp', authenticateToken, requireRole('guest'), async (req, res) => {
+    try {
+        var { booking_id } = req.body;
+
+        if (!booking_id) {
+            return res.status(400).json({ error: 'Booking ID is required' });
+        }
+
+        var booking = await queryOne(
+            "SELECT * FROM bookings WHERE id = $1 AND guest_id = $2",
+            [booking_id, req.user.id]
+        );
+
+        if (!booking) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+
+        if (booking.status !== 'pending_verification') {
+            return res.status(400).json({ error: 'Booking is not pending verification' });
+        }
+
+        // Get user's phone
+        var user = await queryOne('SELECT phone FROM users WHERE id = $1', [req.user.id]);
+        if (!user || !user.phone) {
+            return res.status(400).json({ error: 'No phone number on file' });
+        }
+
+        // Invalidate existing OTPs
+        await execute(
+            "UPDATE otp_codes SET verified = -1 WHERE reference_id = $1 AND type = 'reservation' AND verified = 0",
+            [booking_id]
+        );
+
+        // Generate new OTP
+        var otp = Math.floor(100000 + Math.random() * 900000).toString();
+        var otpHash = await bcrypt.hash(otp, 10);
+        var expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+        await execute(
+            `INSERT INTO otp_codes (user_id, phone, code_hash, type, reference_id, expires_at)
+             VALUES ($1, $2, $3, 'reservation', $4, $5)`,
+            [req.user.id, user.phone, otpHash, booking_id, expiresAt]
+        );
+
+        // Send OTP via SMS
+        await sendOTPSMS(user.phone, otp, 'reservation');
+
+        console.log(`[OTP] Resent booking ${booking_id} code for ${user.phone}: ${otp}`);
+
+        res.json({
+            success: true,
+            message: 'New verification code sent',
+            expiresIn: 300,
+            phoneLast4: user.phone.slice(-4)
+        });
+
+    } catch (err) {
+        console.error('Resend booking OTP error:', err);
+        res.status(500).json({ error: 'Failed to resend code' });
     }
 });
 
