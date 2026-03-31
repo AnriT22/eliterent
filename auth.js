@@ -613,14 +613,69 @@ async function submitRegistration() {
             throw new Error(data.error || 'Registration failed');
         }
 
-        // Auto-login: store token and user
+        // Check if OTP verification is required
+        if (data.requiresVerification && data.userId) {
+            nextBtn.disabled = false;
+            nextBtn.textContent = 'Create Account';
+
+            // Show OTP verification modal
+            if (typeof OTPModal !== 'undefined') {
+                OTPModal.show({
+                    title: 'Verify Your Phone',
+                    subtitle: 'Enter the 6-digit code sent to <strong>****' + (data.phoneLast4 || '****') + '</strong>',
+                    phoneLast4: data.phoneLast4,
+                    expiresIn: data.expiresIn || 300,
+                    resendCooldown: 60,
+                    verifyUrl: '/api/register/verify',
+                    resendUrl: '/api/register/resend-otp',
+                    userId: data.userId,
+                    onSuccess: function(verifyData) {
+                        // Store token and user data
+                        if (verifyData.token) {
+                            localStorage.setItem('token', verifyData.token);
+                            localStorage.setItem('user', JSON.stringify(verifyData.user));
+                            localStorage.setItem('isLoggedIn', 'true');
+                        }
+
+                        // Show success message
+                        form.style.display = 'none';
+                        formActions.style.display = 'none';
+
+                        const successEl = document.querySelector('.success-message');
+                        if (successEl) {
+                            successEl.innerHTML = '<div class="success-icon" style="background:#10b981;color:#fff;">&#10003;</div>'
+                                + '<h3 style="color:#fff;">Welcome to RoyalCar.rent!</h3>'
+                                + '<p style="color:#94a3b8;margin-bottom:12px;">Your account has been verified successfully.</p>'
+                                + '<div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:12px;padding:16px;margin:12px 0;text-align:left;">'
+                                + '<p style="color:#10b981;font-size:14px;font-weight:600;margin:0 0 6px;">✓ Phone Verified</p>'
+                                + '<p style="color:#94a3b8;font-size:13px;margin:0;">Your account is ready! You can now browse vehicles and make reservations.</p>'
+                                + '</div>'
+                                + '<p style="color:#64748b;font-size:12px;">Redirecting to homepage...</p>';
+                            successEl.style.display = 'flex';
+                            successEl.style.flexDirection = 'column';
+                            successEl.style.alignItems = 'center';
+                        }
+
+                        setTimeout(function () { window.location.href = 'index.html'; }, 3000);
+                    },
+                    onCancel: function() {
+                        showRegisterError('Please verify your phone number to complete registration. Check your SMS for the code.');
+                    }
+                });
+            } else {
+                // Fallback if OTPModal not loaded
+                showRegisterError('Verification required. Please check your phone for the code.');
+            }
+            return;
+        }
+
+        // Legacy flow (no OTP required - shouldn't happen with new backend)
         if (data.token) {
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
             localStorage.setItem('isLoggedIn', 'true');
         }
 
-        // Hide form and show success message
         form.style.display = 'none';
         formActions.style.display = 'none';
 
@@ -629,10 +684,6 @@ async function submitRegistration() {
             successEl.innerHTML = '<div class="success-icon" style="background:#88BDF2;color:#0c1117;">&#10003;</div>'
                 + '<h3 style="color:#fff;">Welcome to Rent Cars Georgia!</h3>'
                 + '<p style="color:#94a3b8;margin-bottom:12px;">Your account has been created successfully.</p>'
-                + '<div style="background:rgba(136,189,242,0.1);border:1px solid rgba(136,189,242,0.2);border-radius:12px;padding:16px;margin:12px 0;text-align:left;">'
-                + '<p style="color:#BDDDFC;font-size:14px;font-weight:600;margin:0 0 6px;">Please note:</p>'
-                + '<p style="color:#94a3b8;font-size:13px;margin:0;">Your account is ready! You can now browse vehicles and make reservations.</p>'
-                + '</div>'
                 + '<p style="color:#64748b;font-size:12px;">Redirecting to homepage...</p>';
             successEl.style.display = 'flex';
             successEl.style.flexDirection = 'column';

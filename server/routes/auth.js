@@ -3,6 +3,9 @@ const bcrypt = require('bcryptjs');
 const dns = require('dns').promises;
 const { authenticateToken, generateToken } = require('../middleware/auth');
 const { queryAll, queryOne, execute } = require('../db-helpers');
+const { sendOTPEmail } = require('../mailer');
+const { sendOTPSMS } = require('../services/sms');
+const otpService = require('../services/otp');
 
 const router = express.Router();
 
@@ -117,8 +120,18 @@ router.post('/register/guest', async (req, res) => {
             return res.status(400).json({ error: 'Email, password, and full name are required' });
         }
 
+        // Phone is now REQUIRED for 2FA
+        if (!phone) {
+            return res.status(400).json({ error: 'Phone number is required for account verification' });
+        }
+
         if (!isValidEmail(email)) {
             return res.status(400).json({ error: 'Invalid email format' });
+        }
+
+        // Check for disposable email
+        if (otpService.isDisposableEmail(email)) {
+            return res.status(400).json({ error: 'Disposable email addresses are not allowed' });
         }
 
         var pwCheck = validatePassword(password);
@@ -127,11 +140,9 @@ router.post('/register/guest', async (req, res) => {
         }
 
         // Validate phone format per country rules
-        if (phone) {
-            var phoneCheck = validatePhone(phone);
-            if (!phoneCheck.valid) {
-                return res.status(400).json({ error: phoneCheck.error });
-            }
+        var phoneCheck = validatePhone(phone);
+        if (!phoneCheck.valid) {
+            return res.status(400).json({ error: phoneCheck.error });
         }
 
         const existing = await queryOne('SELECT id FROM users WHERE email = $1', [email.trim()]);
@@ -139,16 +150,14 @@ router.post('/register/guest', async (req, res) => {
             return res.status(409).json({ error: 'Email already registered' });
         }
 
-        if (phone) {
-            const phoneDigits = phone.replace(/\D/g, '');
-            const safeLast9 = escapeLikeWildcards(phoneDigits.slice(-9));
-            const phoneExists = await queryOne(
-                "SELECT id FROM users WHERE REPLACE(REPLACE(REPLACE(phone, ' ', ''), '+', ''), '-', '') LIKE '%' || $1",
-                [safeLast9]
-            );
-            if (phoneExists) {
-                return res.status(409).json({ error: 'Phone number already registered' });
-            }
+        const phoneDigits = phone.replace(/\D/g, '');
+        const safeLast9 = escapeLikeWildcards(phoneDigits.slice(-9));
+        const phoneExists = await queryOne(
+            "SELECT id FROM users WHERE REPLACE(REPLACE(REPLACE(phone, ' ', ''), '+', ''), '-', '') LIKE '%' || $1",
+            [safeLast9]
+        );
+        if (phoneExists) {
+            return res.status(409).json({ error: 'Phone number already registered' });
         }
 
         const nameExists = await queryOne('SELECT id FROM users WHERE full_name = $1', [full_name.trim()]);
@@ -158,30 +167,201 @@ router.post('/register/guest', async (req, res) => {
 
         const password_hash = await bcrypt.hash(password, 12);
 
-        // Auto-approve: user can log in immediately, but actions may be restricted
+        // Create user with is_verified = 0 (pending OTP verification)
         await execute(
-            'INSERT INTO users (email, password_hash, full_name, phone, role, is_approved) VALUES ($1, $2, $3, $4, $5, 1)',
-            [email.trim(), password_hash, full_name.trim(), phone || null, 'guest']
+            'INSERT INTO users (email, password_hash, full_name, phone, role, is_approved, is_verified) VALUES ($1, $2, $3, $4, $5, 1, 0)',
+            [email.trim(), password_hash, full_name.trim(), phone, 'guest']
         );
 
-        const newUser = await queryOne('SELECT id, email, full_name, role, is_approved FROM users WHERE email = $1', [email.trim()]);
-        const token = generateToken(newUser);
+        const newUser = await queryOne('SELECT id, email, full_name, phone, role, is_approved, is_verified FROM users WHERE email = $1', [email.trim()]);
+
+        // Generate and send OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpHash = await bcrypt.hash(otp, 10);
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+        await execute(
+            `INSERT INTO otp_codes (user_id, phone, email, code_hash, type, expires_at)
+             VALUES ($1, $2, $3, $4, 'registration', $5)`,
+            [newUser.id, phone, email.trim(), otpHash, expiresAt]
+        );
+
+        // Send OTP via SMS (primary) and Email (backup)
+        await sendOTPSMS(phone, otp, 'registration');
+        await sendOTPEmail(email.trim(), otp, 'registration');
+
+        console.log(`[OTP] Registration code for ${phone}: ${otp}`);
 
         res.status(201).json({
-            message: 'Account created successfully!',
-            token,
-            user: {
-                id: newUser.id,
-                email: newUser.email,
-                full_name: newUser.full_name,
-                role: newUser.role,
-                is_approved: newUser.is_approved
-            },
-            pending_approval: false
+            message: 'Account created! Please verify your phone number.',
+            requiresVerification: true,
+            userId: newUser.id,
+            phoneLast4: phone.slice(-4),
+            expiresIn: 300
         });
     } catch (err) {
         console.error('Guest registration error:', err);
         res.status(500).json({ error: 'Registration failed' });
+    }
+});
+
+// POST /api/register/verify - Verify registration OTP and activate account
+router.post('/register/verify', async (req, res) => {
+    try {
+        const { userId, code } = req.body;
+
+        if (!userId || !code) {
+            return res.status(400).json({ error: 'User ID and verification code are required' });
+        }
+
+        // Get user
+        const user = await queryOne('SELECT * FROM users WHERE id = $1', [userId]);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        if (user.is_verified === 1) {
+            return res.status(400).json({ error: 'Account already verified' });
+        }
+
+        // Find the OTP record
+        const otpRecord = await queryOne(
+            `SELECT * FROM otp_codes 
+             WHERE user_id = $1 AND type = 'registration' AND verified = 0 AND expires_at > NOW()
+             ORDER BY created_at DESC LIMIT 1`,
+            [userId]
+        );
+
+        if (!otpRecord) {
+            return res.status(400).json({ error: 'Verification code expired. Please request a new one.' });
+        }
+
+        // Check max attempts
+        if (otpRecord.attempts >= otpRecord.max_attempts) {
+            await execute("UPDATE otp_codes SET verified = -1 WHERE id = $1", [otpRecord.id]);
+            return res.status(429).json({
+                error: 'Too many failed attempts. Please request a new code.',
+                needsResend: true
+            });
+        }
+
+        // Verify the code
+        const isValid = await bcrypt.compare(code, otpRecord.code_hash);
+
+        if (!isValid) {
+            await execute(
+                "UPDATE otp_codes SET attempts = attempts + 1 WHERE id = $1",
+                [otpRecord.id]
+            );
+
+            const remainingAttempts = otpRecord.max_attempts - otpRecord.attempts - 1;
+
+            return res.status(400).json({
+                error: 'Invalid verification code',
+                remainingAttempts: remainingAttempts
+            });
+        }
+
+        // Mark OTP as verified
+        await execute("UPDATE otp_codes SET verified = 1 WHERE id = $1", [otpRecord.id]);
+
+        // Activate user account
+        await execute(
+            "UPDATE users SET is_verified = 1, phone_verified = 1, email_verified = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+            [userId]
+        );
+
+        // Generate token for auto-login
+        const token = generateToken({
+            id: user.id,
+            email: user.email,
+            role: user.role
+        });
+
+        res.json({
+            success: true,
+            message: 'Account verified successfully!',
+            token,
+            user: {
+                id: user.id,
+                email: user.email,
+                full_name: user.full_name,
+                role: user.role,
+                is_approved: user.is_approved,
+                is_verified: 1
+            }
+        });
+
+    } catch (err) {
+        console.error('Registration verify error:', err);
+        res.status(500).json({ error: 'Verification failed' });
+    }
+});
+
+// POST /api/register/resend-otp - Resend registration OTP
+router.post('/register/resend-otp', async (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ error: 'User ID is required' });
+        }
+
+        const user = await queryOne('SELECT * FROM users WHERE id = $1', [userId]);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        if (user.is_verified === 1) {
+            return res.status(400).json({ error: 'Account already verified' });
+        }
+
+        if (!user.phone) {
+            return res.status(400).json({ error: 'No phone number on file' });
+        }
+
+        // Check cooldown
+        const cooldown = await otpService.checkResendCooldown(`reg:${userId}`);
+        if (!cooldown.allowed) {
+            return res.status(429).json({
+                error: 'Please wait before requesting another code',
+                waitSeconds: cooldown.waitSeconds
+            });
+        }
+
+        // Invalidate existing OTPs
+        await execute(
+            "UPDATE otp_codes SET verified = -1 WHERE user_id = $1 AND type = 'registration' AND verified = 0",
+            [userId]
+        );
+
+        // Generate new OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpHash = await bcrypt.hash(otp, 10);
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+        await execute(
+            `INSERT INTO otp_codes (user_id, phone, email, code_hash, type, expires_at)
+             VALUES ($1, $2, $3, $4, 'registration', $5)`,
+            [userId, user.phone, user.email, otpHash, expiresAt]
+        );
+
+        // Send OTP
+        await sendOTPSMS(user.phone, otp, 'registration');
+        await sendOTPEmail(user.email, otp, 'registration');
+
+        console.log(`[OTP] Resent registration code for ${user.phone}: ${otp}`);
+
+        res.json({
+            success: true,
+            message: 'New verification code sent',
+            expiresIn: 300,
+            phoneLast4: user.phone.slice(-4)
+        });
+
+    } catch (err) {
+        console.error('Resend OTP error:', err);
+        res.status(500).json({ error: 'Failed to resend code' });
     }
 });
 

@@ -34,11 +34,21 @@ async function initDB() {
             role TEXT NOT NULL CHECK(role IN ('guest', 'partner', 'admin')),
             avatar_url TEXT,
             is_approved INTEGER DEFAULT 1,
+            is_verified INTEGER DEFAULT 0,
+            phone_verified INTEGER DEFAULT 0,
+            email_verified INTEGER DEFAULT 0,
             admin_notes TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
+
+    // Add verification columns if they don't exist (for existing databases)
+    try {
+        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified INTEGER DEFAULT 0`);
+        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_verified INTEGER DEFAULT 0`);
+        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified INTEGER DEFAULT 0`);
+    } catch (e) { /* columns may already exist */ }
 
     await pool.query(`
         CREATE TABLE IF NOT EXISTS partner_profiles (
@@ -141,7 +151,7 @@ async function initDB() {
             service_fee REAL DEFAULT 0,
             total_price REAL NOT NULL,
             deposit_paid REAL DEFAULT 0,
-            status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'accepted', 'rejected', 'completed', 'cancelled', 'cancel_requested')),
+            status TEXT DEFAULT 'pending_verification' CHECK(status IN ('pending_verification', 'pending', 'accepted', 'rejected', 'completed', 'cancelled', 'cancel_requested')),
             guest_notes TEXT,
             partner_notes TEXT,
             payment_status TEXT DEFAULT 'unpaid',
@@ -210,6 +220,32 @@ async function initDB() {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     `);
+
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS otp_codes (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER,
+            phone TEXT,
+            email TEXT,
+            code_hash TEXT NOT NULL,
+            type TEXT NOT NULL CHECK(type IN ('registration', 'reservation', 'login', 'phone_verify', 'email_verify')),
+            reference_id INTEGER,
+            attempts INTEGER DEFAULT 0,
+            max_attempts INTEGER DEFAULT 5,
+            expires_at TIMESTAMP NOT NULL,
+            verified INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    `);
+
+    // Create indexes for OTP lookups
+    try {
+        await pool.query('CREATE INDEX IF NOT EXISTS idx_otp_phone ON otp_codes(phone)');
+        await pool.query('CREATE INDEX IF NOT EXISTS idx_otp_email ON otp_codes(email)');
+        await pool.query('CREATE INDEX IF NOT EXISTS idx_otp_user ON otp_codes(user_id)');
+        await pool.query('CREATE INDEX IF NOT EXISTS idx_otp_type ON otp_codes(type)');
+    } catch (e) { /* indexes may already exist */ }
 
     await pool.query(`
         CREATE TABLE IF NOT EXISTS promo_codes (

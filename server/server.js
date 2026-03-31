@@ -19,9 +19,16 @@ const reviewsRoutes = require('./routes/reviews');
 const paymentsRoutes = require('./routes/payments');
 const financialsRoutes = require('./routes/financials');
 const contactRoutes = require('./routes/contact');
+const otpRoutes = require('./routes/otp');
+const { initTwilio } = require('./services/sms');
+const { initRedis } = require('./services/otp');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Initialize external services
+initTwilio();
+initRedis();
 
 // Rate limiting
 const authLimiter = rateLimit({
@@ -52,6 +59,14 @@ const generalApiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 200,
     message: { error: 'Too many requests. Please slow down.' },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+const otpLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 5,
+    message: { error: 'Too many OTP requests. Please wait.' },
     standardHeaders: true,
     legacyHeaders: false
 });
@@ -130,6 +145,8 @@ app.use('/api/reviews', reviewsRoutes);
 app.use('/api/payments', paymentsRoutes);
 app.use('/api/financials', financialsRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/otp', otpLimiter);
+app.use('/api/otp', otpRoutes);
 
 // Fallback: serve index.html for root
 app.get('/', (req, res) => {
