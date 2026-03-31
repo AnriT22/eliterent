@@ -186,9 +186,15 @@ router.post('/register/guest', async (req, res) => {
             [newUser.id, phone, email.trim(), otpHash, expiresAt]
         );
 
-        // Send OTP via SMS (primary) and Email (backup)
+        // Send OTP via SMS (primary) and Email (backup - non-blocking)
         await sendOTPSMS(phone, otp, 'registration');
-        await sendOTPEmail(email.trim(), otp, 'registration');
+        
+        // Email is backup - don't fail if it doesn't work
+        try {
+            await sendOTPEmail(email.trim(), otp, 'registration');
+        } catch (emailErr) {
+            console.error('[OTP] Email send failed (non-critical):', emailErr.message);
+        }
 
         console.log(`[OTP] Registration code for ${phone}: ${otp}`);
 
@@ -346,9 +352,14 @@ router.post('/register/resend-otp', async (req, res) => {
             [userId, user.phone, user.email, otpHash, expiresAt]
         );
 
-        // Send OTP
+        // Send OTP via SMS (primary) and Email (backup - non-blocking)
         await sendOTPSMS(user.phone, otp, 'registration');
-        await sendOTPEmail(user.email, otp, 'registration');
+        
+        try {
+            await sendOTPEmail(user.email, otp, 'registration');
+        } catch (emailErr) {
+            console.error('[OTP] Email send failed (non-critical):', emailErr.message);
+        }
 
         console.log(`[OTP] Resent registration code for ${user.phone}: ${otp}`);
 
