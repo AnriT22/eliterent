@@ -20,14 +20,15 @@ const paymentsRoutes = require('./routes/payments');
 const financialsRoutes = require('./routes/financials');
 const contactRoutes = require('./routes/contact');
 const otpRoutes = require('./routes/otp');
-const { initTwilio } = require('./services/sms');
+const { initSMS } = require('./services/sms');
 const { initRedis } = require('./services/otp');
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 
 // Initialize external services
-initTwilio();
+initSMS();
 initRedis();
 
 // Rate limiting
@@ -71,10 +72,58 @@ const otpLimiter = rateLimit({
     legacyHeaders: false
 });
 
+// Permissions-Policy: disable unused browser features
+app.use((req, res, next) => {
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(self), usb=(), magnetometer=(), gyroscope=(), accelerometer=()');
+    next();
+});
+
+// Request ID for error tracing
+const crypto = require('crypto');
+app.use((req, res, next) => {
+    req.requestId = crypto.randomBytes(8).toString('hex');
+    res.setHeader('X-Request-Id', req.requestId);
+    next();
+});
+
 // Security headers
 app.use(helmet({
-    contentSecurityPolicy: false,
-    crossOriginEmbedderPolicy: false
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://accounts.google.com",
+                "https://www.paypal.com",
+                "https://www.sandbox.paypal.com",
+                "https://cdn.jsdelivr.net"
+            ],
+            scriptSrcAttr: ["'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", "data:", "blob:", "https:", "http:"],
+            connectSrc: [
+                "'self'",
+                "https://www.googleapis.com",
+                "https://accounts.google.com",
+                "https://oauth2.googleapis.com",
+                "https://www.paypal.com",
+                "https://www.sandbox.paypal.com"
+            ],
+            frameSrc: [
+                "https://accounts.google.com",
+                "https://www.google.com",
+                "https://www.paypal.com",
+                "https://www.sandbox.paypal.com"
+            ],
+            fontSrc: ["'self'", "data:"],
+            objectSrc: ["'none'"],
+            baseUri: ["'self'"],
+            formAction: ["'self'", "https://accounts.google.com"]
+        }
+    },
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
 }));
 
 // Compression
@@ -86,11 +135,15 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
     : ['http://localhost:3000', 'http://127.0.0.1:3000'];
 app.use(cors({
     origin: function (origin, cb) {
+        // Allow same-origin requests (no Origin header) and whitelisted origins
         if (!origin || allowedOrigins.indexOf(origin) !== -1) return cb(null, true);
-        if (process.env.NODE_ENV === 'production') return cb(new Error('Not allowed by CORS'));
-        cb(null, true); // allow all only in development
+        if (process.env.NODE_ENV !== 'production') return cb(null, true); // dev only
+        console.warn('[CORS] Blocked origin:', origin);
+        return cb(new Error('Not allowed by CORS'));
     },
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Body parsing with size limits
@@ -100,7 +153,8 @@ app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 // Block access to sensitive files
 app.use((req, res, next) => {
     const blocked = ['.env', '.git', 'package.json', 'package-lock.json', 'node_modules',
-        'AUDIT-REPORT.md', 'SECURITY-AUDIT.md', 'README.md', '.gitignore'];
+        'AUDIT-REPORT.md', 'SECURITY-AUDIT.md', 'README.md', '.gitignore',
+        'ecosystem.config.js', '.windsurf', 'progress.txt', 'Dockerfile', 'docker-compose.yml'];
     const reqPath = req.path.toLowerCase();
     if (blocked.some(b => reqPath === '/' + b || reqPath.startsWith('/' + b + '/'))) {
         return res.status(404).send('Not found');
@@ -111,26 +165,55 @@ app.use((req, res, next) => {
     next();
 });
 
+// admin.html, partner-dashboard.html, partner-financials.html are protected
+// client-side (admin.js, dashboard.js check localStorage token+role → redirect to login).
+// All sensitive data/actions are protected server-side via API-level JWT auth middleware.
+
 // Serve static files with caching
 app.use(express.static(path.join(__dirname, '..'), {
     maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
     etag: true
 }));
 
-// Serve uploaded images with caching
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads'), {
+// Serve uploaded images with caching + security headers
+app.use('/uploads', (req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Content-Disposition', 'inline');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    next();
+}, express.static(path.join(__dirname, '..', 'uploads'), {
     maxAge: '7d',
     etag: true
 }));
+
+// Prevent caching of API responses (sensitive data)
+app.use('/api', (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    next();
+});
 
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', uptime: process.uptime(), timestamp: new Date().toISOString() });
 });
 
+// Google Client ID config (public, no auth needed)
+app.get('/api/config/google-client-id', (req, res) => {
+    res.json({ clientId: process.env.GOOGLE_CLIENT_ID || null });
+});
+
 // API Routes
+app.use('/api/check-availability', rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    message: { error: 'Too many requests. Please slow down.' },
+    standardHeaders: true,
+    legacyHeaders: false
+}));
 app.use('/api/login', authLimiter);
 app.use('/api/register', authLimiter);
+app.use('/api/auth/google', authLimiter);
 app.use('/api/forgot-password', passwordResetLimiter);
 app.use('/api/contact', contactLimiter);
 app.use('/api', generalApiLimiter);
@@ -167,8 +250,8 @@ app.use((req, res) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
-    console.error('Unhandled error:', err.stack || err);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('[' + (req.requestId || 'no-id') + '] Unhandled error:', err.stack || err);
+    res.status(500).json({ error: 'Internal server error', requestId: req.requestId });
 });
 
 // Initialize DB then start server
@@ -177,6 +260,43 @@ initDB().then(() => {
         console.log(`Server running at http://localhost:${PORT}`);
         console.log(`Static files served from: ${path.join(__dirname, '..')}`);
     });
+
+    // Background task: auto-expire stale bookings every 5 minutes
+    const { getPool } = require('./db');
+    setInterval(async () => {
+        try {
+            const pool = getPool();
+            if (!pool) return;
+
+            // Cancel pending_verification bookings older than 15 minutes (guest never completed OTP)
+            const pvResult = await pool.query(
+                "UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE status = 'pending_verification' AND created_at < NOW() - INTERVAL '15 minutes'"
+            );
+            if (pvResult.rowCount > 0) {
+                console.log('[Cleanup] Auto-cancelled ' + pvResult.rowCount + ' expired pending_verification bookings');
+            }
+
+            // Cancel pending bookings older than 72 hours (partner never responded)
+            // Also unblock dates for these bookings
+            const staleBookings = await pool.query(
+                "SELECT id, vehicle_id, pickup_date, dropoff_date FROM bookings WHERE status = 'pending' AND created_at < NOW() - INTERVAL '72 hours'"
+            );
+            if (staleBookings.rows.length > 0) {
+                for (var i = 0; i < staleBookings.rows.length; i++) {
+                    var bk = staleBookings.rows[i];
+                    await pool.query("UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE id = $1", [bk.id]);
+                    await pool.query(
+                        "DELETE FROM vehicle_availability WHERE vehicle_id = $1 AND date >= $2 AND date < $3 AND status = 'booked'",
+                        [bk.vehicle_id, bk.pickup_date, bk.dropoff_date]
+                    );
+                }
+                console.log('[Cleanup] Auto-cancelled ' + staleBookings.rows.length + ' stale pending bookings (72h+ no response)');
+            }
+        } catch (e) {
+            console.error('[Cleanup] Booking expiry error:', e.message);
+        }
+    }, 5 * 60 * 1000); // every 5 minutes
+
 }).catch((err) => {
     console.error('Failed to initialize database:', err);
     process.exit(1);

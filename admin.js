@@ -2,6 +2,10 @@
    ADMIN PANEL — JavaScript
    ======================================== */
 
+function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 (function () {
     var token = localStorage.getItem('token') || sessionStorage.getItem('token');
     var user = null;
@@ -99,7 +103,7 @@
         var el = document.getElementById(containerId);
         if (!el) return;
         if (!data || data.length === 0) {
-            el.innerHTML = '<p style="color:#94a3b8;font-size:13px;margin:auto;">No data yet</p>';
+            el.innerHTML = '<p style="color:#A0A3B0;font-size:13px;margin:auto;">No data yet</p>';
             return;
         }
         var maxVal = Math.max.apply(null, data.map(function (d) { return d[valueKey] || 0; }));
@@ -127,7 +131,7 @@
             var tbody = document.getElementById('usersTableBody');
             var users = data.users || [];
             if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:30px;">No users found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#A0A3B0;padding:30px;">No users found</td></tr>';
                 return;
             }
             tbody.innerHTML = users.map(function (u) {
@@ -135,6 +139,18 @@
                 var approvedBadge = u.is_approved
                     ? '<span class="admin-status" style="background:#dcfce7;color:#16a34a;">Approved</span>'
                     : '<span class="admin-status" style="background:#fef3c7;color:#d97706;">Pending</span>';
+                var googleBadge = u.google_id
+                    ? ' <span class="admin-status" style="background:#e8f0fe;color:#1a73e8;font-size:10px;" title="Signed up with Google">G</span>'
+                    : '';
+                var verifiedBadge = u.is_verified
+                    ? ' <span class="admin-status" style="background:#dcfce7;color:#16a34a;font-size:10px;" title="Verified">✓</span>'
+                    : ' <span class="admin-status" style="background:#fef3c7;color:#d97706;font-size:10px;" title="Not verified">?</span>';
+                var phoneVerBadge = u.phone_verified
+                    ? ' <span class="admin-status" style="background:#dcfce7;color:#16a34a;font-size:10px;" title="Phone verified">📱✓</span>'
+                    : ' <span class="admin-status" style="background:#fef2f2;color:#dc2626;font-size:10px;" title="Phone not verified">📱✗</span>';
+                var emailVerBadge = u.email_verified
+                    ? ' <span class="admin-status" style="background:#dcfce7;color:#16a34a;font-size:10px;" title="Email verified">✉✓</span>'
+                    : ' <span class="admin-status" style="background:#fef2f2;color:#dc2626;font-size:10px;" title="Email not verified">✉✗</span>';
                 var approveBtn = !u.is_approved
                     ? '<button class="admin-action-btn success" onclick="adminApproveUser(' + u.id + ')">Approve</button>'
                       + '<button class="admin-action-btn danger" onclick="adminRejectUser(' + u.id + ')">Reject</button>'
@@ -144,10 +160,10 @@
                     : '<button class="admin-action-btn success" onclick="adminUnsuspendUser(' + u.id + ')">Unsuspend</button>';
                 return '<tr>'
                     + '<td>' + u.id + '</td>'
-                    + '<td><strong><a href="#" onclick="adminViewUser(' + u.id + ');return false;" style="color:#2563eb;text-decoration:none;">' + (u.full_name || '-') + '</a></strong></td>'
+                    + '<td><strong><a href="#" onclick="adminViewUser(' + u.id + ');return false;" style="color:#C9A84C;text-decoration:none;">' + (u.full_name || '-') + '</a></strong>' + googleBadge + '</td>'
                     + '<td>' + (u.email || '-') + '</td>'
                     + '<td>' + (u.phone || '-') + '</td>'
-                    + '<td><span class="admin-status ' + u.role + '">' + u.role + '</span></td>'
+                    + '<td><span class="admin-status ' + u.role + '">' + u.role + '</span>' + verifiedBadge + phoneVerBadge + emailVerBadge + '</td>'
                     + '<td>' + approvedBadge + '</td>'
                     + '<td>' + date + '</td>'
                     + '<td>'
@@ -216,21 +232,24 @@
             var tbody = document.getElementById('partnersTableBody');
             var partners = data.partners || [];
             if (partners.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:30px;">No partners found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#A0A3B0;padding:30px;">No partners found</td></tr>';
                 return;
             }
             tbody.innerHTML = partners.map(function (p) {
                 var date = p.created_at ? new Date(p.created_at).toLocaleDateString() : '-';
                 var verified = p.is_verified ? 'verified' : 'unverified';
+                var pPhoneBadge = p.phone_verified
+                    ? '<span class="admin-status" style="background:#dcfce7;color:#16a34a;font-size:10px;margin-left:4px;" title="Phone verified">📱✓</span>'
+                    : '<span class="admin-status" style="background:#fef2f2;color:#dc2626;font-size:10px;margin-left:4px;" title="Phone not verified">📱✗</span>';
                 var verifyBtn = p.is_verified
                     ? '<button class="admin-action-btn" onclick="adminUnverifyPartner(' + p.id + ')">Unverify</button>'
                     : '<button class="admin-action-btn success" onclick="adminVerifyPartner(' + p.id + ')">Verify</button>';
                 return '<tr>'
                     + '<td>' + p.id + '</td>'
-                    + '<td><strong><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:#2563eb;text-decoration:none;">' + (p.full_name || '-') + '</a></strong></td>'
-                    + '<td><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:#2563eb;text-decoration:none;">' + (p.company_name || '-') + '</a></td>'
+                    + '<td><strong><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:#C9A84C;text-decoration:none;">' + (p.full_name || '-') + '</a></strong></td>'
+                    + '<td><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:#C9A84C;text-decoration:none;">' + (p.company_name || '-') + '</a></td>'
                     + '<td>' + (p.email || '-') + '</td>'
-                    + '<td>' + (p.phone || '-') + '</td>'
+                    + '<td>' + (p.phone || '-') + pPhoneBadge + '</td>'
                     + '<td><span class="admin-status ' + verified + '">' + verified + '</span></td>'
                     + '<td>' + date + '</td>'
                     + '<td>'
@@ -267,13 +286,13 @@
             var vehicles = data.vehicles || [];
             _adminVehicles = vehicles;
             if (vehicles.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:30px;">No vehicles found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#A0A3B0;padding:30px;">No vehicles found</td></tr>';
                 return;
             }
             tbody.innerHTML = vehicles.map(function (v) {
                 var date = v.created_at ? new Date(v.created_at).toLocaleDateString() : '-';
                 var imgSrc = v.image_url || '';
-                var imgTag = imgSrc ? '<img src="' + imgSrc + '" class="vehicle-thumb">' : '<div class="vehicle-thumb" style="display:inline-flex;align-items:center;justify-content:center;background:#e2e8f0;font-size:14px;">-</div>';
+                var imgTag = imgSrc ? '<img src="' + imgSrc + '" class="vehicle-thumb">' : '<div class="vehicle-thumb" style="display:inline-flex;align-items:center;justify-content:center;background:#262A35;font-size:14px;">-</div>';
                 var status = v.status || 'active';
                 return '<tr>'
                     + '<td>' + v.id + '</td>'
@@ -336,12 +355,12 @@
         if (allImages.length > 0) {
             imgHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:20px;">'
                 + allImages.map(function(url, i) {
-                    return '<img src="' + url + '" style="width:100%;height:180px;object-fit:cover;border-radius:10px;cursor:pointer;border:1px solid #e2e8f0;" onclick="window.open(this.src)">';
+                    return '<img src="' + url + '" style="width:100%;height:180px;object-fit:cover;border-radius:10px;cursor:pointer;border:1px solid #3A3F4B;" onclick="window.open(this.src)">';
                 }).join('')
                 + '</div>';
         }
 
-        var row = function(label, val) { return val ? '<tr><td style="padding:6px 12px 6px 0;color:#64748b;font-weight:600;white-space:nowrap;">' + label + '</td><td style="padding:6px 0;">' + val + '</td></tr>' : ''; };
+        var row = function(label, val) { return val ? '<tr><td style="padding:6px 12px 6px 0;color:#A0A3B0;font-weight:600;white-space:nowrap;">' + label + '</td><td style="padding:6px 0;">' + val + '</td></tr>' : ''; };
 
         var specHtml = '<table style="width:100%;font-size:13px;border-collapse:collapse;">'
             + row('Category', v.category)
@@ -360,12 +379,12 @@
         // Price tiers
         var tierHtml = '';
         if (priceTiers.price_1_3 || priceTiers.price_4_7 || priceTiers.price_8_14 || priceTiers.price_15_30) {
-            tierHtml = '<h4 style="margin:16px 0 8px;font-size:14px;color:#334155;">Price Tiers</h4>'
+            tierHtml = '<h4 style="margin:16px 0 8px;font-size:14px;color:#EAEAEA;">Price Tiers</h4>'
                 + '<div style="display:flex;gap:12px;flex-wrap:wrap;">'
-                + (priceTiers.price_1_3 ? '<span style="padding:4px 12px;background:#f1f5f9;border-radius:6px;font-size:12px;">1-3d: $' + priceTiers.price_1_3 + '</span>' : '')
-                + (priceTiers.price_4_7 ? '<span style="padding:4px 12px;background:#f1f5f9;border-radius:6px;font-size:12px;">4-7d: $' + priceTiers.price_4_7 + '</span>' : '')
-                + (priceTiers.price_8_14 ? '<span style="padding:4px 12px;background:#f1f5f9;border-radius:6px;font-size:12px;">8-14d: $' + priceTiers.price_8_14 + '</span>' : '')
-                + (priceTiers.price_15_30 ? '<span style="padding:4px 12px;background:#f1f5f9;border-radius:6px;font-size:12px;">15-30d: $' + priceTiers.price_15_30 + '</span>' : '')
+                + (priceTiers.price_1_3 ? '<span style="padding:4px 12px;background:#262A35;border-radius:6px;font-size:12px;color:#A0A3B0;">1-3d: $' + priceTiers.price_1_3 + '</span>' : '')
+                + (priceTiers.price_4_7 ? '<span style="padding:4px 12px;background:#262A35;border-radius:6px;font-size:12px;color:#A0A3B0;">4-7d: $' + priceTiers.price_4_7 + '</span>' : '')
+                + (priceTiers.price_8_14 ? '<span style="padding:4px 12px;background:#262A35;border-radius:6px;font-size:12px;color:#A0A3B0;">8-14d: $' + priceTiers.price_8_14 + '</span>' : '')
+                + (priceTiers.price_15_30 ? '<span style="padding:4px 12px;background:#262A35;border-radius:6px;font-size:12px;color:#A0A3B0;">15-30d: $' + priceTiers.price_15_30 + '</span>' : '')
                 + '</div>';
         }
 
@@ -373,7 +392,7 @@
         var featKeys = Object.keys(features).filter(function(k) { return features[k]; });
         var featHtml = '';
         if (featKeys.length) {
-            featHtml = '<h4 style="margin:16px 0 8px;font-size:14px;color:#334155;">Features</h4>'
+            featHtml = '<h4 style="margin:16px 0 8px;font-size:14px;color:#EAEAEA;">Features</h4>'
                 + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
                 + featKeys.map(function(k) { return '<span style="padding:4px 10px;background:#dcfce7;color:#16a34a;border-radius:6px;font-size:11px;font-weight:600;">' + k.replace(/_/g, ' ') + '</span>'; }).join('')
                 + '</div>';
@@ -383,13 +402,13 @@
         var extKeys = Object.keys(extras).filter(function(k) { return !k.endsWith('_available') && extras[k] && extras[k] !== '0'; });
         var extHtml = '';
         if (extKeys.length) {
-            extHtml = '<h4 style="margin:16px 0 8px;font-size:14px;color:#334155;">Extras</h4>'
+            extHtml = '<h4 style="margin:16px 0 8px;font-size:14px;color:#EAEAEA;">Extras</h4>'
                 + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
                 + extKeys.map(function(k) {
                     var val = extras[k];
                     var label = k.replace(/_/g, ' ');
-                    if (val === true || val === 1) return '<span style="padding:4px 10px;background:#dbeafe;color:#2563eb;border-radius:6px;font-size:11px;font-weight:600;">' + label + '</span>';
-                    return '<span style="padding:4px 10px;background:#dbeafe;color:#2563eb;border-radius:6px;font-size:11px;font-weight:600;">' + label + ': $' + val + '</span>';
+                    if (val === true || val === 1) return '<span style="padding:4px 10px;background:rgba(201,168,76,0.12);color:#C9A84C;border-radius:6px;font-size:11px;font-weight:600;">' + label + '</span>';
+                    return '<span style="padding:4px 10px;background:rgba(201,168,76,0.12);color:#C9A84C;border-radius:6px;font-size:11px;font-weight:600;">' + label + ': $' + val + '</span>';
                 }).join('')
                 + '</div>';
         }
@@ -397,20 +416,20 @@
         // Tech Passport Photos
         var tpHtml = '';
         if (v.tech_passport_front || v.tech_passport_back) {
-            tpHtml = '<h4 style="margin:20px 0 10px;font-size:14px;color:#334155;">Tech Passport</h4>'
+            tpHtml = '<h4 style="margin:20px 0 10px;font-size:14px;color:#EAEAEA;">Tech Passport</h4>'
                 + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
             if (v.tech_passport_front) {
-                tpHtml += '<div><p style="font-size:11px;color:#64748b;margin:0 0 4px;font-weight:600;">Front</p>'
-                    + '<img src="' + v.tech_passport_front + '" style="width:100%;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;" onclick="window.open(this.src)"></div>';
+                tpHtml += '<div><p style="font-size:11px;color:#A0A3B0;margin:0 0 4px;font-weight:600;">Front</p>'
+                    + '<img src="' + v.tech_passport_front + '" style="width:100%;border-radius:8px;border:1px solid #3A3F4B;cursor:pointer;" onclick="window.open(this.src)"></div>';
             }
             if (v.tech_passport_back) {
-                tpHtml += '<div><p style="font-size:11px;color:#64748b;margin:0 0 4px;font-weight:600;">Back</p>'
-                    + '<img src="' + v.tech_passport_back + '" style="width:100%;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;" onclick="window.open(this.src)"></div>';
+                tpHtml += '<div><p style="font-size:11px;color:#A0A3B0;margin:0 0 4px;font-weight:600;">Back</p>'
+                    + '<img src="' + v.tech_passport_back + '" style="width:100%;border-radius:8px;border:1px solid #3A3F4B;cursor:pointer;" onclick="window.open(this.src)"></div>';
             }
             tpHtml += '</div>';
         } else {
-            tpHtml = '<h4 style="margin:20px 0 10px;font-size:14px;color:#334155;">Tech Passport</h4>'
-                + '<p style="color:#94a3b8;font-size:13px;">No tech passport photos uploaded.</p>';
+            tpHtml = '<h4 style="margin:20px 0 10px;font-size:14px;color:#EAEAEA;">Tech Passport</h4>'
+                + '<p style="color:#A0A3B0;font-size:13px;">No tech passport photos uploaded.</p>';
         }
 
         content.innerHTML = imgHtml + specHtml + tierHtml + featHtml + extHtml + tpHtml;
@@ -439,7 +458,7 @@
             var tbody = document.getElementById('bookingsTableBody');
             var bookings = data.bookings || [];
             if (bookings.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:30px;">No bookings found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#A0A3B0;padding:30px;">No bookings found</td></tr>';
                 return;
             }
             tbody.innerHTML = bookings.map(function (b) {
@@ -599,7 +618,7 @@
         var tbody = document.getElementById('finTableBody');
         tbody.innerHTML = '';
         if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#94a3b8;">No financial records found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#A0A3B0;">No financial records found</td></tr>';
             return;
         }
         filtered.forEach(function(r) {
@@ -617,7 +636,7 @@
                 '<td>$' + r.extras_total.toFixed(2) + '</td>' +
                 '<td><strong>$' + r.service_fee.toFixed(2) + '</strong></td>' +
                 '<td>$' + r.total_price.toFixed(2) + '</td>' +
-                '<td><span class="' + payCls + '" style="' + (payCls ? '' : 'color:#94a3b8;font-size:11px;') + '">' + payLabel + '</span></td>' +
+                '<td><span class="' + payCls + '" style="' + (payCls ? '' : 'color:#A0A3B0;font-size:11px;') + '">' + payLabel + '</span></td>' +
                 '<td><span class="' + statusCls + '">' + statusLabel + '</span></td>';
             if (!r.is_active) tr.style.opacity = '0.6';
             tbody.appendChild(tr);
@@ -674,7 +693,7 @@
             var tbody = document.getElementById('promosTableBody');
             var codes = data.codes || [];
             if (codes.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:30px;">No promo codes yet</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#A0A3B0;padding:30px;">No promo codes yet</td></tr>';
                 return;
             }
             tbody.innerHTML = codes.map(function (c) {
@@ -742,25 +761,25 @@
             var feed = document.getElementById('activityFeed');
             var activities = data.activities || [];
             if (activities.length === 0) {
-                feed.innerHTML = '<p style="color:#94a3b8;text-align:center;padding:40px;">No recent activity</p>';
+                feed.innerHTML = '<p style="color:#A0A3B0;text-align:center;padding:40px;">No recent activity</p>';
                 return;
             }
             var iconMap = {
-                user: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+                user: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
                 calendar: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>',
                 car: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
                 check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>'
             };
-            var colorMap = { registration: '#3b82f6', booking: '#f59e0b', vehicle: '#16a34a', status_change: '#8b5cf6' };
+            var colorMap = { registration: '#C9A84C', booking: '#f59e0b', vehicle: '#16a34a', status_change: '#8b5cf6' };
             feed.innerHTML = activities.map(function (a) {
                 var icon = iconMap[a.icon] || iconMap.check;
-                var color = colorMap[a.type] || '#64748b';
+                var color = colorMap[a.type] || '#A0A3B0';
                 var timeAgo = getTimeAgo(a.time);
-                return '<div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #f1f5f9;">'
+                return '<div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #3A3F4B;">'
                     + '<div style="width:32px;height:32px;border-radius:50%;background:' + color + '10;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + icon + '</div>'
                     + '<div style="flex:1;min-width:0;">'
-                    + '<p style="margin:0;font-size:13px;color:#334155;">' + a.text + '</p>'
-                    + '<p style="margin:2px 0 0;font-size:11px;color:#94a3b8;">' + timeAgo + '</p>'
+                    + '<p style="margin:0;font-size:13px;color:#EAEAEA;">' + a.text + '</p>'
+                    + '<p style="margin:2px 0 0;font-size:11px;color:#A0A3B0;">' + timeAgo + '</p>'
                     + '</div></div>';
             }).join('');
         }).catch(function () {
@@ -786,14 +805,14 @@
     function udStatCard(label, value, color) {
         return '<div style="background:' + color + '10;border:1px solid ' + color + '30;border-radius:10px;padding:12px 14px;text-align:center;">'
             + '<div style="font-size:18px;font-weight:700;color:' + color + ';">' + value + '</div>'
-            + '<div style="font-size:11px;color:#64748b;margin-top:2px;">' + label + '</div></div>';
+            + '<div style="font-size:11px;color:#A0A3B0;margin-top:2px;">' + label + '</div></div>';
     }
 
     window.adminViewUser = function (id) {
         var modal = document.getElementById('userDetailModal');
         var title = document.getElementById('udTitle');
         var content = document.getElementById('udContent');
-        content.innerHTML = '<p style="color:#94a3b8;text-align:center;padding:40px;">Loading...</p>';
+        content.innerHTML = '<p style="color:#A0A3B0;text-align:center;padding:40px;">Loading...</p>';
         modal.style.display = 'block';
         title.textContent = 'User Details';
 
@@ -814,30 +833,74 @@
             var approvedBadge = u.is_approved
                 ? '<span class="admin-status" style="background:#dcfce7;color:#16a34a;font-size:11px;">Approved</span>'
                 : '<span class="admin-status" style="background:#fef3c7;color:#d97706;font-size:11px;">Pending</span>';
+            var googleBadge = u.google_id
+                ? ' <span class="admin-status" style="background:#e8f0fe;color:#1a73e8;font-size:11px;">Google</span>'
+                : '';
             var verifiedBadge = '';
             if (pp) {
                 verifiedBadge = pp.is_verified
                     ? ' <span class="admin-status" style="background:#dcfce7;color:#16a34a;font-size:11px;">Verified</span>'
                     : ' <span class="admin-status" style="background:#fef3c7;color:#d97706;font-size:11px;">Unverified</span>';
             }
+            var emailVerBadge = u.email_verified
+                ? ' <span class="admin-status" style="background:#dcfce7;color:#16a34a;font-size:10px;">Email ✓</span>'
+                : ' <span class="admin-status" style="background:#fef3c7;color:#d97706;font-size:10px;">Email ?</span>';
+            var phoneVerBadge = u.phone_verified
+                ? ' <span class="admin-status" style="background:#dcfce7;color:#16a34a;font-size:10px;">Phone ✓</span>'
+                : ' <span class="admin-status" style="background:#fef3c7;color:#d97706;font-size:10px;">Phone ?</span>';
             var initials = (u.full_name || '?').split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+            var avatarHtml = u.avatar_url
+                ? '<img src="' + u.avatar_url + '" style="width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display=\'none\'">'
+                : '<div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#C9A84C,#A6832E);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;flex-shrink:0;">' + initials + '</div>';
 
-            var html = '<div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid #e2e8f0;">'
-                + '<div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#2563eb);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;flex-shrink:0;">' + initials + '</div>'
+            var html = '<div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid #3A3F4B;">'
+                + avatarHtml
                 + '<div style="flex:1;">'
-                + '<h4 style="margin:0 0 4px;font-size:16px;">' + (u.full_name || '-') + '</h4>'
-                + '<p style="margin:0 0 6px;color:#64748b;font-size:13px;">' + (u.email || '-') + (u.phone ? ' &middot; ' + u.phone : '') + '</p>'
-                + '<div style="display:flex;gap:6px;flex-wrap:wrap;">' + roleBadge + ' ' + approvedBadge + verifiedBadge + '</div>'
-                + (pp && pp.location ? '<p style="margin:6px 0 0;color:#94a3b8;font-size:12px;">📍 ' + pp.location + '</p>' : '')
-                + (pp && pp.description ? '<p style="margin:4px 0 0;color:#94a3b8;font-size:12px;">' + pp.description + '</p>' : '')
-                + (pp && pp.whatsapp ? '<p style="margin:4px 0 0;color:#94a3b8;font-size:12px;">WhatsApp: ' + pp.whatsapp + '</p>' : '')
-                + (pp && pp.telegram ? '<p style="margin:4px 0 0;color:#94a3b8;font-size:12px;">Telegram: ' + pp.telegram + '</p>' : '')
-                + '<p style="margin:6px 0 0;color:#94a3b8;font-size:11px;">Joined: ' + (u.created_at ? new Date(u.created_at).toLocaleDateString() : '-') + '</p>'
+                + '<h4 style="margin:0 0 4px;font-size:16px;">' + escHtml(u.full_name || '-') + '</h4>'
+                + '<p style="margin:0 0 6px;color:#A0A3B0;font-size:13px;">' + escHtml(u.email || '-') + (u.phone ? ' &middot; ' + escHtml(u.phone) : '') + '</p>'
+                + '<div style="display:flex;gap:6px;flex-wrap:wrap;">' + roleBadge + ' ' + approvedBadge + googleBadge + verifiedBadge + emailVerBadge + phoneVerBadge + '</div>'
+                + (pp && pp.location ? '<p style="margin:6px 0 0;color:#A0A3B0;font-size:12px;">📍 ' + escHtml(pp.location) + '</p>' : '')
+                + (pp && pp.description ? '<p style="margin:4px 0 0;color:#A0A3B0;font-size:12px;">' + escHtml(pp.description) + '</p>' : '')
+                + (pp && pp.whatsapp ? '<p style="margin:4px 0 0;color:#A0A3B0;font-size:12px;">WhatsApp: ' + escHtml(pp.whatsapp) + '</p>' : '')
+                + (pp && pp.telegram ? '<p style="margin:4px 0 0;color:#A0A3B0;font-size:12px;">Telegram: ' + escHtml(pp.telegram) + '</p>' : '')
+                + '<p style="margin:6px 0 0;color:#A0A3B0;font-size:11px;">Joined: ' + (u.created_at ? new Date(u.created_at).toLocaleDateString() : '-') + (u.updated_at ? ' &middot; Updated: ' + new Date(u.updated_at).toLocaleDateString() : '') + '</p>'
                 + '</div></div>';
+
+            // Legal & Contact Information
+            var infoStyle = 'padding:6px 0;border-bottom:1px solid #3A3F4B;display:flex;justify-content:space-between;font-size:12px;';
+            var labelStyle = 'color:#A0A3B0;font-weight:600;';
+            var valueStyle = 'color:#EAEAEA;text-align:right;';
+            var sectionTitle = 'margin:0 0 10px;font-size:14px;color:#EAEAEA;';
+
+            html += '<div style="background:#262A35;border:1px solid #3A3F4B;border-radius:12px;padding:16px 20px;margin-bottom:20px;">'
+                + '<h4 style="' + sectionTitle + '">Legal & Contact Information</h4>'
+                + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">Full Name</span><span style="' + valueStyle + '">' + escHtml(u.full_name || '-') + '</span></div>'
+                + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">Email</span><span style="' + valueStyle + '">' + escHtml(u.email || '-') + '</span></div>'
+                + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">Phone</span><span style="' + valueStyle + '">' + escHtml(u.phone || 'Not provided') + '</span></div>'
+                + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">Phone Verified</span><span style="' + valueStyle + '">' + (u.phone_verified ? '<span style="color:#16a34a;font-weight:700;">Yes ✓</span>' : '<span style="color:#dc2626;font-weight:700;">No ✗</span>') + '</span></div>'
+                + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">Email Verified</span><span style="' + valueStyle + '">' + (u.email_verified ? '<span style="color:#16a34a;font-weight:700;">Yes ✓</span>' : '<span style="color:#dc2626;font-weight:700;">No ✗</span>') + '</span></div>'
+                + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">Account Verified</span><span style="' + valueStyle + '">' + (u.is_verified ? '<span style="color:#16a34a;font-weight:700;">Yes ✓</span>' : '<span style="color:#dc2626;font-weight:700;">No ✗</span>') + '</span></div>'
+                + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">Account Status</span><span style="' + valueStyle + '">' + (u.is_approved ? '<span style="color:#16a34a;">Active</span>' : '<span style="color:#dc2626;">Suspended</span>') + '</span></div>'
+                + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">Role</span><span style="' + valueStyle + '">' + u.role + '</span></div>'
+                + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">Auth Method</span><span style="' + valueStyle + '">' + (u.google_id ? 'Google OAuth' : 'Email/Password') + '</span></div>'
+                + '<div style="' + infoStyle + 'border:none;"><span style="' + labelStyle + '">User ID</span><span style="' + valueStyle + '">#' + u.id + '</span></div>';
+
+            if (pp) {
+                html += '<div style="border-top:1px solid #3A3F4B;margin-top:8px;padding-top:8px;">'
+                    + '<h4 style="' + sectionTitle + 'margin-top:4px;">Partner Business Info</h4>'
+                    + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">Company Name</span><span style="' + valueStyle + '">' + escHtml(pp.company_name || '-') + '</span></div>'
+                    + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">Location</span><span style="' + valueStyle + '">' + escHtml(pp.location || 'Not provided') + '</span></div>'
+                    + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">Description</span><span style="' + valueStyle + 'max-width:260px;">' + escHtml(pp.description || 'Not provided') + '</span></div>'
+                    + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">WhatsApp</span><span style="' + valueStyle + '">' + escHtml(pp.whatsapp || 'Not provided') + '</span></div>'
+                    + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">Telegram</span><span style="' + valueStyle + '">' + escHtml(pp.telegram || 'Not provided') + '</span></div>'
+                    + '<div style="' + infoStyle + 'border:none;"><span style="' + labelStyle + '">Partner Verified</span><span style="' + valueStyle + '">' + (pp.is_verified ? '<span style="color:#16a34a;font-weight:700;">Yes ✓</span>' : '<span style="color:#dc2626;font-weight:700;">No ✗</span>') + '</span></div>'
+                    + '</div>';
+            }
+            html += '</div>';
 
             // Stats
             html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px;">'
-                + udStatCard('Bookings', stats.total_bookings, '#3b82f6')
+                + udStatCard('Bookings', stats.total_bookings, '#C9A84C')
                 + udStatCard('Active', stats.active_bookings, '#f59e0b')
                 + udStatCard('Revenue', '$' + stats.total_revenue.toFixed(2), '#16a34a')
                 + udStatCard('Fees', '$' + stats.total_service_fees.toFixed(2), '#8b5cf6');
@@ -849,12 +912,12 @@
 
             // Vehicles (partner)
             if (vehicles.length > 0) {
-                html += '<h4 style="margin:0 0 10px;font-size:14px;color:#334155;">Vehicles (' + vehicles.length + ')</h4>'
+                html += '<h4 style="margin:0 0 10px;font-size:14px;color:#EAEAEA;">Vehicles (' + vehicles.length + ')</h4>'
                     + '<div style="overflow-x:auto;margin-bottom:20px;"><table style="width:100%;border-collapse:collapse;font-size:12px;">'
-                    + '<thead><tr style="background:#f8fafc;"><th style="padding:8px 10px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0;">Image</th><th style="padding:8px 10px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0;">Name</th><th style="padding:8px 10px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0;">Category</th><th style="padding:8px 10px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0;">Price/Day</th><th style="padding:8px 10px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0;">Year</th><th style="padding:8px 10px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0;">Status</th></tr></thead><tbody>';
+                    + '<thead><tr style="background:#262A35;"><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Image</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Name</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Category</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Price/Day</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Year</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Status</th></tr></thead><tbody>';
                 vehicles.forEach(function (v) {
-                    var img = v.image_url ? '<img src="' + v.image_url + '" style="width:48px;height:32px;object-fit:cover;border-radius:4px;">' : '<span style="color:#94a3b8;">—</span>';
-                    html += '<tr style="border-bottom:1px solid #f1f5f9;">'
+                    var img = v.image_url ? '<img src="' + v.image_url + '" style="width:48px;height:32px;object-fit:cover;border-radius:4px;">' : '<span style="color:#A0A3B0;">—</span>';
+                    html += '<tr style="border-bottom:1px solid #3A3F4B;">'
                         + '<td style="padding:6px 10px;">' + img + '</td>'
                         + '<td style="padding:6px 10px;font-weight:600;">' + (v.name || '-') + '</td>'
                         + '<td style="padding:6px 10px;">' + (v.category || '-') + '</td>'
@@ -868,13 +931,13 @@
 
             // Bookings
             if (bookings.length > 0) {
-                html += '<h4 style="margin:0 0 10px;font-size:14px;color:#334155;">Bookings (' + bookings.length + ')</h4>'
+                html += '<h4 style="margin:0 0 10px;font-size:14px;color:#EAEAEA;">Bookings (' + bookings.length + ')</h4>'
                     + '<div style="overflow-x:auto;margin-bottom:20px;"><table style="width:100%;border-collapse:collapse;font-size:12px;">'
-                    + '<thead><tr style="background:#f8fafc;"><th style="padding:8px 10px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0;">#</th><th style="padding:8px 10px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0;">Vehicle</th><th style="padding:8px 10px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0;">' + (u.role === 'partner' ? 'Guest' : 'Partner') + '</th><th style="padding:8px 10px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0;">Dates</th><th style="padding:8px 10px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0;">Total</th><th style="padding:8px 10px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0;">Status</th><th style="padding:8px 10px;text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0;">Payment</th></tr></thead><tbody>';
+                    + '<thead><tr style="background:#262A35;"><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">#</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Vehicle</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">' + (u.role === 'partner' ? 'Guest' : 'Partner') + '</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Dates</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Total</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Status</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Payment</th></tr></thead><tbody>';
                 bookings.forEach(function (b) {
                     var otherParty = u.role === 'partner' ? (b.guest_name || b.guest_email || '-') : (b.partner_company || '-');
-                    var payBadge = b.payment_status === 'paid' ? '<span style="color:#16a34a;font-weight:600;">Paid</span>' : (b.payment_status === 'refunded' ? '<span style="color:#d97706;">Refunded</span>' : '<span style="color:#94a3b8;">Unpaid</span>');
-                    html += '<tr style="border-bottom:1px solid #f1f5f9;">'
+                    var payBadge = b.payment_status === 'paid' ? '<span style="color:#16a34a;font-weight:600;">Paid</span>' : (b.payment_status === 'refunded' ? '<span style="color:#d97706;">Refunded</span>' : '<span style="color:#A0A3B0;">Unpaid</span>');
+                    html += '<tr style="border-bottom:1px solid #3A3F4B;">'
                         + '<td style="padding:6px 10px;">' + b.id + '</td>'
                         + '<td style="padding:6px 10px;font-weight:600;">' + (b.vehicle_name || '-') + '</td>'
                         + '<td style="padding:6px 10px;">' + otherParty + '</td>'
@@ -886,44 +949,44 @@
                 });
                 html += '</tbody></table></div>';
             } else {
-                html += '<p style="color:#94a3b8;font-size:13px;margin-bottom:16px;">No bookings yet.</p>';
+                html += '<p style="color:#A0A3B0;font-size:13px;margin-bottom:16px;">No bookings yet.</p>';
             }
 
             // Reviews (guest only)
             if (reviews.length > 0) {
-                html += '<h4 style="margin:0 0 10px;font-size:14px;color:#334155;">Reviews (' + reviews.length + ')</h4>';
+                html += '<h4 style="margin:0 0 10px;font-size:14px;color:#EAEAEA;">Reviews (' + reviews.length + ')</h4>';
                 reviews.forEach(function (r) {
                     var stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
-                    html += '<div style="background:#f8fafc;border-radius:8px;padding:12px 14px;margin-bottom:8px;">'
+                    html += '<div style="background:#262A35;border-radius:8px;padding:12px 14px;margin-bottom:8px;">'
                         + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'
                         + '<span style="color:#f59e0b;font-size:13px;">' + stars + '</span>'
-                        + '<span style="color:#94a3b8;font-size:11px;">' + (r.created_at ? new Date(r.created_at).toLocaleDateString() : '') + '</span>'
+                        + '<span style="color:#A0A3B0;font-size:11px;">' + (r.created_at ? new Date(r.created_at).toLocaleDateString() : '') + '</span>'
                         + '</div>'
-                        + (r.title ? '<p style="margin:0 0 4px;font-weight:600;font-size:13px;color:#334155;">' + r.title + '</p>' : '')
-                        + (r.body ? '<p style="margin:0;font-size:12px;color:#64748b;">' + r.body + '</p>' : '')
+                        + (r.title ? '<p style="margin:0 0 4px;font-weight:600;font-size:13px;color:#EAEAEA;">' + r.title + '</p>' : '')
+                        + (r.body ? '<p style="margin:0;font-size:12px;color:#A0A3B0;">' + r.body + '</p>' : '')
                         + '</div>';
                 });
             }
 
             // Edit User
-            html += '<div style="border-top:1px solid #e2e8f0;padding-top:20px;margin-top:20px;">'
-                + '<h4 style="margin:0 0 12px;font-size:14px;color:#334155;">Edit Profile</h4>'
+            html += '<div style="border-top:1px solid #3A3F4B;padding-top:20px;margin-top:20px;">'
+                + '<h4 style="margin:0 0 12px;font-size:14px;color:#EAEAEA;">Edit Profile</h4>'
                 + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">'
-                + '<div><label style="font-size:11px;color:#64748b;font-weight:600;display:block;margin-bottom:3px;">Name</label>'
-                + '<input type="text" id="udEditName" value="' + (u.full_name || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;box-sizing:border-box;"></div>'
-                + '<div><label style="font-size:11px;color:#64748b;font-weight:600;display:block;margin-bottom:3px;">Email</label>'
-                + '<input type="email" id="udEditEmail" value="' + (u.email || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;box-sizing:border-box;"></div>'
-                + '<div><label style="font-size:11px;color:#64748b;font-weight:600;display:block;margin-bottom:3px;">Phone</label>'
-                + '<input type="text" id="udEditPhone" value="' + (u.phone || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;box-sizing:border-box;"></div>'
+                + '<div><label style="font-size:11px;color:#A0A3B0;font-weight:600;display:block;margin-bottom:3px;">Name</label>'
+                + '<input type="text" id="udEditName" value="' + (u.full_name || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:7px 10px;border:1px solid #3A3F4B;border-radius:6px;font-size:12px;box-sizing:border-box;"></div>'
+                + '<div><label style="font-size:11px;color:#A0A3B0;font-weight:600;display:block;margin-bottom:3px;">Email</label>'
+                + '<input type="email" id="udEditEmail" value="' + (u.email || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:7px 10px;border:1px solid #3A3F4B;border-radius:6px;font-size:12px;box-sizing:border-box;"></div>'
+                + '<div><label style="font-size:11px;color:#A0A3B0;font-weight:600;display:block;margin-bottom:3px;">Phone</label>'
+                + '<input type="text" id="udEditPhone" value="' + (u.phone || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:7px 10px;border:1px solid #3A3F4B;border-radius:6px;font-size:12px;box-sizing:border-box;"></div>'
                 + '</div>'
-                + '<button onclick="adminSaveUserEdit(' + u.id + ')" style="margin-top:10px;padding:7px 20px;background:#3b82f6;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save Changes</button>'
+                + '<button onclick="adminSaveUserEdit(' + u.id + ')" style="margin-top:10px;padding:7px 20px;background:#C9A84C;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save Changes</button>'
                 + '</div>';
 
             // Admin Notes
-            html += '<div style="border-top:1px solid #e2e8f0;padding-top:20px;margin-top:20px;">'
-                + '<h4 style="margin:0 0 8px;font-size:14px;color:#334155;">Admin Notes</h4>'
-                + '<p style="margin:0 0 8px;font-size:11px;color:#94a3b8;">Internal notes — not visible to the user.</p>'
-                + '<textarea id="udAdminNotes" rows="3" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;resize:vertical;box-sizing:border-box;font-family:inherit;">' + (u.admin_notes || '') + '</textarea>'
+            html += '<div style="border-top:1px solid #3A3F4B;padding-top:20px;margin-top:20px;">'
+                + '<h4 style="margin:0 0 8px;font-size:14px;color:#EAEAEA;">Admin Notes</h4>'
+                + '<p style="margin:0 0 8px;font-size:11px;color:#A0A3B0;">Internal notes — not visible to the user.</p>'
+                + '<textarea id="udAdminNotes" rows="3" style="width:100%;padding:8px 10px;border:1px solid #3A3F4B;border-radius:6px;font-size:12px;resize:vertical;box-sizing:border-box;font-family:inherit;">' + (u.admin_notes || '') + '</textarea>'
                 + '<button onclick="adminSaveNotes(' + u.id + ')" style="margin-top:8px;padding:7px 20px;background:#8b5cf6;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save Notes</button>'
                 + '</div>';
 
@@ -957,6 +1020,35 @@
             if (data.error) { alert('Error: ' + data.error); return; }
             alert('Notes saved');
         }).catch(function () { alert('Failed to save notes'); });
+    };
+
+    // ========================================
+    // SETTINGS — Change Password
+    // ========================================
+    window.adminChangePassword = function () {
+        var current = document.getElementById('settingsCurrentPw').value;
+        var newPw = document.getElementById('settingsNewPw').value;
+        var confirm = document.getElementById('settingsConfirmPw').value;
+        var msg = document.getElementById('settingsPwMsg');
+
+        function showMsg(text, isError) {
+            msg.textContent = text;
+            msg.style.display = 'block';
+            msg.style.background = isError ? '#fef2f2' : '#dcfce7';
+            msg.style.color = isError ? '#dc2626' : '#16a34a';
+        }
+
+        if (!current || !newPw || !confirm) { showMsg('All fields are required', true); return; }
+        if (newPw !== confirm) { showMsg('New passwords do not match', true); return; }
+        if (newPw.length < 8) { showMsg('Password must be at least 8 characters', true); return; }
+
+        apiPut('/api/admin/change-password', { current_password: current, new_password: newPw }).then(function (data) {
+            if (data.error) { showMsg(data.error, true); return; }
+            showMsg('Password changed successfully!', false);
+            document.getElementById('settingsCurrentPw').value = '';
+            document.getElementById('settingsNewPw').value = '';
+            document.getElementById('settingsConfirmPw').value = '';
+        }).catch(function () { showMsg('Failed to change password', true); });
     };
 
     // Initial load

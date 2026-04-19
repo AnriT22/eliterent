@@ -1,343 +1,690 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>About Us — RoyalCar.rent | Premium Car Rental in Georgia</title>
+
     <meta name="description" content="Learn about RoyalCar.rent — Georgia's premium car rental marketplace connecting travelers with verified local partners.">
-    <link rel="canonical" href="https://RoyalCar.rent/about.html">
+
+    <link rel="canonical" href="https://royalcar.rent/about.html">
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
     <meta property="og:title" content="About RoyalCar.rent">
+
     <meta property="og:description" content="Georgia's premium car rental marketplace.">
-    <meta property="og:url" content="https://RoyalCar.rent/about.html">
+
+    <meta property="og:url" content="https://royalcar.rent/about.html">
+
     <meta property="og:site_name" content="RoyalCar.rent">
+
+    <meta property="og:image" content="https://royalcar.rent/images/og-preview.jpg">
+
     <link rel="stylesheet" href="style.css">
+
     <link rel="stylesheet" href="premium.css">
+
     <link rel="stylesheet" href="navbar-auth.css">
+
     <script src="api-helper.js"></script>
+
+    <script src="i18n.js"></script>
+
 </head>
+
 <body>
+
     <!-- HEADER & NAVIGATION -->
+
     <header class="header sticky-header">
+
         <div class="container header-content">
+
             <!-- Logo -->
+
             <div class="header-left">
+
                 <a href="/" class="logo">
+
                     <img src="images/logo.png" alt="RoyalCar.rent" class="logo-img">
+
                     <span class="logo-text">RoyalCar.rent</span>
+
                 </a>
+
             </div>
+
+
 
             <!-- Navigation Menu -->
+
             <div class="header-center">
+
                 <nav class="nav-menu">
+
                     <a href="index.html" class="nav-link">Home</a>
+
                     <a href="vehicles.html" class="nav-link">Vehicles</a>
+
                     <a href="reviews.html" class="nav-link">Reviews</a>
+
                     <a href="about.html" class="nav-link active">About</a>
+
                     <a href="contact.html" class="nav-link">Contact</a>
+
                 </nav>
+
             </div>
+
+
 
             <!-- Right Section: Currency, Language, Button -->
+
             <div class="header-right">
+
                 <!-- Currency Selector -->
+
                 <div class="selector-group">
+
                     <button class="selector-btn currency-btn" id="currencyBtn">
+
                         <span class="selector-icon">💵</span>
+
                         <span class="selector-text">USD</span>
+
                         <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
                             <polyline points="6 9 12 15 18 9"></polyline>
+
                         </svg>
+
                     </button>
+
                     <div class="dropdown-menu currency-dropdown" id="currencyDropdown" style="display: none;">
+
                         <a href="#" class="dropdown-item" data-currency="USD">$ USD</a>
+
                         <a href="#" class="dropdown-item" data-currency="EUR">€ EUR</a>
+
                         <a href="#" class="dropdown-item" data-currency="GEL">₾ GEL</a>
+
                     </div>
+
                 </div>
+
+
 
                 <!-- Language Selector -->
+
                 <div class="selector-group">
+
                     <button class="selector-btn language-btn" id="languageBtn">
+
                         <span class="selector-icon">EN</span>
+
                         <span class="selector-text">English</span>
+
                         <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
                             <polyline points="6 9 12 15 18 9"></polyline>
+
                         </svg>
+
                     </button>
+
                     <div class="dropdown-menu language-dropdown" id="languageDropdown" style="display: none;">
+
                         <div class="dropdown-header">SELECT LANGUAGE</div>
+
                         <a href="#" class="dropdown-item" data-language="en">
+
                             <span class="language-flag">en</span>
+
                             <span>English</span>
+
                             <span class="checkmark">✓</span>
+
                         </a>
+
                         <a href="#" class="dropdown-item" data-language="ru">
+
                             <span class="language-flag">🇷🇺</span>
+
                             <span>Русский</span>
+
                         </a>
+
                         <a href="#" class="dropdown-item" data-language="ka">
+
                             <span class="language-flag">🇬🇪</span>
+
                             <span>ქართული</span>
+
                         </a>
+
                     </div>
+
                 </div>
+
+
 
                 <!-- Partner Button -->
-                <a href="register-partner.html" class="partner-btn">Become Partner</a>
+
+                <a href="register-partner.html" class="partner-btn" data-i18n="nav.become_partner">Become Partner</a>
+
             </div>
+
         </div>
+
     </header>
 
+
+
     <!-- PAGE HERO -->
+
     <section class="page-hero">
+
         <div class="page-hero-overlay"></div>
+
         <div class="container">
-            <h1>About RCB</h1>
-            <p>Connecting travelers with premium car rentals across Georgia</p>
+
+            <h1 data-i18n="about_page.title">About RCB</h1>
+
+            <p data-i18n="about_page.subtitle">Connecting travelers with premium car rentals across Georgia</p>
+
         </div>
+
     </section>
+
+
 
     <!-- MISSION SECTION -->
+
     <section class="about-section">
+
         <div class="container">
+
             <div class="about-grid">
+
                 <div class="about-content">
-                    <h2>Our Mission</h2>
-                    <p>At Rent Cars Georgia (RCB), we believe that exploring Georgia should be easy, affordable, and unforgettable. We connect international travelers with verified local partners to provide premium car rental experiences.</p>
-                    <p>Our platform eliminates middlemen, ensuring you get the best prices while supporting local businesses. Whether you're climbing mountains, touring cities, or relaxing on the coast, we have the perfect vehicle for your adventure.</p>
+
+                    <h2 data-i18n="about_page.mission_title">Our Mission</h2>
+
+                    <p data-i18n="about_page.mission_p1">At Rent Cars Georgia (RCB), we believe that exploring Georgia should be easy, affordable, and unforgettable. We connect international travelers with verified local partners to provide premium car rental experiences.</p>
+
+                    <p data-i18n="about_page.mission_p2">Our platform eliminates middlemen, ensuring you get the best prices while supporting local businesses. Whether you're climbing mountains, touring cities, or relaxing on the coast, we have the perfect vehicle for your adventure.</p>
+
                 </div>
+
                 <div class="about-image">
+
                     <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+
                         <rect fill="#228B7F" width="400" height="300" rx="12"/>
+
                         <circle cx="200" cy="100" r="40" fill="#fff" opacity="0.2"/>
+
                         <path d="M50,200 Q100,150 200,180 Q300,210 350,160" stroke="#fff" stroke-width="3" fill="none" opacity="0.3"/>
+
                         <text x="200" y="250" text-anchor="middle" fill="white" font-size="24" font-weight="bold">RCB</text>
+
                     </svg>
+
                 </div>
+
             </div>
+
         </div>
+
     </section>
+
+
 
     <!-- VALUES SECTION -->
+
     <section class="values-section">
+
         <div class="container">
-            <h2 class="section-title">Our Values</h2>
+
+            <h2 class="section-title" data-i18n="about_page.values_title">Our Values</h2>
+
             <div class="values-grid">
+
                 <div class="value-card">
+
                     <div class="value-icon">🎯</div>
-                    <h3>Reliability</h3>
-                    <p>Every vehicle is thoroughly inspected and maintained to ensure your safety and comfort.</p>
+
+                    <h3 data-i18n="about_page.reliability">Reliability</h3>
+
+                    <p data-i18n="about_page.reliability_desc">Every vehicle is thoroughly inspected and maintained to ensure your safety and comfort.</p>
+
                 </div>
+
                 <div class="value-card">
+
                     <div class="value-icon">💰</div>
-                    <h3>Transparency</h3>
-                    <p>No hidden fees, no surprises. Clear pricing and straightforward terms from booking to return.</p>
+
+                    <h3 data-i18n="about_page.transparency">Transparency</h3>
+
+                    <p data-i18n="about_page.transparency_desc">No hidden fees, no surprises. Clear pricing and straightforward terms from booking to return.</p>
+
                 </div>
+
                 <div class="value-card">
+
                     <div class="value-icon">🤝</div>
-                    <h3>Community</h3>
-                    <p>We support local partners and help grow Georgia's tourism ecosystem sustainably.</p>
+
+                    <h3 data-i18n="about_page.community">Community</h3>
+
+                    <p data-i18n="about_page.community_desc">We support local partners and help grow Georgia's tourism ecosystem sustainably.</p>
+
                 </div>
+
                 <div class="value-card">
+
                     <div class="value-icon">⚡</div>
-                    <h3>Innovation</h3>
-                    <p>Cutting-edge booking technology makes renting a car as simple as booking a flight.</p>
+
+                    <h3 data-i18n="about_page.innovation">Innovation</h3>
+
+                    <p data-i18n="about_page.innovation_desc">Cutting-edge booking technology makes renting a car as simple as booking a flight.</p>
+
                 </div>
+
             </div>
+
         </div>
+
     </section>
+
+
 
     <!-- STATS SECTION -->
+
     <section class="company-stats">
+
         <div class="container">
+
             <div class="stats-grid">
+
                 <div class="stat-item">
+
                     <div class="stat-number">2,450+</div>
-                    <div class="stat-text">Happy Travelers</div>
+
+                    <div class="stat-text" data-i18n="about_page.stats_travelers">Happy Travelers</div>
+
                 </div>
+
                 <div class="stat-item">
+
                     <div class="stat-number">350+</div>
-                    <div class="stat-text">Verified Partners</div>
+
+                    <div class="stat-text" data-i18n="about_page.stats_partners">Verified Partners</div>
+
                 </div>
+
                 <div class="stat-item">
+
                     <div class="stat-number">1,200+</div>
-                    <div class="stat-text">Quality Vehicles</div>
+
+                    <div class="stat-text" data-i18n="about_page.stats_vehicles">Quality Vehicles</div>
+
                 </div>
+
                 <div class="stat-item">
+
                     <div class="stat-number">24/7</div>
-                    <div class="stat-text">Customer Support</div>
+
+                    <div class="stat-text" data-i18n="about_page.stats_support">Customer Support</div>
+
                 </div>
+
             </div>
+
         </div>
+
     </section>
+
+
 
     <!-- TEAM SECTION -->
+
     <section class="team-section">
+
         <div class="container">
-            <h2 class="section-title">Meet Our Team</h2>
+
+            <h2 class="section-title" data-i18n="about_page.team_title">Meet Our Team</h2>
+
             <div class="team-grid">
+
                 <div class="team-member">
+
                     <div class="member-avatar">👨‍💼</div>
+
                     <h3>David Giorgi</h3>
-                    <p class="member-role">CEO & Founder</p>
-                    <p class="member-bio">Passionate about Georgia and committed to revolutionizing car rentals for travelers.</p>
+
+                    <p class="member-role" data-i18n="about_page.team_david_role">CEO & Founder</p>
+
+                    <p class="member-bio" data-i18n="about_page.team_david_bio">Passionate about Georgia and committed to revolutionizing car rentals for travelers.</p>
+
                 </div>
+
                 <div class="team-member">
+
                     <div class="member-avatar">👩‍💼</div>
+
                     <h3>Tamar Kikasishvili</h3>
-                    <p class="member-role">Operations Manager</p>
-                    <p class="member-bio">Ensures every rental experience exceeds expectations with attention to detail.</p>
+
+                    <p class="member-role" data-i18n="about_page.team_tamar_role">Operations Manager</p>
+
+                    <p class="member-bio" data-i18n="about_page.team_tamar_bio">Ensures every rental experience exceeds expectations with attention to detail.</p>
+
                 </div>
+
                 <div class="team-member">
+
                     <div class="member-avatar">👨‍💻</div>
+
                     <h3>Giorgi Beridze</h3>
-                    <p class="member-role">Tech Lead</p>
-                    <p class="member-bio">Building the platform that makes car rental simple and transparent.</p>
+
+                    <p class="member-role" data-i18n="about_page.team_giorgi_role">Tech Lead</p>
+
+                    <p class="member-bio" data-i18n="about_page.team_giorgi_bio">Building the platform that makes car rental simple and transparent.</p>
+
                 </div>
+
                 <div class="team-member">
+
                     <div class="member-avatar">👩‍💻</div>
+
                     <h3>Nino Goginashvili</h3>
-                    <p class="member-role">Customer Success</p>
-                    <p class="member-bio">Available 24/7 to ensure your rental experience is smooth and memorable.</p>
+
+                    <p class="member-role" data-i18n="about_page.team_nino_role">Customer Success</p>
+
+                    <p class="member-bio" data-i18n="about_page.team_nino_bio">Available 24/7 to ensure your rental experience is smooth and memorable.</p>
+
                 </div>
+
             </div>
+
         </div>
+
     </section>
+
+
 
     <!-- WHY CHOOSE US -->
+
     <section class="why-us-section">
+
         <div class="container">
-            <h2 class="section-title">Why Choose RCB?</h2>
+
+            <h2 class="section-title" data-i18n="about_page.why_title">Why Choose RCB?</h2>
+
             <div class="features-list">
+
                 <div class="feature-item">
+
                     <span class="feature-check">✓</span>
+
                     <div>
-                        <h4>Best Prices Guaranteed</h4>
-                        <p>Direct connection with owners means no middleman markup</p>
+
+                        <h4 data-i18n="about_page.why_prices">Best Prices Guaranteed</h4>
+
+                        <p data-i18n="about_page.why_prices_desc">Direct connection with owners means no middleman markup</p>
+
                     </div>
+
                 </div>
+
                 <div class="feature-item">
+
                     <span class="feature-check">✓</span>
+
                     <div>
-                        <h4>Verified Partners Only</h4>
-                        <p>All vehicles and owners are thoroughly vetted and reviewed</p>
+
+                        <h4 data-i18n="about_page.why_verified">Verified Partners Only</h4>
+
+                        <p data-i18n="about_page.why_verified_desc">All vehicles and owners are thoroughly vetted and reviewed</p>
+
                     </div>
+
                 </div>
+
                 <div class="feature-item">
+
                     <span class="feature-check">✓</span>
+
                     <div>
-                        <h4>Wide Selection</h4>
-                        <p>From budget-friendly economy cars to luxury vehicles</p>
+
+                        <h4 data-i18n="about_page.why_selection">Wide Selection</h4>
+
+                        <p data-i18n="about_page.why_selection_desc">From budget-friendly economy cars to luxury vehicles</p>
+
                     </div>
+
                 </div>
+
                 <div class="feature-item">
+
                     <span class="feature-check">✓</span>
+
                     <div>
-                        <h4>24/7 Support</h4>
-                        <p>Our team is always available to help you</p>
+
+                        <h4 data-i18n="about_page.why_support">24/7 Support</h4>
+
+                        <p data-i18n="about_page.why_support_desc">Our team is always available to help you</p>
+
                     </div>
+
                 </div>
+
                 <div class="feature-item">
+
                     <span class="feature-check">✓</span>
+
                     <div>
+
                         <h4>Easy Booking</h4>
+
                         <p>Simple, secure, and quick online reservation process</p>
+
                     </div>
+
                 </div>
+
                 <div class="feature-item">
+
                     <span class="feature-check">✓</span>
+
                     <div>
+
                         <h4>Flexible Options</h4>
+
                         <p>Customize your rental with various insurance and service options</p>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
     </section>
+
+
 
     <!-- CTA SECTION -->
+
     <section class="cta-section">
+
         <div class="container">
-            <h2>Ready to Explore Georgia?</h2>
-            <p>Join thousands of travelers who trust RCB for their rental needs</p>
-            <a href="index.html" class="btn btn-primary">Book Your Vehicle Today</a>
+
+            <h2 data-i18n="about_page.cta_title">Ready to Explore Georgia?</h2>
+
+            <p data-i18n="about_page.cta_subtitle">Join thousands of travelers who trust RCB for their rental needs</p>
+
+            <a href="index.html" class="btn btn-primary" data-i18n="about_page.cta_button">Book Your Vehicle Today</a>
+
         </div>
+
     </section>
 
+
+
     <!-- FLOATING QUICK CHAT -->
+
     <a href="https://wa.me/995591522299" target="_blank" class="floating-whatsapp" style="text-decoration:none;color:inherit;">
+
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+
             <path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+
         </svg>
-        <span>Quick Chat</span>
+
+        <span data-i18n="quick_chat.label">Quick Chat</span>
+
     </a>
 
+
+
     <!-- FOOTER -->
+
     <footer class="footer">
+
         <div class="container footer-content">
+
             <div class="footer-column">
+
                 <h4>RoyalCar.rent</h4>
+
                 <p>Premium car rental marketplace for Georgia adventures.</p>
+
                 <div class="social-icons">
+
                     <a href="https://www.facebook.com/profile.php?id=61583448788067" target="_blank" class="social-icon" title="Facebook">
+
                         <img src="images/Facebook_Logo.png" alt="Facebook" width="18" height="18" style="object-fit:contain;">
+
                     </a>
+
                     <a href="https://www.instagram.com/eliterentalgeorgia/" target="_blank" class="social-icon" title="Instagram">
+
                         <img src="images/Instagram.png" alt="Instagram" width="18" height="18" style="object-fit:contain;">
+
                     </a>
+
                 </div>
+
             </div>
+
             <div class="footer-column">
+
                 <h4>Legal</h4>
+
                 <ul>
+
                     <li><a href="tos.html">Terms & Conditions</a></li>
+
                     <li><a href="privacy.html">Privacy Policy</a></li>
+
                     <li><a href="#" onclick="document.getElementById('contactModal').style.display='flex'; return false;">Contact</a></li>
+
                 </ul>
+
             </div>
+
             <div class="footer-column">
+
                 <h4>Contact</h4>
+
                 <p>📧 elite.rental25@gmail.com</p>
+
                 <p>📞 +995 591 522 299</p>
+
                 <p>📍 Tbilisi, Georgia</p>
+
             </div>
+
         </div>
+
         <div class="footer-bottom">
+
             <p>&copy; 2026 RoyalCar.rent. All rights reserved.</p>
+
         </div>
+
     </footer>
 
+
+
     <!-- Contact Modal -->
+
     <div id="contactModal" onclick="if(event.target===this)this.style.display='none';" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-        <div style="background:#fff; border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.15); text-align:center;">
-            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#64748b; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">✕</button>
-            <div style="width:64px; height:64px; background:linear-gradient(135deg,#3b82f6,#2563eb); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px;">📞</div>
-            <h2 style="font-size:24px; font-weight:800; color:#1e293b; margin-bottom:8px;">Contact Us</h2>
-            <p style="font-size:14px; color:#64748b; margin-bottom:28px;">We're here to help! Reach us anytime.</p>
-            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0'">
-                <div style="width:44px; height:44px; background:#eff6ff; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">📧</div>
+
+        <div style="background:#1C1E26; border:1px solid #3A3F4B; border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.5); text-align:center;">
+
+            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#A0A3B0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='none'">✕</button>
+
+            <div style="width:64px; height:64px; background:linear-gradient(135deg,#D4AF37,#B8963F); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px;">📞</div>
+
+            <h2 style="font-size:24px; font-weight:800; color:#EAEAEA; margin-bottom:8px;">Contact Us</h2>
+
+            <p style="font-size:14px; color:#A0A3B0; margin-bottom:28px;">We're here to help! Reach us anytime.</p>
+
+            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#262A35; border:1px solid #3A3F4B; border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#D4AF37'" onmouseout="this.style.borderColor='#D4AF37'">
+
+                <div style="width:44px; height:44px; background:rgba(212,175,55,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">📧</div>
+
                 <div style="text-align:left;">
-                    <div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div>
-                    <div style="font-size:15px; color:#1e293b; font-weight:600;">elite.rental25@gmail.com</div>
+
+                    <div style="font-size:12px; color:#A0A3B0; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div>
+
+                    <div style="font-size:15px; color:#EAEAEA; font-weight:600;">elite.rental25@gmail.com</div>
+
                 </div>
+
             </a>
-            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#e2e8f0'">
-                <div style="width:44px; height:44px; background:#f0fdf4; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#22c55e"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+
+            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#262A35; border:1px solid #3A3F4B; border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#D4AF37'" onmouseout="this.style.borderColor='#D4AF37'">
+
+                <div style="width:44px; height:44px; background:rgba(212,175,55,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#D4AF37"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+
                 </div>
+
                 <div style="text-align:left;">
-                    <div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div>
-                    <div style="font-size:15px; color:#1e293b; font-weight:600;">+995 591 522 299</div>
+
+                    <div style="font-size:12px; color:#A0A3B0; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div>
+
+                    <div style="font-size:15px; color:#EAEAEA; font-weight:600;">+995 591 522 299</div>
+
                 </div>
+
             </a>
+
         </div>
+
     </div>
 
+
+
     <script src="script.js"></script>
+
     <script src="navbar-auth.js"></script>
+
 <script src="premium-animations.js"></script>
+
 </body>
+
 </html>
+

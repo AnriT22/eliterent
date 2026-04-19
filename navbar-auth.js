@@ -5,10 +5,53 @@
    ======================================== */
 
 (function () {
+    function t(key, fallback) {
+        if (typeof I18n !== 'undefined' && I18n.t) {
+            var val = I18n.t(key);
+            if (val && val !== key) return val;
+        }
+        return fallback;
+    }
+
     document.addEventListener('DOMContentLoaded', initNavbarAuth);
     if (document.readyState !== 'loading') initNavbarAuth();
 
+    // Re-render navbar when language changes or i18n becomes ready
+    document.addEventListener('languageChanged', function () {
+        initialized = false;
+        mobileInitialized = false;
+        cleanupNavbar();
+        initNavbarAuth();
+        initMobileNav();
+    });
+    if (typeof I18n !== 'undefined' && I18n.onReady) {
+        I18n.onReady(function () {
+            if (initialized) {
+                initialized = false;
+                mobileInitialized = false;
+                cleanupNavbar();
+                initNavbarAuth();
+                initMobileNav();
+            }
+        });
+    }
+
+    function cleanupNavbar() {
+        var oldProfile = document.getElementById('navProfile');
+        if (oldProfile) oldProfile.remove();
+        var oldLogin = document.querySelector('.nav-login-btn');
+        if (oldLogin) oldLogin.remove();
+        var oldOverlay = document.getElementById('mobileNavOverlay');
+        if (oldOverlay) oldOverlay.remove();
+        var oldPanel = document.getElementById('mobileNavPanel');
+        if (oldPanel) oldPanel.remove();
+        var oldHamburger = document.getElementById('hamburgerBtn');
+        if (oldHamburger) oldHamburger.remove();
+        document.body.style.overflow = '';
+    }
+
     var initialized = false;
+    var mobileInitialized = false;
 
     function initNavbarAuth() {
         if (initialized) return;
@@ -42,22 +85,22 @@
                 + '      <div>'
                 + '        <div class="nav-profile-name">' + (user.full_name || 'User') + '</div>'
                 + '        <div class="nav-profile-email">' + (user.email || '') + '</div>'
-                + '        <span class="nav-profile-role">' + (user.role === 'partner' ? 'Partner' : 'Guest') + '</span>'
+                + '        <span class="nav-profile-role">' + (user.role === 'partner' ? t('nav.partner','Partner') : t('nav.guest','Guest')) + '</span>'
                 + (user.role === 'partner'
                     ? (user.is_verified
-                        ? '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(34,197,94,0.15);color:#22c55e;border-radius:12px;font-size:11px;font-weight:600;margin-top:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Verified</span>'
-                        : '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(249,115,22,0.15);color:#f97316;border-radius:12px;font-size:11px;font-weight:600;margin-top:4px;">Not Approved Yet</span>')
+                        ? '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(34,197,94,0.15);color:#22c55e;border-radius:12px;font-size:11px;font-weight:600;margin-top:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>' + t('nav.verified','Verified') + '</span>'
+                        : '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(249,115,22,0.15);color:#f97316;border-radius:12px;font-size:11px;font-weight:600;margin-top:4px;">' + t('nav.not_approved','Not Approved Yet') + '</span>')
                     : '')
                 + '      </div>'
                 + '    </div>'
                 + '    <div class="nav-profile-divider"></div>'
                 + (user.role === 'partner'
-                    ? '<a href="partner-dashboard.html" class="nav-profile-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>'
-                    : '<a href="guest-profile.html" class="nav-profile-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>My Profile</a>')
-                + '    <a href="guest-profile.html#bookings" class="nav-profile-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>My Bookings</a>'
-                + '    <a href="guest-profile.html#favorites" class="nav-profile-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Favorites</a>'
+                    ? '<a href="partner-dashboard.html" class="nav-profile-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>' + t('nav.dashboard','Dashboard') + '</a>'
+                    : '<a href="guest-profile.html" class="nav-profile-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + t('nav.my_profile','My Profile') + '</a>')
+                + '    <a href="guest-profile.html#bookings" class="nav-profile-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' + t('nav.my_bookings','My Bookings') + '</a>'
+                + '    <a href="guest-profile.html#favorites" class="nav-profile-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' + t('nav.favorites','Favorites') + '</a>'
                 + '    <div class="nav-profile-divider"></div>'
-                + '    <button class="nav-profile-item nav-profile-logout" id="navLogoutBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Log Out</button>'
+                + '    <button class="nav-profile-item nav-profile-logout" id="navLogoutBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>' + t('nav.logout','Log Out') + '</button>'
                 + '  </div>'
                 + '</div>';
 
@@ -99,7 +142,7 @@
 
         } else {
             // Not logged in — show login button next to partner btn
-            var loginHTML = '<a href="login.html" class="nav-login-btn">Sign In</a>';
+            var loginHTML = '<a href="login.html" class="nav-login-btn">' + t('nav.login','Sign In') + '</a>';
             var wrapper2 = document.createElement('div');
             wrapper2.innerHTML = loginHTML;
             if (partnerBtn) {
@@ -137,11 +180,11 @@
 
         // Build nav links
         var navPages = [
-            { href: 'index.html',    label: 'Home' },
-            { href: 'vehicles.html', label: 'Vehicles' },
-            { href: 'reviews.html',  label: 'Reviews' },
-            { href: 'about.html',    label: 'About' },
-            { href: 'contact.html',  label: 'Contact' }
+            { href: 'index.html',    label: t('nav.home','Home') },
+            { href: 'vehicles.html', label: t('nav.vehicles','Vehicles') },
+            { href: 'reviews.html',  label: t('nav.reviews','Reviews') },
+            { href: 'about.html',    label: t('nav.about','About') },
+            { href: 'contact.html',  label: t('nav.contact','Contact') }
         ];
 
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -156,14 +199,14 @@
         // Add auth links
         if (token && user) {
             var dashLink = user.role === 'partner'
-                ? '<a href="partner-dashboard.html">Dashboard</a>'
-                : '<a href="guest-profile.html">My Profile</a>';
+                ? '<a href="partner-dashboard.html">' + t('nav.dashboard','Dashboard') + '</a>'
+                : '<a href="guest-profile.html">' + t('nav.my_profile','My Profile') + '</a>';
             linksHTML += dashLink
-                + '<a href="guest-profile.html#bookings">My Bookings</a>'
-                + '<a href="guest-profile.html#favorites">Favorites</a>';
+                + '<a href="guest-profile.html#bookings">' + t('nav.my_bookings','My Bookings') + '</a>'
+                + '<a href="guest-profile.html#favorites">' + t('nav.favorites','Favorites') + '</a>';
         } else {
-            linksHTML += '<a href="login.html">Sign In</a>'
-                + '<a href="register.html">Register</a>';
+            linksHTML += '<a href="login.html">' + t('nav.login','Sign In') + '</a>'
+                + '<a href="register.html">' + t('nav.register','Register') + '</a>';
         }
 
         // Build mobile nav panel + overlay
@@ -178,16 +221,16 @@
         panel.innerHTML = ''
             + '<div class="mobile-nav-header">'
             + '  <a href="/" class="logo">'
-            + '    <img src="images/logo.png" alt="Eliterent.ge" onerror="this.style.display=\'none\'">'
-            + '    <span>Eliterent.ge</span>'
+            + '    <img src="images/logo.png" alt="RoyalCar.rent" onerror="this.style.display=\'none\'">'
+            + '    <span>RoyalCar.rent</span>'
             + '  </a>'
             + '  <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">&#x2715;</button>'
             + '</div>'
             + '<div class="mobile-nav-links">' + linksHTML + '</div>'
             + '<div class="mobile-nav-footer">'
             + (token && user
-                ? '<button class="partner-btn" id="mobileLogoutBtn" style="background:#ef4444;">Log Out</button>'
-                : '<a href="register-partner.html" class="partner-btn">Become a Partner</a>')
+                ? '<button class="partner-btn" id="mobileLogoutBtn" style="background:#ef4444;">' + t('nav.logout','Log Out') + '</button>'
+                : '<a href="register-partner.html" class="partner-btn">' + t('nav.become_partner','Become a Partner') + '</a>')
             + '</div>';
 
         document.body.appendChild(overlay);

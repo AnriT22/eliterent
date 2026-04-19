@@ -1,5 +1,6 @@
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 let pool = null;
 
@@ -28,10 +29,11 @@ async function initDB() {
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
             email TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
+            password_hash TEXT,
             full_name TEXT NOT NULL,
             phone TEXT,
             role TEXT NOT NULL CHECK(role IN ('guest', 'partner', 'admin')),
+            google_id TEXT,
             avatar_url TEXT,
             is_approved INTEGER DEFAULT 1,
             is_verified INTEGER DEFAULT 0,
@@ -43,11 +45,13 @@ async function initDB() {
         )
     `);
 
-    // Add verification columns if they don't exist (for existing databases)
+    // Add verification and Google columns if they don't exist (for existing databases)
     try {
         await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified INTEGER DEFAULT 0`);
         await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_verified INTEGER DEFAULT 0`);
         await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified INTEGER DEFAULT 0`);
+        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id TEXT`);
+        await pool.query(`ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL`);
     } catch (e) { /* columns may already exist */ }
 
     await pool.query(`
@@ -229,7 +233,7 @@ async function initDB() {
             email TEXT,
             code_hash TEXT NOT NULL,
             type TEXT NOT NULL CHECK(type IN ('registration', 'reservation', 'login', 'phone_verify', 'email_verify')),
-            reference_id INTEGER,
+            reference_id TEXT,
             attempts INTEGER DEFAULT 0,
             max_attempts INTEGER DEFAULT 5,
             expires_at TIMESTAMP NOT NULL,
@@ -238,6 +242,31 @@ async function initDB() {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     `);
+
+    // Migrate reference_id from INTEGER to TEXT (for Verify API SIDs)
+    try {
+        await pool.query('ALTER TABLE otp_codes ALTER COLUMN reference_id TYPE TEXT USING reference_id::TEXT');
+    } catch (e) { /* column already TEXT or doesn't exist */ }
+
+    // Migrate money columns from REAL (float) to NUMERIC(10,2) for accurate financial math
+    try {
+        var moneyMigrations = [
+            'ALTER TABLE vehicles ALTER COLUMN price_per_day TYPE NUMERIC(10,2) USING price_per_day::NUMERIC(10,2)',
+            'ALTER TABLE vehicles ALTER COLUMN deposit_amount TYPE NUMERIC(10,2) USING deposit_amount::NUMERIC(10,2)',
+            'ALTER TABLE bookings ALTER COLUMN extras_total TYPE NUMERIC(10,2) USING extras_total::NUMERIC(10,2)',
+            'ALTER TABLE bookings ALTER COLUMN location_fee TYPE NUMERIC(10,2) USING location_fee::NUMERIC(10,2)',
+            'ALTER TABLE bookings ALTER COLUMN service_fee TYPE NUMERIC(10,2) USING service_fee::NUMERIC(10,2)',
+            'ALTER TABLE bookings ALTER COLUMN total_price TYPE NUMERIC(10,2) USING total_price::NUMERIC(10,2)',
+            'ALTER TABLE bookings ALTER COLUMN deposit_paid TYPE NUMERIC(10,2) USING deposit_paid::NUMERIC(10,2)',
+            'ALTER TABLE bookings ALTER COLUMN promo_discount TYPE NUMERIC(10,2) USING promo_discount::NUMERIC(10,2)',
+            'ALTER TABLE promo_codes ALTER COLUMN discount_value TYPE NUMERIC(10,2) USING discount_value::NUMERIC(10,2)',
+            'ALTER TABLE promo_codes ALTER COLUMN min_order TYPE NUMERIC(10,2) USING min_order::NUMERIC(10,2)'
+        ];
+        for (var i = 0; i < moneyMigrations.length; i++) {
+            await pool.query(moneyMigrations[i]);
+        }
+        console.log('Money columns migrated to NUMERIC(10,2)');
+    } catch (e) { /* columns may already be NUMERIC or table not yet created */ }
 
     // Create indexes for OTP lookups
     try {
@@ -283,16 +312,31 @@ async function initDB() {
         await pool.query(sql);
     }
 
-    // Seed default admin account (password: admin123)
+    // Seed default admin account with a secure random password
     const adminCheck = await pool.query("SELECT id FROM users WHERE role = 'admin' LIMIT 1");
     if (adminCheck.rows.length === 0) {
-        const hash = bcrypt.hashSync('admin123', 12);
+        const adminPassword = process.env.ADMIN_INITIAL_PASSWORD || crypto.randomBytes(16).toString('hex');
+        const hash = bcrypt.hashSync(adminPassword, 12);
         await pool.query(
             "INSERT INTO users (email, password_hash, full_name, role, is_approved) VALUES ($1, $2, $3, 'admin', 1)",
-            ['admin@eliterent.ge', hash, 'Admin']
+            ['admin@royalcar.rent', hash, 'Admin']
         );
-        console.log('Default admin created: admin@eliterent.ge / admin123');
+        console.log('=======================================================');
+        console.log('DEFAULT ADMIN CREATED');
+        console.log('Email:    admin@royalcar.rent');
+        console.log('Password: ' + adminPassword);
+        console.log('CHANGE THIS PASSWORD IMMEDIATELY AFTER FIRST LOGIN!');
+        console.log('=======================================================');
     }
+
+    // Cleanup expired OTP codes and password resets
+    try {
+        const otpClean = await pool.query("DELETE FROM otp_codes WHERE expires_at < NOW() - INTERVAL '1 day'");
+        const pwClean = await pool.query("DELETE FROM password_resets WHERE expires_at < NOW() - INTERVAL '1 day'");
+        if (otpClean.rowCount > 0 || pwClean.rowCount > 0) {
+            console.log('Cleanup: removed ' + otpClean.rowCount + ' expired OTPs, ' + pwClean.rowCount + ' expired password resets');
+        }
+    } catch (e) { /* table may not exist yet on first run */ }
 
     console.log('PostgreSQL database initialized');
     return pool;

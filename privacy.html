@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="premium.css">
     <link rel="stylesheet" href="navbar-auth.css">
+    <script src="i18n.js"></script>
     <style>
         .legal-page {
             max-width: 860px;
@@ -18,7 +19,7 @@
         .legal-hero {
             text-align: center;
             padding: 56px 24px 40px;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            background: linear-gradient(135deg, #1C1E26 0%, #0f172a 100%);
             border-radius: 20px;
             margin-bottom: 48px;
             color: #fff;
@@ -31,7 +32,7 @@
         }
         .legal-hero p {
             font-size: 15px;
-            color: #94a3b8;
+            color: #A0A3B0;
         }
         .legal-section {
             margin-bottom: 40px;
@@ -39,10 +40,10 @@
         .legal-section h2 {
             font-size: 22px;
             font-weight: 700;
-            color: #1e293b;
+            color: #EAEAEA;
             margin-bottom: 16px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #e2e8f0;
+            border-bottom: 2px solid #3A3F4B;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -63,13 +64,13 @@
         .legal-section h3 {
             font-size: 16px;
             font-weight: 600;
-            color: #334155;
+            color: #EAEAEA;
             margin: 20px 0 10px;
         }
         .legal-section p {
             font-size: 15px;
             line-height: 1.8;
-            color: #475569;
+            color: #A0A3B0;
             margin-bottom: 12px;
         }
         .legal-section ul {
@@ -79,14 +80,14 @@
         .legal-section li {
             font-size: 15px;
             line-height: 1.8;
-            color: #475569;
+            color: #A0A3B0;
             margin-bottom: 8px;
         }
         .legal-section li strong {
-            color: #1e293b;
+            color: #EAEAEA;
         }
         .legal-highlight {
-            background: #f0fdf4;
+            background: rgba(34,197,94,0.1);
             border-left: 4px solid #22c55e;
             padding: 16px 20px;
             border-radius: 0 10px 10px 0;
@@ -94,7 +95,7 @@
         }
         .legal-highlight p {
             margin: 0;
-            color: #166534;
+            color: #4ade80;
             font-weight: 500;
         }
         .legal-back {
@@ -102,8 +103,8 @@
             align-items: center;
             gap: 8px;
             padding: 12px 24px;
-            background: #f1f5f9;
-            color: #475569;
+            background: #262A35;
+            color: #A0A3B0;
             border-radius: 10px;
             text-decoration: none;
             font-size: 14px;
@@ -112,8 +113,8 @@
             transition: background 0.2s;
         }
         .legal-back:hover {
-            background: #e2e8f0;
-            color: #1e293b;
+            background: #3A3F4B;
+            color: #EAEAEA;
         }
         @media (max-width: 640px) {
             .legal-hero h1 { font-size: 26px; }
@@ -137,118 +138,118 @@
 
     <div class="legal-page">
         <div class="legal-hero">
-            <h1>Privacy Policy</h1>
-            <p>Last updated: March 2026</p>
+            <h1 data-i18n="privacy_page.title">Privacy Policy</h1>
+            <p data-i18n="privacy_page.updated">Last updated: March 2026</p>
         </div>
 
         <section class="legal-section">
-            <h2><span class="section-num">1</span> What This Policy Covers</h2>
-            <p>This Privacy Policy explains how RoyalCar.rent collects, uses, and protects your personal information when you use our website and services. We want you to feel safe and confident when renting a vehicle with us.</p>
+            <h2><span class="section-num">1</span> <span data-i18n="privacy_page.s1_title">What This Policy Covers</span></h2>
+            <p data-i18n="privacy_page.s1_p1">This Privacy Policy explains how RoyalCar.rent collects, uses, and protects your personal information when you use our website and services. We want you to feel safe and confident when renting a vehicle with us.</p>
             <div class="legal-highlight">
-                <p>In short: We only collect what we need to process your rental, and we never sell your data to anyone.</p>
+                <p data-i18n="privacy_page.s1_highlight">In short: We only collect what we need to process your rental, and we never sell your data to anyone.</p>
             </div>
         </section>
 
         <section class="legal-section">
-            <h2><span class="section-num">2</span> What Information We Collect</h2>
-            <p>When you use our website, we may collect the following information:</p>
+            <h2><span class="section-num">2</span> <span data-i18n="privacy_page.s2_title">What Information We Collect</span></h2>
+            <p data-i18n="privacy_page.s2_intro">When you use our website, we may collect the following information:</p>
             <ul>
-                <li><strong>Account details</strong> — your name, email address, and phone number when you register</li>
-                <li><strong>Booking details</strong> — pickup/drop-off dates, locations, and vehicle preferences</li>
-                <li><strong>Payment information</strong> — processed securely through PayPal; we never see or store your card numbers</li>
-                <li><strong>Documents</strong> — driver's license and passport photos shared with vehicle owners via WhatsApp for verification</li>
-                <li><strong>Communication</strong> — messages you send us through our contact form or email</li>
+                <li data-i18n-html="privacy_page.s2_item1"><strong>Account details</strong> — your name, email address, and phone number when you register</li>
+                <li data-i18n-html="privacy_page.s2_item2"><strong>Booking details</strong> — pickup/drop-off dates, locations, and vehicle preferences</li>
+                <li data-i18n-html="privacy_page.s2_item3"><strong>Payment information</strong> — processed securely through PayPal; we never see or store your card numbers</li>
+                <li data-i18n-html="privacy_page.s2_item4"><strong>Documents</strong> — driver's license and passport photos shared with vehicle owners via WhatsApp for verification</li>
+                <li data-i18n-html="privacy_page.s2_item5"><strong>Communication</strong> — messages you send us through our contact form or email</li>
             </ul>
         </section>
 
         <section class="legal-section">
-            <h2><span class="section-num">3</span> How We Use Your Information</h2>
-            <p>We use your information only to:</p>
+            <h2><span class="section-num">3</span> <span data-i18n="privacy_page.s3_title">How We Use Your Information</span></h2>
+            <p data-i18n="privacy_page.s3_intro">We use your information only to:</p>
             <ul>
-                <li><strong>Process your bookings</strong> — create reservations and connect you with vehicle owners</li>
-                <li><strong>Communicate with you</strong> — send booking confirmations, updates, and respond to your questions</li>
-                <li><strong>Improve our service</strong> — understand how our website is used so we can make it better</li>
-                <li><strong>Ensure safety</strong> — verify driver eligibility and prevent fraud</li>
+                <li data-i18n-html="privacy_page.s3_item1"><strong>Process your bookings</strong> — create reservations and connect you with vehicle owners</li>
+                <li data-i18n-html="privacy_page.s3_item2"><strong>Communicate with you</strong> — send booking confirmations, updates, and respond to your questions</li>
+                <li data-i18n-html="privacy_page.s3_item3"><strong>Improve our service</strong> — understand how our website is used so we can make it better</li>
+                <li data-i18n-html="privacy_page.s3_item4"><strong>Ensure safety</strong> — verify driver eligibility and prevent fraud</li>
             </ul>
             <div class="legal-highlight">
-                <p>We will never use your information for unsolicited marketing or share it with advertisers.</p>
+                <p data-i18n="privacy_page.s3_highlight">We will never use your information for unsolicited marketing or share it with advertisers.</p>
             </div>
         </section>
 
         <section class="legal-section">
-            <h2><span class="section-num">4</span> Payment Security</h2>
-            <p>Your financial safety is our top priority.</p>
+            <h2><span class="section-num">4</span> <span data-i18n="privacy_page.s4_title">Payment Security</span></h2>
+            <p data-i18n="privacy_page.s4_intro">Your financial safety is our top priority.</p>
             <ul>
-                <li>All online payments are handled entirely by <strong>PayPal</strong></li>
-                <li>We <strong>never see, store, or have access</strong> to your credit card or debit card numbers</li>
-                <li>Your card details are entered directly on PayPal's secure platform</li>
-                <li>PayPal uses industry-leading encryption and fraud protection</li>
+                <li data-i18n-html="privacy_page.s4_item1">All online payments are handled entirely by <strong>PayPal</strong></li>
+                <li data-i18n-html="privacy_page.s4_item2">We <strong>never see, store, or have access</strong> to your credit card or debit card numbers</li>
+                <li data-i18n-html="privacy_page.s4_item3">Your card details are entered directly on PayPal's secure platform</li>
+                <li data-i18n-html="privacy_page.s4_item4">PayPal uses industry-leading encryption and fraud protection</li>
             </ul>
             <div class="legal-highlight">
-                <p>Your card information never touches our servers. It goes directly to PayPal, which is one of the most trusted payment platforms in the world.</p>
+                <p data-i18n="privacy_page.s4_highlight">Your card information never touches our servers. It goes directly to PayPal, which is one of the most trusted payment platforms in the world.</p>
             </div>
         </section>
 
         <section class="legal-section">
-            <h2><span class="section-num">5</span> Who Can See Your Information</h2>
-            <p>We share your information only with:</p>
+            <h2><span class="section-num">5</span> <span data-i18n="privacy_page.s5_title">Who Can See Your Information</span></h2>
+            <p data-i18n="privacy_page.s5_intro">We share your information only with:</p>
             <ul>
-                <li><strong>Vehicle owners/partners</strong> — only the details needed to fulfill your booking (name, dates, contact info, documents)</li>
-                <li><strong>PayPal</strong> — only for processing your payment securely</li>
-                <li><strong>Law enforcement</strong> — only if legally required by Georgian law</li>
+                <li data-i18n-html="privacy_page.s5_item1"><strong>Vehicle owners/partners</strong> — only the details needed to fulfill your booking (name, dates, contact info, documents)</li>
+                <li data-i18n-html="privacy_page.s5_item2"><strong>PayPal</strong> — only for processing your payment securely</li>
+                <li data-i18n-html="privacy_page.s5_item3"><strong>Law enforcement</strong> — only if legally required by Georgian law</li>
             </ul>
-            <p>We do not sell, rent, or trade your personal information to any third parties.</p>
+            <p data-i18n="privacy_page.s5_outro">We do not sell, rent, or trade your personal information to any third parties.</p>
         </section>
 
         <section class="legal-section">
-            <h2><span class="section-num">6</span> How We Protect Your Data</h2>
-            <p>We take reasonable steps to keep your information safe:</p>
+            <h2><span class="section-num">6</span> <span data-i18n="privacy_page.s6_title">How We Protect Your Data</span></h2>
+            <p data-i18n="privacy_page.s6_intro">We take reasonable steps to keep your information safe:</p>
             <ul>
-                <li>Passwords are encrypted and never stored in plain text</li>
-                <li>Secure connections (HTTPS) protect data in transit</li>
-                <li>Access to personal data is limited to authorized personnel only</li>
-                <li>We regularly review our security practices</li>
+                <li data-i18n="privacy_page.s6_item1">Passwords are encrypted and never stored in plain text</li>
+                <li data-i18n="privacy_page.s6_item2">Secure connections (HTTPS) protect data in transit</li>
+                <li data-i18n="privacy_page.s6_item3">Access to personal data is limited to authorized personnel only</li>
+                <li data-i18n="privacy_page.s6_item4">We regularly review our security practices</li>
             </ul>
         </section>
 
         <section class="legal-section">
-            <h2><span class="section-num">7</span> Your Rights</h2>
-            <p>You have the right to:</p>
+            <h2><span class="section-num">7</span> <span data-i18n="privacy_page.s7_title">Your Rights</span></h2>
+            <p data-i18n="privacy_page.s7_intro">You have the right to:</p>
             <ul>
-                <li><strong>Access</strong> — request a copy of the personal data we hold about you</li>
-                <li><strong>Correct</strong> — ask us to update or fix incorrect information</li>
-                <li><strong>Delete</strong> — request that we remove your account and personal data</li>
-                <li><strong>Withdraw consent</strong> — stop us from using your data at any time</li>
+                <li data-i18n-html="privacy_page.s7_item1"><strong>Access</strong> — request a copy of the personal data we hold about you</li>
+                <li data-i18n-html="privacy_page.s7_item2"><strong>Correct</strong> — ask us to update or fix incorrect information</li>
+                <li data-i18n-html="privacy_page.s7_item3"><strong>Delete</strong> — request that we remove your account and personal data</li>
+                <li data-i18n-html="privacy_page.s7_item4"><strong>Withdraw consent</strong> — stop us from using your data at any time</li>
             </ul>
-            <p>To exercise any of these rights, contact us at <strong>elite.rental25@gmail.com</strong>.</p>
+            <p data-i18n-html="privacy_page.s7_outro">To exercise any of these rights, contact us at <strong>elite.rental25@gmail.com</strong>.</p>
         </section>
 
         <section class="legal-section">
-            <h2><span class="section-num">8</span> Cookies</h2>
-            <p>Our website may use cookies (small files stored on your device) to:</p>
+            <h2><span class="section-num">8</span> <span data-i18n="privacy_page.s8_title">Cookies</span></h2>
+            <p data-i18n="privacy_page.s8_intro">Our website may use cookies (small files stored on your device) to:</p>
             <ul>
-                <li>Keep you logged in during your session</li>
-                <li>Remember your preferences</li>
+                <li data-i18n="privacy_page.s8_item1">Keep you logged in during your session</li>
+                <li data-i18n="privacy_page.s8_item2">Remember your preferences</li>
             </ul>
-            <p>We do not use tracking cookies or share cookie data with advertisers.</p>
+            <p data-i18n="privacy_page.s8_outro">We do not use tracking cookies or share cookie data with advertisers.</p>
         </section>
 
         <section class="legal-section">
-            <h2><span class="section-num">9</span> Changes to This Policy</h2>
-            <p>We may update this Privacy Policy from time to time. If we make significant changes, we will notify you through our website. We encourage you to review this page periodically.</p>
+            <h2><span class="section-num">9</span> <span data-i18n="privacy_page.s9_title">Changes to This Policy</span></h2>
+            <p data-i18n="privacy_page.s9_p1">We may update this Privacy Policy from time to time. If we make significant changes, we will notify you through our website. We encourage you to review this page periodically.</p>
         </section>
 
         <section class="legal-section">
-            <h2><span class="section-num">10</span> Contact Us</h2>
-            <p>If you have any questions or concerns about your privacy, feel free to reach out:</p>
+            <h2><span class="section-num">10</span> <span data-i18n="privacy_page.s10_title">Contact Us</span></h2>
+            <p data-i18n="privacy_page.s10_intro">If you have any questions or concerns about your privacy, feel free to reach out:</p>
             <ul>
-                <li><strong>Email:</strong> elite.rental25@gmail.com</li>
-                <li><strong>WhatsApp:</strong> +995 591 522 299</li>
-                <li><strong>Location:</strong> Tbilisi, Georgia</li>
+                <li data-i18n-html="privacy_page.s10_email"><strong>Email:</strong> elite.rental25@gmail.com</li>
+                <li data-i18n-html="privacy_page.s10_whatsapp"><strong>WhatsApp:</strong> +995 591 522 299</li>
+                <li data-i18n-html="privacy_page.s10_location"><strong>Location:</strong> Tbilisi, Georgia</li>
             </ul>
         </section>
 
-        <a href="/" class="legal-back">← Back to Home</a>
+        <a href="/" class="legal-back" data-i18n="privacy_page.back_home">← Back to Home</a>
     </div>
 
     <!-- FLOATING QUICK CHAT -->
@@ -265,18 +266,18 @@
         <div class="footer-bottom"><p>&copy; 2026 RoyalCar.rent. All rights reserved.</p></div>
     </footer>
     <div id="contactModal" onclick="if(event.target===this)this.style.display='none';" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-        <div style="background:#fff; border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.15); text-align:center;">
-            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#64748b; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">✕</button>
-            <div style="width:64px; height:64px; background:linear-gradient(135deg,#3b82f6,#2563eb); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px;">📞</div>
-            <h2 style="font-size:24px; font-weight:800; color:#1e293b; margin-bottom:8px;">Contact Us</h2>
-            <p style="font-size:14px; color:#64748b; margin-bottom:28px;">We're here to help! Reach us anytime.</p>
-            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0'">
-                <div style="width:44px; height:44px; background:#eff6ff; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">📧</div>
-                <div style="text-align:left;"><div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div><div style="font-size:15px; color:#1e293b; font-weight:600;">elite.rental25@gmail.com</div></div>
+        <div style="background:#1C1E26; border:1px solid #3A3F4B; border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.5); text-align:center;">
+            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#A0A3B0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='none'">✕</button>
+            <div style="width:64px; height:64px; background:linear-gradient(135deg,#D4AF37,#B8963F); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px;">📞</div>
+            <h2 style="font-size:24px; font-weight:800; color:#EAEAEA; margin-bottom:8px;">Contact Us</h2>
+            <p style="font-size:14px; color:#A0A3B0; margin-bottom:28px;">We're here to help! Reach us anytime.</p>
+            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#262A35; border:1px solid #3A3F4B; border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#D4AF37'" onmouseout="this.style.borderColor='#3A3F4B'">
+                <div style="width:44px; height:44px; background:rgba(212,175,55,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">📧</div>
+                <div style="text-align:left;"><div style="font-size:12px; color:#A0A3B0; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div><div style="font-size:15px; color:#EAEAEA; font-weight:600;">elite.rental25@gmail.com</div></div>
             </a>
-            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#e2e8f0'">
-                <div style="width:44px; height:44px; background:#f0fdf4; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="24" height="24" viewBox="0 0 24 24" fill="#22c55e"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></div>
-                <div style="text-align:left;"><div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div><div style="font-size:15px; color:#1e293b; font-weight:600;">+995 591 522 299</div></div>
+            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#262A35; border:1px solid #3A3F4B; border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#3A3F4B'">
+                <div style="width:44px; height:44px; background:rgba(34,197,94,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="24" height="24" viewBox="0 0 24 24" fill="#22c55e"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></div>
+                <div style="text-align:left;"><div style="font-size:12px; color:#A0A3B0; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div><div style="font-size:15px; color:#EAEAEA; font-weight:600;">+995 591 522 299</div></div>
             </a>
         </div>
     </div>

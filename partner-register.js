@@ -29,9 +29,8 @@
         }
     });
 
-    // Live availability checks (function defined in auth.js)
+    // Live availability checks for email and phone only (names are not unique)
     if (typeof initLiveAvailabilityCheck === 'function') {
-        initLiveAvailabilityCheck('pFullName', 'full_name', 'pFullNameError');
         initLiveAvailabilityCheck('pEmail', 'email', 'pEmailError');
         initLiveAvailabilityCheck('pPhone', 'phone', 'pPhoneError');
     }
@@ -107,7 +106,11 @@
             clearErr('pPhoneError');
         }
 
-        if (!pass || pass.length < 6) { showErr('pPasswordError', 'Password must be at least 6 characters'); valid = false; } else clearErr('pPasswordError');
+        if (!pass || pass.length < 8) { showErr('pPasswordError', 'Password must be at least 8 characters'); valid = false; }
+        else if (!/[A-Z]/.test(pass)) { showErr('pPasswordError', 'Password must contain at least one uppercase letter'); valid = false; }
+        else if (!/[0-9]/.test(pass)) { showErr('pPasswordError', 'Password must contain at least one number'); valid = false; }
+        else if (!/[^A-Za-z0-9]/.test(pass)) { showErr('pPasswordError', 'Password must contain at least one special character'); valid = false; }
+        else clearErr('pPasswordError');
         if (pass !== confirm) { showErr('pConfirmPasswordError', 'Passwords do not match'); valid = false; } else clearErr('pConfirmPasswordError');
 
         return valid;
@@ -172,7 +175,24 @@
                 throw new Error(data.error || 'Registration failed');
             }
 
-            // Auto-login: store token and user
+            // Check if OTP verification is required
+            if (data.requiresVerification && data.userId) {
+                nextBtn.disabled = false;
+                nextBtn.textContent = 'Create Partner Account';
+
+                // Store token immediately so skip works
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('isLoggedIn', 'true');
+                }
+
+                // Redirect to verify-phone page (SMS sent only when user clicks "Send Code")
+                window.location.href = 'verify-phone.html';
+                return;
+            }
+
+            // Legacy flow (no OTP required - fallback)
             if (data.token) {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
@@ -192,7 +212,7 @@
                     + '<p style="color:#BDDDFC;font-size:14px;font-weight:600;margin:0 0 6px;">Please note:</p>'
                     + '<p style="color:#94a3b8;font-size:13px;margin:0;">An admin will review and verify your account. Until verified, you can access your dashboard but cannot add vehicles or receive bookings. Your dashboard updates automatically once approved.</p>'
                     + '</div>'
-                    + '<p style="color:#64748b;font-size:12px;">Redirecting to your dashboard...</p>';
+                    + '<p style="color:#A0A3B0;font-size:12px;">Redirecting to your dashboard...</p>';
                 successEl.style.display = 'flex';
                 successEl.style.flexDirection = 'column';
                 successEl.style.alignItems = 'center';

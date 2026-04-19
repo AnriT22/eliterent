@@ -6,15 +6,15 @@
 .db-layout {
     display: flex;
     min-height: calc(100vh - 70px);
-    background: #f3f6fa;
+    background: #0F0F0F;
 }
 
 /* Sidebar */
 .db-sidebar {
     width: 260px;
     min-width: 260px;
-    background: #fff;
-    border-right: 1px solid #e2e8f0;
+    background: #1A1814;
+    border-right: 1px solid #2A2520;
     padding: 24px 0;
     position: sticky;
     top: 70px;
@@ -26,7 +26,7 @@
 
 .db-sidebar-header {
     padding: 0 20px 20px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #2A2520;
     margin-bottom: 12px;
     display: flex;
     align-items: center;
@@ -36,7 +36,7 @@
 .db-sidebar-header h3 {
     font-size: 16px;
     font-weight: 700;
-    color: #1e293b;
+    color: #F0ECE2;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -52,8 +52,8 @@
 }
 
 .db-badge-partner {
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: rgba(201,168,76,0.15);
+    color: #C9A84C;
 }
 
 /* Sidebar Nav */
@@ -78,12 +78,12 @@
 }
 
 .db-nav-item:hover {
-    background: #f1f5f9;
-    color: #1e293b;
+    background: rgba(201,168,76,0.08);
+    color: #F0ECE2;
 }
 
 .db-nav-item.active {
-    background: #3B82F6;
+    background: #C9A84C;
     color: #fff;
 }
 
@@ -125,7 +125,7 @@
 .db-tab-header h2 {
     font-size: 24px;
     font-weight: 700;
-    color: #1e293b;
+    color: #F0ECE2;
 }
 
 /* User info in header */
@@ -150,14 +150,14 @@
     gap: 12px;
     padding: 60px 20px;
     text-align: center;
-    background: #fff;
-    border: 2px dashed #e2e8f0;
+    background: #1A1814;
+    border: 2px dashed #2A2520;
     border-radius: 16px;
 }
 
 .db-empty-state h3 {
     font-size: 18px;
-    color: #1e293b;
+    color: #F0ECE2;
     margin: 0;
 }
 
@@ -176,8 +176,8 @@
 
 /* Vehicle Card (dashboard) */
 .db-vehicle-card {
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: #1A1814;
+    border: 1px solid #2A2520;
     border-radius: 14px;
     overflow: hidden;
     transition: box-shadow 0.2s;
@@ -191,7 +191,7 @@
     width: 100%;
     height: 160px;
     object-fit: cover;
-    background: #f1f5f9;
+    background: #151210;
 }
 
 .db-vehicle-body {
@@ -201,7 +201,7 @@
 .db-vehicle-name {
     font-size: 16px;
     font-weight: 700;
-    color: #1e293b;
+    color: #F0ECE2;
     margin-bottom: 6px;
 }
 
@@ -217,14 +217,14 @@
     font-weight: 600;
     padding: 3px 8px;
     border-radius: 6px;
-    background: #f1f5f9;
-    color: #64748b;
+    background: #2A2520;
+    color: #9A9082;
 }
 
 .db-vehicle-price {
     font-size: 20px;
     font-weight: 800;
-    color: #1e293b;
+    color: #F0ECE2;
     margin-bottom: 12px;
 }
 
@@ -254,41 +254,41 @@
 }
 
 .db-vehicle-status.pending {
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: rgba(201,168,76,0.15);
+    color: #C9A84C;
 }
 
 .db-vehicle-actions {
     display: flex;
     gap: 8px;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid #2A2520;
     padding-top: 12px;
 }
 
 .db-vehicle-actions button {
     flex: 1;
     padding: 8px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #2A2520;
     border-radius: 8px;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    background: #fff;
-    color: #64748b;
+    background: #1A1814;
+    color: #9A9082;
 }
 
 .db-vehicle-actions button:hover {
-    background: #f1f5f9;
+    background: #2A2520;
 }
 
 .db-vehicle-actions .db-btn-edit {
-    color: #3B82F6;
-    border-color: #3B82F6;
+    color: #C9A84C;
+    border-color: #C9A84C;
 }
 
 .db-vehicle-actions .db-btn-edit:hover {
-    background: rgba(59,130,246,0.06);
+    background: rgba(201,168,76,0.1);
 }
 
 .db-vehicle-actions .db-btn-delete {
@@ -305,21 +305,21 @@
    ======================================== */
 
 .db-upload-area {
-    border: 2px dashed #d1d5db;
+    border: 2px dashed #2A2520;
     border-radius: 12px;
     padding: 20px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
-    background: #fafbfc;
+    background: #151210;
     min-height: 120px;
     position: relative;
 }
 
 .db-upload-area:hover,
 .db-upload-area.dragover {
-    border-color: #3B82F6;
-    background: rgba(59, 130, 246, 0.03);
+    border-color: #C9A84C;
+    background: rgba(201, 168, 76, 0.05);
 }
 
 .db-upload-placeholder {
@@ -351,7 +351,7 @@
     height: 90px;
     border-radius: 10px;
     overflow: hidden;
-    border: 2px solid #e2e8f0;
+    border: 2px solid #2A2520;
 }
 
 .db-upload-thumb img {
@@ -383,7 +383,7 @@
 }
 
 .db-upload-thumb.main-photo {
-    border-color: #3B82F6;
+    border-color: #C9A84C;
 }
 
 .db-thumb-main-badge {
@@ -391,7 +391,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: #3B82F6;
+    background: #C9A84C;
     color: #fff;
     font-size: 9px;
     font-weight: 700;
@@ -421,7 +421,7 @@
 }
 
 .db-thumb-main:hover {
-    background: #3B82F6;
+    background: #C9A84C;
     color: #fff;
 }
 
@@ -467,7 +467,7 @@
     border-radius: 0;
     font-size: 15px;
     font-family: inherit;
-    color: #1e293b;
+    color: #F0ECE2;
     background: transparent;
     outline: none;
     transition: border-color 0.2s;
@@ -476,7 +476,7 @@
 }
 
 .db-input:focus {
-    border-bottom-color: #3B82F6;
+    border-bottom-color: #C9A84C;
     box-shadow: none;
     background: transparent;
 }
@@ -488,15 +488,15 @@
 textarea.db-input {
     resize: vertical;
     min-height: 60px;
-    border: 1.5px solid #e2e8f0;
+    border: 1.5px solid #2A2520;
     border-radius: 10px;
     padding: 10px 14px;
-    background: #f8fafc;
+    background: #151210;
 }
 
 textarea.db-input:focus {
-    border-color: #3B82F6;
-    background: #fff;
+    border-color: #C9A84C;
+    background: #1A1814;
 }
 
 select.db-input {
@@ -516,7 +516,7 @@ select.db-input {
     gap: 8px;
     font-size: 13px;
     font-weight: 600;
-    color: #1e293b;
+    color: #F0ECE2;
     cursor: pointer;
     padding-top: 20px;
 }
@@ -524,7 +524,7 @@ select.db-input {
 .db-checkbox-label input[type="checkbox"] {
     width: 18px;
     height: 18px;
-    accent-color: #3B82F6;
+    accent-color: #C9A84C;
     cursor: pointer;
 }
 
@@ -546,9 +546,9 @@ select.db-input {
     grid-template-columns: 200px 1fr auto;
     gap: 10px;
     padding: 12px 14px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #2A2520;
     border-radius: 10px;
-    background: #f8fafc;
+    background: #151210;
     align-items: center;
 }
 .db-loc-enable {
@@ -557,13 +557,13 @@ select.db-input {
     gap: 8px;
     font-size: 13px;
     font-weight: 700;
-    color: #1e293b;
+    color: #F0ECE2;
     white-space: nowrap;
 }
 .db-loc-enable input[type="checkbox"] {
     width: 18px;
     height: 18px;
-    accent-color: #3B82F6;
+    accent-color: #C9A84C;
 }
 .db-loc-address {
     font-size: 13px;
@@ -583,7 +583,7 @@ select.db-input {
     gap: 4px;
     font-size: 13px;
     font-weight: 600;
-    color: #334155;
+    color: #cbd5e1;
 }
 .db-loc-price-wrap .db-loc-price {
     width: 80px;
@@ -601,25 +601,25 @@ select.db-input {
     align-items: center;
     gap: 10px;
     padding: 12px 14px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #2A2520;
     border-radius: 10px;
-    background: #f8fafc;
+    background: #151210;
     cursor: pointer;
     transition: all 0.15s;
 }
 .db-pm-option:has(input:checked) {
-    border-color: #3B82F6;
-    background: #eff6ff;
+    border-color: #C9A84C;
+    background: rgba(201,168,76,0.1);
 }
 .db-pm-option input[type="checkbox"] {
     width: 18px;
     height: 18px;
-    accent-color: #3B82F6;
+    accent-color: #C9A84C;
 }
 .db-pm-option span {
     font-size: 13px;
     font-weight: 700;
-    color: #1e293b;
+    color: #F0ECE2;
 }
 .db-pm-option small {
     margin-left: auto;
@@ -637,9 +637,9 @@ select.db-input {
     align-items: center;
     gap: 12px;
     padding: 14px 16px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #2A2520;
     border-radius: 10px;
-    background: #f8fafc;
+    background: #151210;
     cursor: pointer;
     transition: all 0.15s;
 }
@@ -658,7 +658,7 @@ select.db-input {
 }
 .db-ins-info strong {
     font-size: 13px;
-    color: #1e293b;
+    color: #F0ECE2;
     display: block;
     margin-bottom: 2px;
 }
@@ -692,9 +692,9 @@ select.db-input {
     grid-template-columns: 180px 1fr 140px;
     gap: 10px;
     padding: 14px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #2A2520;
     border-radius: 12px;
-    background: #f8fafc;
+    background: #151210;
 }
 
 .db-service-enable {
@@ -703,13 +703,13 @@ select.db-input {
     gap: 8px;
     font-size: 13px;
     font-weight: 700;
-    color: #1e293b;
+    color: #F0ECE2;
 }
 
 .db-service-enable input[type="checkbox"] {
     width: 18px;
     height: 18px;
-    accent-color: #3B82F6;
+    accent-color: #C9A84C;
 }
 
 .db-service-desc {
@@ -717,12 +717,231 @@ select.db-input {
 }
 
 /* ========================================
+   WIZARD PROGRESS BAR
+   ======================================== */
+
+.wz-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 28px;
+    padding: 20px 24px;
+    background: #1A1814;
+    border: 1px solid #2A2520;
+    border-radius: 12px;
+}
+
+.wz-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.wz-step:hover { background: #2A2520; }
+
+.wz-num {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #2A2520;
+    color: #9A9082;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    flex-shrink: 0;
+}
+
+.wz-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #94a3b8;
+    transition: color 0.3s;
+    white-space: nowrap;
+}
+
+.wz-line {
+    flex: 1;
+    height: 2px;
+    background: #2A2520;
+    margin: 0 4px;
+    min-width: 16px;
+    max-width: 60px;
+    transition: background 0.3s;
+}
+
+.wz-step.active .wz-num,
+.wz-step.completed .wz-num {
+    background: #C9A84C;
+    color: #fff;
+}
+
+.wz-step.active .wz-label { color: #F0ECE2; }
+.wz-step.completed .wz-label { color: #C9A84C; }
+.wz-step.completed .wz-num { background: #22c55e; }
+
+.wz-line.done { background: #22c55e; }
+
+/* Wizard panels */
+.wz-panel { display: none; }
+.wz-panel.active { display: block; animation: wzFadeIn 0.25s ease; }
+
+@keyframes wzFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.wz-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    gap: 16px;
+}
+
+.wz-nav .btn { min-width: 140px; }
+
+.btn-lg {
+    padding: 14px 36px !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+}
+
+/* ========================================
+   COLOR SWATCHES
+   ======================================== */
+
+.color-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.color-swatch {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--sw-color);
+    border: 3px solid #2A2520;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.color-swatch:hover {
+    transform: scale(1.15);
+    border-color: #94a3b8;
+}
+
+.color-swatch.selected {
+    border-color: #C9A84C;
+    box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.3);
+    transform: scale(1.1);
+}
+
+.sw-check {
+    display: none;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+.color-swatch[data-color="White"] .sw-check { color: #333; text-shadow: none; }
+.color-swatch[data-color="Beige"] .sw-check { color: #333; text-shadow: none; }
+
+.color-swatch.selected .sw-check { display: block; }
+
+.color-selected-label {
+    margin-top: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+/* ========================================
+   UPLOAD PROGRESS BAR
+   ======================================== */
+
+.upload-progress-wrap {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.upload-progress-bar {
+    flex: 1;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.upload-progress-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #C9A84C, #22c55e);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.upload-progress-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+/* Multi-column checkbox grid */
+.vf-checkbox-grid-cols {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px 24px;
+}
+
+@media (min-width: 768px) {
+    .vf-checkbox-grid-cols {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ========================================
+   WIZARD MOBILE RESPONSIVE
+   ======================================== */
+
+@media (max-width: 640px) {
+    .wz-progress {
+        padding: 14px 12px;
+        gap: 0;
+    }
+    .wz-label { display: none; }
+    .wz-num { width: 28px; height: 28px; font-size: 12px; }
+    .wz-line { min-width: 12px; }
+    .wz-step { padding: 4px 6px; }
+    .wz-nav { flex-direction: column; }
+    .wz-nav .btn { width: 100%; }
+    .color-swatch { width: 36px; height: 36px; }
+}
+
+/* ========================================
    VEHICLE FORM SECTIONS
    ======================================== */
 
 .vf-section {
-    background: #fff;
-    border: 1px solid #e8ecf1;
+    background: #1A1814;
+    border: 1px solid #2A2520;
     border-radius: 12px;
     padding: 28px 32px;
     margin-bottom: 20px;
@@ -731,12 +950,12 @@ select.db-input {
 .vf-section-title {
     font-size: 15px;
     font-weight: 800;
-    color: #1e293b;
+    color: #F0ECE2;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     padding-bottom: 12px;
     margin-bottom: 24px;
-    border-bottom: 3px solid #3B82F6;
+    border-bottom: 3px solid #C9A84C;
 }
 
 .vf-sub-section {
@@ -755,28 +974,28 @@ select.db-input {
     display: flex;
     align-items: flex-start;
     gap: 14px;
-    background: #f8fafc;
-    border: 1.5px solid #e8ecf1;
+    background: #151210;
+    border: 1.5px solid #2A2520;
     border-radius: 12px;
     padding: 16px 18px;
     transition: border-color 0.2s;
 }
 
 .vf-filter-card:focus-within {
-    border-color: #3B82F6;
-    background: #f0f7ff;
+    border-color: #C9A84C;
+    background: rgba(201,168,76,0.08);
 }
 
 .vf-filter-card-icon {
     width: 38px;
     height: 38px;
-    background: #e0eaff;
+    background: rgba(201,168,76,0.15);
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    color: #3B82F6;
+    color: #C9A84C;
 }
 
 .vf-filter-card-body {
@@ -797,7 +1016,7 @@ select.db-input {
 .vf-sub-title {
     font-size: 14px;
     font-weight: 700;
-    color: #1e293b;
+    color: #EAEAEA;
     margin-bottom: 14px;
 }
 
@@ -843,7 +1062,7 @@ select.db-input {
 }
 
 .vf-switch input:checked + .vf-slider {
-    background: #3B82F6;
+    background: #C9A84C;
 }
 
 .vf-switch input:checked + .vf-slider::before {
@@ -858,7 +1077,7 @@ select.db-input {
     gap: 12px;
     font-size: 14px;
     font-weight: 600;
-    color: #1e293b;
+    color: #EAEAEA;
 }
 
 /* Toggles row (side by side) */
@@ -880,7 +1099,7 @@ select.db-input {
     gap: 8px;
     font-size: 14px;
     font-weight: 500;
-    color: #1e293b;
+    color: #EAEAEA;
     cursor: pointer;
     padding: 4px 0;
 }
@@ -888,7 +1107,7 @@ select.db-input {
 .vf-check-item input[type="checkbox"] {
     width: 18px;
     height: 18px;
-    accent-color: #3B82F6;
+    accent-color: #C9A84C;
     cursor: pointer;
     flex-shrink: 0;
 }
@@ -906,26 +1125,26 @@ select.db-input {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    background: #f8fafc;
-    border: 1px solid #e8ecf1;
+    background: #151210;
+    border: 1px solid #2A2520;
     border-radius: 10px;
     padding: 18px 22px;
 }
 
 /* Info box */
 .vf-info-box {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: #151210;
+    border: 1px solid #2A2520;
     border-radius: 10px;
     padding: 18px 22px;
     margin-bottom: 20px;
     font-size: 13px;
     line-height: 1.6;
-    color: #475569;
+    color: #94a3b8;
 }
 
 .vf-info-box strong {
-    color: #1e293b;
+    color: #EAEAEA;
     display: block;
     margin-bottom: 8px;
 }
@@ -985,8 +1204,8 @@ select.db-input {
 
 /* Profile Card */
 .db-profile-card {
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: #1A1814;
+    border: 1px solid #2A2520;
     border-radius: 16px;
     padding: 28px;
     display: flex;
@@ -999,9 +1218,9 @@ select.db-input {
     display: flex;
     gap: 12px;
     font-size: 14px;
-    color: #1e293b;
+    color: #EAEAEA;
     padding-bottom: 10px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #2A2520;
 }
 
 .db-profile-row strong {
@@ -1039,11 +1258,11 @@ select.db-input {
         min-width: unset;
         position: static;
         height: auto;
-        flex-direction: row;
+        border-bottom: 1px solid #2A2520;
         padding: 12px;
         overflow-x: auto;
         border-right: none;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid #2A2520;
     }
 
     .db-sidebar-header {
@@ -1060,14 +1279,14 @@ select.db-input {
         white-space: nowrap;
         padding: 8px 14px;
         font-size: 13px;
-        color: #1e293b;
-        background: #e2e8f0;
+        color: #F0ECE2;
+        background: #2A2520;
         border-radius: 8px;
         font-weight: 600;
     }
 
     .db-nav-item.active {
-        background: #3B82F6;
+        background: #C9A84C;
         color: #fff;
     }
 
@@ -1116,7 +1335,7 @@ select.db-input {
    ======================================== */
 
 .db-passport-upload {
-    border: 2px dashed #e2e8f0;
+    border: 2px dashed #2A2520;
     border-radius: 10px;
     padding: 16px;
     text-align: center;
@@ -1127,12 +1346,12 @@ select.db-input {
     align-items: center;
     justify-content: center;
     position: relative;
-    background: #fafbfc;
+    background: #151210;
 }
 
 .db-passport-upload:hover {
-    border-color: #3B82F6;
-    background: #f0f7ff;
+    border-color: #C9A84C;
+    background: rgba(201,168,76,0.05);
 }
 
 .db-passport-upload.has-image {
@@ -1207,7 +1426,7 @@ select.db-input {
 
 .availability-modal-content {
     position: relative;
-    background: #fff;
+    background: #1A1814;
     border-radius: 16px;
     width: 90%;
     max-width: 600px;
@@ -1228,7 +1447,7 @@ select.db-input {
     margin: 0;
     font-size: 18px;
     font-weight: 700;
-    color: #1e293b;
+    color: #EAEAEA;
 }
 
 .availability-modal-close {
@@ -1248,7 +1467,7 @@ select.db-input {
 
 .availability-modal-close:hover {
     background: #e2e8f0;
-    color: #1e293b;
+    color: #EAEAEA;
 }
 
 .availability-modal-body {
@@ -1288,7 +1507,7 @@ select.db-input {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
-    color: #1e293b;
+    color: #EAEAEA;
 }
 
 .availability-calendar-grid {
@@ -1308,16 +1527,16 @@ select.db-input {
 
 .availability-day {
     aspect-ratio: 1;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #2A2520;
     border-radius: 8px;
-    background: #fff;
+    background: #1A1814;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 13px;
     font-weight: 500;
-    color: #1e293b;
+    color: #EAEAEA;
     transition: all 0.2s;
 }
 
@@ -1354,9 +1573,9 @@ select.db-input {
 }
 
 .availability-day.booked {
-    background: #dbeafe;
-    border-color: #93c5fd;
-    color: #1d4ed8;
+    background: rgba(201,168,76,0.15);
+    border-color: rgba(201,168,76,0.3);
+    color: #C9A84C;
     cursor: not-allowed;
 }
 
@@ -1395,8 +1614,8 @@ select.db-input {
 }
 
 .legend-color.booked {
-    background: #dbeafe;
-    border-color: #93c5fd;
+    background: rgba(201,168,76,0.15);
+    border-color: rgba(201,168,76,0.3);
 }
 
 .availability-actions {
@@ -1408,9 +1627,9 @@ select.db-input {
 }
 
 .btn-secondary {
-    background: #f1f5f9;
-    color: #64748b;
-    border: 1px solid #e2e8f0;
+    background: #2A2520;
+    color: #9A9082;
+    border: 1px solid #2A2520;
     padding: 8px 16px;
     border-radius: 8px;
     font-size: 14px;
@@ -1420,12 +1639,12 @@ select.db-input {
 }
 
 .btn-secondary:hover {
-    background: #e2e8f0;
-    color: #1e293b;
+    background: #3A3530;
+    color: #F0ECE2;
 }
 
 .btn-primary {
-    background: #3B82F6;
+    background: #C9A84C;
     color: #fff;
     border: none;
     padding: 8px 16px;
@@ -1437,7 +1656,7 @@ select.db-input {
 }
 
 .btn-primary:hover {
-    background: #2563eb;
+    background: #B8963F;
 }
 
 /* DATES button style */
@@ -1467,9 +1686,9 @@ select.db-input {
 }
 
 .db-booking-card {
-    background: #fff;
+    background: #1A1814;
     border-radius: 16px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #2A2520;
     display: flex;
     gap: 16px;
     align-items: flex-start;
@@ -1503,7 +1722,7 @@ select.db-input {
 .db-booking-vehicle {
     font-size: 16px;
     font-weight: 700;
-    color: #1e293b;
+    color: #EAEAEA;
 }
 
 .db-booking-status {
@@ -1516,13 +1735,13 @@ select.db-input {
 
 .db-booking-guest {
     font-size: 13px;
-    color: #374151;
+    color: #cbd5e1;
     margin-bottom: 4px;
 }
 
 .db-booking-dates {
     font-size: 13px;
-    color: #475569;
+    color: #94a3b8;
     margin-bottom: 3px;
 }
 
@@ -1541,7 +1760,7 @@ select.db-input {
 
 .db-booking-price {
     font-size: 14px;
-    color: #374151;
+    color: #cbd5e1;
     margin-top: 4px;
 }
 
@@ -1605,7 +1824,7 @@ select.db-input {
         position: static;
         height: auto;
         border-right: none;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid #2A2520;
         padding: 12px 0 0;
         flex-direction: column;
     }
@@ -1635,8 +1854,8 @@ select.db-input {
     }
     .db-nav-item.active {
         border-left: none;
-        border-bottom: 3px solid #3B82F6;
-        background: #eff6ff;
+        border-bottom: 3px solid #C9A84C;
+        background: rgba(201,168,76,0.1);
     }
     .db-nav-item svg { display: none; }
 
@@ -1707,8 +1926,8 @@ select.db-input {
 }
 
 .fin-stat-card {
-    background: white;
-    border: 1px solid #e2e8f0;
+    background: #1A1814;
+    border: 1px solid #2A2520;
     border-radius: 12px;
     padding: 20px;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -1737,7 +1956,7 @@ select.db-input {
 .fin-stat-value {
     font-size: 32px;
     font-weight: 800;
-    color: #1e293b;
+    color: #EAEAEA;
     margin-bottom: 8px;
 }
 
@@ -1770,8 +1989,8 @@ select.db-input {
 }
 
 .fin-chart-card {
-    background: white;
-    border: 1px solid #e2e8f0;
+    background: #1A1814;
+    border: 1px solid #2A2520;
     border-radius: 12px;
     padding: 24px;
 }
@@ -1783,7 +2002,7 @@ select.db-input {
 .fin-chart-header h3 {
     font-size: 16px;
     font-weight: 700;
-    color: #1e293b;
+    color: #EAEAEA;
 }
 
 .fin-chart-container {
@@ -1819,7 +2038,7 @@ select.db-input {
     padding: 16px;
     border-bottom: 1px solid #f1f5f9;
     font-size: 14px;
-    color: #1e293b;
+    color: #EAEAEA;
 }
 
 .fin-table tbody tr:hover {
@@ -1840,8 +2059,8 @@ select.db-input {
 }
 
 .fin-status-active {
-    background: #dbeafe;
-    color: #1e40af;
+    background: rgba(201,168,76,0.15);
+    color: #C9A84C;
 }
 
 .fin-status-pending {

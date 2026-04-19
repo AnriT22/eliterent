@@ -50,7 +50,30 @@ function initDropdowns() {
     // Language dropdown
     const languageBtn = document.getElementById('languageBtn');
     const languageDropdown = document.getElementById('languageDropdown');
-    
+
+    function updateLanguageButton(lang) {
+        if (!languageBtn) return;
+        const iconMap = { 'en': 'EN', 'ru': '🇷🇺', 'ka': '🇬🇪' };
+        const textMap = { 'en': 'English', 'ru': 'Русский', 'ka': 'ქართული' };
+        languageBtn.innerHTML = `
+            <span class="selector-icon">${iconMap[lang] || 'EN'}</span>
+            <span class="selector-text">${textMap[lang] || 'English'}</span>
+            <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        `;
+        if (languageDropdown) {
+            languageDropdown.querySelectorAll('.checkmark').forEach(check => check.remove());
+            const activeItem = languageDropdown.querySelector('[data-language="' + lang + '"]');
+            if (activeItem) activeItem.innerHTML += '<span class="checkmark">✓</span>';
+        }
+    }
+
+    // Restore saved language on load
+    const savedLang = (window.I18n && window.I18n.lang()) || localStorage.getItem('royalcar_lang') || 'en';
+    appState.currentLanguage = savedLang;
+    updateLanguageButton(savedLang);
+
     if (languageBtn && languageDropdown) {
         languageBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -64,22 +87,14 @@ function initDropdowns() {
                 e.stopPropagation();
                 const language = item.dataset.language;
                 appState.currentLanguage = language;
-                
-                // Update language button
-                const flagMap = { 'en': '🇬🇧 English', 'ru': '🇷🇺 Русский', 'ka': '🇬🇪 ქართული' };
-                const languageText = flagMap[language];
-                languageBtn.innerHTML = `
-                    <span class="selector-icon">${language === 'en' ? '🇬🇧' : language === 'ru' ? '🇷🇺' : '🇬🇪'}</span>
-                    <span class="selector-text">${language === 'en' ? 'English' : language === 'ru' ? 'Русский' : 'ქართული'}</span>
-                    <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                `;
-                
-                // Update checkmark
-                languageDropdown.querySelectorAll('.checkmark').forEach(check => check.remove());
-                item.innerHTML += '<span class="checkmark">✓</span>';
-                
+
+                updateLanguageButton(language);
+
+                // Use I18n engine to switch language and translate page
+                if (window.I18n && window.I18n.setLang) {
+                    window.I18n.setLang(language);
+                }
+
                 closeDropdown(languageBtn, languageDropdown);
             });
         });
@@ -459,7 +474,7 @@ function loadCarouselWithAvailability() {
         return;
     }
     
-    carouselTrack.innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8;grid-column:1/-1;">Loading vehicles...</div>';
+    carouselTrack.innerHTML = '<div style="padding:40px;text-align:center;color:#A0A3B0;grid-column:1/-1;">Loading vehicles...</div>';
     
     let apiUrl = '/api/vehicles?sort=newest';
     const hasDates = window.selectedStartDate && window.selectedEndDate;
@@ -476,12 +491,12 @@ function loadCarouselWithAvailability() {
             window._allCarouselVehicles = vehicles;
             
             if (vehicles.length === 0 && hasDates) {
-                carouselTrack.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;grid-column:1/-1;"><p style="font-size:18px;margin-bottom:8px;">No vehicles available for the selected dates.</p><button onclick="clearDatesAndReload()" style="padding:8px 20px;background:#3B82F6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Clear Dates</button></div>';
+                carouselTrack.innerHTML = '<div style="padding:40px;text-align:center;color:#EAEAEA;grid-column:1/-1;"><p style="font-size:18px;margin-bottom:8px;">No vehicles available for the selected dates.</p><button onclick="clearDatesAndReload()" style="padding:8px 20px;background:#D4AF37;color:#0B0C10;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;">Clear Dates</button></div>';
                 return;
             }
             
             if (vehicles.length === 0) {
-                carouselTrack.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b;grid-column:1/-1;"><p style="font-size:18px;">No vehicles available yet.</p></div>';
+                carouselTrack.innerHTML = '<div style="padding:40px;text-align:center;color:#EAEAEA;grid-column:1/-1;"><p style="font-size:18px;">No vehicles available yet.</p></div>';
                 return;
             }
             
@@ -799,7 +814,7 @@ function initMapWidget() {
     if (!mapWidget) return;
     mapWidget.addEventListener('click', () => {
         const tooltip = mapWidget.querySelector('.map-tooltip') || mapWidget;
-        tooltip.style.outline = '2px solid #3B82F6';
+        tooltip.style.outline = '2px solid #C9A84C';
         setTimeout(() => { tooltip.style.outline = ''; }, 1500);
     });
 }
@@ -1144,8 +1159,8 @@ function applyHomeFilters() {
         if (!noMatch && track) {
             const msg = document.createElement('div');
             msg.className = 'no-filter-match';
-            msg.style.cssText = 'padding:40px;text-align:center;color:#64748b;grid-column:1/-1;';
-            msg.innerHTML = '<p style="font-size:18px;margin-bottom:8px;">No vehicles match your filters.</p><button onclick="document.querySelectorAll(\'.filter-options input[type=checkbox]\').forEach(c=>c.checked=false);applyHomeFilters();" style="padding:8px 20px;background:#3B82F6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Clear Filters</button>';
+            msg.style.cssText = 'padding:40px;text-align:center;color:#EAEAEA;grid-column:1/-1;background-color:#0B0C10;';
+            msg.innerHTML = '<p style="font-size:18px;margin-bottom:8px;">No vehicles match your filters.</p><button onclick="document.querySelectorAll(\'.filter-options input[type=checkbox]\').forEach(c=>c.checked=false);applyHomeFilters();" style="padding:8px 20px;background:#D4AF37;color:#0B0C10;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;">Clear Filters</button>';
             track.appendChild(msg);
         }
     } else if (noMatch) {

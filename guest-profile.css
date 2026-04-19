@@ -5,15 +5,15 @@
 .gp-container {
     display: flex;
     min-height: calc(100vh - 70px);
-    background: #f3f6fa;
+    background: #0F0F0F;
 }
 
 /* Sidebar */
 .gp-sidebar {
     width: 260px;
     min-width: 260px;
-    background: #fff;
-    border-right: 1px solid #e2e8f0;
+    background: #1A1814;
+    border-right: 1px solid #2A2520;
     padding: 0;
     position: sticky;
     top: 70px;
@@ -27,14 +27,14 @@
     flex-direction: column;
     align-items: center;
     padding: 28px 20px 20px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #2A2520;
 }
 
 .gp-avatar {
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+    background: linear-gradient(135deg, #C9A84C, #A6832E);
     color: #fff;
     font-size: 22px;
     font-weight: 800;
@@ -48,7 +48,7 @@
 .gp-name {
     font-size: 16px;
     font-weight: 700;
-    color: #1e293b;
+    color: #F0ECE2;
     margin: 0 0 2px;
     text-align: center;
 }
@@ -95,12 +95,12 @@
 }
 
 .gp-nav-item:hover {
-    background: #f1f5f9;
-    color: #1e293b;
+    background: rgba(201,168,76,0.08);
+    color: #F0ECE2;
 }
 
 .gp-nav-item.active {
-    background: #3B82F6;
+    background: #C9A84C;
     color: #fff;
 }
 
@@ -118,7 +118,7 @@
     margin: 10px;
     border: 1.5px solid #fecaca;
     border-radius: 10px;
-    background: #fff;
+    background: #1A1814;
     color: #ef4444;
     font-size: 13px;
     font-weight: 700;
@@ -128,7 +128,7 @@
 }
 
 .gp-logout-btn:hover {
-    background: #fef2f2;
+    background: rgba(239,68,68,0.1);
     border-color: #ef4444;
 }
 
@@ -161,13 +161,13 @@
 .gp-tab-header h2 {
     font-size: 24px;
     font-weight: 700;
-    color: #1e293b;
+    color: #F0ECE2;
 }
 
 /* Card */
 .gp-card {
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: #1A1814;
+    border: 1px solid #2A2520;
     border-radius: 16px;
     padding: 24px;
 }
@@ -175,7 +175,7 @@
 .gp-card-title {
     font-size: 16px;
     font-weight: 700;
-    color: #1e293b;
+    color: #F0ECE2;
     margin: 0 0 16px;
 }
 
@@ -203,7 +203,7 @@
 .gp-info-item span {
     font-size: 15px;
     font-weight: 600;
-    color: #1e293b;
+    color: #F0ECE2;
 }
 
 /* Stats Row */
@@ -215,8 +215,8 @@
 }
 
 .gp-stat-card {
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: #1A1814;
+    border: 1px solid #2A2520;
     border-radius: 14px;
     padding: 20px;
     text-align: center;
@@ -225,7 +225,7 @@
 .gp-stat-number {
     font-size: 28px;
     font-weight: 800;
-    color: #3B82F6;
+    color: #C9A84C;
     line-height: 1;
     margin-bottom: 6px;
 }
@@ -247,14 +247,14 @@
     gap: 12px;
     padding: 60px 20px;
     text-align: center;
-    background: #fff;
-    border: 2px dashed #e2e8f0;
+    background: #1A1814;
+    border: 2px dashed #2A2520;
     border-radius: 16px;
 }
 
 .gp-empty-state h3 {
     font-size: 18px;
-    color: #1e293b;
+    color: #F0ECE2;
     margin: 0;
 }
 
@@ -281,27 +281,27 @@
 .gp-form-group label {
     font-size: 12px;
     font-weight: 700;
-    color: #1e293b;
+    color: #F0ECE2;
     text-transform: uppercase;
     letter-spacing: 0.3px;
 }
 
 .gp-input {
     padding: 10px 14px;
-    border: 1.5px solid #e2e8f0;
+    border: 1.5px solid #2A2520;
     border-radius: 10px;
     font-size: 14px;
     font-family: inherit;
-    color: #1e293b;
-    background: #f8fafc;
+    color: #F0ECE2;
+    background: #151210;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .gp-input:focus {
-    border-color: #3B82F6;
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
-    background: #fff;
+    border-color: #C9A84C;
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+    background: #1A1814;
 }
 
 /* Danger button */
@@ -331,8 +331,8 @@
 }
 
 .gp-fav-card {
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: #1A1814;
+    border: 1px solid #2A2520;
     border-radius: 12px;
     overflow: hidden;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -374,7 +374,7 @@
 .gp-fav-name {
     font-size: 16px;
     font-weight: 600;
-    color: #1e293b;
+    color: #F0ECE2;
     margin: 0 0 8px 0;
 }
 
@@ -388,15 +388,15 @@
 .gp-fav-specs span {
     font-size: 12px;
     padding: 4px 8px;
-    background: #f1f5f9;
+    background: #2A2520;
     border-radius: 6px;
-    color: #64748b;
+    color: #9A9082;
 }
 
 .gp-fav-price {
     font-size: 18px;
     font-weight: 700;
-    color: #3B82F6;
+    color: #C9A84C;
     margin-bottom: 12px;
 }
 
@@ -444,14 +444,14 @@
         white-space: nowrap;
         padding: 8px 14px;
         font-size: 13px;
-        background: #e2e8f0;
-        color: #1e293b;
+        background: #2A2520;
+        color: #F0ECE2;
         border-radius: 8px;
         font-weight: 600;
     }
 
     .gp-nav-item.active {
-        background: #3B82F6;
+        background: #C9A84C;
         color: #fff;
     }
 
@@ -494,9 +494,9 @@
 }
 
 .gp-booking-card {
-    background: #fff;
+    background: #1A1814;
     border-radius: 16px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #2A2520;
     display: flex;
     gap: 16px;
     align-items: flex-start;
@@ -530,7 +530,7 @@
 .gp-booking-name {
     font-size: 16px;
     font-weight: 700;
-    color: #1e293b;
+    color: #F0ECE2;
 }
 
 .gp-booking-status {
@@ -543,19 +543,19 @@
 
 .gp-booking-dates {
     font-size: 13px;
-    color: #475569;
+    color: #94a3b8;
     margin-bottom: 4px;
 }
 
 .gp-booking-loc {
     font-size: 13px;
-    color: #64748b;
+    color: #94a3b8;
     margin-bottom: 4px;
 }
 
 .gp-booking-price {
     font-size: 14px;
-    color: #374151;
+    color: #d1d5db;
     margin-top: 6px;
 }
 
@@ -569,7 +569,7 @@
 .gp-booking-pay-btn {
     display: inline-block;
     padding: 8px 16px;
-    background: #3B82F6;
+    background: #C9A84C;
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -580,7 +580,7 @@
     cursor: pointer;
     transition: background 0.2s;
 }
-.gp-booking-pay-btn:hover { background: #2563eb; color: #fff; }
+.gp-booking-pay-btn:hover { background: #B8963F; color: #fff; }
 .gp-booking-cancel-btn {
     flex-shrink: 0;
     padding: 8px 16px;

@@ -1,240 +1,518 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Login — RoyalCar.rent</title>
+
     <meta name="description" content="Log in to your RoyalCar.rent account to manage bookings, vehicles, and more.">
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
     <link rel="stylesheet" href="style.css">
+
     <link rel="stylesheet" href="premium.css">
+
     <link rel="stylesheet" href="auth-luxury.css">
+
     <script src="api-helper.js"></script>
+
+    <!-- Google OAuth handled via server-side redirect, no GIS library needed -->
+
 </head>
+
 <body class="auth-page">
+
     <!-- AUTH CONTAINER -->
+
     <div class="auth-container">
+
         <!-- LEFT PANEL - BRANDING -->
+
         <div class="auth-left-panel">
+
             <div class="auth-branding">
+
                 <div class="auth-logo">
+
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
                         <path d="M19 17h2v.5a.5.5 0 0 1-.5.5h-19a.5.5 0 0 1-.5-.5V5a.5.5 0 0 1 .5-.5H16V3a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v3h2a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2Z"/>
+
                         <circle cx="6.5" cy="15.5" r="1.5"/>
+
                         <circle cx="17.5" cy="15.5" r="1.5"/>
+
                     </svg>
+
                     <h1>Rent Cars Georgia</h1>
+
                 </div>
+
+
 
                 <div class="auth-tagline">
+
                     <p class="auth-main-text">Premium Car Rental Marketplace</p>
+
                     <p class="auth-sub-text">Your adventure starts here</p>
+
                 </div>
+
+
 
                 <div class="auth-benefits">
+
                     <div class="benefit-item">
+
                         <span class="benefit-icon">✓</span>
+
                         <span>No Deposit Required</span>
+
                     </div>
+
                     <div class="benefit-item">
+
                         <span class="benefit-icon">✓</span>
+
                         <span>Verified Vehicles</span>
+
                     </div>
+
                     <div class="benefit-item">
+
                         <span class="benefit-icon">✓</span>
+
                         <span>24/7 Support</span>
+
                     </div>
+
                     <div class="benefit-item">
+
                         <span class="benefit-icon">✓</span>
+
                         <span>Free Delivery</span>
+
                     </div>
+
                 </div>
+
+
 
                 <div class="auth-stats">
+
                     <div class="stat">
+
                         <strong>2,000+</strong>
+
                         <span>Vehicles</span>
+
                     </div>
+
                     <div class="stat">
+
                         <strong>4.9★</strong>
+
                         <span>Rating</span>
+
                     </div>
+
                     <div class="stat">
+
                         <strong>50K+</strong>
+
                         <span>Journeys</span>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
 
+
+
         <!-- RIGHT PANEL - LOGIN FORM -->
+
         <div class="auth-right-panel">
+
             <div class="auth-form-wrapper">
+
                 <div class="auth-form-header">
+
                     <h2>Welcome Back</h2>
+
                     <p>Sign in to your account to continue your adventure</p>
+
                 </div>
+
+
 
                 <!-- Role Tabs -->
+
                 <div class="login-role-tabs">
+
                     <button class="login-role-tab active" data-role="guest">
+
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+
                         Login as Guest
+
                     </button>
+
                     <button class="login-role-tab" data-role="partner">
+
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+
                         Login as Partner
+
                     </button>
+
                 </div>
 
+
+
                 <form class="auth-form" id="loginForm">
+
                     <!-- Email Field -->
+
                     <div class="form-group">
+
                         <label for="email" class="form-label">Email Address</label>
+
                         <div class="form-input-wrapper">
+
                             <span class="form-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 4-10 8L2 4"/></svg></span>
+
                             <input 
+
                                 type="email" 
+
                                 id="email" 
+
                                 name="email" 
+
                                 class="form-input" 
+
                                 placeholder="hello@example.com"
+
                                 required
+
                             >
+
                         </div>
+
                         <span class="form-error" id="emailError"></span>
+
                     </div>
+
+
 
                     <!-- Password Field -->
+
                     <div class="form-group">
+
                         <div class="form-label-row">
+
                             <label for="password" class="form-label">Password</label>
+
                             <a href="#" class="form-link" id="forgotPasswordLink">Forgot?</a>
+
                         </div>
+
                         <div class="form-input-wrapper">
+
                             <span class="form-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+
                             <input 
+
                                 type="password" 
+
                                 id="password" 
+
                                 name="password" 
+
                                 class="form-input" 
+
                                 placeholder="••••••••"
+
                                 required
+
                             >
+
                             <button type="button" class="form-toggle-password" data-target="password">
+
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+
                             </button>
+
                         </div>
+
                         <span class="form-error" id="passwordError"></span>
+
                     </div>
+
+
 
                     <!-- Remember Me -->
+
                     <div class="form-checkbox">
+
                         <input type="checkbox" id="rememberMe" name="rememberMe" class="checkbox-input">
+
                         <label for="rememberMe" class="checkbox-label">Remember me for 30 days</label>
+
                     </div>
 
+
+
                     <!-- Submit Button -->
+
                     <button type="submit" class="btn btn-primary btn-large btn-full">
+
                         <span class="btn-text">Sign In</span>
+
                         <span class="btn-loader" style="display: none;">⏳</span>
+
                     </button>
+
+
+
+                    <!-- Divider -->
+
+                    <div class="auth-divider">
+
+                        <span>or</span>
+
+                    </div>
+
+
+
+                    <!-- Google Login Button -->
+
+                    <button type="button" id="googleLoginBtn" class="btn btn-google btn-full">
+
+                        <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+
+                        </svg>
+
+                        <span>Login with Google</span>
+
+                    </button>
+
+
 
                 </form>
 
+
+
                 <!-- Sign Up Links -->
+
                 <div class="auth-footer" id="loginFooter">
+
                     <p>Don't have an account?</p>
+
                     <div class="auth-footer-links">
+
                         <a href="register.html" class="auth-link">Register as Guest</a>
+
                         <span class="auth-footer-sep">|</span>
+
                         <a href="register-partner.html" class="auth-link">Register as Partner</a>
+
                     </div>
+
                     <p><a href="index.html" class="auth-link">Back to home</a></p>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
+
+
 
     <!-- FLOATING ELEMENTS -->
+
     <div class="floating-support">
+
         <button class="support-btn" title="Need help?">
+
             <span>💬</span>
+
         </button>
+
     </div>
+
+
 
     <!-- FLOATING QUICK CHAT -->
+
     <a href="https://wa.me/995591522299" target="_blank" class="floating-whatsapp" style="text-decoration:none;color:inherit;">
+
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+
         <span>Quick Chat</span>
+
     </a>
+
     <footer class="footer">
+
         <div class="container footer-content">
+
             <div class="footer-column"><h4>RoyalCar.rent</h4><p>Premium car rental marketplace for Georgia adventures.</p><div class="social-icons"><a href="https://www.facebook.com/profile.php?id=61583448788067" target="_blank" class="social-icon" title="Facebook"><img src="images/Facebook_Logo.png" alt="Facebook" width="18" height="18" style="object-fit:contain;"></a><a href="https://www.instagram.com/eliterentalgeorgia/" target="_blank" class="social-icon" title="Instagram"><img src="images/Instagram.png" alt="Instagram" width="18" height="18" style="object-fit:contain;"></a></div></div>
+
             <div class="footer-column"><h4>Legal</h4><ul><li><a href="tos.html">Terms & Conditions</a></li><li><a href="privacy.html">Privacy Policy</a></li><li><a href="#" onclick="document.getElementById('contactModal').style.display='flex'; return false;">Contact</a></li></ul></div>
+
             <div class="footer-column"><h4>Contact</h4><p>📧 elite.rental25@gmail.com</p><p>📞 +995 591 522 299</p><p>📍 Tbilisi, Georgia</p></div>
+
         </div>
+
         <div class="footer-bottom"><p>&copy; 2026 RoyalCar.rent. All rights reserved.</p></div>
+
     </footer>
+
     <div id="contactModal" onclick="if(event.target===this)this.style.display='none';" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-        <div style="background:#fff; border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.15); text-align:center;">
-            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#64748b; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">✕</button>
-            <div style="width:64px; height:64px; background:linear-gradient(135deg,#3b82f6,#2563eb); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px;">📞</div>
-            <h2 style="font-size:24px; font-weight:800; color:#1e293b; margin-bottom:8px;">Contact Us</h2>
-            <p style="font-size:14px; color:#64748b; margin-bottom:28px;">We're here to help! Reach us anytime.</p>
-            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0'">
-                <div style="width:44px; height:44px; background:#eff6ff; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">📧</div>
-                <div style="text-align:left;"><div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div><div style="font-size:15px; color:#1e293b; font-weight:600;">elite.rental25@gmail.com</div></div>
+
+        <div style="background:#1C1E26; border:1px solid #3A3F4B; border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.5); text-align:center;">
+
+            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#A0A3B0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='none'">✕</button>
+
+            <div style="width:64px; height:64px; background:linear-gradient(135deg,#D4AF37,#B8963F); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px;">📞</div>
+
+            <h2 style="font-size:24px; font-weight:800; color:#EAEAEA; margin-bottom:8px;">Contact Us</h2>
+
+            <p style="font-size:14px; color:#A0A3B0; margin-bottom:28px;">We're here to help! Reach us anytime.</p>
+
+            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#262A35; border:1px solid #3A3F4B; border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#D4AF37'" onmouseout="this.style.borderColor='#D4AF37'">
+
+                <div style="width:44px; height:44px; background:rgba(212,175,55,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">📧</div>
+
+                <div style="text-align:left;">
+
+                    <div style="font-size:12px; color:#A0A3B0; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div>
+
+                    <div style="font-size:15px; color:#EAEAEA; font-weight:600;">elite.rental25@gmail.com</div></div>
+
             </a>
-            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#e2e8f0'">
-                <div style="width:44px; height:44px; background:#f0fdf4; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="24" height="24" viewBox="0 0 24 24" fill="#22c55e"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></div>
-                <div style="text-align:left;"><div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div><div style="font-size:15px; color:#1e293b; font-weight:600;">+995 591 522 299</div></div>
+
+            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#262A35; border:1px solid #3A3F4B; border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#D4AF37'">
+
+                <div style="width:44px; height:44px; background:rgba(34,197,94,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="24" height="24" viewBox="0 0 24 24" fill="#22c55e"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></div>
+
+                <div style="text-align:left;"><div style="font-size:12px; color:#A0A3B0; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div><div style="font-size:15px; color:#EAEAEA; font-weight:600;">+995 591 522 299</div></div>
+
             </a>
+
         </div>
+
     </div>
+
+
 
     <!-- Forgot Password Modal -->
+
     <div id="forgotModal" onclick="if(event.target===this)this.style.display='none';" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
-        <div style="background:#fff;border-radius:20px;padding:36px;max-width:420px;width:90%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
-            <button onclick="document.getElementById('forgotModal').style.display='none';" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:#64748b;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50;">&#10005;</button>
-            <h3 style="font-size:20px;font-weight:700;color:#1e293b;margin-bottom:6px;">Reset Password</h3>
-            <p style="font-size:13px;color:#64748b;margin-bottom:20px;">Enter your email and we'll send you a reset link.</p>
+
+        <div style="background:#1C1E26;border:1px solid #3A3F4B;border-radius:20px;padding:36px;max-width:420px;width:90%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+
+            <button onclick="document.getElementById('forgotModal').style.display='none';" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:#A0A3B0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;">&#10005;</button>
+
+            <h3 style="font-size:20px;font-weight:700;color:#EAEAEA;margin-bottom:6px;">Reset Password</h3>
+
+            <p style="font-size:13px;color:#A0A3B0;margin-bottom:20px;">Enter your email and we'll send you a reset link.</p>
+
             <div id="forgotMsg" style="display:none;padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:13px;"></div>
-            <input type="email" id="forgotEmail" placeholder="your@email.com" style="width:100%;padding:12px 16px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;margin-bottom:14px;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor='#c8a961'" onblur="this.style.borderColor='#e2e8f0'">
+
+            <input type="email" id="forgotEmail" placeholder="your@email.com" style="width:100%;padding:12px 16px;border:1.5px solid #3A3F4B;border-radius:10px;font-size:14px;margin-bottom:14px;box-sizing:border-box;outline:none;background:#262A35;color:#EAEAEA;" onfocus="this.style.borderColor='#D4AF37'" onblur="this.style.borderColor='#3A3F4B'">
+
             <button id="forgotSubmitBtn" onclick="submitForgotPassword()" style="width:100%;padding:12px;background:linear-gradient(135deg,#c8a961,#b8943f);color:#0f172a;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Send Reset Link</button>
+
         </div>
+
     </div>
 
+
+
     <script>
+
     document.getElementById('forgotPasswordLink').addEventListener('click', function(e) {
+
         e.preventDefault();
+
         document.getElementById('forgotModal').style.display = 'flex';
+
         document.getElementById('forgotEmail').value = document.getElementById('email').value || '';
+
         document.getElementById('forgotMsg').style.display = 'none';
+
     });
 
+
+
     function submitForgotPassword() {
+
         var email = document.getElementById('forgotEmail').value.trim();
+
         var msgEl = document.getElementById('forgotMsg');
+
         var btn = document.getElementById('forgotSubmitBtn');
+
         if (!email) { msgEl.style.display='block'; msgEl.style.background='#fef2f2'; msgEl.style.color='#dc2626'; msgEl.textContent='Please enter your email.'; return; }
+
         btn.disabled = true; btn.textContent = 'Sending...';
+
         fetch('/api/forgot-password', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:email}) })
+
         .then(function(r){ return r.json(); })
+
         .then(function(d){
+
             msgEl.style.display='block'; msgEl.style.background='#f0fdf4'; msgEl.style.color='#166534'; msgEl.style.border='1px solid #bbf7d0';
+
             msgEl.textContent = d.message || 'Check your email for the reset link.';
+
             btn.textContent = 'Sent!';
+
         })
+
         .catch(function(){
+
             msgEl.style.display='block'; msgEl.style.background='#fef2f2'; msgEl.style.color='#dc2626';
+
             msgEl.textContent='Network error. Try again.'; btn.disabled=false; btn.textContent='Send Reset Link';
+
         });
+
     }
+
     </script>
 
+
+
     <script src="script.js"></script>
+
     <script src="auth.js"></script>
+
 <script src="premium-animations.js"></script>
+
 </body>
+
 </html>
+

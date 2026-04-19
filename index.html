@@ -6,14 +6,15 @@
     <title>RoyalCar.rent — Premium Car Rental Marketplace in Georgia</title>
     <meta name="description" content="Rent premium cars in Georgia. Browse SUVs, sedans, economy &amp; luxury vehicles from verified partners. Best prices, free cancellation, instant booking.">
     <meta name="keywords" content="car rental Georgia, rent car Tbilisi, premium car rental, SUV rental Georgia, RoyalCar">
-    <link rel="canonical" href="https://RoyalCar.rent/">
+    <link rel="canonical" href="https://royalcar.rent/">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="RoyalCar.rent — Premium Car Rental Marketplace in Georgia">
     <meta property="og:description" content="Browse and rent premium cars from verified partners across Georgia. Best prices guaranteed.">
-    <meta property="og:url" content="https://RoyalCar.rent/">
+    <meta property="og:url" content="https://royalcar.rent/">
     <meta property="og:site_name" content="RoyalCar.rent">
+    <meta property="og:image" content="https://royalcar.rent/images/og-preview.jpg">
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="RoyalCar.rent — Premium Car Rental in Georgia">
@@ -22,6 +23,7 @@
     <link rel="stylesheet" href="premium.css">
     <link rel="stylesheet" href="navbar-auth.css">
     <script src="api-helper.js"></script>
+    <script src="i18n.js"></script>
 </head>
 <body>
     <!-- HEADER & NAVIGATION -->
@@ -38,11 +40,11 @@
             <!-- Navigation Menu -->
             <div class="header-center">
                 <nav class="nav-menu">
-                    <a href="index.html" class="nav-link active">Home</a>
-                    <a href="vehicles.html" class="nav-link">Vehicles</a>
-                    <a href="reviews.html" class="nav-link">Reviews</a>
-                    <a href="about.html" class="nav-link">About</a>
-                    <a href="contact.html" class="nav-link">Contact</a>
+                    <a href="index.html" class="nav-link active" data-i18n="nav.home">Home</a>
+                    <a href="vehicles.html" class="nav-link" data-i18n="nav.vehicles">Vehicles</a>
+                    <a href="reviews.html" class="nav-link" data-i18n="nav.reviews">Reviews</a>
+                    <a href="about.html" class="nav-link" data-i18n="nav.about">About</a>
+                    <a href="contact.html" class="nav-link" data-i18n="nav.contact">Contact</a>
                 </nav>
             </div>
 
@@ -92,7 +94,7 @@
                 </div>
 
                 <!-- Partner Button -->
-                <a href="register-partner.html" class="partner-btn">Become Partner</a>
+                <a href="register-partner.html" class="partner-btn" data-i18n="nav.become_partner">Become Partner</a>
             </div>
         </div>
     </header>
@@ -106,18 +108,18 @@
             <div class="hero-main">
                 <!-- Left Content -->
                 <div class="hero-left">
-                    <h1 class="hero-headline">Rent Cars Georgia<br>— Car Rental in<br>Tbilisi, Batumi &<br>Kutaisi and etc.</h1>
-                    <p class="hero-subtext">Rent from verified local partners. Save up to <span class="discount">40%</span> on select vehicles.</p>
+                    <h1 class="hero-headline" data-i18n-html="hero.headline">Rent Cars Georgia<br>— Car Rental in<br>Tbilisi, Batumi &<br>Kutaisi and etc.</h1>
+                    <p class="hero-subtext" data-i18n-html="hero.subtext">Rent from verified local partners. Save up to <span class="discount">40%</span> on select vehicles.</p>
                     
                     <!-- Rating Section -->
                     <div class="rating-section">
                         <div class="rating-stars">⭐⭐⭐⭐⭐</div>
-                        <span class="rating-text">4.8</span>
-                        <span class="rating-source">Google Reviews</span>
+                        <span class="rating-text" data-i18n="hero.rating_text">4.8</span>
+                        <span class="rating-source" data-i18n="hero.rating_source">Google Reviews</span>
                         <span class="divider">|</span>
-                        <span class="badge">✓ Verified Partners</span>
+                        <span class="badge" data-i18n="hero.verified_partners">✓ Verified Partners</span>
                         <span class="divider">|</span>
-                        <span class="badge">✓ Free Cancellation</span>
+                        <span class="badge" data-i18n="hero.free_cancellation">✓ Free Cancellation</span>
                     </div>
                 </div>
 
@@ -133,7 +135,7 @@
                     <div class="form-group">
                         <div class="input-wrapper">
                             <span class="input-icon">📍</span>
-                            <input type="text" id="pickupInput" placeholder="Pick-up *" class="booking-input" readonly>
+                            <input type="text" id="pickupInput" placeholder="Pick-up *" data-i18n-placeholder="hero.pickup_placeholder" class="booking-input" readonly>
                         </div>
                         <div class="location-dropdown" id="pickupDropdown" style="display: none;">
                             <div class="location-item" data-location="Tbilisi">
@@ -169,7 +171,7 @@
                     <div class="form-group">
                         <div class="input-wrapper">
                             <span class="input-icon">📍</span>
-                            <input type="text" id="dropoffInput" placeholder="Drop-off *" class="booking-input" readonly>
+                            <input type="text" id="dropoffInput" placeholder="Drop-off *" data-i18n-placeholder="hero.dropoff_placeholder" class="booking-input" readonly>
                         </div>
                         <div class="location-dropdown" id="dropoffDropdown" style="display: none;">
                             <div class="location-item" data-location="Tbilisi">
@@ -205,10 +207,10 @@
                     <div class="form-group">
                         <div class="input-wrapper">
                             <span class="input-icon">📅</span>
-                            <input type="text" id="dateRangeInput" placeholder="Pick-up & Drop-off" class="booking-input" readonly>
+                            <input type="text" id="dateRangeInput" placeholder="Pick-up & Drop-off" data-i18n-placeholder="hero.date_placeholder" class="booking-input" readonly>
                         </div>
                     </div>
-                    <button class="search-btn">Search for a car</button>
+                    <button class="search-btn" data-i18n="hero.search_btn">Search for a car</button>
                 </div>
 
                 <!-- Advanced Filters Toggle -->
@@ -218,7 +220,7 @@
                         <line x1="4" y1="12" x2="20" y2="12"></line>
                         <line x1="4" y1="18" x2="20" y2="18"></line>
                     </svg>
-                    <span>Advanced Filters</span>
+                    <span data-i18n="hero.advanced_filters">Advanced Filters</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
@@ -471,8 +473,8 @@
     <section class="carousel-section">
         <div class="container">
             <div class="carousel-header">
-                <h2 class="carousel-title">Our Fleet</h2>
-                <p class="carousel-subtitle">Meet Some of Our Cars</p>
+                <h2 class="carousel-title" data-i18n="fleet.title">Our Fleet</h2>
+                <p class="carousel-subtitle" data-i18n="fleet.subtitle">Meet Some of Our Cars</p>
             </div>
 
             <div class="fleet-grid" id="carouselTrack">
@@ -481,7 +483,7 @@
 
             <div class="carousel-footer">
                 <a href="vehicles.html" class="show-all-link">
-                    Show all vehicles
+                    <span data-i18n="fleet.show_all">Show all vehicles</span>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
@@ -496,13 +498,13 @@
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
             <path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
         </svg>
-        <span>Quick Chat</span>
+        <span data-i18n="quick_chat">Quick Chat</span>
     </a>
 
     <!-- FEATURES SECTION - BENTO GRID -->
     <section class="features-section">
         <div class="container">
-            <h2 class="section-title">Why Choose Rent Cars Georgia?</h2>
+            <h2 class="section-title" data-i18n="features.title">Why Choose Rent Cars Georgia?</h2>
             <div class="bento-grid">
                 <!-- Large Video Tile -->
                 <div class="bento-tile large">
@@ -518,8 +520,8 @@
                 <!-- Medium Badge Tile -->
                 <div class="bento-tile medium badge-tile">
                     <div class="badge-icon">✓</div>
-                    <h3>No Deposit Required</h3>
-                    <p>Start your adventure immediately</p>
+                    <h3 data-i18n="features.no_deposit_title">No Deposit Required</h3>
+                    <p data-i18n="features.no_deposit_desc">Start your adventure immediately</p>
                 </div>
 
                 <!-- Small Rating Tile -->
@@ -532,22 +534,22 @@
                 <!-- Verified Partners -->
                 <div class="bento-tile medium">
                     <div class="tile-icon">👥</div>
-                    <h3>Verified Partners</h3>
-                    <p>Trusted by 2000+ vehicle owners</p>
+                    <h3 data-i18n="features.verified_title">Verified Partners</h3>
+                    <p data-i18n="features.verified_desc">Trusted by 2000+ vehicle owners</p>
                 </div>
 
                 <!-- Insurance -->
                 <div class="bento-tile medium">
                     <div class="tile-icon">🛡️</div>
-                    <h3>Insurance Included</h3>
-                    <p>Comprehensive coverage on all trips</p>
+                    <h3 data-i18n="features.insurance_title">Insurance Included</h3>
+                    <p data-i18n="features.insurance_desc">Comprehensive coverage on all trips</p>
                 </div>
 
                 <!-- 24/7 Support -->
                 <div class="bento-tile medium">
                     <div class="tile-icon">📞</div>
-                    <h3>Local Support 24/7</h3>
-                    <p>Georgian-speaking support team</p>
+                    <h3 data-i18n="features.support_title">Local Support 24/7</h3>
+                    <p data-i18n="features.support_desc">Georgian-speaking support team</p>
                 </div>
             </div>
         </div>
@@ -556,7 +558,7 @@
     <!-- PARTNERS SLIDER -->
     <section class="partners-section">
         <div class="container">
-            <h2 class="section-title">Trusted by Leading Partners</h2>
+            <h2 class="section-title" data-i18n="partners_section.title">Trusted by Leading Partners</h2>
             <div class="partners-slider">
                 <div class="partner-logo">🏢 Partner 1</div>
                 <div class="partner-logo">🏢 Partner 2</div>
@@ -570,22 +572,22 @@
     <!-- TESTIMONIALS -->
     <section class="testimonials-section">
         <div class="container">
-            <h2 class="section-title">What Our Customers Say</h2>
+            <h2 class="section-title" data-i18n="testimonials.title">What Our Customers Say</h2>
             <div class="testimonials-grid">
                 <div class="testimonial-card">
                     <div class="stars">★★★★★</div>
-                    <p>"Amazing service! The 4x4 was perfect for our Kazbegi trip. Delivery was free and fast!"</p>
-                    <strong>— Sarah M.</strong>
+                    <p data-i18n="testimonials.quote1">"Amazing service! The 4x4 was perfect for our Kazbegi trip. Delivery was free and fast!"</p>
+                    <strong data-i18n="testimonials.author1">— Sarah M.</strong>
                 </div>
                 <div class="testimonial-card">
                     <div class="stars">★★★★★</div>
-                    <p>"Best car rental experience in Georgia. Professional partners and seamless booking process."</p>
-                    <strong>— David L.</strong>
+                    <p data-i18n="testimonials.quote2">"Best car rental experience in Georgia. Professional partners and seamless booking process."</p>
+                    <strong data-i18n="testimonials.author2">— David L.</strong>
                 </div>
                 <div class="testimonial-card">
                     <div class="stars">★★★★★</div>
-                    <p>"No deposit required made it so easy! Highly recommended for adventure travelers."</p>
-                    <strong>— Elena K.</strong>
+                    <p data-i18n="testimonials.quote3">"No deposit required made it so easy! Highly recommended for adventure travelers."</p>
+                    <strong data-i18n="testimonials.author3">— Elena K.</strong>
                 </div>
             </div>
         </div>
@@ -596,7 +598,7 @@
         <div class="container footer-content">
             <div class="footer-column">
                 <h4>RoyalCar.rent</h4>
-                <p>Premium car rental marketplace for Georgia adventures.</p>
+                <p data-i18n="footer.tagline">Premium car rental marketplace for Georgia adventures.</p>
                 <div class="social-icons">
                     <a href="https://www.facebook.com/profile.php?id=61583448788067" target="_blank" class="social-icon" title="Facebook">
                         <img src="images/Facebook_Logo.png" alt="Facebook" width="18" height="18" style="object-fit:contain;">
@@ -607,10 +609,10 @@
                 </div>
             </div>
             <div class="footer-column">
-                <h4>Legal</h4>
+                <h4 data-i18n="footer.legal">Legal</h4>
                 <ul>
-                    <li><a href="tos.html">Terms & Conditions</a></li>
-                    <li><a href="privacy.html">Privacy Policy</a></li>
+                    <li><a href="tos.html" data-i18n="footer.terms">Terms & Conditions</a></li>
+                    <li><a href="privacy.html" data-i18n="footer.privacy">Privacy Policy</a></li>
                     <li><a href="#" onclick="document.getElementById('contactModal').style.display='flex'; return false;">Contact</a></li>
                 </ul>
             </div>
@@ -622,7 +624,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 RoyalCar.rent. All rights reserved.</p>
+            <p data-i18n="footer.copyright">&copy; 2026 RoyalCar.rent. All rights reserved.</p>
         </div>
     </footer>
 
@@ -737,26 +739,26 @@
     </div>
 
     <!-- Contact Modal -->
-    <div id="contactModal" onclick="if(event.target===this)this.style.display='none';" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-        <div style="background:#fff; border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.15); text-align:center;">
-            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#64748b; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">✕</button>
-            <div style="width:64px; height:64px; background:linear-gradient(135deg,#3b82f6,#2563eb); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px;">📞</div>
-            <h2 style="font-size:24px; font-weight:800; color:#1e293b; margin-bottom:8px;">Contact Us</h2>
-            <p style="font-size:14px; color:#64748b; margin-bottom:28px;">We're here to help! Reach us anytime.</p>
-            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0'">
-                <div style="width:44px; height:44px; background:#eff6ff; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">📧</div>
+    <div id="contactModal" onclick="if(event.target===this)this.style.display='none';" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+        <div style="background:#1C1E26; border:1px solid #3A3F4B; border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.5); text-align:center;">
+            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#A0A3B0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='none'">✕</button>
+            <div style="width:64px; height:64px; background:linear-gradient(135deg,#D4AF37,#B8963F); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px;">📞</div>
+            <h2 style="font-size:24px; font-weight:800; color:#EAEAEA; margin-bottom:8px;">Contact Us</h2>
+            <p style="font-size:14px; color:#A0A3B0; margin-bottom:28px;">We're here to help! Reach us anytime.</p>
+            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#262A35; border:1px solid #3A3F4B; border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#D4AF37'" onmouseout="this.style.borderColor='#3A3F4B'">
+                <div style="width:44px; height:44px; background:rgba(212,175,55,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">📧</div>
                 <div style="text-align:left;">
-                    <div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div>
-                    <div style="font-size:15px; color:#1e293b; font-weight:600;">elite.rental25@gmail.com</div>
+                    <div style="font-size:12px; color:#A0A3B0; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div>
+                    <div style="font-size:15px; color:#EAEAEA; font-weight:600;">elite.rental25@gmail.com</div>
                 </div>
             </a>
-            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#e2e8f0'">
-                <div style="width:44px; height:44px; background:#f0fdf4; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#262A35; border:1px solid #3A3F4B; border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#3A3F4B'">
+                <div style="width:44px; height:44px; background:rgba(34,197,94,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="#22c55e"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
                 </div>
                 <div style="text-align:left;">
-                    <div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div>
-                    <div style="font-size:15px; color:#1e293b; font-weight:600;">+995 591 522 299</div>
+                    <div style="font-size:12px; color:#A0A3B0; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div>
+                    <div style="font-size:15px; color:#EAEAEA; font-weight:600;">+995 591 522 299</div>
                 </div>
             </a>
         </div>

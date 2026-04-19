@@ -1,66 +1,123 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
 function escapeHtml(str) {
-    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function isProduction() {
+  return String(process.env.NODE_ENV || "").toLowerCase() === "production";
+}
+
+function isEmailDebugEnabled() {
+  return (
+    String(process.env.EMAIL_DEBUG_LOGS || "").toLowerCase() === "true" &&
+    !isProduction()
+  );
+}
+
+function maskEmail(email) {
+  if (!email || typeof email !== "string") return "***";
+  const parts = email.split("@");
+  if (parts.length !== 2) return "***";
+
+  const local = parts[0];
+  const domain = parts[1];
+
+  if (!local) return `***@${domain || "***"}`;
+  if (local.length <= 2) return `${local[0]}***@${domain}`;
+
+  return `${local.slice(0, 2)}***@${domain}`;
 }
 
 let transporter = null;
 
 function getTransporter() {
-    if (transporter) return transporter;
+  if (transporter) return transporter;
 
-    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-        return null;
-    }
+  if (
+    !process.env.SMTP_HOST ||
+    !process.env.SMTP_USER ||
+    !process.env.SMTP_PASS
+  ) {
+    return null;
+  }
 
-    transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || '587', 10),
-        secure: String(process.env.SMTP_SECURE || 'false') === 'true',
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS
-        }
-    });
+  transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT || "587", 10),
+    secure: String(process.env.SMTP_SECURE || "false") === "true",
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
 
-    return transporter;
+  return transporter;
 }
 
 async function sendEmail(options) {
-    var tx = getTransporter();
-    var from = process.env.SMTP_FROM || process.env.SMTP_USER || 'no-reply@royalcar.rent';
+  const tx = getTransporter();
+  const from =
+    process.env.SMTP_FROM || process.env.SMTP_USER || "noreply@royalcar.rent";
 
-    if (!tx) {
-        console.log('[email:fallback]', {
-            from: from,
-            to: options.to,
-            subject: options.subject,
-            text: options.text
-        });
-        return { sent: false, fallback: true };
+  if (!tx) {
+    if (isProduction()) {
+      console.error(
+        "[email] SMTP is not configured in production. Email delivery skipped.",
+        {
+          to: maskEmail(options && options.to),
+          subject: options && options.subject,
+        },
+      );
+      return { sent: false, fallback: false, error: "SMTP is not configured" };
     }
 
-    await tx.sendMail({
-        from: from,
-        to: options.to,
-        subject: options.subject,
-        text: options.text,
-        html: options.html
-    });
+    if (isEmailDebugEnabled()) {
+      console.log("[email:debug] Simulated email delivery", {
+        from,
+        to: maskEmail(options && options.to),
+        subject: options && options.subject,
+      });
+    } else {
+      console.log("[email] SMTP not configured; email delivery skipped", {
+        to: maskEmail(options && options.to),
+        subject: options && options.subject,
+      });
+    }
 
-    return { sent: true, fallback: false };
+    return { sent: false, fallback: true };
+  }
+
+  await tx.sendMail({
+    from,
+    to: options.to,
+    subject: options.subject,
+    text: options.text,
+    html: options.html,
+  });
+
+  console.log("[email] Sent successfully", {
+    to: maskEmail(options && options.to),
+    subject: options && options.subject,
+  });
+
+  return { sent: true, fallback: false };
 }
 
 // Send OTP verification email
-async function sendOTPEmail(email, otp, type = 'verification') {
-    let subject, text, html;
+async function sendOTPEmail(email, otp, type = "verification") {
+  let subject, text, html;
 
-    switch (type) {
-        case 'registration':
-            subject = 'RoyalCar.rent - Verify Your Account';
-            text = `Your verification code is: ${otp}\n\nThis code expires in 5 minutes.\nIf you didn't create an account, please ignore this email.`;
-            html = `
+  switch (type) {
+    case "registration":
+      subject = "RoyalCar.rent - Verify Your Account";
+      text = `Your verification code is: ${otp}\n\nThis code expires in 5 minutes.\nIf you didn't create an account, please ignore this email.`;
+      html = `
                 <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
                     <div style="text-align: center; margin-bottom: 30px;">
                         <h1 style="color: #1e293b; margin: 0;">RoyalCar.rent</h1>
@@ -79,11 +136,11 @@ async function sendOTPEmail(email, otp, type = 'verification') {
                     </p>
                 </div>
             `;
-            break;
-        case 'reservation':
-            subject = 'RoyalCar.rent - Confirm Your Booking';
-            text = `Your booking confirmation code is: ${otp}\n\nThis code expires in 5 minutes.\nEnter this code to confirm your reservation.`;
-            html = `
+      break;
+    case "reservation":
+      subject = "RoyalCar.rent - Confirm Your Booking";
+      text = `Your booking confirmation code is: ${otp}\n\nThis code expires in 5 minutes.\nEnter this code to confirm your reservation.`;
+      html = `
                 <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
                     <div style="text-align: center; margin-bottom: 30px;">
                         <h1 style="color: #1e293b; margin: 0;">RoyalCar.rent</h1>
@@ -102,14 +159,14 @@ async function sendOTPEmail(email, otp, type = 'verification') {
                     </p>
                 </div>
             `;
-            break;
-        default:
-            subject = 'RoyalCar.rent - Verification Code';
-            text = `Your verification code is: ${otp}\n\nThis code expires in 5 minutes.`;
-            html = `<p>Your verification code is: <strong>${otp}</strong></p><p>This code expires in 5 minutes.</p>`;
-    }
+      break;
+    default:
+      subject = "RoyalCar.rent - Verification Code";
+      text = `Your verification code is: ${otp}\n\nThis code expires in 5 minutes.`;
+      html = `<p>Your verification code is: <strong>${otp}</strong></p><p>This code expires in 5 minutes.</p>`;
+  }
 
-    return sendEmail({ to: email, subject, text, html });
+  return sendEmail({ to: email, subject, text, html });
 }
 
 module.exports = { sendEmail, sendOTPEmail, escapeHtml };

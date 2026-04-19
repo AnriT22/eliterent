@@ -4,8 +4,12 @@ const crypto = require('crypto');
 let JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) {
+    if (String(process.env.NODE_ENV || '').toLowerCase() === 'production') {
+        console.error('FATAL: JWT_SECRET is not set in production. All user sessions will break on restart. Set JWT_SECRET in your .env file.');
+        process.exit(1);
+    }
     JWT_SECRET = crypto.randomBytes(48).toString('hex');
-    console.warn('WARNING: JWT_SECRET not set — generated a random secret. Sessions will reset on each deploy. Set JWT_SECRET env var for persistent sessions.');
+    console.warn('WARNING: JWT_SECRET not set — generated a random secret. Sessions will reset on each restart. Set JWT_SECRET env var for persistent sessions.');
 }
 
 function authenticateToken(req, res, next) {

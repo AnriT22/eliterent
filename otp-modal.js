@@ -70,6 +70,8 @@
 
                     <button class="otp-verify-btn" id="otpVerifyBtn" disabled>Verify Code</button>
 
+                    <button class="otp-skip-btn" id="otpSkipBtn" style="display:none;background:transparent;border:1px solid rgba(255,255,255,0.12);color:#94a3b8;padding:10px 20px;border-radius:10px;cursor:pointer;font-size:14px;width:100%;margin-top:8px;transition:all 0.2s;">Skip for now</button>
+
                     <div class="otp-attempts" id="otpAttempts"></div>
                 </div>
             </div>
@@ -151,6 +153,12 @@
         // Resend button
         document.getElementById('otpResendBtn').addEventListener('click', resend);
 
+        // Skip button
+        document.getElementById('otpSkipBtn').addEventListener('click', function() {
+            hide();
+            if (OTPModal.onCancel) OTPModal.onCancel();
+        });
+
         // Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && OTPModal.overlay.classList.contains('active')) {
@@ -199,6 +207,7 @@
         var errorText = document.getElementById('otpErrorText');
         var attemptsEl = document.getElementById('otpAttempts');
 
+        if (!errorText || !errorEl) return;
         errorText.textContent = message;
         errorEl.classList.add('visible');
 
@@ -206,7 +215,7 @@
             input.classList.add('error');
         });
 
-        if (typeof remainingAttempts === 'number') {
+        if (typeof remainingAttempts === 'number' && attemptsEl) {
             attemptsEl.textContent = remainingAttempts + ' attempt' + (remainingAttempts !== 1 ? 's' : '') + ' remaining';
             attemptsEl.className = 'otp-attempts';
             if (remainingAttempts <= 2) attemptsEl.classList.add('warning');
@@ -247,6 +256,7 @@
     // Update timer display
     function updateTimerDisplay() {
         var el = document.getElementById('otpCountdown');
+        if (!el) return;
         var mins = Math.floor(OTPModal.countdown / 60);
         var secs = OTPModal.countdown % 60;
         el.textContent = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
@@ -264,17 +274,17 @@
 
         btn.disabled = true;
         btn.style.display = 'none';
-        cooldownEl.textContent = 'Resend available in ' + OTPModal.resendCooldown + 's';
+        if (cooldownEl) cooldownEl.textContent = 'Resend available in ' + OTPModal.resendCooldown + 's';
 
         var interval = setInterval(function() {
             OTPModal.resendCooldown--;
-            cooldownEl.textContent = 'Resend available in ' + OTPModal.resendCooldown + 's';
+            if (cooldownEl) cooldownEl.textContent = 'Resend available in ' + OTPModal.resendCooldown + 's';
 
             if (OTPModal.resendCooldown <= 0) {
                 clearInterval(interval);
                 btn.disabled = false;
                 btn.style.display = 'inline-block';
-                cooldownEl.textContent = '';
+                if (cooldownEl) cooldownEl.textContent = '';
             }
         }, 1000);
     }
@@ -354,7 +364,8 @@
                 OTPModal.inputs[0].focus();
 
                 if (data.phoneLast4) {
-                    document.getElementById('otpPhone').textContent = '****' + data.phoneLast4;
+                    var phoneEl = document.getElementById('otpPhone');
+                    if (phoneEl) phoneEl.textContent = '****' + data.phoneLast4;
                 }
             } else {
                 showError(data.error || 'Failed to resend code');
@@ -377,8 +388,10 @@
         icon.classList.add('success');
         icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 13l4 4L19 7"/></svg>';
 
-        document.getElementById('otpTitle').textContent = 'Verified!';
-        document.getElementById('otpSubtitle').textContent = data.message || 'Verification successful';
+        var titleEl = document.getElementById('otpTitle');
+        var subtitleEl = document.getElementById('otpSubtitle');
+        if (titleEl) titleEl.textContent = 'Verified!';
+        if (subtitleEl) subtitleEl.textContent = data.message || 'Verification successful';
         document.getElementById('otpInputs').style.display = 'none';
         document.querySelector('.otp-timer').style.display = 'none';
         document.querySelector('.otp-resend').style.display = 'none';
@@ -405,15 +418,20 @@
         icon.className = 'otp-icon';
         icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>';
 
-        document.getElementById('otpTitle').textContent = config.title || 'Verify Your Phone';
-        document.getElementById('otpSubtitle').innerHTML = config.subtitle || 'Enter the 6-digit code sent to <strong id="otpPhone">****' + (config.phoneLast4 || '****') + '</strong>';
-        document.getElementById('otpPhone').textContent = '****' + (config.phoneLast4 || '****');
+        var titleEl = document.getElementById('otpTitle');
+        var subtitleEl = document.getElementById('otpSubtitle');
+        if (titleEl) titleEl.textContent = config.title || 'Verify Your Phone';
+        if (subtitleEl) subtitleEl.innerHTML = config.subtitle || 'Enter the 6-digit code sent to <strong id="otpPhone">****' + (config.phoneLast4 || '****') + '</strong>';
+        var phoneEl = document.getElementById('otpPhone');
+        if (phoneEl) phoneEl.textContent = '****' + (config.phoneLast4 || '****');
         document.getElementById('otpInputs').style.display = 'flex';
         document.querySelector('.otp-timer').style.display = 'block';
         document.querySelector('.otp-resend').style.display = 'block';
         document.getElementById('otpVerifyBtn').style.display = 'block';
-        document.getElementById('otpAttempts').style.display = 'block';
-        document.getElementById('otpAttempts').textContent = '';
+        var skipBtn = document.getElementById('otpSkipBtn');
+        if (skipBtn) skipBtn.style.display = config.canSkip ? 'block' : 'none';
+        var attemptsEl = document.getElementById('otpAttempts');
+        if (attemptsEl) { attemptsEl.style.display = 'block'; attemptsEl.textContent = ''; }
 
         clearInputs();
         hideError();

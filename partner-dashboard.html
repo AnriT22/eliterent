@@ -1,645 +1,1514 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Partner Dashboard - RoyalCar.rent</title>
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
     <link rel="stylesheet" href="style.css">
+
     <link rel="stylesheet" href="premium.css">
+
     <link rel="stylesheet" href="navbar-auth.css">
+
     <link rel="stylesheet" href="dashboard.css">
+
     <script src="api-helper.js"></script>
+
 </head>
+
 <body>
+
     <!-- HEADER -->
+
     <header class="header sticky-header">
+
         <div class="container header-content">
+
             <div class="header-left">
+
                 <a href="/" class="logo">
+
                     <img src="images/logo.png" alt="RoyalCar.rent" class="logo-img">
+
                     <span class="logo-text">RoyalCar.rent</span>
+
                 </a>
+
             </div>
+
             <div class="header-center">
+
                 <nav class="nav-menu">
+
                     <a href="index.html" class="nav-link">Home</a>
+
                     <a href="vehicles.html" class="nav-link">Vehicles</a>
+
                     <a href="partner-dashboard.html" class="nav-link active">Dashboard</a>
+
                 </nav>
+
             </div>
+
             <div class="header-right">
+
                 <a href="register-partner.html" class="partner-btn">Become Partner</a>
+
             </div>
+
         </div>
+
     </header>
 
+
+
     <!-- DASHBOARD LAYOUT -->
+
     <div class="db-layout">
+
         <!-- SIDEBAR NAV -->
+
         <aside class="db-sidebar">
+
             <div class="db-sidebar-header">
+
                 <h3 id="dbCompanyName">My Company</h3>
+
                 <span class="db-badge db-badge-partner">Partner</span>
+
                 <span id="dbVerificationStatus"></span>
+
             </div>
+
             <nav class="db-nav">
+
                 <a href="#" class="db-nav-item active" data-tab="vehicles">
+
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+
                     My Vehicles
+
                 </a>
+
                 <a href="#" class="db-nav-item" data-tab="add-vehicle">
+
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+
                     Add Vehicle
+
                 </a>
+
                 <a href="#" class="db-nav-item" data-tab="bookings">
+
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+
                     Bookings
+
                 </a>
+
                 <a href="partner-financials.html" class="db-nav-item">
+
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+
                     Financials
+
                 </a>
+
                 <a href="#" class="db-nav-item" data-tab="profile">
+
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+
                     Profile
+
                 </a>
+
             </nav>
+
         </aside>
 
+
+
         <!-- MAIN CONTENT -->
+
         <main class="db-main">
 
+
+
             <!-- TAB: MY VEHICLES -->
+
             <div class="db-tab active" id="tab-vehicles">
+
                 <div class="db-tab-header">
+
                     <h2>My Vehicles</h2>
+
                     <button class="btn btn-primary btn-small" id="addVehicleFromList">+ Add Vehicle</button>
+
                 </div>
+
                 <div class="db-vehicles-grid" id="vehiclesGrid">
+
                     <div class="db-empty-state" id="emptyVehicles">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#A0A3B0" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+
                         <h3>No vehicles yet</h3>
+
                         <p>Add your first vehicle to start receiving bookings</p>
+
                         <button class="btn btn-primary" id="addFirstVehicle">+ Add Your First Vehicle</button>
+
                     </div>
+
                 </div>
+
             </div>
 
-            <!-- TAB: ADD VEHICLE -->
+
+
+            <!-- TAB: ADD VEHICLE (Multi-Step Wizard) -->
+
             <div class="db-tab" id="tab-add-vehicle">
+
                 <div class="db-tab-header">
+
                     <h2 id="addVehicleTitle">Add New Vehicle</h2>
+
                 </div>
+
+
+
+                <!-- WIZARD PROGRESS BAR -->
+
+                <div class="wz-progress">
+
+                    <div class="wz-step active" data-step="1"><span class="wz-num">1</span><span class="wz-label">Car Details</span></div>
+
+                    <div class="wz-line"></div>
+
+                    <div class="wz-step" data-step="2"><span class="wz-num">2</span><span class="wz-label">Features</span></div>
+
+                    <div class="wz-line"></div>
+
+                    <div class="wz-step" data-step="3"><span class="wz-num">3</span><span class="wz-label">Pricing</span></div>
+
+                    <div class="wz-line"></div>
+
+                    <div class="wz-step" data-step="4"><span class="wz-num">4</span><span class="wz-label">Location</span></div>
+
+                    <div class="wz-line"></div>
+
+                    <div class="wz-step" data-step="5"><span class="wz-num">5</span><span class="wz-label">Photos</span></div>
+
+                </div>
+
+
+
                 <form class="db-form" id="vehicleForm">
 
-                    <!-- SECTION 1 - PHOTOS --- -->
-                    <div class="vf-section">
-                        <div class="vf-section-title">Vehicle Photos</div>
-                        <div class="db-form-grid">
-                            <div class="db-form-group db-col-2">
-                                <label class="db-label">Upload Photos (up to 10) *</label>
-                                <p class="db-field-hint">Recommended image size: 300x200. First photo will be the main image.</p>
-                                <div class="db-upload-area" id="uploadArea">
-                                    <div class="db-upload-placeholder" id="uploadPlaceholder">
-                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                                        <span>Click or drag images here</span>
-                                        <span class="db-upload-hint">JPG, PNG, WebP - max 20 MB each</span>
-                                    </div>
-                                    <input type="file" id="vImageFiles" accept=".jpg,.jpeg,.png,.webp" multiple style="display:none;">
-                                    <div class="db-upload-preview" id="uploadPreview"></div>
-                                </div>
-                                <input type="hidden" id="vImageUrl" value="">
-                                <input type="hidden" id="vGalleryUrls" value="[]">
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- SECTION 2 - BASIC INFORMATION --- -->
-                    <div class="vf-section">
-                        <div class="vf-section-title">Basic Information</div>
-                        <div class="db-form-grid">
-                            <div class="db-form-group">
-                                <label class="db-label">Vehicle Name *</label>
-                                <input type="text" class="db-input" id="vName" placeholder="e.g. Toyota Camry" required>
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Minimum Age</label>
-                                <input type="number" class="db-input" id="vMinAge" value="21" min="18" max="99">
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Pickup & Dropoff Location *</label>
-                                <select class="db-input" id="vLocationCity" required>
-                                    <option value="">Select Location</option>
-                                    <option value="Tbilisi">Tbilisi</option>
-                                    <option value="Batumi">Batumi</option>
-                                    <option value="Kutaisi">Kutaisi</option>
-                                    <option value="Tbilisi Airport">Tbilisi Airport</option>
-                                    <option value="Batumi Airport">Batumi Airport</option>
-                                    <option value="Kutaisi Airport">Kutaisi Airport</option>
-                                </select>
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Brand *</label>
-                                <select class="db-input" id="vBrand" required>
-                                    <option value="">Select Brand</option>
-                                    <option>Toyota</option><option>Hyundai</option><option>Kia</option>
-                                    <option>Mercedes-Benz</option><option>BMW</option><option>Audi</option>
-                                    <option>Volkswagen</option><option>Nissan</option><option>Honda</option>
-                                    <option>Ford</option><option>Chevrolet</option><option>Mazda</option>
-                                    <option>Subaru</option><option>Lexus</option><option>Mitsubishi</option>
-                                    <option>Peugeot</option><option>Renault</option><option>Opel</option>
-                                    <option>Skoda</option><option>Volvo</option><option>Land Rover</option>
-                                    <option>Jeep</option><option>Porsche</option><option>Tesla</option>
-                                    <option>Other</option>
-                                </select>
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Model</label>
-                                <input type="text" class="db-input" id="vModel" placeholder="e.g. Camry">
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Year *</label>
-                                <input type="number" class="db-input" id="vYear" placeholder="2024" min="2000" max="2026" required>
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Color</label>
-                                <input type="text" class="db-input" id="vColor" placeholder="e.g. Black">
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Description</label>
-                                <textarea class="db-input" id="vDescription" rows="2" placeholder="Brief vehicle description..."></textarea>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- SECTION 3 - CAR SPECIFICATIONS --- -->
-                    <div class="vf-section">
-                        <div class="vf-section-title">Car Specifications</div>
-                        <div class="db-form-grid-3">
-                            <div class="db-form-group">
-                                <label class="db-label">Category *</label>
-                                <select class="db-input" id="vCategory" required>
-                                    <option value="">Select</option>
-                                    <option value="economy">Economy</option>
-                                    <option value="sedan">Sedan</option>
-                                    <option value="standard">Standard</option>
-                                    <option value="suv">SUV</option>
-                                    <option value="minivan">Minivan</option>
-                                    <option value="convertible">Convertible</option>
-                                </select>
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Luggage Capacity *</label>
-                                <select class="db-input" id="vLuggage" required>
-                                    <option value="">Select</option>
-                                    <option value="small">Small (1-2 bags)</option>
-                                    <option value="medium">Medium (3-4 bags)</option>
-                                    <option value="large">Large (5+ bags)</option>
-                                </select>
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Multimedia</label>
-                                <div class="vf-checkbox-row">
-                                    <label class="vf-check-item"><input type="checkbox" id="mmAndroidAuto"> Android Auto</label>
-                                    <label class="vf-check-item"><input type="checkbox" id="mmAppleCarPlay"> Apple CarPlay</label>
-                                    <label class="vf-check-item"><input type="checkbox" id="mmBluetooth"> Bluetooth</label>
-                                    <label class="vf-check-item"><input type="checkbox" id="mmTouchScreen"> Touch Screen</label>
-                                </div>
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Engine Capacity (cc)</label>
-                                <input type="number" class="db-input" id="vEngineCC" placeholder="e.g. 2000" min="0">
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Horsepower (HP)</label>
-                                <input type="number" class="db-input" id="vHorsepower" placeholder="e.g. 150" min="0">
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Fuel Consumption (L/100km)</label>
-                                <input type="text" class="db-input" id="vFuelConsumption" placeholder="e.g. 7.5">
-                            </div>
-                        </div>
-                    </div>
+                    <!-- ===================== STEP 1: CAR DETAILS ===================== -->
 
-                    <!-- SECTION 4 - VEHICLE CHARACTERISTICS --- -->
-                    <div class="vf-section">
-                        <div class="vf-section-title">Vehicle Characteristics</div>
-                        <div class="db-form-grid-3">
-                            <div class="db-form-group">
-                                <label class="db-label">Drive Type *</label>
-                                <select class="db-input" id="vDriveType" required>
-                                    <option value="">Select</option>
-                                    <option value="fwd">Front Wheel (FWD)</option>
-                                    <option value="rwd">Rear Wheel (RWD)</option>
-                                    <option value="awd">4x4 (AWD)</option>
-                                </select>
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Gearbox Type *</label>
-                                <select class="db-input" id="vGearbox" required>
-                                    <option value="">Select</option>
-                                    <option value="automatic">Automatic</option>
-                                    <option value="manual">Manual</option>
-                                    <option value="tiptronic">Tiptronic</option>
-                                    <option value="variator">Variator</option>
-                                </select>
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Seats *</label>
-                                <select class="db-input" id="vSeats" required>
-                                    <option value="2">2</option>
-                                    <option value="4">4</option>
-                                    <option value="5" selected>5</option>
-                                    <option value="7">7</option>
-                                    <option value="8">8</option>
-                                    <option value="9">9</option>
-                                </select>
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Doors *</label>
-                                <select class="db-input" id="vDoors">
-                                    <option value="2">2</option>
-                                    <option value="4" selected>4</option>
-                                    <option value="5">5</option>
-                                </select>
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Fuel Policy *</label>
-                                <select class="db-input" id="vFuelPolicy" required>
-                                    <option value="full_to_full">Full to Full</option>
-                                    <option value="same_to_same">Same to Same</option>
-                                    <option value="free_tank">Free Tank</option>
-                                </select>
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label vf-toggle-label">
-                                    <span>Mileage Limit</span>
-                                    <label class="vf-switch"><input type="checkbox" id="vMileageLimitEnabled"><span class="vf-slider"></span></label>
-                                </label>
-                                <input type="number" class="db-input" id="vMileageKm" placeholder="km / day" min="0" disabled>
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Engine Type *</label>
-                                <select class="db-input" id="vEngine" required>
-                                    <option value="">Select</option>
-                                    <option value="gasoline">Gasoline</option>
-                                    <option value="diesel">Diesel</option>
-                                    <option value="hybrid">Hybrid</option>
-                                    <option value="electric">Electric</option>
-                                    <option value="lpg">LPG</option>
-                                </select>
-                            </div>
-                        </div>
+                    <div class="wz-panel active" data-panel="1">
 
-                        <div class="vf-sub-section">
-                            <div class="vf-sub-title">Additional Features</div>
-                            <div class="vf-checkbox-grid">
-                                <label class="vf-check-item"><input type="checkbox" id="featAC"> Air Conditioning</label>
-                                <label class="vf-check-item"><input type="checkbox" id="featCruise"> Cruise Control</label>
-                                <label class="vf-check-item"><input type="checkbox" id="featRearCam"> Rear Camera</label>
-                                <label class="vf-check-item"><input type="checkbox" id="featParkAssist"> Parking Assist</label>
-                                <label class="vf-check-item"><input type="checkbox" id="featABS"> ABS (Anti-lock Braking)</label>
-                                <label class="vf-check-item"><input type="checkbox" id="featESP"> ESP (Stability Control)</label>
-                                <label class="vf-check-item"><input type="checkbox" id="featHeatedSeats"> Heated Seats</label>
-                                <label class="vf-check-item"><input type="checkbox" id="featSunroof"> Sunroof</label>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- SECTION 5 - PRICING --- -->
-                    <div class="vf-section">
-                        <div class="vf-section-title">Pricing</div>
-                        <div class="db-form-grid">
-                            <div class="db-form-group">
-                                <label class="db-label">Daily Price ($) *</label>
-                                <input type="number" class="db-input" id="vPrice" placeholder="50" min="1" step="0.01" required>
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Deposit Amount ($)</label>
-                                <input type="number" class="db-input" id="vDeposit" placeholder="0" min="0" step="0.01">
-                            </div>
-                        </div>
-                        <div class="vf-sub-section">
-                            <label class="db-label vf-toggle-label">
-                                <span>Custom Date-Based Pricing</span>
-                                <label class="vf-switch"><input type="checkbox" id="vCustomPricingEnabled"><span class="vf-slider"></span></label>
-                            </label>
-                            <div id="customPricingContainer" class="vf-hidden">
-                                <div id="customPricingList"></div>
-                                <button type="button" class="btn btn-secondary btn-small" id="addCustomPricing">+ Add Date Range</button>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- SECTION 6 - PRICE TIERS & EXTRAS --- -->
-                    <div class="vf-section">
-                        <div class="vf-section-title">Price Tiers & Extras</div>
-                        <div class="db-form-grid-3">
-                            <div class="db-form-group">
-                                <label class="db-label">Price 1-3 Days ($/day)</label>
-                                <input type="number" class="db-input" id="vPrice1_3" placeholder="0" min="0" step="0.01">
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Price 4-7 Days ($/day)</label>
-                                <input type="number" class="db-input" id="vPrice4_7" placeholder="0" min="0" step="0.01">
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Price 8-14 Days ($/day)</label>
-                                <input type="number" class="db-input" id="vPrice8_14" placeholder="0" min="0" step="0.01">
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Price 15-30 Days ($/day)</label>
-                                <input type="number" class="db-input" id="vPrice15_30" placeholder="0" min="0" step="0.01">
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label" style="display:flex;align-items:center;gap:8px;">
-                                    <input type="checkbox" id="vChildSeatAvail" style="width:18px;height:18px;">
-                                    <span>Child Seat Available</span>
-                                </label>
-                                <input type="number" class="db-input" id="vChildSeat" placeholder="Price $/day" min="0" step="0.01" style="margin-top:6px;" disabled>
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label" style="display:flex;align-items:center;gap:8px;">
-                                    <input type="checkbox" id="vChainsAvail" style="width:18px;height:18px;">
-                                    <span>Snow Chains Available</span>
-                                </label>
-                                <input type="number" class="db-input" id="vChains" placeholder="Price $" min="0" step="0.01" style="margin-top:6px;" disabled>
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label" style="display:flex;align-items:center;gap:8px;">
-                                    <input type="checkbox" id="vRoofRackAvail" style="width:18px;height:18px;">
-                                    <span>Roof Luggage Carrier Available</span>
-                                </label>
-                                <input type="number" class="db-input" id="vRoofRack" placeholder="Price $/day" min="0" step="0.01" style="margin-top:6px;" disabled>
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Third Driver Allowed ($/day)</label>
-                                <input type="number" class="db-input" id="vThirdDriver" placeholder="0" min="0" step="0.01">
-                            </div>
-                            <div class="db-form-group db-col-3">
-                                <div class="vf-section-title" style="font-size:14px;margin-bottom:8px;">Mountain Destination Roads (Extra Cost)</div>
-                                <div style="display:flex;gap:16px;flex-wrap:wrap;">
-                                    <div style="flex:1;min-width:200px;">
-                                        <label class="db-label" style="display:flex;align-items:center;gap:8px;">
-                                            <input type="checkbox" id="vSvanetiAccepted" style="width:18px;height:18px;">
-                                            <span>Mestia / Mountain Svaneti</span>
-                                        </label>
-                                        <input type="number" class="db-input" id="vSvanetiPrice" placeholder="Extra cost ($)" min="0" step="0.01" style="margin-top:6px;" disabled>
-                                    </div>
-                                    <div style="flex:1;min-width:200px;">
-                                        <label class="db-label" style="display:flex;align-items:center;gap:8px;">
-                                            <input type="checkbox" id="vShatiliAccepted" style="width:18px;height:18px;">
-                                            <span>Shatili</span>
-                                        </label>
-                                        <input type="number" class="db-input" id="vShatiliPrice" placeholder="Extra cost ($)" min="0" step="0.01" style="margin-top:6px;" disabled>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                        <div class="vf-section">
 
-                    <!-- SECTION 7 - INSURANCE & OPTIONS --- -->
-                    <div class="vf-section">
-                        <div class="vf-section-title">Insurance & Options</div>
-                        <div class="vf-info-box">
-                            <strong>Insurance Information:</strong>
-                            <p><b>TPL - Third Party Liability:</b><br>Covers damage caused to other vehicles. Does not cover: your rented vehicle.</p>
-                            <p><b>CDW - Collision Damage Waiver:</b><br>Covers damage to the rented vehicle in case of an accident. Does not cover: tires, glass, or interior damage.</p>
-                            <p><b>Full Coverage:</b><br>Covers all damages, theft, and roadside assistance.<br>Includes: TPL + CDW + full protection.</p>
-                            <p style="color:#64748b;font-size:12px;">If not offered, leave it blank. For free options enter 0, or specify the price per day.</p>
-                        </div>
-                        <div class="db-form-grid-3">
-                            <div class="db-form-group">
-                                <label class="db-label">TPL - Third Party Liability ($/day)</label>
-                                <input type="number" class="db-input" id="vInsTPL" placeholder="0" min="0" step="0.01">
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">CDW - Collision Damage Waiver ($/day)</label>
-                                <input type="number" class="db-input" id="vInsCDW" placeholder="0" min="0" step="0.01">
-                            </div>
-                            <div class="db-form-group">
-                                <label class="db-label">Full Coverage ($/day)</label>
-                                <input type="number" class="db-input" id="vInsFullCoverage" placeholder="0" min="0" step="0.01">
-                            </div>
-                        </div>
-                    </div>
+                            <div class="vf-section-title">Basic Information</div>
 
-                    <!-- SECTION 8 - PICKUP & DROP OFF --- -->
-                    <div class="vf-section">
-                        <div class="vf-section-title">Pickup & Drop Off</div>
-                        <div class="db-form-grid">
-                            <div class="db-form-group db-col-2">
-                                <label class="db-label vf-toggle-label">
-                                    <span>Enable Pickup & Drop-off Fees</span>
-                                    <label class="vf-switch"><input type="checkbox" id="vPickupFeesEnabled"><span class="vf-slider"></span></label>
-                                </label>
-                                <p class="db-field-hint">By default, your office location is used for free pickup/dropoff.</p>
-                            </div>
-                        </div>
-                        <div id="pickupFeesContainer" class="vf-hidden">
                             <div class="db-form-grid">
-                                <div class="db-form-group">
-                                    <label class="db-label">Office Address</label>
-                                    <input type="text" class="db-input" id="locOfficeAddress" placeholder="e.g. Tbilisi, Rustaveli Ave 15">
-                                </div>
-                                <div class="db-form-group">
-                                    <label class="db-label">Airport Fee ($)</label>
-                                    <input type="number" class="db-input" id="locAirportPrice" placeholder="0" min="0" step="0.01">
-                                </div>
-                                <div class="db-form-group">
-                                    <label class="db-label">Delivery to Address Fee ($)</label>
-                                    <input type="number" class="db-input" id="locDeliveryPrice" placeholder="0" min="0" step="0.01">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- SECTION 9 - FILTER OPTIONS --- -->
-                    <div class="vf-section">
-                        <div class="vf-section-title">Filter Options</div>
-                        <p class="db-field-hint">These settings help customers find your vehicle using search filters on the website.</p>
-                        <div class="vf-filter-options-grid">
-                            <div class="vf-filter-card">
-                                <div class="vf-filter-card-icon">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Vehicle Name *</label>
+
+                                    <input type="text" class="db-input" id="vName" placeholder="e.g. Toyota Camry" required>
+
                                 </div>
-                                <div class="vf-filter-card-body">
-                                    <label class="db-label">Region *</label>
-                                    <select class="db-input" id="vRegion">
-                                        <option value="">Select Region</option>
-                                        <option value="tbilisi">Tbilisi</option>
-                                        <option value="adjara">Adjara</option>
-                                        <option value="imereti">Imereti</option>
-                                        <option value="kakheti">Kakheti</option>
-                                        <option value="mtskheta_mtianeti">Mtskheta-Mtianeti</option>
-                                        <option value="samegrelo">Samegrelo</option>
-                                        <option value="guria">Guria</option>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Brand *</label>
+
+                                    <select class="db-input" id="vBrand" required>
+
+                                        <option value="">Select Brand</option>
+
+                                        <optgroup label="Popular">
+
+                                            <option>Toyota</option><option>Hyundai</option><option>Kia</option>
+
+                                            <option>Mercedes-Benz</option><option>BMW</option><option>Audi</option>
+
+                                            <option>Volkswagen</option><option>Nissan</option><option>Honda</option>
+
+                                        </optgroup>
+
+                                        <optgroup label="Economy">
+
+                                            <option>Suzuki</option><option>Dacia</option><option>Fiat</option>
+
+                                            <option>Citroen</option><option>SEAT</option><option>Daewoo</option>
+
+                                            <option>Chery</option><option>Geely</option><option>MG</option>
+
+                                            <option>Haval</option><option>BYD</option>
+
+                                        </optgroup>
+
+                                        <optgroup label="Standard">
+
+                                            <option>Ford</option><option>Chevrolet</option><option>Mazda</option>
+
+                                            <option>Subaru</option><option>Mitsubishi</option><option>Peugeot</option>
+
+                                            <option>Renault</option><option>Opel</option><option>Skoda</option>
+
+                                            <option>Volvo</option><option>Chrysler</option><option>Dodge</option>
+
+                                        </optgroup>
+
+                                        <optgroup label="Premium & Luxury">
+
+                                            <option>Lexus</option><option>Infiniti</option><option>Acura</option>
+
+                                            <option>Land Rover</option><option>Jeep</option><option>Porsche</option>
+
+                                            <option>Jaguar</option><option>Maserati</option><option>Bentley</option>
+
+                                            <option>Rolls-Royce</option><option>Aston Martin</option>
+
+                                            <option>Lamborghini</option><option>Ferrari</option><option>McLaren</option>
+
+                                            <option>Genesis</option><option>Lincoln</option><option>Cadillac</option>
+
+                                        </optgroup>
+
+                                        <optgroup label="Electric & EV">
+
+                                            <option>Tesla</option><option>Rivian</option><option>Polestar</option>
+
+                                            <option>Lucid</option><option>NIO</option>
+
+                                        </optgroup>
+
+                                        <optgroup label="Other">
+
+                                            <option>Other</option>
+
+                                        </optgroup>
+
                                     </select>
+
                                 </div>
-                            </div>
-                            <div class="vf-filter-card">
-                                <div class="vf-filter-card-icon">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Model *</label>
+
+                                    <input type="text" class="db-input" id="vModel" placeholder="e.g. Camry">
+
                                 </div>
-                                <div class="vf-filter-card-body">
-                                    <label class="db-label">Interior Type</label>
-                                    <select class="db-input" id="vInterior">
-                                        <option value="fabric">Fabric</option>
-                                        <option value="leather">Leather</option>
-                                        <option value="alcantara">Alcantara</option>
-                                        <option value="synthetic">Synthetic</option>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Year *</label>
+
+                                    <input type="number" class="db-input" id="vYear" placeholder="2024" min="1990" max="2027" required>
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Category *</label>
+
+                                    <select class="db-input" id="vCategory" required>
+
+                                        <option value="">Select</option>
+
+                                        <option value="economy">Economy</option>
+
+                                        <option value="sedan">Sedan</option>
+
+                                        <option value="standard">Standard</option>
+
+                                        <option value="suv">SUV</option>
+
+                                        <option value="crossover">Crossover</option>
+
+                                        <option value="minivan">Minivan</option>
+
+                                        <option value="coupe">Coupe</option>
+
+                                        <option value="convertible">Convertible</option>
+
+                                        <option value="pickup">Pickup</option>
+
+                                        <option value="van">Van / Bus</option>
+
                                     </select>
+
                                 </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Minimum Driver Age</label>
+
+                                    <input type="number" class="db-input" id="vMinAge" value="21" min="18" max="99">
+
+                                </div>
+
                             </div>
-                            <div class="vf-filter-card">
-                                <div class="vf-filter-card-icon">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+
+                        </div>
+
+
+
+                        <!-- COLOR SWATCHES -->
+
+                        <div class="vf-section">
+
+                            <div class="vf-section-title">Color *</div>
+
+                            <input type="hidden" id="vColor" value="">
+
+                            <div class="color-swatches" id="colorSwatches">
+
+                                <button type="button" class="color-swatch" data-color="Black" style="--sw-color:#1a1a1a" title="Black"><span class="sw-check">&#10003;</span></button>
+
+                                <button type="button" class="color-swatch" data-color="White" style="--sw-color:#f5f5f5" title="White"><span class="sw-check">&#10003;</span></button>
+
+                                <button type="button" class="color-swatch" data-color="Silver" style="--sw-color:#c0c0c0" title="Silver"><span class="sw-check">&#10003;</span></button>
+
+                                <button type="button" class="color-swatch" data-color="Gray" style="--sw-color:#808080" title="Gray"><span class="sw-check">&#10003;</span></button>
+
+                                <button type="button" class="color-swatch" data-color="Red" style="--sw-color:#dc2626" title="Red"><span class="sw-check">&#10003;</span></button>
+
+                                <button type="button" class="color-swatch" data-color="Blue" style="--sw-color:#2563eb" title="Blue"><span class="sw-check">&#10003;</span></button>
+
+                                <button type="button" class="color-swatch" data-color="Dark Blue" style="--sw-color:#1e3a5f" title="Dark Blue"><span class="sw-check">&#10003;</span></button>
+
+                                <button type="button" class="color-swatch" data-color="Green" style="--sw-color:#16a34a" title="Green"><span class="sw-check">&#10003;</span></button>
+
+                                <button type="button" class="color-swatch" data-color="Brown" style="--sw-color:#92400e" title="Brown"><span class="sw-check">&#10003;</span></button>
+
+                                <button type="button" class="color-swatch" data-color="Beige" style="--sw-color:#d4b896" title="Beige"><span class="sw-check">&#10003;</span></button>
+
+                                <button type="button" class="color-swatch" data-color="Gold" style="--sw-color:#ca8a04" title="Gold"><span class="sw-check">&#10003;</span></button>
+
+                                <button type="button" class="color-swatch" data-color="Orange" style="--sw-color:#ea580c" title="Orange"><span class="sw-check">&#10003;</span></button>
+
+                                <button type="button" class="color-swatch" data-color="Yellow" style="--sw-color:#eab308" title="Yellow"><span class="sw-check">&#10003;</span></button>
+
+                                <button type="button" class="color-swatch" data-color="Purple" style="--sw-color:#7c3aed" title="Purple"><span class="sw-check">&#10003;</span></button>
+
+                                <button type="button" class="color-swatch" data-color="Burgundy" style="--sw-color:#7f1d1d" title="Burgundy"><span class="sw-check">&#10003;</span></button>
+
+                            </div>
+
+                            <div class="color-selected-label" id="colorSelectedLabel">No color selected</div>
+
+                        </div>
+
+
+
+                        <!-- SPECIFICATIONS -->
+
+                        <div class="vf-section">
+
+                            <div class="vf-section-title">Specifications</div>
+
+                            <div class="db-form-grid-3">
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Engine Type *</label>
+
+                                    <select class="db-input" id="vEngine" required>
+
+                                        <option value="">Select</option>
+
+                                        <option value="gasoline">Gasoline</option>
+
+                                        <option value="diesel">Diesel</option>
+
+                                        <option value="hybrid">Hybrid</option>
+
+                                        <option value="plugin_hybrid">Plug-in Hybrid</option>
+
+                                        <option value="electric">Electric</option>
+
+                                        <option value="lpg">LPG</option>
+
+                                        <option value="cng">CNG</option>
+
+                                    </select>
+
                                 </div>
-                                <div class="vf-filter-card-body">
-                                    <label class="db-label">Steering Side</label>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Engine Volume (Liters)</label>
+
+                                    <input type="number" class="db-input" id="vEngineLiters" placeholder="e.g. 2.0" min="0" max="20" step="0.1">
+
+                                    <input type="hidden" id="vEngineCC" value="">
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Horsepower (HP)</label>
+
+                                    <input type="number" class="db-input" id="vHorsepower" placeholder="e.g. 150" min="0">
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Gearbox Type *</label>
+
+                                    <select class="db-input" id="vGearbox" required>
+
+                                        <option value="">Select</option>
+
+                                        <option value="automatic">Automatic</option>
+
+                                        <option value="manual">Manual</option>
+
+                                        <option value="tiptronic">Tiptronic</option>
+
+                                        <option value="variator">CVT / Variator</option>
+
+                                    </select>
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Drive Type *</label>
+
+                                    <select class="db-input" id="vDriveType" required>
+
+                                        <option value="">Select</option>
+
+                                        <option value="fwd">Front Wheel (FWD)</option>
+
+                                        <option value="rwd">Rear Wheel (RWD)</option>
+
+                                        <option value="awd">All Wheel (AWD/4x4)</option>
+
+                                    </select>
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Fuel Consumption (L/100km)</label>
+
+                                    <input type="text" class="db-input" id="vFuelConsumption" placeholder="e.g. 7.5">
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Seats *</label>
+
+                                    <select class="db-input" id="vSeats" required>
+
+                                        <option value="2">2</option>
+
+                                        <option value="4">4</option>
+
+                                        <option value="5" selected>5</option>
+
+                                        <option value="6">6</option>
+
+                                        <option value="7">7</option>
+
+                                        <option value="8">8</option>
+
+                                        <option value="9">9+</option>
+
+                                        <option value="21">21+</option>
+
+                                    </select>
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Doors *</label>
+
+                                    <select class="db-input" id="vDoors">
+
+                                        <option value="2">2/3 Doors</option>
+
+                                        <option value="4" selected>4/5 Doors</option>
+
+                                        <option value="5">5+ Doors</option>
+
+                                    </select>
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Steering Side *</label>
+
                                     <select class="db-input" id="vSteering">
-                                        <option value="left">Left Hand Drive</option>
-                                        <option value="right">Right Hand Drive</option>
+
+                                        <option value="left">Left-Hand Drive</option>
+
+                                        <option value="right">Right-Hand Drive</option>
+
                                     </select>
+
                                 </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Interior Type</label>
+
+                                    <select class="db-input" id="vInterior">
+
+                                        <option value="fabric">Fabric</option>
+
+                                        <option value="leather">Leather</option>
+
+                                        <option value="alcantara">Alcantara</option>
+
+                                        <option value="synthetic">Synthetic Leather</option>
+
+                                    </select>
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Luggage Capacity *</label>
+
+                                    <select class="db-input" id="vLuggage" required>
+
+                                        <option value="">Select</option>
+
+                                        <option value="small">Small (1-2 bags)</option>
+
+                                        <option value="medium">Medium (3-4 bags)</option>
+
+                                        <option value="large">Large (5+ bags)</option>
+
+                                    </select>
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Fuel Policy *</label>
+
+                                    <select class="db-input" id="vFuelPolicy" required>
+
+                                        <option value="full_to_full">Full to Full</option>
+
+                                        <option value="same_to_same">Same to Same</option>
+
+                                        <option value="free_tank">Free Tank</option>
+
+                                    </select>
+
+                                </div>
+
                             </div>
+
                         </div>
+
+
+
+                        <div class="vf-section">
+
+                            <div class="db-form-group">
+
+                                <label class="db-label">Description</label>
+
+                                <textarea class="db-input" id="vDescription" rows="3" placeholder="Brief vehicle description — highlights, condition, special notes..."></textarea>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="wz-nav">
+
+                            <div></div>
+
+                            <button type="button" class="btn btn-primary wz-btn-next" data-next="2">Next: Features &rarr;</button>
+
+                        </div>
+
                     </div>
 
-                    <!-- SECTION 10 - AVAILABILITY & STATUS --- -->
-                    <div class="vf-section">
-                        <div class="vf-section-title">Availability & Status</div>
-                        <div class="vf-toggles-row">
+
+
+                    <!-- ===================== STEP 2: FEATURES & EQUIPMENT ===================== -->
+
+                    <div class="wz-panel" data-panel="2">
+
+
+
+                        <div class="vf-section">
+
+                            <div class="vf-section-title">Multimedia</div>
+
+                            <div class="vf-checkbox-grid vf-checkbox-grid-cols">
+
+                                <label class="vf-check-item"><input type="checkbox" id="mmAndroidAuto"> Android Auto</label>
+
+                                <label class="vf-check-item"><input type="checkbox" id="mmAppleCarPlay"> Apple CarPlay</label>
+
+                                <label class="vf-check-item"><input type="checkbox" id="mmBluetooth"> Bluetooth</label>
+
+                                <label class="vf-check-item"><input type="checkbox" id="mmTouchScreen"> Touch Screen</label>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="vf-section">
+
+                            <div class="vf-section-title">Safety & Comfort</div>
+
+                            <div class="vf-checkbox-grid vf-checkbox-grid-cols">
+
+                                <label class="vf-check-item"><input type="checkbox" id="featAC"> Air Conditioning</label>
+
+                                <label class="vf-check-item"><input type="checkbox" id="featCruise"> Cruise Control</label>
+
+                                <label class="vf-check-item"><input type="checkbox" id="featRearCam"> Rear Camera</label>
+
+                                <label class="vf-check-item"><input type="checkbox" id="featParkAssist"> Parking Sensors</label>
+
+                                <label class="vf-check-item"><input type="checkbox" id="featABS"> ABS</label>
+
+                                <label class="vf-check-item"><input type="checkbox" id="featESP"> ESP</label>
+
+                                <label class="vf-check-item"><input type="checkbox" id="featHeatedSeats"> Heated Seats</label>
+
+                                <label class="vf-check-item"><input type="checkbox" id="featSunroof"> Sunroof</label>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="vf-section">
+
                             <label class="db-label vf-toggle-label">
-                                <span>Visible in Search Results</span>
-                                <label class="vf-switch"><input type="checkbox" id="vVisibleInSearch" checked><span class="vf-slider"></span></label>
+
+                                <span>Mileage Limit</span>
+
+                                <label class="vf-switch"><input type="checkbox" id="vMileageLimitEnabled"><span class="vf-slider"></span></label>
+
                             </label>
-                            <label class="db-label vf-toggle-label">
-                                <span>Block Vehicle After Confirmed Payment</span>
-                                <label class="vf-switch"><input type="checkbox" id="vReturnFormatted" checked><span class="vf-slider"></span></label>
-                            </label>
+
+                            <input type="number" class="db-input" id="vMileageKm" placeholder="km / day" min="0" disabled style="margin-top:10px;max-width:220px;">
+
                         </div>
+
+
+
+                        <div class="wz-nav">
+
+                            <button type="button" class="btn btn-secondary wz-btn-prev" data-prev="1">&larr; Back</button>
+
+                            <button type="button" class="btn btn-primary wz-btn-next" data-next="3">Next: Pricing &rarr;</button>
+
+                        </div>
+
                     </div>
 
-                    <!-- SECTION 11 - DOCUMENTATION --- -->
-                    <div class="vf-section">
-                        <div class="vf-section-title">Ownership Confirmation</div>
-                        <p class="db-field-hint">This is required for vehicle ownership verification. Information will not be published.</p>
-                        <div class="db-form-grid">
-                            <div class="db-form-group" style="flex:1;">
-                                <label class="db-label">Tech Passport — Front Side *</label>
-                                <div class="db-passport-upload" id="passportFrontArea">
-                                    <div class="db-passport-placeholder" id="passportFrontPlaceholder">
-                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="6" y1="15" x2="14" y2="15"/></svg>
-                                        <span>Upload front side</span>
-                                    </div>
-                                    <input type="file" id="passportFrontFile" accept=".jpg,.jpeg,.png,.webp" style="display:none;">
-                                    <div class="db-passport-preview" id="passportFrontPreview"></div>
+
+
+                    <!-- ===================== STEP 3: PRICING & SERVICES ===================== -->
+
+                    <div class="wz-panel" data-panel="3">
+
+
+
+                        <div class="vf-section">
+
+                            <div class="vf-section-title">Base Pricing</div>
+
+                            <div class="db-form-grid">
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Daily Price ($) *</label>
+
+                                    <input type="number" class="db-input" id="vPrice" placeholder="50" min="1" step="0.01" required>
+
                                 </div>
-                                <input type="hidden" id="vPassportFront" value="">
-                            </div>
-                            <div class="db-form-group" style="flex:1;">
-                                <label class="db-label">Tech Passport — Back Side *</label>
-                                <div class="db-passport-upload" id="passportBackArea">
-                                    <div class="db-passport-placeholder" id="passportBackPlaceholder">
-                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="6" y1="15" x2="14" y2="15"/></svg>
-                                        <span>Upload back side</span>
-                                    </div>
-                                    <input type="file" id="passportBackFile" accept=".jpg,.jpeg,.png,.webp" style="display:none;">
-                                    <div class="db-passport-preview" id="passportBackPreview"></div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Deposit Amount ($)</label>
+
+                                    <input type="number" class="db-input" id="vDeposit" placeholder="0" min="0" step="0.01">
+
                                 </div>
-                                <input type="hidden" id="vPassportBack" value="">
+
                             </div>
+
                         </div>
-                        <div class="db-form-group" style="margin-top:16px;">
-                            <label class="db-label">Car Registration Number *</label>
-                            <input type="text" class="db-input" id="vRegNumber" placeholder="e.g. AB-123-CD" required>
+
+
+
+                        <div class="vf-section">
+
+                            <div class="vf-section-title">Duration Pricing Tiers</div>
+
+                            <p class="db-field-hint">Override the daily price for longer rentals. Leave blank to use base price.</p>
+
+                            <div class="db-form-grid">
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">1-3 Days ($/day)</label>
+
+                                    <input type="number" class="db-input" id="vPrice1_3" placeholder="0" min="0" step="0.01">
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">4-7 Days ($/day)</label>
+
+                                    <input type="number" class="db-input" id="vPrice4_7" placeholder="0" min="0" step="0.01">
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">8-14 Days ($/day)</label>
+
+                                    <input type="number" class="db-input" id="vPrice8_14" placeholder="0" min="0" step="0.01">
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">15-30 Days ($/day)</label>
+
+                                    <input type="number" class="db-input" id="vPrice15_30" placeholder="0" min="0" step="0.01">
+
+                                </div>
+
+                            </div>
+
+                            <div class="vf-sub-section" style="margin-top:16px;">
+
+                                <label class="db-label vf-toggle-label">
+
+                                    <span>Custom Date-Based Pricing</span>
+
+                                    <label class="vf-switch"><input type="checkbox" id="vCustomPricingEnabled"><span class="vf-slider"></span></label>
+
+                                </label>
+
+                                <div id="customPricingContainer" class="vf-hidden">
+
+                                    <div id="customPricingList"></div>
+
+                                    <button type="button" class="btn btn-secondary btn-small" id="addCustomPricing">+ Add Date Range</button>
+
+                                </div>
+
+                            </div>
+
                         </div>
+
+
+
+                        <div class="vf-section">
+
+                            <div class="vf-section-title">Extras & Add-ons</div>
+
+                            <div class="db-form-grid-3">
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label" style="display:flex;align-items:center;gap:8px;">
+
+                                        <input type="checkbox" id="vChildSeatAvail" style="width:18px;height:18px;">
+
+                                        <span>Child Seat</span>
+
+                                    </label>
+
+                                    <input type="number" class="db-input" id="vChildSeat" placeholder="$/day" min="0" step="0.01" style="margin-top:6px;" disabled>
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label" style="display:flex;align-items:center;gap:8px;">
+
+                                        <input type="checkbox" id="vChainsAvail" style="width:18px;height:18px;">
+
+                                        <span>Snow Chains</span>
+
+                                    </label>
+
+                                    <input type="number" class="db-input" id="vChains" placeholder="$" min="0" step="0.01" style="margin-top:6px;" disabled>
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label" style="display:flex;align-items:center;gap:8px;">
+
+                                        <input type="checkbox" id="vRoofRackAvail" style="width:18px;height:18px;">
+
+                                        <span>Roof Rack</span>
+
+                                    </label>
+
+                                    <input type="number" class="db-input" id="vRoofRack" placeholder="$/day" min="0" step="0.01" style="margin-top:6px;" disabled>
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Third Driver ($/day)</label>
+
+                                    <input type="number" class="db-input" id="vThirdDriver" placeholder="0" min="0" step="0.01">
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label" style="display:flex;align-items:center;gap:8px;">
+
+                                        <input type="checkbox" id="vDriverServiceAvail" style="width:18px;height:18px;">
+
+                                        <span>Driver Included</span>
+
+                                    </label>
+
+                                    <input type="number" class="db-input" id="vDriverServicePrice" placeholder="$/day" min="0" step="0.01" style="margin-top:6px;" disabled>
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label" style="display:flex;align-items:center;gap:8px;">
+
+                                        <input type="checkbox" id="vPicnicHouseAvail" style="width:18px;height:18px;">
+
+                                        <span>Picnic House Rental</span>
+
+                                    </label>
+
+                                    <input type="number" class="db-input" id="vPicnicHousePrice" placeholder="$/day" min="0" step="0.01" style="margin-top:6px;" disabled>
+
+                                </div>
+
+                            </div>
+
+                            <div class="vf-sub-section" style="margin-top:16px;">
+
+                                <div class="vf-section-title" style="font-size:14px;margin-bottom:8px;">Mountain Destination Roads (Extra Cost)</div>
+
+                                <div style="display:flex;gap:16px;flex-wrap:wrap;">
+
+                                    <div style="flex:1;min-width:200px;">
+
+                                        <label class="db-label" style="display:flex;align-items:center;gap:8px;">
+
+                                            <input type="checkbox" id="vSvanetiAccepted" style="width:18px;height:18px;">
+
+                                            <span>Mestia / Mountain Svaneti</span>
+
+                                        </label>
+
+                                        <input type="number" class="db-input" id="vSvanetiPrice" placeholder="Extra cost ($)" min="0" step="0.01" style="margin-top:6px;" disabled>
+
+                                    </div>
+
+                                    <div style="flex:1;min-width:200px;">
+
+                                        <label class="db-label" style="display:flex;align-items:center;gap:8px;">
+
+                                            <input type="checkbox" id="vShatiliAccepted" style="width:18px;height:18px;">
+
+                                            <span>Shatili</span>
+
+                                        </label>
+
+                                        <input type="number" class="db-input" id="vShatiliPrice" placeholder="Extra cost ($)" min="0" step="0.01" style="margin-top:6px;" disabled>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="vf-section">
+
+                            <div class="vf-section-title">Insurance Options</div>
+
+                            <div class="vf-info-box">
+
+                                <strong>Insurance Information:</strong>
+
+                                <p><b>TPL:</b> Covers damage to other vehicles. <b>CDW:</b> Covers rented vehicle damage (not tires/glass/interior). <b>Full Coverage:</b> All damages + theft + roadside assistance.</p>
+
+                                <p style="color:#A0A3B0;font-size:12px;">Leave blank if not offered. Enter 0 for free options.</p>
+
+                            </div>
+
+                            <div class="db-form-grid-3">
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">TPL ($/day)</label>
+
+                                    <input type="number" class="db-input" id="vInsTPL" placeholder="0" min="0" step="0.01">
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">CDW ($/day)</label>
+
+                                    <input type="number" class="db-input" id="vInsCDW" placeholder="0" min="0" step="0.01">
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Full Coverage ($/day)</label>
+
+                                    <input type="number" class="db-input" id="vInsFullCoverage" placeholder="0" min="0" step="0.01">
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="wz-nav">
+
+                            <button type="button" class="btn btn-secondary wz-btn-prev" data-prev="2">&larr; Back</button>
+
+                            <button type="button" class="btn btn-primary wz-btn-next" data-next="4">Next: Location &rarr;</button>
+
+                        </div>
+
                     </div>
 
-                    <input type="hidden" id="vEditId" value="">
 
-                    <div class="db-form-actions">
-                        <button type="button" class="btn btn-secondary" id="cancelVehicleForm">Cancel</button>
-                        <button type="submit" class="btn btn-primary" id="submitVehicleBtn">Add Vehicle</button>
+
+                    <!-- ===================== STEP 4: LOCATION & SETTINGS ===================== -->
+
+                    <div class="wz-panel" data-panel="4">
+
+
+
+                        <div class="vf-section">
+
+                            <div class="vf-section-title">Location</div>
+
+                            <div class="db-form-grid">
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Pickup & Dropoff City *</label>
+
+                                    <select class="db-input" id="vLocationCity" required>
+
+                                        <option value="">Select Location</option>
+
+                                        <option value="Tbilisi">Tbilisi</option>
+
+                                        <option value="Batumi">Batumi</option>
+
+                                        <option value="Kutaisi">Kutaisi</option>
+
+                                        <option value="Tbilisi Airport">Tbilisi Airport</option>
+
+                                        <option value="Batumi Airport">Batumi Airport</option>
+
+                                        <option value="Kutaisi Airport">Kutaisi Airport</option>
+
+                                    </select>
+
+                                </div>
+
+                                <div class="db-form-group">
+
+                                    <label class="db-label">Region *</label>
+
+                                    <select class="db-input" id="vRegion">
+
+                                        <option value="">Select Region</option>
+
+                                        <option value="tbilisi">Tbilisi</option>
+
+                                        <option value="adjara">Adjara</option>
+
+                                        <option value="imereti">Imereti</option>
+
+                                        <option value="kakheti">Kakheti</option>
+
+                                        <option value="mtskheta_mtianeti">Mtskheta-Mtianeti</option>
+
+                                        <option value="samegrelo">Samegrelo</option>
+
+                                        <option value="guria">Guria</option>
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="vf-section">
+
+                            <div class="vf-section-title">Pickup & Delivery Fees</div>
+
+                            <div class="db-form-grid">
+
+                                <div class="db-form-group db-col-2">
+
+                                    <label class="db-label vf-toggle-label">
+
+                                        <span>Enable Pickup & Drop-off Fees</span>
+
+                                        <label class="vf-switch"><input type="checkbox" id="vPickupFeesEnabled"><span class="vf-slider"></span></label>
+
+                                    </label>
+
+                                    <p class="db-field-hint">By default, your office location is used for free pickup/dropoff.</p>
+
+                                </div>
+
+                            </div>
+
+                            <div id="pickupFeesContainer" class="vf-hidden">
+
+                                <div class="db-form-grid-3" style="margin-top:12px;">
+
+                                    <div class="db-form-group">
+
+                                        <label class="db-label">Office Address</label>
+
+                                        <input type="text" class="db-input" id="locOfficeAddress" placeholder="e.g. Tbilisi, Rustaveli Ave 15">
+
+                                    </div>
+
+                                    <div class="db-form-group">
+
+                                        <label class="db-label">Airport Fee ($)</label>
+
+                                        <input type="number" class="db-input" id="locAirportPrice" placeholder="0" min="0" step="0.01">
+
+                                    </div>
+
+                                    <div class="db-form-group">
+
+                                        <label class="db-label">Delivery Fee ($)</label>
+
+                                        <input type="number" class="db-input" id="locDeliveryPrice" placeholder="0" min="0" step="0.01">
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="vf-section">
+
+                            <div class="vf-section-title">Visibility & Settings</div>
+
+                            <div class="vf-toggles-row">
+
+                                <label class="db-label vf-toggle-label">
+
+                                    <span>Visible in Search Results</span>
+
+                                    <label class="vf-switch"><input type="checkbox" id="vVisibleInSearch" checked><span class="vf-slider"></span></label>
+
+                                </label>
+
+                                <label class="db-label vf-toggle-label">
+
+                                    <span>Block Vehicle After Confirmed Payment</span>
+
+                                    <label class="vf-switch"><input type="checkbox" id="vReturnFormatted" checked><span class="vf-slider"></span></label>
+
+                                </label>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="wz-nav">
+
+                            <button type="button" class="btn btn-secondary wz-btn-prev" data-prev="3">&larr; Back</button>
+
+                            <button type="button" class="btn btn-primary wz-btn-next" data-next="5">Next: Photos &rarr;</button>
+
+                        </div>
+
                     </div>
-                    <div class="db-form-message" id="vehicleFormMessage"></div>
+
+
+
+                    <!-- ===================== STEP 5: PHOTOS & DOCUMENTS ===================== -->
+
+                    <div class="wz-panel" data-panel="5">
+
+
+
+                        <div class="vf-section">
+
+                            <div class="vf-section-title">Vehicle Photos *</div>
+
+                            <p class="db-field-hint">Upload up to 10 photos. First photo = main image. Drag to reorder.</p>
+
+                            <div class="db-upload-area" id="uploadArea">
+
+                                <div class="db-upload-placeholder" id="uploadPlaceholder">
+
+                                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#A0A3B0" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+
+                                    <span>Click or drag images here</span>
+
+                                    <span class="db-upload-hint">JPG, PNG, WebP &mdash; max 20 MB each &mdash; up to 10 photos</span>
+
+                                </div>
+
+                                <input type="file" id="vImageFiles" accept=".jpg,.jpeg,.png,.webp" multiple style="display:none;">
+
+                                <div class="db-upload-preview" id="uploadPreview"></div>
+
+                            </div>
+
+                            <div class="upload-progress-wrap" id="uploadProgressWrap" style="display:none;">
+
+                                <div class="upload-progress-bar"><div class="upload-progress-fill" id="uploadProgressFill"></div></div>
+
+                                <span class="upload-progress-text" id="uploadProgressText">Uploading...</span>
+
+                            </div>
+
+                            <input type="hidden" id="vImageUrl" value="">
+
+                            <input type="hidden" id="vGalleryUrls" value="[]">
+
+                        </div>
+
+
+
+                        <div class="vf-section">
+
+                            <div class="vf-section-title">Ownership Confirmation *</div>
+
+                            <p class="db-field-hint">Required for verification. Not published publicly.</p>
+
+                            <div class="db-form-grid">
+
+                                <div class="db-form-group" style="flex:1;">
+
+                                    <label class="db-label">Tech Passport — Front Side *</label>
+
+                                    <div class="db-passport-upload" id="passportFrontArea">
+
+                                        <div class="db-passport-placeholder" id="passportFrontPlaceholder">
+
+                                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A0A3B0" stroke-width="1.5"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="6" y1="15" x2="14" y2="15"/></svg>
+
+                                            <span>Upload front side</span>
+
+                                        </div>
+
+                                        <input type="file" id="passportFrontFile" accept=".jpg,.jpeg,.png,.webp" style="display:none;">
+
+                                        <div class="db-passport-preview" id="passportFrontPreview"></div>
+
+                                    </div>
+
+                                    <input type="hidden" id="vPassportFront" value="">
+
+                                </div>
+
+                                <div class="db-form-group" style="flex:1;">
+
+                                    <label class="db-label">Tech Passport — Back Side *</label>
+
+                                    <div class="db-passport-upload" id="passportBackArea">
+
+                                        <div class="db-passport-placeholder" id="passportBackPlaceholder">
+
+                                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A0A3B0" stroke-width="1.5"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="6" y1="15" x2="14" y2="15"/></svg>
+
+                                            <span>Upload back side</span>
+
+                                        </div>
+
+                                        <input type="file" id="passportBackFile" accept=".jpg,.jpeg,.png,.webp" style="display:none;">
+
+                                        <div class="db-passport-preview" id="passportBackPreview"></div>
+
+                                    </div>
+
+                                    <input type="hidden" id="vPassportBack" value="">
+
+                                </div>
+
+                            </div>
+
+                            <div class="db-form-group" style="margin-top:16px;">
+
+                                <label class="db-label">Car Registration Number *</label>
+
+                                <input type="text" class="db-input" id="vRegNumber" placeholder="e.g. AB-123-CD" required>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <input type="hidden" id="vEditId" value="">
+
+
+
+                        <div class="wz-nav">
+
+                            <button type="button" class="btn btn-secondary wz-btn-prev" data-prev="4">&larr; Back</button>
+
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitVehicleBtn">Add Vehicle</button>
+
+                        </div>
+
+                        <div class="db-form-message" id="vehicleFormMessage"></div>
+
+                    </div>
+
+
+
                 </form>
+
             </div>
+
+
 
             <!-- TAB: BOOKINGS -->
+
             <div class="db-tab" id="tab-bookings">
+
                 <div class="db-tab-header">
+
                     <h2>Bookings</h2>
+
                 </div>
+
                 <div class="db-empty-state">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#A0A3B0" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+
                     <h3>No bookings yet</h3>
+
                     <p>Bookings will appear here once customers start renting your vehicles</p>
+
                 </div>
+
             </div>
+
+
 
             <!-- TAB: PROFILE -->
+
             <div class="db-tab" id="tab-profile">
+
                 <div class="db-tab-header">
+
                     <h2>Partner Profile</h2>
+
                 </div>
+
                 <div class="db-profile-card" id="profileCard">
+
                     <div class="db-profile-row"><strong>Name:</strong> <span id="profileName">-</span></div>
+
                     <div class="db-profile-row"><strong>Email:</strong> <span id="profileEmail">-</span></div>
+
                     <div class="db-profile-row"><strong>Phone:</strong> <span id="profilePhone">-</span></div>
+
                     <div class="db-profile-row"><strong>Company:</strong> <span id="profileCompany">-</span></div>
+
                     <div class="db-profile-row"><strong>Location:</strong> <span id="profileLocation">-</span></div>
+
                     <div class="db-profile-row"><strong>Member since:</strong> <span id="profileDate">-</span></div>
+
                 </div>
+
+
+
+                <!-- Phone Verification Status -->
+
+                <div id="partnerPhoneVerifyCard" style="display:none;margin-top:16px;border-radius:12px;padding:16px 20px;">
+
+                    <div style="display:flex;align-items:center;gap:14px;">
+
+                        <div id="ppvIcon" style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+
+                        </div>
+
+                        <div style="flex:1;">
+
+                            <h3 id="ppvTitle" style="margin:0;font-size:15px;font-weight:700;"></h3>
+
+                            <p id="ppvDesc" style="margin:4px 0 0;font-size:13px;color:#A0A3B0;"></p>
+
+                        </div>
+
+                        <button id="ppvActionBtn" style="display:none;flex-shrink:0;padding:8px 20px;background:#D4AF37;color:#0f172a;border:none;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;">Verify Now</button>
+
+                    </div>
+
+                </div>
+
             </div>
+
+
 
         </main>
+
     </div>
+
+
 
     <!-- Availability Calendar Modal -->
+
     <div class="availability-modal" id="availabilityModal" style="display: none;">
+
         <div class="availability-modal-overlay" onclick="closeAvailabilityCalendar()"></div>
+
         <div class="availability-modal-content">
+
             <div class="availability-modal-header">
+
                 <h3>Manage Vehicle Availability</h3>
+
                 <button class="availability-modal-close" onclick="closeAvailabilityCalendar()">&#x2715;</button>
+
             </div>
+
             <div class="availability-modal-body">
+
                 <div class="availability-calendar-header">
+
                     <button class="availability-nav-btn" onclick="changeMonth(-1)">&lsaquo;</button>
+
                     <h4 id="availabilityMonth">Month Year</h4>
+
                     <button class="availability-nav-btn" onclick="changeMonth(1)">&rsaquo;</button>
+
                 </div>
+
                 <div class="availability-calendar-grid" id="availabilityCalendar">
+
                     <!-- Calendar will be generated here -->
+
                 </div>
+
                 <div class="availability-legend">
+
                     <div class="legend-item">
+
                         <div class="legend-color available"></div>
+
                         <span>Available</span>
+
                     </div>
+
                     <div class="legend-item">
+
                         <div class="legend-color blocked"></div>
+
                         <span>Blocked</span>
+
                     </div>
+
                     <div class="legend-item">
+
                         <div class="legend-color booked"></div>
+
                         <span>Booked</span>
+
                     </div>
+
                 </div>
+
                 <div class="availability-actions">
+
                     <button class="btn btn-secondary" onclick="closeAvailabilityCalendar()">Cancel</button>
+
                     <button class="btn btn-primary" id="availabilitySaveBtn" onclick="saveAvailability()">Save Changes</button>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
 
+
+
     <script src="script.js"></script>
+
     <script src="navbar-auth.js"></script>
+
     <script src="dashboard.js"></script>
+
 <script src="premium-animations.js"></script>
+
 </body>
+
 </html>
+

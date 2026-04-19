@@ -1,413 +1,828 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Customer Reviews — RoyalCar.rent</title>
+
     <meta name="description" content="Read real reviews from travelers who rented cars through RoyalCar.rent. Trusted ratings from verified customers.">
-    <link rel="canonical" href="https://RoyalCar.rent/reviews.html">
+
+    <link rel="canonical" href="https://royalcar.rent/reviews.html">
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
     <meta property="og:title" content="Customer Reviews — RoyalCar.rent">
+
     <meta property="og:description" content="Real reviews from verified travelers in Georgia.">
+
     <meta property="og:site_name" content="RoyalCar.rent">
+
+    <meta property="og:image" content="https://royalcar.rent/images/og-preview.jpg">
+
     <link rel="stylesheet" href="style.css">
+
     <link rel="stylesheet" href="premium.css">
+
     <link rel="stylesheet" href="navbar-auth.css">
+
     <script src="api-helper.js"></script>
+
 </head>
+
 <body>
+
     <!-- HEADER & NAVIGATION -->
+
     <header class="header sticky-header">
+
         <div class="container header-content">
+
             <!-- Logo -->
+
             <div class="header-left">
+
                 <a href="/" class="logo">
+
                     <img src="images/logo.png" alt="RoyalCar.rent" class="logo-img">
+
                     <span class="logo-text">RoyalCar.rent</span>
+
                 </a>
+
             </div>
+
+
 
             <!-- Navigation Menu -->
+
             <div class="header-center">
+
                 <nav class="nav-menu">
+
                     <a href="index.html" class="nav-link">Home</a>
+
                     <a href="vehicles.html" class="nav-link">Vehicles</a>
+
                     <a href="reviews.html" class="nav-link active">Reviews</a>
+
                     <a href="about.html" class="nav-link">About</a>
+
                     <a href="contact.html" class="nav-link">Contact</a>
+
                 </nav>
+
             </div>
+
+
 
             <!-- Right Section: Currency, Language, Button -->
+
             <div class="header-right">
-                <div class="selector-group">
-                    <button class="selector-btn currency-btn" id="currencyBtn">
-                        <span class="selector-icon">💵</span>
-                        <span class="selector-text">USD</span>
-                        <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </button>
-                    <div class="dropdown-menu currency-dropdown" id="currencyDropdown" style="display: none;">
-                        <a href="#" class="dropdown-item" data-currency="USD">$ USD</a>
-                        <a href="#" class="dropdown-item" data-currency="EUR">€ EUR</a>
-                        <a href="#" class="dropdown-item" data-currency="GEL">₾ GEL</a>
-                    </div>
-                </div>
 
                 <div class="selector-group">
-                    <button class="selector-btn language-btn" id="languageBtn">
-                        <span class="selector-icon">EN</span>
-                        <span class="selector-text">English</span>
+
+                    <button class="selector-btn currency-btn" id="currencyBtn">
+
+                        <span class="selector-icon">💵</span>
+
+                        <span class="selector-text">USD</span>
+
                         <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
                             <polyline points="6 9 12 15 18 9"></polyline>
+
                         </svg>
+
                     </button>
-                    <div class="dropdown-menu language-dropdown" id="languageDropdown" style="display: none;">
-                        <div class="dropdown-header">SELECT LANGUAGE</div>
-                        <a href="#" class="dropdown-item" data-language="en">
-                            <span class="language-flag">en</span>
-                            <span>English</span>
-                            <span class="checkmark">✓</span>
-                        </a>
-                        <a href="#" class="dropdown-item" data-language="ru">
-                            <span class="language-flag">🇷🇺</span>
-                            <span>Русский</span>
-                        </a>
-                        <a href="#" class="dropdown-item" data-language="ka">
-                            <span class="language-flag">🇬🇪</span>
-                            <span>ქართული</span>
-                        </a>
+
+                    <div class="dropdown-menu currency-dropdown" id="currencyDropdown" style="display: none;">
+
+                        <a href="#" class="dropdown-item" data-currency="USD">$ USD</a>
+
+                        <a href="#" class="dropdown-item" data-currency="EUR">€ EUR</a>
+
+                        <a href="#" class="dropdown-item" data-currency="GEL">₾ GEL</a>
+
                     </div>
+
                 </div>
+
+
+
+                <div class="selector-group">
+
+                    <button class="selector-btn language-btn" id="languageBtn">
+
+                        <span class="selector-icon">EN</span>
+
+                        <span class="selector-text">English</span>
+
+                        <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                            <polyline points="6 9 12 15 18 9"></polyline>
+
+                        </svg>
+
+                    </button>
+
+                    <div class="dropdown-menu language-dropdown" id="languageDropdown" style="display: none;">
+
+                        <div class="dropdown-header">SELECT LANGUAGE</div>
+
+                        <a href="#" class="dropdown-item" data-language="en">
+
+                            <span class="language-flag">en</span>
+
+                            <span>English</span>
+
+                            <span class="checkmark">✓</span>
+
+                        </a>
+
+                        <a href="#" class="dropdown-item" data-language="ru">
+
+                            <span class="language-flag">🇷🇺</span>
+
+                            <span>Русский</span>
+
+                        </a>
+
+                        <a href="#" class="dropdown-item" data-language="ka">
+
+                            <span class="language-flag">🇬🇪</span>
+
+                            <span>ქართული</span>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
 
                 <a href="register-partner.html" class="partner-btn">Become Partner</a>
+
             </div>
+
         </div>
+
     </header>
 
+
+
     <!-- PAGE HERO -->
+
     <section class="page-hero">
+
         <div class="page-hero-overlay"></div>
+
         <div class="container">
+
             <h1>Customer Reviews</h1>
+
             <p>Read what our customers say about their rental experience</p>
+
         </div>
+
     </section>
+
+
 
     <!-- STATS SECTION -->
+
     <section class="reviews-stats">
+
         <div class="container">
+
             <div class="stats-grid">
+
                 <div class="stat-card">
+
                     <div class="stat-number" id="statAvgRating">—</div>
+
                     <div class="stat-label">Average Rating</div>
+
                     <div class="stat-stars" id="statStars">☆☆☆☆☆</div>
+
                 </div>
+
                 <div class="stat-card">
+
                     <div class="stat-number" id="statTotal">—</div>
+
                     <div class="stat-label">Total Reviews</div>
+
                 </div>
+
                 <div class="stat-card">
+
                     <div class="stat-number" id="stat5star">—</div>
+
                     <div class="stat-label">5-Star Reviews</div>
+
                 </div>
+
                 <div class="stat-card">
+
                     <div class="stat-number" id="statRecentDays">—</div>
+
                     <div class="stat-label">This Month</div>
+
                 </div>
+
             </div>
+
         </div>
+
     </section>
+
+
 
     <!-- WRITE A REVIEW (logged-in guests only) -->
+
     <section class="write-review-section" id="writeReviewSection" style="display:none;">
+
         <div class="container">
+
             <div class="write-review-card">
+
                 <h2>Write a Review</h2>
+
                 <p class="write-review-sub">Share your rental experience with other travelers</p>
+
                 <form id="reviewForm">
+
                     <div class="rv-stars-pick" id="rvStarPick">
+
                         <span class="rv-star-btn" data-v="1">★</span>
+
                         <span class="rv-star-btn" data-v="2">★</span>
+
                         <span class="rv-star-btn" data-v="3">★</span>
+
                         <span class="rv-star-btn" data-v="4">★</span>
+
                         <span class="rv-star-btn" data-v="5">★</span>
-                        <span id="rvRatingLabel" style="font-size:13px;color:#64748b;margin-left:8px;">Select rating</span>
+
+                        <span id="rvRatingLabel" style="font-size:13px;color:#A0A3B0;margin-left:8px;">Select rating</span>
+
                     </div>
+
                     <input type="hidden" id="rvRating" value="">
+
                     <input type="text" id="rvTitle" placeholder="Review title (optional)" class="rv-input" maxlength="100">
+
                     <textarea id="rvBody" placeholder="Tell us about your experience..." class="rv-input rv-textarea" maxlength="1000" required></textarea>
+
                     <div id="rvMsg" style="display:none;font-size:13px;padding:8px 12px;border-radius:6px;margin-bottom:10px;"></div>
+
                     <button type="submit" class="rv-submit-btn" id="rvSubmitBtn">Submit Review</button>
+
                 </form>
+
             </div>
+
         </div>
+
     </section>
+
+
 
     <!-- REVIEWS SECTION -->
+
     <section class="reviews-section">
+
         <div class="container">
+
             <div class="reviews-header">
+
                 <h2>What Our Customers Say</h2>
+
                 <div class="reviews-filter">
+
                     <button class="filter-btn active" data-filter="all">All</button>
+
                     <button class="filter-btn" data-filter="5">★★★★★ 5 Stars</button>
+
                     <button class="filter-btn" data-filter="4">★★★★ 4 Stars</button>
+
                     <button class="filter-btn" data-filter="3">★★★ 3 Stars</button>
+
                 </div>
+
             </div>
+
+
 
             <div class="reviews-list" id="reviewsList">
-                <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#94a3b8;">
+
+                <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#A0A3B0;">
+
                     <p style="font-size:16px;">Loading reviews...</p>
+
                 </div>
+
             </div>
+
         </div>
+
     </section>
+
+
 
     <!-- CTA SECTION -->
+
     <section class="cta-section">
+
         <div class="container">
+
             <h2>Join Our Happy Customers</h2>
+
             <p>Book your perfect vehicle today and experience the RoyalCar difference</p>
+
             <a href="vehicles.html" class="btn btn-primary">Browse Vehicles</a>
+
         </div>
+
     </section>
 
+
+
     <script>
+
     (function() {
+
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
         var user = null;
+
         try { user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')); } catch(e) {}
 
+
+
         // Show write review form for logged-in guests
+
         if (token && user && user.role === 'guest') {
+
             document.getElementById('writeReviewSection').style.display = '';
+
         }
+
+
 
         // Load stats
+
         fetch('/api/reviews/stats')
+
         .then(function(r) { return r.json(); })
+
         .then(function(d) {
+
             document.getElementById('statAvgRating').textContent = d.avg_rating ? d.avg_rating + '/5' : '—';
+
             document.getElementById('statTotal').textContent = d.total || 0;
+
             document.getElementById('stat5star').textContent = (d.distribution && d.distribution[5]) || 0;
+
             document.getElementById('statRecentDays').textContent = '—';
+
             // star display
+
             var avg = Math.round(d.avg_rating || 0);
+
             document.getElementById('statStars').textContent = '★'.repeat(avg) + '☆'.repeat(5 - avg);
+
         }).catch(function() {});
 
+
+
         // Load reviews
+
         var allReviews = [];
+
         var activeFilter = 'all';
 
+
+
         function renderReviews(reviews) {
+
             var list = document.getElementById('reviewsList');
+
             if (!reviews.length) {
+
                 list.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;">'
+
                     + '<div style="font-size:48px;margin-bottom:16px;">💬</div>'
-                    + '<h3 style="color:#64748b;">No reviews yet</h3>'
-                    + '<p style="color:#94a3b8;">Be the first to leave a review!</p></div>';
+
+                    + '<h3 style="color:#A0A3B0;">No reviews yet</h3>'
+
+                    + '<p style="color:#A0A3B0;">Be the first to leave a review!</p></div>';
+
                 return;
+
             }
+
             list.innerHTML = reviews.map(function(r) {
+
                 var initials = (r.guest_name || '?').split(' ').map(function(p){ return p[0]; }).join('').substring(0,2).toUpperCase();
+
                 var stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+
                 var date = new Date(r.created_at);
+
                 var ago = timeAgo(date);
+
                 return '<div class="review-card" data-rating="' + r.rating + '">'
+
                     + '<div class="review-header">'
+
                     + '<div class="reviewer-info">'
+
                     + '<div class="reviewer-avatar">' + initials + '</div>'
+
                     + '<div><h4>' + esc(r.guest_name || 'Anonymous') + '</h4>'
+
                     + (r.vehicle_name ? '<span class="reviewer-location">🚗 ' + esc(r.vehicle_name) + '</span>' : '') + '</div>'
+
                     + '</div>'
+
                     + '<div class="review-rating" style="color:#f59e0b;font-size:18px;">' + stars + '</div>'
+
                     + '</div>'
+
                     + (r.title ? '<h3 class="review-title">' + esc(r.title) + '</h3>' : '')
+
                     + '<p class="review-text">' + esc(r.body) + '</p>'
+
                     + '<div class="review-date">' + ago + '</div>'
+
                     + '</div>';
+
             }).join('');
+
         }
+
+
 
         fetch('/api/reviews')
+
         .then(function(r) { return r.json(); })
+
         .then(function(d) {
+
             allReviews = d.reviews || [];
+
             renderReviews(allReviews);
+
         }).catch(function() {
+
             document.getElementById('reviewsList').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#ef4444;">Failed to load reviews.</div>';
+
         });
+
+
 
         // Filter buttons
+
         document.querySelectorAll('.filter-btn').forEach(function(btn) {
+
             btn.addEventListener('click', function() {
+
                 document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+
                 this.classList.add('active');
+
                 activeFilter = this.dataset.filter;
+
                 var filtered = activeFilter === 'all' ? allReviews : allReviews.filter(function(r) { return r.rating === parseInt(activeFilter); });
+
                 renderReviews(filtered);
+
             });
+
         });
+
+
 
         // Star picker
+
         var selectedRating = 0;
+
         document.querySelectorAll('.rv-star-btn').forEach(function(btn) {
+
             btn.addEventListener('mouseenter', function() { highlightStars(parseInt(this.dataset.v)); });
+
             btn.addEventListener('mouseleave', function() { highlightStars(selectedRating); });
+
             btn.addEventListener('click', function() {
+
                 selectedRating = parseInt(this.dataset.v);
+
                 document.getElementById('rvRating').value = selectedRating;
+
                 highlightStars(selectedRating);
+
                 var labels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+
                 document.getElementById('rvRatingLabel').textContent = labels[selectedRating] || '';
+
             });
+
         });
 
+
+
         function highlightStars(n) {
+
             document.querySelectorAll('.rv-star-btn').forEach(function(s, i) {
-                s.style.color = i < n ? '#f59e0b' : '#d1d5db';
+
+                s.style.color = i < n ? '#f59e0b' : '#3A3F4B';
+
             });
+
         }
+
         highlightStars(0);
 
+
+
         // Submit review
+
         var form = document.getElementById('reviewForm');
+
         if (form) {
+
             form.addEventListener('submit', function(e) {
+
                 e.preventDefault();
+
                 var rating = parseInt(document.getElementById('rvRating').value);
+
                 var body = document.getElementById('rvBody').value.trim();
+
                 var title = document.getElementById('rvTitle').value.trim();
+
                 var msg = document.getElementById('rvMsg');
+
                 var btn = document.getElementById('rvSubmitBtn');
 
+
+
                 msg.style.display = 'none';
+
                 if (!rating) { showMsg(msg, 'Please select a star rating.', false); return; }
+
                 if (!body) { showMsg(msg, 'Please write your review.', false); return; }
 
+
+
                 btn.disabled = true; btn.textContent = 'Submitting...';
+
                 fetch('/api/reviews', {
+
                     method: 'POST',
+
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+
                     body: JSON.stringify({ rating: rating, title: title, body: body })
+
                 })
+
                 .then(function(r) { return r.json(); })
+
                 .then(function(d) {
+
                     btn.disabled = false; btn.textContent = 'Submit Review';
+
                     if (d.error) { showMsg(msg, d.error, false); return; }
+
                     showMsg(msg, 'Thank you! Your review has been submitted.', true);
+
                     form.reset(); selectedRating = 0; highlightStars(0);
+
                     document.getElementById('rvRatingLabel').textContent = 'Select rating';
+
                     document.getElementById('rvRating').value = '';
+
                     // Reload reviews
+
                     fetch('/api/reviews').then(function(r){return r.json();}).then(function(d){ allReviews = d.reviews||[]; renderReviews(allReviews); });
+
                 })
+
                 .catch(function() {
+
                     btn.disabled = false; btn.textContent = 'Submit Review';
+
                     showMsg(msg, 'Network error. Please try again.', false);
+
                 });
+
             });
+
         }
 
+
+
         function showMsg(el, text, ok) {
+
             el.style.display = 'block';
+
             el.style.background = ok ? '#f0fdf4' : '#fef2f2';
+
             el.style.color = ok ? '#16a34a' : '#dc2626';
+
             el.style.border = '1px solid ' + (ok ? '#86efac' : '#fecaca');
+
             el.textContent = text;
+
         }
+
+
 
         function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
+
+
         function timeAgo(date) {
+
             var s = Math.floor((Date.now() - date) / 1000);
+
             if (s < 60) return 'Just now';
+
             if (s < 3600) return Math.floor(s/60) + ' min ago';
+
             if (s < 86400) return Math.floor(s/3600) + ' hr ago';
+
             if (s < 604800) return Math.floor(s/86400) + ' day' + (s < 172800?'':'s') + ' ago';
+
             if (s < 2592000) return Math.floor(s/604800) + ' week' + (s < 1209600?'':'s') + ' ago';
+
             if (s < 31536000) return Math.floor(s/2592000) + ' month' + (s < 5184000?'':'s') + ' ago';
+
             return Math.floor(s/31536000) + ' year' + (s < 63072000?'':'s') + ' ago';
+
         }
+
     })();
+
     </script>
 
+
+
     <!-- FLOATING QUICK CHAT -->
+
     <a href="https://wa.me/995591522299" target="_blank" class="floating-whatsapp" style="text-decoration:none;color:inherit;">
+
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+
             <path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+
         </svg>
+
         <span>Quick Chat</span>
+
     </a>
 
+
+
     <!-- FOOTER -->
+
     <footer class="footer">
+
         <div class="container footer-content">
+
             <div class="footer-column">
+
                 <h4>RoyalCar.rent</h4>
+
                 <p>Premium car rental marketplace for Georgia adventures.</p>
+
                 <div class="social-icons">
+
                     <a href="https://www.facebook.com/profile.php?id=61583448788067" target="_blank" class="social-icon" title="Facebook">
+
                         <img src="images/Facebook_Logo.png" alt="Facebook" width="18" height="18" style="object-fit:contain;">
+
                     </a>
+
                     <a href="https://www.instagram.com/eliterentalgeorgia/" target="_blank" class="social-icon" title="Instagram">
+
                         <img src="images/Instagram.png" alt="Instagram" width="18" height="18" style="object-fit:contain;">
+
                     </a>
+
                 </div>
+
             </div>
+
             <div class="footer-column">
+
                 <h4>Legal</h4>
+
                 <ul>
+
                     <li><a href="tos.html">Terms & Conditions</a></li>
+
                     <li><a href="privacy.html">Privacy Policy</a></li>
+
                     <li><a href="#" onclick="document.getElementById('contactModal').style.display='flex'; return false;">Contact</a></li>
+
                 </ul>
+
             </div>
+
             <div class="footer-column">
+
                 <h4>Contact</h4>
+
                 <p>📧 elite.rental25@gmail.com</p>
+
                 <p>📞 +995 591 522 299</p>
+
                 <p>📍 Tbilisi, Georgia</p>
+
             </div>
+
         </div>
+
         <div class="footer-bottom">
+
             <p>&copy; 2026 RoyalCar.rent. All rights reserved.</p>
+
         </div>
+
     </footer>
 
+
+
     <!-- Contact Modal -->
+
     <div id="contactModal" onclick="if(event.target===this)this.style.display='none';" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-        <div style="background:#fff; border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.15); text-align:center;">
-            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#64748b; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">✕</button>
-            <div style="width:64px; height:64px; background:linear-gradient(135deg,#3b82f6,#2563eb); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px;">📞</div>
-            <h2 style="font-size:24px; font-weight:800; color:#1e293b; margin-bottom:8px;">Contact Us</h2>
-            <p style="font-size:14px; color:#64748b; margin-bottom:28px;">We're here to help! Reach us anytime.</p>
-            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0'">
-                <div style="width:44px; height:44px; background:#eff6ff; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">📧</div>
+
+        <div style="background:#1C1E26; border:1px solid #3A3F4B; border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.5); text-align:center;">
+
+            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#A0A3B0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='none'">✕</button>
+
+            <div style="width:64px; height:64px; background:linear-gradient(135deg,#D4AF37,#B8963F); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px;">📞</div>
+
+            <h2 style="font-size:24px; font-weight:800; color:#EAEAEA; margin-bottom:8px;">Contact Us</h2>
+
+            <p style="font-size:14px; color:#A0A3B0; margin-bottom:28px;">We're here to help! Reach us anytime.</p>
+
+            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#262A35; border:1px solid #3A3F4B; border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#D4AF37'" onmouseout="this.style.borderColor='#3A3F4B'">
+
+                <div style="width:44px; height:44px; background:rgba(212,175,55,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">📧</div>
+
                 <div style="text-align:left;">
-                    <div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div>
-                    <div style="font-size:15px; color:#1e293b; font-weight:600;">elite.rental25@gmail.com</div>
+
+                    <div style="font-size:12px; color:#A0A3B0; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div>
+
+                    <div style="font-size:15px; color:#EAEAEA; font-weight:600;">elite.rental25@gmail.com</div>
+
                 </div>
+
             </a>
-            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#e2e8f0'">
-                <div style="width:44px; height:44px; background:#f0fdf4; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+
+            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#262A35; border:1px solid #3A3F4B; border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#3A3F4B'">
+
+                <div style="width:44px; height:44px; background:rgba(34,197,94,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="#22c55e"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+
                 </div>
+
                 <div style="text-align:left;">
-                    <div style="font-size:12px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div>
-                    <div style="font-size:15px; color:#1e293b; font-weight:600;">+995 591 522 299</div>
+
+                    <div style="font-size:12px; color:#A0A3B0; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div>
+
+                    <div style="font-size:15px; color:#EAEAEA; font-weight:600;">+995 591 522 299</div>
+
                 </div>
+
             </a>
+
         </div>
+
     </div>
 
+
+
     <script src="script.js"></script>
+
     <script src="navbar-auth.js"></script>
+
 <script src="premium-animations.js"></script>
+
 </body>
+
 </html>
+

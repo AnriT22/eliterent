@@ -131,6 +131,13 @@ router.post('/', authenticateToken, requireRole('partner'), async (req, res) => 
             return res.status(400).json({ error: 'Name, category, engine, gearbox, drive type, price, and year are required' });
         }
 
+        if (b.name && String(b.name).length > 100) {
+            return res.status(400).json({ error: 'Vehicle name too long (max 100 characters)' });
+        }
+        if (b.description && String(b.description).length > 5000) {
+            return res.status(400).json({ error: 'Description too long (max 5000 characters)' });
+        }
+
         var price = parseFloat(b.price_per_day);
         if (!price || price <= 0 || price > 100000) {
             return res.status(400).json({ error: 'Price must be between $1 and $100,000 per day' });
@@ -300,7 +307,7 @@ router.put('/:id', authenticateToken, requireRole('partner'), async (req, res) =
                 b.deposit_amount !== undefined ? parseFloat(b.deposit_amount) : existing.deposit_amount,
                 b.tech_passport_front !== undefined ? b.tech_passport_front : existing.tech_passport_front,
                 b.tech_passport_back !== undefined ? b.tech_passport_back : existing.tech_passport_back,
-                b.status || existing.status,
+                existing.status, // Partners cannot change their own vehicle status — admin only
                 vehicleId,
                 req.user.id
             ]

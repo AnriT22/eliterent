@@ -6,4 +6,4 @@ Disallow: /partner-dashboard.html
 Disallow: /partner-financials.html
 Disallow: /uploads/
 
-Sitemap: https://eliterent.ge/sitemap.xml
+Sitemap: https://royalcar.rent/sitemap.xml

@@ -64,6 +64,7 @@ body.auth-page .auth-right-panel {
         0 24px 60px rgba(0, 0, 0, 0.4);
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
 }
 
 body.auth-page.register-page .auth-right-panel {
@@ -482,6 +483,51 @@ body.auth-page .social-btn:hover {
     border-color: rgba(136, 189, 242, 0.25);
 }
 
+/* ===== GOOGLE BUTTON ===== */
+body.auth-page .btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 13px 20px;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #3c4043;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+body.auth-page .btn-google svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+body.auth-page .btn-google:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+body.auth-page .btn-google:active {
+    background: #f1f5f9;
+    transform: scale(0.99);
+}
+
+/* Google rendered button container */
+body.auth-page .google-btn-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 0 auto;
+}
+
 /* ===== AUTH FOOTER (in-card) ===== */
 body.auth-page .auth-footer {
     margin-top: 24px;
@@ -617,6 +663,7 @@ body.auth-page .license-option {
     font-size: 14px;
     color: #94a3b8;
     width: 100%;
+    box-sizing: border-box;
 }
 
 body.auth-page .license-option:hover {
