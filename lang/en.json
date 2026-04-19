@@ -314,12 +314,6 @@
     "earnings": "Earnings",
     "calendar": "Calendar"
   },
-  "reviews_page": {
-    "title": "Customer Reviews",
-    "subtitle": "See what our customers are saying",
-    "write_review": "Write a Review",
-    "no_reviews": "No reviews yet"
-  },
   "verify_phone": {
     "title": "Verify Your Phone",
     "subtitle": "We sent a verification code to your phone",
@@ -557,5 +551,21 @@
     "view_bookings": "View My Bookings",
     "browse_more": "Browse More",
     "booking_failed": "Booking failed"
+  },
+  "reviews_page": {
+    "title": "Customer Reviews",
+    "subtitle": "Read what our customers say about their rental experience",
+    "avg_rating": "Average Rating",
+    "total_reviews": "Total Reviews",
+    "five_star": "5-Star Reviews",
+    "this_month": "This Month",
+    "write_review": "Write a Review",
+    "write_review_sub": "Share your rental experience with other travelers",
+    "submit": "Submit Review",
+    "what_customers_say": "What Our Customers Say",
+    "cta_title": "Join Our Happy Customers",
+    "cta_subtitle": "Book your perfect vehicle today and experience the RoyalCar difference",
+    "cta_button": "Browse Vehicles",
+    "no_reviews": "No reviews yet"
   }
 }
