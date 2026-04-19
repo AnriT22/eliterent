@@ -53,9 +53,32 @@
     var initialized = false;
     var mobileInitialized = false;
 
+    function translateDesktopNav() {
+        var navLinks = document.querySelectorAll('.nav-menu .nav-link');
+        var keyMap = {
+            'index.html': 'nav.home',
+            'vehicles.html': 'nav.vehicles',
+            'reviews.html': 'nav.reviews',
+            'about.html': 'nav.about',
+            'contact.html': 'nav.contact'
+        };
+        navLinks.forEach(function (link) {
+            var href = (link.getAttribute('href') || '').replace(/^\//, '');
+            if (keyMap[href]) {
+                link.textContent = t(keyMap[href], link.textContent);
+            }
+        });
+        var partnerBtn = document.querySelector('.header-right .partner-btn');
+        if (partnerBtn && partnerBtn.id !== 'mobileLogoutBtn') {
+            partnerBtn.textContent = t('nav.become_partner', partnerBtn.textContent);
+        }
+    }
+
     function initNavbarAuth() {
         if (initialized) return;
         initialized = true;
+
+        translateDesktopNav();
 
         var headerRight = document.querySelector('.header-right');
         if (!headerRight) return;

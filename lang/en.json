@@ -15,7 +15,9 @@
     "guest": "Guest",
     "verified": "Verified",
     "not_approved": "Not Yet Approved",
-    "select_language": "Select Language"
+    "select_language": "Select Language",
+    "login": "Sign In",
+    "register": "Register"
   },
   "hero": {
     "headline": "Premium Car Rental<br>in Georgia —<br>Tbilisi, Batumi,<br>Kutaisi & More.",
