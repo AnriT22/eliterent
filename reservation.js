@@ -243,7 +243,7 @@
         });
 
         html += '<div class="rv-payment-note">'
-            + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+            + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
             + ' Full payment on delivery. Small booking fee charged now.'
             + '</div>';
 
@@ -449,7 +449,7 @@
         var v = vehicleData;
         var days = getRentalDays();
 
-        document.title = 'Reservation — ' + v.name + ' — Eliterent.ge';
+        document.title = 'Reservation — ' + v.name + ' — RoyalCar.rent';
 
         galleryImages = [];
         if (v.image_url) galleryImages.push(v.image_url);
@@ -708,6 +708,12 @@
             btn.disabled = false;
             btn.querySelector('span:nth-child(2)').textContent = 'Book now';
             if (data.error) {
+                if (data.phoneRequired) {
+                    if (confirm(data.error + '\n\nWould you like to verify your phone now?')) {
+                        window.location.href = '/verify-phone.html';
+                    }
+                    return;
+                }
                 alert('Booking failed: ' + data.error);
                 return;
             }

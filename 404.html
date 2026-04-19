@@ -9,8 +9,8 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: #f1f5f9;
+            background: linear-gradient(135deg, #0f172a 0%, #1C1E26 100%);
+            color: #EAEAEA;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -30,7 +30,7 @@
             margin-bottom: 16px;
         }
         h1 { font-size: 28px; font-weight: 700; margin-bottom: 12px; }
-        p { color: #94a3b8; font-size: 16px; line-height: 1.6; margin-bottom: 32px; }
+        p { color: #A0A3B0; font-size: 16px; line-height: 1.6; margin-bottom: 32px; }
         .home-btn {
             display: inline-block;
             padding: 14px 36px;
@@ -47,13 +47,14 @@
             box-shadow: 0 8px 24px rgba(200, 169, 97, 0.3);
         }
     </style>
+    <script src="i18n.js"></script>
 </head>
 <body>
     <div class="error-container">
         <div class="error-code">404</div>
-        <h1>Page Not Found</h1>
-        <p>The page you're looking for doesn't exist or has been moved. Let's get you back on track.</p>
-        <a href="/" class="home-btn">Back to Home</a>
+        <h1 data-i18n="error_404.title">Page Not Found</h1>
+        <p data-i18n="error_404.message">The page you're looking for doesn't exist or has been moved. Let's get you back on track.</p>
+        <a href="/" class="home-btn" data-i18n="error_404.home">Back to Home</a>
     </div>
 </body>
 </html>

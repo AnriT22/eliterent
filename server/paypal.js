@@ -53,7 +53,7 @@ async function createOrder(bookingId, amount, currency, description) {
             intent: 'CAPTURE',
             purchase_units: [{
                 reference_id: 'BOOKING-' + bookingId,
-                description: description || 'Eliterent.ge — Booking #' + bookingId + ' Service Fee',
+                description: description || 'RoyalCar.rent — Booking #' + bookingId + ' Service Fee',
                 amount: {
                     currency_code: currency || 'USD',
                     value: parseFloat(amount).toFixed(2)

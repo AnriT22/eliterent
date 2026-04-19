@@ -84,6 +84,34 @@
         if (nameEl) nameEl.textContent = u.full_name || 'User';
         if (emailEl) emailEl.textContent = u.email || '';
         if (avatarEl) avatarEl.textContent = getInitials(u.full_name || u.email);
+
+        // Phone verification card
+        var pvCard = document.getElementById('phoneVerifyCard');
+        var pvIcon = document.getElementById('pvIcon');
+        var pvTitle = document.getElementById('pvTitle');
+        var pvDesc = document.getElementById('pvDesc');
+        var pvBtn = document.getElementById('pvActionBtn');
+        if (pvCard) {
+            pvCard.style.display = 'block';
+            if (u.phone_verified === 1 || u.phone_verified === true) {
+                pvIcon.style.background = 'rgba(34,197,94,0.1)';
+                pvIcon.style.color = '#22c55e';
+                pvTitle.style.color = '#22c55e';
+                pvTitle.textContent = 'Phone Verified';
+                pvDesc.textContent = 'Your phone number ' + (u.phone || '') + ' is verified. You can make reservations.';
+                pvBtn.style.display = 'none';
+            } else {
+                pvIcon.style.background = 'rgba(249,115,22,0.1)';
+                pvIcon.style.color = '#f97316';
+                pvTitle.style.color = '#f97316';
+                pvTitle.textContent = 'Phone Not Verified';
+                pvDesc.textContent = 'Verify your phone number to make reservations on RoyalCar.rent.';
+                pvBtn.style.display = 'inline-block';
+                pvBtn.addEventListener('click', function () {
+                    window.location.href = '/verify-phone.html';
+                });
+            }
+        }
     })
     .catch(function (err) {
         console.error('Failed to load profile:', err);
@@ -111,7 +139,7 @@
                         <h2>My Favorites</h2>
                     </div>
                     <div class="gp-empty-state">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#A0A3B0" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                         <h3>No favorites yet</h3>
                         <p>Save vehicles you like by clicking the heart icon</p>
                         <a href="vehicles.html" class="btn btn-primary">Browse Vehicles</a>
@@ -180,13 +208,13 @@
     // ========================================
     // LOAD BOOKINGS
     // ========================================
-    var STATUS_COLORS = { pending: '#f59e0b', accepted: '#22c55e', confirmed: '#22c55e', rejected: '#ef4444', cancelled: '#ef4444', cancel_requested: '#f97316', completed: '#3B82F6' };
+    var STATUS_COLORS = { pending: '#f59e0b', accepted: '#22c55e', confirmed: '#22c55e', rejected: '#ef4444', cancelled: '#ef4444', cancel_requested: '#f97316', completed: '#C9A84C' };
     var STATUS_LABELS = { pending: 'Pending', accepted: 'Confirmed', confirmed: 'Confirmed', rejected: 'Rejected', cancelled: 'Cancelled', cancel_requested: 'Cancellation Requested', completed: 'Completed' };
 
     function loadBookings() {
         var tab = document.getElementById('tab-bookings');
         if (!tab) return;
-        tab.innerHTML = '<div class="gp-tab-header"><h2>My Bookings</h2></div><div style="padding:40px;text-align:center;color:#94a3b8;">Loading...</div>';
+        tab.innerHTML = '<div class="gp-tab-header"><h2>My Bookings</h2></div><div style="padding:40px;text-align:center;color:#A0A3B0;">Loading...</div>';
 
         fetch('/api/bookings/my', { headers: { 'Authorization': 'Bearer ' + token } })
         .then(function(r) { return r.json(); })
@@ -201,7 +229,7 @@
             if (bookings.length === 0) {
                 tab.innerHTML = '<div class="gp-tab-header"><h2>My Bookings</h2></div>'
                     + '<div class="gp-empty-state">'
-                    + '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
+                    + '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#A0A3B0" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
                     + '<h3>No bookings yet</h3><p>Your rental bookings will appear here</p>'
                     + '<a href="vehicles.html" class="btn btn-primary">Browse Vehicles</a></div>';
                 return;
@@ -210,7 +238,7 @@
             var html = '<div class="gp-tab-header"><h2>My Bookings</h2></div><div class="gp-bookings-list">';
             bookings.forEach(function(b) {
                 var imgSrc = b.image_url || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240'%3E%3Crect fill='%23e2e8f0' width='400' height='240'/%3E%3Ctext x='200' y='125' text-anchor='middle' fill='%2394a3b8' font-size='14'%3ENo Image%3C/text%3E%3C/svg%3E";
-                var statusColor = STATUS_COLORS[b.status] || '#94a3b8';
+                var statusColor = STATUS_COLORS[b.status] || '#A0A3B0';
                 var statusLabel = STATUS_LABELS[b.status] || b.status;
                 var pickupTime = b.pickup_time || '10:00';
                 var dropoffTime = b.dropoff_time || '10:00';
@@ -250,7 +278,7 @@
                     + '<div class="gp-booking-dates">' + pickup + ' ' + pickupTime + ' &rarr; ' + dropoff + ' ' + dropoffTime + ' &middot; ' + days + ' day' + (days!==1?'s':'') + '</div>'
                     + (b.pickup_location ? '<div class="gp-booking-loc">&#128205; ' + b.pickup_location + '</div>' : '')
                     + '<div class="gp-booking-price">Total: <strong>$' + (b.total_price || 0) + '</strong>' + payBadge
-                    + (b.partner_company ? ' &middot; <span style="color:#64748b;">' + b.partner_company + '</span>' : '') + '</div>'
+                    + (b.partner_company ? ' &middot; <span style="color:#A0A3B0;">' + b.partner_company + '</span>' : '') + '</div>'
                     + '</div>'
                     + '<div class="gp-booking-actions">' + payBtn + actionBtn + '</div>'
                     + '</div>';

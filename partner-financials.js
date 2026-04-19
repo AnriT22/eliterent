@@ -101,14 +101,14 @@
                 datasets: [{
                     label: 'Earnings ($)',
                     data: values,
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: '#C9A84C',
+                    backgroundColor: 'rgba(201, 168, 76, 0.1)',
                     borderWidth: 2,
                     fill: true,
                     tension: 0.4,
                     pointRadius: 4,
                     pointHoverRadius: 6,
-                    pointBackgroundColor: '#3b82f6',
+                    pointBackgroundColor: '#C9A84C',
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2
                 }]
@@ -125,7 +125,7 @@
                         padding: 12,
                         titleColor: '#fff',
                         bodyColor: '#fff',
-                        borderColor: '#3b82f6',
+                        borderColor: '#C9A84C',
                         borderWidth: 1,
                         displayColors: false,
                         callbacks: {
@@ -145,7 +145,7 @@
                             callback: function(value) {
                                 return '$' + value;
                             },
-                            color: '#64748b'
+                            color: '#A0A3B0'
                         }
                     },
                     x: {
@@ -153,7 +153,7 @@
                             display: false
                         },
                         ticks: {
-                            color: '#64748b',
+                            color: '#A0A3B0',
                             maxRotation: 45,
                             minRotation: 45
                         }
@@ -175,7 +175,7 @@
         var colors = statusData.map(function(d) {
             switch(d.status.toLowerCase()) {
                 case 'completed': return '#22c55e';
-                case 'active': return '#3b82f6';
+                case 'active': return '#C9A84C';
                 case 'pending': return '#f59e0b';
                 case 'cancelled': return '#ef4444';
                 case 'rejected': return '#f97316';
@@ -216,7 +216,7 @@
                         padding: 12,
                         titleColor: '#fff',
                         bodyColor: '#fff',
-                        borderColor: '#3b82f6',
+                        borderColor: '#C9A84C',
                         borderWidth: 1,
                         displayColors: true,
                         callbacks: {
@@ -252,10 +252,10 @@
             var idStr = String(booking.id);
             
             html += '<tr>';
-            html += '<td><span style="font-family:monospace;color:#64748b;">#' + idStr + '</span></td>';
+            html += '<td><span style="font-family:monospace;color:#A0A3B0;">#' + idStr + '</span></td>';
             html += '<td>' + escapeHtml(booking.customer_name) + '</td>';
             html += '<td>' + escapeHtml(booking.vehicle_name) + '</td>';
-            html += '<td style="font-size:13px;color:#64748b;">' + formatDate(booking.pickup_date) + ' → ' + formatDate(booking.dropoff_date) + '</td>';
+            html += '<td style="font-size:13px;color:#A0A3B0;">' + formatDate(booking.pickup_date) + ' → ' + formatDate(booking.dropoff_date) + '</td>';
             html += '<td><span class="fin-status-badge ' + statusClass + '">' + statusText + '</span></td>';
             html += '<td style="font-weight:700;color:#22c55e;">$' + (booking.partner_earnings || 0).toFixed(2) + '</td>';
             html += '</tr>';

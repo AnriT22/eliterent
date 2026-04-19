@@ -25,7 +25,7 @@
 }
 
 .otp-modal {
-    background: #fff;
+    background: #1A1814;
     border-radius: 20px;
     width: 100%;
     max-width: 420px;
@@ -34,6 +34,7 @@
     transform: scale(0.9) translateY(20px);
     transition: transform 0.3s ease;
     position: relative;
+    box-sizing: border-box;
 }
 
 .otp-overlay.active .otp-modal {
@@ -47,7 +48,7 @@
     width: 36px;
     height: 36px;
     border: none;
-    background: #f1f5f9;
+    background: #2A2520;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
@@ -57,7 +58,7 @@
 }
 
 .otp-close:hover {
-    background: #e2e8f0;
+    background: #3A3530;
     transform: rotate(90deg);
 }
 
@@ -71,12 +72,12 @@
     width: 72px;
     height: 72px;
     margin: 0 auto 24px;
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, #C9A84C 0%, #A6832E 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 8px 24px rgba(201, 168, 76, 0.3);
 }
 
 .otp-icon svg {
@@ -99,7 +100,7 @@
 .otp-title {
     font-size: 24px;
     font-weight: 700;
-    color: #1e293b;
+    color: #F0ECE2;
     text-align: center;
     margin: 0 0 8px;
 }
@@ -113,7 +114,7 @@
 }
 
 .otp-subtitle strong {
-    color: #1e293b;
+    color: #F0ECE2;
 }
 
 /* OTP Input Fields */
@@ -127,13 +128,13 @@
 .otp-input {
     width: 52px;
     height: 60px;
-    border: 2px solid #e2e8f0;
+    border: 2px solid #2A2520;
     border-radius: 12px;
     font-size: 24px;
     font-weight: 700;
     text-align: center;
-    color: #1e293b;
-    background: #f8fafc;
+    color: #F0ECE2;
+    background: #151210;
     transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
     -webkit-appearance: none;
     -moz-appearance: textfield;
@@ -149,9 +150,9 @@
 
 .otp-input:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-    background: #fff;
+    border-color: #C9A84C;
+    box-shadow: 0 0 0 4px rgba(201, 168, 76, 0.15);
+    background: #1A1814;
 }
 
 .otp-input.filled {
@@ -185,7 +186,7 @@
 .otp-timer-countdown {
     font-size: 20px;
     font-weight: 700;
-    color: #1e293b;
+    color: #F0ECE2;
     font-variant-numeric: tabular-nums;
 }
 
@@ -206,7 +207,7 @@
 .otp-resend-btn {
     background: none;
     border: none;
-    color: #3b82f6;
+    color: #C9A84C;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -216,7 +217,7 @@
 }
 
 .otp-resend-btn:hover:not(:disabled) {
-    background: #eff6ff;
+    background: rgba(201,168,76,0.1);
 }
 
 .otp-resend-btn:disabled {
@@ -265,7 +266,7 @@
 .otp-verify-btn {
     width: 100%;
     padding: 16px 24px;
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, #C9A84C 0%, #A6832E 100%);
     color: #fff;
     border: none;
     border-radius: 12px;
@@ -273,12 +274,13 @@
     font-weight: 600;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 16px rgba(201, 168, 76, 0.3);
+    box-sizing: border-box;
 }
 
 .otp-verify-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 6px 24px rgba(201, 168, 76, 0.4);
 }
 
 .otp-verify-btn:active:not(:disabled) {
@@ -391,15 +393,15 @@
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
     .otp-modal {
-        background: #1e293b;
+        background: #1A1814;
     }
 
     .otp-close {
-        background: #334155;
+        background: #2A2520;
     }
 
     .otp-close:hover {
-        background: #475569;
+        background: #3A3530;
     }
 
     .otp-close svg {
@@ -407,7 +409,7 @@
     }
 
     .otp-title {
-        color: #f1f5f9;
+        color: #F0ECE2;
     }
 
     .otp-subtitle {
@@ -415,18 +417,18 @@
     }
 
     .otp-subtitle strong {
-        color: #f1f5f9;
+        color: #F0ECE2;
     }
 
     .otp-input {
-        background: #334155;
-        border-color: #475569;
-        color: #f1f5f9;
+        background: #2A2520;
+        border-color: #3A3530;
+        color: #F0ECE2;
     }
 
     .otp-input:focus {
-        background: #1e293b;
-        border-color: #3b82f6;
+        background: #1A1814;
+        border-color: #C9A84C;
     }
 
     .otp-input.filled {
@@ -435,7 +437,7 @@
     }
 
     .otp-timer-countdown {
-        color: #f1f5f9;
+        color: #F0ECE2;
     }
 
     .otp-error {

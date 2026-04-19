@@ -39,8 +39,6 @@
         }
     }
 
-    renderVerificationBadge(isVerified);
-
     // Show restriction banner for unverified partners
     function showRestrictionBanner() {
         if (isVerified) return;
@@ -53,9 +51,256 @@
         var dbMain = document.querySelector('.db-main');
         if (dbMain) dbMain.insertBefore(banner, dbMain.firstChild);
     }
-    showRestrictionBanner();
 
-    // Poll for verification status change (every 30s) if not yet verified
+    // Fetch fresh verification status from server before showing badge/banner
+    // This prevents the flash of "pending" for already-approved partners
+    fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.user && data.user.partner_profile) {
+            var freshVerified = !!data.user.partner_profile.is_verified;
+            if (freshVerified !== isVerified) {
+                isVerified = freshVerified;
+                user.is_verified = freshVerified ? 1 : 0;
+                localStorage.setItem('user', JSON.stringify(user));
+            }
+        }
+        renderVerificationBadge(isVerified);
+        showRestrictionBanner();
+    })
+    .catch(function() {
+        renderVerificationBadge(isVerified);
+        showRestrictionBanner();
+    });
+
+    // Show phone verification reminder for partners who skipped it
+    function showPhoneVerifyBanner() {
+        // Check from /api/me if phone is not verified
+        fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + token } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.user) return;
+            var u = data.user;
+            // If phone is already verified, no banner needed
+            if (u.phone_verified === 1 || u.phone_verified === true) return;
+            // Don't show if phone verify banner already exists
+            if (document.getElementById('phoneVerifyBanner')) return;
+
+            var banner = document.createElement('div');
+            banner.id = 'phoneVerifyBanner';
+            banner.style.cssText = 'background:linear-gradient(135deg,rgba(201,168,76,0.1),rgba(201,168,76,0.05));border:1px solid rgba(201,168,76,0.3);border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px;';
+            banner.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" style="flex-shrink:0;"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>'
+                + '<div style="flex:1;"><p style="margin:0;color:#C9A84C;font-weight:600;font-size:14px;">Phone verification required</p>'
+                + '<p style="margin:4px 0 0;color:#94a3b8;font-size:13px;">Verify your phone number so customers and our team can reach you about bookings.</p></div>'
+                + '<button id="phoneVerifyBtn" style="flex-shrink:0;padding:8px 20px;background:#C9A84C;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;">Verify Now</button>';
+
+            var dbMain = document.querySelector('.db-main');
+            if (dbMain) {
+                var existingBanner = document.getElementById('verificationBanner');
+                if (existingBanner) {
+                    existingBanner.insertAdjacentElement('afterend', banner);
+                } else {
+                    dbMain.insertBefore(banner, dbMain.firstChild);
+                }
+            }
+
+            document.getElementById('phoneVerifyBtn').addEventListener('click', function() {
+                showPhoneVerifyModal(u.phone || '');
+            });
+        })
+        .catch(function() {});
+    }
+    showPhoneVerifyBanner();
+
+    // Phone verification modal
+    function showPhoneVerifyModal(existingPhone) {
+        var overlay = document.createElement('div');
+        overlay.id = 'phoneVerifyOverlay';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+
+        var modal = document.createElement('div');
+        modal.style.cssText = 'background:#fff;border-radius:20px;padding:32px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);';
+        modal.innerHTML = ''
+            + '<div style="text-align:center;margin-bottom:20px;">'
+            + '<div style="width:56px;height:56px;background:rgba(201,168,76,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">'
+            + '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>'
+            + '</div>'
+            + '<h3 style="margin:0 0 4px;font-size:18px;color:#1e293b;">Verify Your Phone</h3>'
+            + '<p style="margin:0;color:#A0A3B0;font-size:13px;">Enter your phone number to receive a verification code</p>'
+            + '</div>'
+            // Step 1: Phone input
+            + '<div id="pvStep1">'
+            + '<label style="display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:4px;">Phone Number</label>'
+            + '<input type="tel" id="pvPhoneInput" value="' + (existingPhone || '') + '" placeholder="+995 5XX XXX XXX" style="width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;box-sizing:border-box;margin-bottom:4px;">'
+            + '<p style="margin:0 0 12px;color:#94a3b8;font-size:11px;">International format with country code</p>'
+            + '<div id="pvPhoneErr" style="color:#ef4444;font-size:12px;font-weight:600;margin-bottom:8px;display:none;"></div>'
+            + '<button id="pvSendBtn" style="width:100%;padding:10px;background:#C9A84C;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Send Code</button>'
+            + '</div>'
+            // Step 2: OTP input
+            + '<div id="pvStep2" style="display:none;">'
+            + '<p id="pvSentMsg" style="color:#A0A3B0;font-size:13px;text-align:center;margin-bottom:12px;"></p>'
+            + '<div id="pvOtpRow" style="display:flex;gap:6px;justify-content:center;margin-bottom:12px;">'
+            + '<input type="text" class="pv-otp" maxlength="1" inputmode="numeric" style="width:42px;height:48px;text-align:center;border:1px solid #e2e8f0;border-radius:8px;font-size:20px;font-weight:700;">'
+            + '<input type="text" class="pv-otp" maxlength="1" inputmode="numeric" style="width:42px;height:48px;text-align:center;border:1px solid #e2e8f0;border-radius:8px;font-size:20px;font-weight:700;">'
+            + '<input type="text" class="pv-otp" maxlength="1" inputmode="numeric" style="width:42px;height:48px;text-align:center;border:1px solid #e2e8f0;border-radius:8px;font-size:20px;font-weight:700;">'
+            + '<input type="text" class="pv-otp" maxlength="1" inputmode="numeric" style="width:42px;height:48px;text-align:center;border:1px solid #e2e8f0;border-radius:8px;font-size:20px;font-weight:700;">'
+            + '<input type="text" class="pv-otp" maxlength="1" inputmode="numeric" style="width:42px;height:48px;text-align:center;border:1px solid #e2e8f0;border-radius:8px;font-size:20px;font-weight:700;">'
+            + '<input type="text" class="pv-otp" maxlength="1" inputmode="numeric" style="width:42px;height:48px;text-align:center;border:1px solid #e2e8f0;border-radius:8px;font-size:20px;font-weight:700;">'
+            + '</div>'
+            + '<div id="pvOtpErr" style="color:#ef4444;font-size:12px;font-weight:600;text-align:center;margin-bottom:8px;display:none;"></div>'
+            + '<div id="pvOtpSuccess" style="color:#16a34a;font-size:12px;font-weight:600;text-align:center;margin-bottom:8px;display:none;"></div>'
+            + '<button id="pvVerifyBtn" style="width:100%;padding:10px;background:#C9A84C;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;margin-bottom:8px;">Verify</button>'
+            + '<div style="text-align:center;"><span id="pvResendLink" style="color:#C9A84C;font-size:12px;cursor:pointer;text-decoration:underline;">Resend code</span>'
+            + ' &middot; <span id="pvChangePhone" style="color:#A0A3B0;font-size:12px;cursor:pointer;text-decoration:underline;">Change number</span></div>'
+            + '</div>'
+            // Cancel
+            + '<button id="pvCloseBtn" style="width:100%;padding:8px;background:none;border:none;color:#94a3b8;font-size:12px;cursor:pointer;margin-top:12px;">Cancel</button>';
+
+        overlay.appendChild(modal);
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+        document.body.appendChild(overlay);
+
+        // Close button
+        document.getElementById('pvCloseBtn').addEventListener('click', function() { overlay.remove(); });
+
+        // Send code
+        document.getElementById('pvSendBtn').addEventListener('click', function() { pvSendCode(); });
+        document.getElementById('pvPhoneInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') pvSendCode(); });
+
+        function pvSendCode() {
+            var phone = document.getElementById('pvPhoneInput').value.trim();
+            var errEl = document.getElementById('pvPhoneErr');
+            errEl.style.display = 'none';
+            if (!phone || phone.length < 8) {
+                errEl.textContent = 'Please enter a valid phone number';
+                errEl.style.display = 'block';
+                return;
+            }
+            var btn = document.getElementById('pvSendBtn');
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+            fetch('/api/otp/phone-verify/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ phone: phone })
+            })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(result) {
+                btn.disabled = false;
+                btn.textContent = 'Send Code';
+                if (!result.ok) {
+                    errEl.textContent = result.data.error || 'Failed to send code';
+                    errEl.style.display = 'block';
+                    return;
+                }
+                document.getElementById('pvStep1').style.display = 'none';
+                document.getElementById('pvStep2').style.display = 'block';
+                document.getElementById('pvSentMsg').textContent = result.data.message || 'Code sent';
+                var otpInputs = overlay.querySelectorAll('.pv-otp');
+                if (otpInputs.length) otpInputs[0].focus();
+            })
+            .catch(function() {
+                btn.disabled = false;
+                btn.textContent = 'Send Code';
+                errEl.textContent = 'Network error';
+                errEl.style.display = 'block';
+            });
+        }
+
+        // OTP input auto-advance
+        setTimeout(function() {
+            var otpInputs = overlay.querySelectorAll('.pv-otp');
+            otpInputs.forEach(function(inp, i) {
+                inp.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                    if (this.value && i < otpInputs.length - 1) otpInputs[i + 1].focus();
+                    if (i === otpInputs.length - 1 && this.value) {
+                        var allFilled = true;
+                        otpInputs.forEach(function(o) { if (!o.value) allFilled = false; });
+                        if (allFilled) pvVerifyCode();
+                    }
+                });
+                inp.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && !this.value && i > 0) {
+                        otpInputs[i - 1].focus();
+                        otpInputs[i - 1].value = '';
+                    }
+                });
+                inp.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    var pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
+                    if (pasted.length >= 6) {
+                        for (var j = 0; j < 6; j++) otpInputs[j].value = pasted[j] || '';
+                        otpInputs[5].focus();
+                        pvVerifyCode();
+                    }
+                });
+            });
+        }, 100);
+
+        // Verify code
+        document.getElementById('pvVerifyBtn').addEventListener('click', pvVerifyCode);
+
+        function pvVerifyCode() {
+            var otpInputs = overlay.querySelectorAll('.pv-otp');
+            var code = '';
+            otpInputs.forEach(function(inp) { code += inp.value; });
+            var errEl = document.getElementById('pvOtpErr');
+            var successEl = document.getElementById('pvOtpSuccess');
+            errEl.style.display = 'none';
+            successEl.style.display = 'none';
+            if (code.length !== 6) {
+                errEl.textContent = 'Please enter all 6 digits';
+                errEl.style.display = 'block';
+                return;
+            }
+            var btn = document.getElementById('pvVerifyBtn');
+            btn.disabled = true;
+            btn.textContent = 'Verifying...';
+            fetch('/api/otp/phone-verify/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ code: code })
+            })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(result) {
+                btn.disabled = false;
+                btn.textContent = 'Verify';
+                if (!result.ok) {
+                    errEl.textContent = result.data.error || 'Invalid code';
+                    errEl.style.display = 'block';
+                    return;
+                }
+                successEl.textContent = 'Phone verified successfully!';
+                successEl.style.display = 'block';
+                btn.style.display = 'none';
+                // Remove the phone verify banner
+                var pvBanner = document.getElementById('phoneVerifyBanner');
+                if (pvBanner) pvBanner.remove();
+                // Close modal after 1.5s
+                setTimeout(function() { overlay.remove(); }, 1500);
+            })
+            .catch(function() {
+                btn.disabled = false;
+                btn.textContent = 'Verify';
+                errEl.textContent = 'Network error';
+                errEl.style.display = 'block';
+            });
+        }
+
+        // Resend
+        document.getElementById('pvResendLink').addEventListener('click', function() {
+            pvSendCode();
+        });
+
+        // Change phone number
+        document.getElementById('pvChangePhone').addEventListener('click', function() {
+            document.getElementById('pvStep2').style.display = 'none';
+            document.getElementById('pvStep1').style.display = 'block';
+        });
+    }
+
+    // Poll for verification status change (every 5s) if not yet verified
     var pollInterval = null;
     function startVerificationPoll() {
         if (isVerified || pollInterval) return;
@@ -82,7 +327,7 @@
                 }
             })
             .catch(function () {});
-        }, 30000);
+        }, 5000);
     }
     startVerificationPoll();
 
@@ -94,7 +339,7 @@
         popup.innerHTML = '<div style="width:64px;height:64px;background:rgba(34,197,94,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">'
             + '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>'
             + '<h3 style="margin:0 0 8px;font-size:20px;color:#1e293b;">Account Verified!</h3>'
-            + '<p style="margin:0 0 20px;color:#64748b;font-size:14px;">Congratulations! Your partner account has been verified. You can now add vehicles and receive bookings.</p>'
+            + '<p style="margin:0 0 20px;color:#A0A3B0;font-size:14px;">Congratulations! Your partner account has been verified. You can now add vehicles and receive bookings.</p>'
             + '<button onclick="this.closest(\'div[style]\').parentElement.remove();" style="padding:10px 32px;background:#22c55e;color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-size:14px;">Got it!</button>';
         overlay.appendChild(popup);
         overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.remove(); });
@@ -143,7 +388,7 @@
         popup.innerHTML = '<div style="width:64px;height:64px;background:rgba(249,115,22,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">'
             + '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>'
             + '<h3 style="margin:0 0 8px;font-size:20px;color:#1e293b;">Account Not Verified</h3>'
-            + '<p style="margin:0 0 20px;color:#64748b;font-size:14px;">You cannot add vehicles until your account is verified by an admin. This page updates automatically once approved.</p>'
+            + '<p style="margin:0 0 20px;color:#A0A3B0;font-size:14px;">You cannot add vehicles until your account is verified by an admin. This page updates automatically once approved.</p>'
             + '<button onclick="this.closest(\'div[style]\').parentElement.remove();" style="padding:10px 32px;background:#f97316;color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-size:14px;">OK, I understand</button>';
         overlay.appendChild(popup);
         overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.remove(); });
@@ -170,11 +415,14 @@
         resetVehicleForm(); switchTab('add-vehicle');
     });
 
-    // Cancel button on form
-    document.getElementById('cancelVehicleForm').addEventListener('click', function () {
-        resetVehicleForm();
-        switchTab('vehicles');
-    });
+    // Cancel button on form (if present)
+    var cancelBtn = document.getElementById('cancelVehicleForm');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function () {
+            resetVehicleForm();
+            switchTab('vehicles');
+        });
+    }
 
     // Toggle handlers for form sections
     var mileageToggle = document.getElementById('vMileageLimitEnabled');
@@ -237,6 +485,85 @@
     }
 
     // ========================================
+    // WIZARD STEP NAVIGATION
+    // ========================================
+    var currentWizardStep = 1;
+
+    function goToWizardStep(step) {
+        step = parseInt(step);
+        if (step < 1 || step > 5) return;
+        currentWizardStep = step;
+
+        // Update panels
+        document.querySelectorAll('.wz-panel').forEach(function (p) {
+            p.classList.remove('active');
+        });
+        var target = document.querySelector('.wz-panel[data-panel="' + step + '"]');
+        if (target) target.classList.add('active');
+
+        // Update progress steps
+        document.querySelectorAll('.wz-step').forEach(function (s) {
+            var sn = parseInt(s.getAttribute('data-step'));
+            s.classList.remove('active', 'completed');
+            if (sn === step) s.classList.add('active');
+            else if (sn < step) s.classList.add('completed');
+        });
+
+        // Update connector lines
+        var lines = document.querySelectorAll('.wz-line');
+        lines.forEach(function (line, i) {
+            if (i < step - 1) line.classList.add('done');
+            else line.classList.remove('done');
+        });
+
+        // Scroll to top of form
+        var formTop = document.getElementById('tab-add-vehicle');
+        if (formTop) formTop.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Next / Prev buttons
+    document.querySelectorAll('.wz-btn-next').forEach(function (btn) {
+        btn.addEventListener('click', function () { goToWizardStep(this.getAttribute('data-next')); });
+    });
+    document.querySelectorAll('.wz-btn-prev').forEach(function (btn) {
+        btn.addEventListener('click', function () { goToWizardStep(this.getAttribute('data-prev')); });
+    });
+
+    // Click wizard step indicators
+    document.querySelectorAll('.wz-step').forEach(function (s) {
+        s.addEventListener('click', function () { goToWizardStep(this.getAttribute('data-step')); });
+    });
+
+    // ========================================
+    // COLOR SWATCHES
+    // ========================================
+    var colorInput = document.getElementById('vColor');
+    var colorLabel = document.getElementById('colorSelectedLabel');
+
+    document.querySelectorAll('.color-swatch').forEach(function (swatch) {
+        swatch.addEventListener('click', function () {
+            document.querySelectorAll('.color-swatch').forEach(function (s) { s.classList.remove('selected'); });
+            swatch.classList.add('selected');
+            var c = swatch.getAttribute('data-color');
+            if (colorInput) colorInput.value = c;
+            if (colorLabel) colorLabel.textContent = c;
+        });
+    });
+
+    // ========================================
+    // ENGINE LITERS → CC SYNC
+    // ========================================
+    var engineLitersInput = document.getElementById('vEngineLiters');
+    var engineCCInput = document.getElementById('vEngineCC');
+
+    if (engineLitersInput && engineCCInput) {
+        engineLitersInput.addEventListener('input', function () {
+            var liters = parseFloat(this.value);
+            engineCCInput.value = liters ? Math.round(liters * 1000) : '';
+        });
+    }
+
+    // ========================================
     // IMAGE UPLOAD
     // ========================================
     var uploadArea = document.getElementById('uploadArea');
@@ -277,17 +604,19 @@
         });
     }
 
+    var uploadBatchCounter = 0;
+
     function handleImageFiles(files) {
-        var remaining = 6 - uploadedUrls.length;
+        var remaining = 10 - uploadedUrls.length;
         if (remaining <= 0) {
-            showFormMessage('Maximum 6 images allowed', 'error');
+            showFormMessage('Maximum 10 images allowed', 'error');
             return;
         }
 
-        var toUpload = Array.from(files).slice(0, remaining);
-
         var allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-        toUpload.forEach(function (file) {
+        var validFiles = [];
+        Array.from(files).forEach(function (file) {
+            if (validFiles.length >= remaining) return;
             if (!allowedTypes.includes(file.type)) {
                 showFormMessage(file.name + ' — invalid format. Allowed: JPG, PNG, WEBP', 'error');
                 return;
@@ -296,45 +625,122 @@
                 showFormMessage(file.name + ' is too large (max 20MB)', 'error');
                 return;
             }
+            validFiles.push(file);
+        });
 
-            // Show local preview immediately
+        if (validFiles.length === 0) return;
+
+        // Unique batch ID so concurrent uploads don't interfere
+        var batchId = '__uploading_' + (++uploadBatchCounter) + '__';
+
+        // Add placeholders for all files being uploaded (tagged with batch ID)
+        var placeholderStart = uploadedUrls.length;
+        validFiles.forEach(function () {
+            uploadedUrls.push(batchId);
+        });
+        renderUploadPreviews();
+
+        // Show local previews immediately
+        validFiles.forEach(function (file, i) {
             var reader = new FileReader();
             reader.onload = function (ev) {
-                var tempIdx = uploadedUrls.length;
-                uploadedUrls.push('uploading');
-                renderUploadPreviews();
-
-                // Upload to server
-                var formData = new FormData();
-                formData.append('image', file);
-
-                fetch('/api/upload/vehicle-image', {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + token },
-                    body: formData
-                })
-                .then(function (res) { return res.json(); })
-                .then(function (data) {
-                    if (data.url) {
-                        uploadedUrls[tempIdx] = data.url;
-                    } else {
-                        uploadedUrls.splice(tempIdx, 1);
-                        showFormMessage('Upload failed: ' + (data.error || 'Unknown error'), 'error');
-                    }
-                    renderUploadPreviews();
-                    syncImageFields();
-                })
-                .catch(function () {
-                    uploadedUrls.splice(tempIdx, 1);
-                    showFormMessage('Upload failed — check server connection', 'error');
-                    renderUploadPreviews();
-                });
-
-                // Show preview with local data immediately
-                addThumbPreview(ev.target.result, tempIdx);
+                var idx = placeholderStart + i;
+                var existing = uploadPreview.querySelector('[data-idx="' + idx + '"] img');
+                if (existing) existing.src = ev.target.result;
             };
             reader.readAsDataURL(file);
         });
+
+        // Build single FormData with ALL files
+        var formData = new FormData();
+        validFiles.forEach(function (file) {
+            formData.append('images', file);
+        });
+
+        // Progress bar elements
+        var progressWrap = document.getElementById('uploadProgressWrap');
+        var progressFill = document.getElementById('uploadProgressFill');
+        var progressText = document.getElementById('uploadProgressText');
+
+        if (progressWrap) {
+            progressWrap.style.display = 'flex';
+            progressFill.style.width = '0%';
+            progressText.textContent = 'Uploading...';
+        }
+
+        // Upload with XHR for real-time progress
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/upload/vehicle-images');
+        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+
+        xhr.upload.addEventListener('progress', function (e) {
+            if (e.lengthComputable && progressFill) {
+                var pct = Math.round((e.loaded / e.total) * 100);
+                progressFill.style.width = pct + '%';
+                progressText.textContent = pct < 100 ? pct + '%' : 'Processing images...';
+            }
+        });
+
+        xhr.onload = function () {
+            if (progressWrap) progressWrap.style.display = 'none';
+
+            // Handle HTTP errors first
+            if (xhr.status === 413) {
+                uploadedUrls = uploadedUrls.filter(function (u) { return u !== batchId; });
+                showFormMessage('Upload failed — total file size too large. Try fewer or smaller images.', 'error');
+                renderUploadPreviews();
+                return;
+            }
+            if (xhr.status >= 400) {
+                uploadedUrls = uploadedUrls.filter(function (u) { return u !== batchId; });
+                var errMsg = 'Upload failed (HTTP ' + xhr.status + ')';
+                try { errMsg = JSON.parse(xhr.responseText).error || errMsg; } catch (e) {}
+                showFormMessage(errMsg, 'error');
+                renderUploadPreviews();
+                return;
+            }
+
+            try {
+                var data = JSON.parse(xhr.responseText);
+                if (data.urls && data.urls.length > 0) {
+                    var urlIdx = 0;
+                    for (var i = 0; i < uploadedUrls.length && urlIdx < data.urls.length; i++) {
+                        if (uploadedUrls[i] === batchId) {
+                            uploadedUrls[i] = data.urls[urlIdx];
+                            urlIdx++;
+                        }
+                    }
+                    uploadedUrls = uploadedUrls.filter(function (u) { return u !== batchId; });
+                    showFormMessage(data.urls.length + ' image(s) uploaded', 'success');
+                } else {
+                    uploadedUrls = uploadedUrls.filter(function (u) { return u !== batchId; });
+                    showFormMessage('Upload failed: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (e) {
+                uploadedUrls = uploadedUrls.filter(function (u) { return u !== batchId; });
+                showFormMessage('Upload failed — invalid server response', 'error');
+            }
+            renderUploadPreviews();
+            syncImageFields();
+        };
+
+        xhr.timeout = 120000; // 120 seconds
+
+        xhr.onerror = function () {
+            if (progressWrap) progressWrap.style.display = 'none';
+            uploadedUrls = uploadedUrls.filter(function (u) { return u !== batchId; });
+            showFormMessage('Upload failed — check connection', 'error');
+            renderUploadPreviews();
+        };
+
+        xhr.ontimeout = function () {
+            if (progressWrap) progressWrap.style.display = 'none';
+            uploadedUrls = uploadedUrls.filter(function (u) { return u !== batchId; });
+            showFormMessage('Upload timed out — try uploading fewer images at once', 'error');
+            renderUploadPreviews();
+        };
+
+        xhr.send(formData);
     }
 
     function addThumbPreview(src, idx) {
@@ -353,12 +759,13 @@
             thumb.className = 'db-upload-thumb' + (i === 0 ? ' main-photo' : '');
             thumb.setAttribute('data-idx', i);
 
+            var isUploading = (url === 'uploading' || url === '__uploading__' || (typeof url === 'string' && url.indexOf('__uploading_') === 0));
             var img = document.createElement('img');
-            img.src = (url === 'uploading') ? 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90"%3E%3Crect fill="%23e2e8f0" width="90" height="90"/%3E%3Ctext x="45" y="50" text-anchor="middle" fill="%2394a3b8" font-size="10"%3EUploading...%3C/text%3E%3C/svg%3E' : url;
+            img.src = isUploading ? 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 90"%3E%3Crect fill="%23e2e8f0" width="90" height="90"/%3E%3Ctext x="45" y="50" text-anchor="middle" fill="%2394a3b8" font-size="10"%3EUploading...%3C/text%3E%3C/svg%3E' : url;
             img.alt = 'Photo ' + (i + 1);
 
             // Set as Main button (star icon) — only for non-main photos
-            if (i !== 0 && url !== 'uploading') {
+            if (i !== 0 && !isUploading) {
                 var mainBtn = document.createElement('button');
                 mainBtn.className = 'db-thumb-main';
                 mainBtn.title = 'Set as main photo';
@@ -375,7 +782,7 @@
                 thumb.appendChild(mainBtn);
             }
             // Main badge for first photo
-            if (i === 0 && url !== 'uploading') {
+            if (i === 0 && !isUploading) {
                 var badge = document.createElement('span');
                 badge.className = 'db-thumb-main-badge';
                 badge.textContent = 'MAIN';
@@ -400,9 +807,13 @@
     }
 
     function syncImageFields() {
-        var mainUrl = uploadedUrls.length > 0 ? uploadedUrls[0] : '';
+        // Filter out uploading placeholders before syncing
+        var readyUrls = uploadedUrls.filter(function (u) {
+            return u && u !== 'uploading' && u !== '__uploading__' && u.indexOf('__uploading_') !== 0;
+        });
+        var mainUrl = readyUrls.length > 0 ? readyUrls[0] : '';
         document.getElementById('vImageUrl').value = mainUrl;
-        document.getElementById('vGalleryUrls').value = JSON.stringify(uploadedUrls);
+        document.getElementById('vGalleryUrls').value = JSON.stringify(readyUrls);
     }
 
     // ========================================
@@ -428,7 +839,7 @@
             this.value = '';
         });
 
-        area.addEventListener('dragover', function (e) { e.preventDefault(); area.style.borderColor = '#3B82F6'; });
+        area.addEventListener('dragover', function (e) { e.preventDefault(); area.style.borderColor = '#C9A84C'; });
         area.addEventListener('dragleave', function () { area.style.borderColor = ''; });
         area.addEventListener('drop', function (e) {
             e.preventDefault();
@@ -550,7 +961,7 @@
             } else if (statusClass === 'delete_requested') {
                 verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(239,68,68,0.15);color:#ef4444;border-radius:12px;font-size:11px;font-weight:600;">Delete Requested</span>';
             } else {
-                verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(100,116,139,0.15);color:#64748b;border-radius:12px;font-size:11px;font-weight:600;">' + statusClass.toUpperCase() + '</span>';
+                verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(100,116,139,0.15);color:#A0A3B0;border-radius:12px;font-size:11px;font-weight:600;">' + statusClass.toUpperCase() + '</span>';
             }
 
             html += '<div class="db-vehicle-card" data-id="' + v.id + '">';
@@ -625,12 +1036,13 @@
             price_per_day: getFloat('vPrice'),
             deposit_amount: getFloat('vDeposit'),
             image_url: getVal('vImageUrl') || null,
-            gallery: uploadedUrls.filter(function (u) { return u !== 'uploading'; }),
+            gallery: uploadedUrls.filter(function (u) { return !u.startsWith('__uploading_'); }),
             description: getVal('vDescription').trim() || null,
             tech_passport_front: getVal('vPassportFront') || null,
             tech_passport_back: getVal('vPassportBack') || null,
             registration_number: getVal('vRegNumber').trim(),
             engine_cc: getInt('vEngineCC'),
+            engine_liters: parseFloat(getVal('vEngineLiters')) || null,
             horsepower: getInt('vHorsepower'),
             fuel_consumption: getVal('vFuelConsumption').trim(),
             mileage_limit_enabled: getChecked('vMileageLimitEnabled'),
@@ -667,6 +1079,10 @@
                 roof_rack: getChecked('vRoofRackAvail') ? getFloat('vRoofRack') : 0,
                 roof_rack_available: getChecked('vRoofRackAvail'),
                 third_driver: getFloat('vThirdDriver'),
+                driver_service: getChecked('vDriverServiceAvail') ? getFloat('vDriverServicePrice') : 0,
+                driver_service_available: getChecked('vDriverServiceAvail'),
+                picnic_house: getChecked('vPicnicHouseAvail') ? getFloat('vPicnicHousePrice') : 0,
+                picnic_house_available: getChecked('vPicnicHouseAvail'),
                 svaneti_roads: getChecked('vSvanetiAccepted'),
                 svaneti_price: getChecked('vSvanetiAccepted') ? getFloat('vSvanetiPrice') : 0,
                 shatili_roads: getChecked('vShatiliAccepted'),
@@ -799,11 +1215,20 @@
         document.getElementById('vEditId').value = '';
         document.getElementById('addVehicleTitle').textContent = 'Add New Vehicle';
         document.getElementById('submitVehicleBtn').textContent = 'Add Vehicle';
+        // Reset wizard to step 1
+        goToWizardStep(1);
         // Restore default toggles
         var visEl = document.getElementById('vVisibleInSearch');
         if (visEl) visEl.checked = true;
         var blockEl = document.getElementById('vReturnFormatted');
         if (blockEl) blockEl.checked = true;
+        // Clear color swatch selection
+        document.querySelectorAll('.color-swatch').forEach(function (s) { s.classList.remove('selected'); });
+        if (colorInput) colorInput.value = '';
+        if (colorLabel) colorLabel.textContent = 'No color selected';
+        // Clear engine liters
+        var elInput = document.getElementById('vEngineLiters');
+        if (elInput) elInput.value = '';
         // Clear custom pricing rows
         var cpList = document.getElementById('customPricingList');
         if (cpList) cpList.innerHTML = '';
@@ -856,6 +1281,13 @@
             setVal('vBrand', v.brand || '');
             setVal('vModel', v.model || '');
             setVal('vColor', v.color || '');
+            // Restore color swatch selection
+            document.querySelectorAll('.color-swatch').forEach(function (s) { s.classList.remove('selected'); });
+            if (v.color) {
+                var matchSwatch = document.querySelector('.color-swatch[data-color="' + v.color + '"]');
+                if (matchSwatch) matchSwatch.classList.add('selected');
+                if (colorLabel) colorLabel.textContent = v.color;
+            }
             setVal('vMinAge', v.min_age || 21);
             setVal('vLocationCity', v.location_city || '');
             setVal('vCategory', v.category || '');
@@ -876,6 +1308,10 @@
             setVal('vDescription', v.description || '');
             setVal('vRegNumber', v.registration_number || '');
             setVal('vEngineCC', v.engine_cc || '');
+            // Populate engine liters from cc
+            var ccVal = parseInt(v.engine_cc) || 0;
+            var litersVal = v.engine_liters || (ccVal ? (ccVal / 1000).toFixed(1) : '');
+            setVal('vEngineLiters', litersVal);
             setVal('vHorsepower', v.horsepower || '');
             setVal('vFuelConsumption', v.fuel_consumption || '');
             setVal('vMileageKm', v.mileage_km || '');
@@ -923,21 +1359,26 @@
             setCheck('vRoofRackAvail', ext.roof_rack_available || (ext.roof_rack > 0));
             setVal('vRoofRack', ext.roof_rack || '');
             setVal('vThirdDriver', ext.third_driver || '');
+            setCheck('vDriverServiceAvail', ext.driver_service_available || (ext.driver_service > 0));
+            setVal('vDriverServicePrice', ext.driver_service || '');
+            setCheck('vPicnicHouseAvail', ext.picnic_house_available || (ext.picnic_house > 0));
+            setVal('vPicnicHousePrice', ext.picnic_house || '');
             setCheck('vSvanetiAccepted', ext.svaneti_roads || ext.third_party_insurance);
             setVal('vSvanetiPrice', ext.svaneti_price || '');
             setCheck('vShatiliAccepted', ext.shatili_roads);
             setVal('vShatiliPrice', ext.shatili_price || '');
             // Enable price inputs if checkboxes are checked
-            var cs = document.getElementById('vChildSeatAvail');
-            var ch = document.getElementById('vChainsAvail');
-            var rr = document.getElementById('vRoofRackAvail');
-            var sv = document.getElementById('vSvanetiAccepted');
-            var sh = document.getElementById('vShatiliAccepted');
-            if (cs && cs.checked) document.getElementById('vChildSeat').disabled = false;
-            if (ch && ch.checked) document.getElementById('vChains').disabled = false;
-            if (rr && rr.checked) document.getElementById('vRoofRack').disabled = false;
-            if (sv && sv.checked) document.getElementById('vSvanetiPrice').disabled = false;
-            if (sh && sh.checked) document.getElementById('vShatiliPrice').disabled = false;
+            var extraToggles = [
+                ['vChildSeatAvail', 'vChildSeat'], ['vChainsAvail', 'vChains'],
+                ['vRoofRackAvail', 'vRoofRack'], ['vDriverServiceAvail', 'vDriverServicePrice'],
+                ['vPicnicHouseAvail', 'vPicnicHousePrice'], ['vSvanetiAccepted', 'vSvanetiPrice'],
+                ['vShatiliAccepted', 'vShatiliPrice']
+            ];
+            extraToggles.forEach(function (pair) {
+                var cb = document.getElementById(pair[0]);
+                var inp = document.getElementById(pair[1]);
+                if (cb && inp) inp.disabled = !cb.checked;
+            });
 
             // Insurance
             var ins = (typeof v.insurance === 'string') ? JSON.parse(v.insurance || '{}') : (v.insurance || {});
@@ -1073,6 +1514,36 @@
 
                 if (companyEl && u.partner_profile.company_name) {
                     companyEl.textContent = u.partner_profile.company_name;
+                }
+            }
+
+            // Phone verification card
+            var ppvCard = document.getElementById('partnerPhoneVerifyCard');
+            var ppvIcon = document.getElementById('ppvIcon');
+            var ppvTitle = document.getElementById('ppvTitle');
+            var ppvDesc = document.getElementById('ppvDesc');
+            var ppvBtn = document.getElementById('ppvActionBtn');
+            if (ppvCard) {
+                ppvCard.style.display = 'block';
+                if (u.phone_verified === 1 || u.phone_verified === true) {
+                    ppvCard.style.background = 'rgba(34,197,94,0.05)';
+                    ppvCard.style.border = '1px solid rgba(34,197,94,0.2)';
+                    ppvIcon.style.background = 'rgba(34,197,94,0.1)';
+                    ppvIcon.style.color = '#22c55e';
+                    ppvTitle.style.color = '#22c55e';
+                    ppvTitle.textContent = 'Phone Verified';
+                    ppvDesc.textContent = 'Your phone number ' + (u.phone || '') + ' is verified.';
+                    ppvBtn.style.display = 'none';
+                } else {
+                    ppvCard.style.background = 'rgba(249,115,22,0.05)';
+                    ppvCard.style.border = '1px solid rgba(249,115,22,0.2)';
+                    ppvIcon.style.background = 'rgba(249,115,22,0.1)';
+                    ppvIcon.style.color = '#f97316';
+                    ppvTitle.style.color = '#f97316';
+                    ppvTitle.textContent = 'Phone Not Verified';
+                    ppvDesc.textContent = 'Verify your phone so customers and our team can reach you about bookings.';
+                    ppvBtn.style.display = 'inline-block';
+                    ppvBtn.onclick = function () { window.location.href = '/verify-phone.html'; };
                 }
             }
         });
@@ -1257,7 +1728,7 @@
     // ========================================
     // PARTNER BOOKINGS
     // ========================================
-    var STATUS_COLORS = { pending: '#f59e0b', accepted: '#22c55e', rejected: '#ef4444', cancelled: '#ef4444', completed: '#3B82F6' };
+    var STATUS_COLORS = { pending: '#f59e0b', accepted: '#22c55e', rejected: '#ef4444', cancelled: '#ef4444', completed: '#C9A84C' };
     var STATUS_LABELS = { pending: 'Pending Review', accepted: 'Accepted', rejected: 'Rejected', cancelled: 'Cancelled', completed: 'Completed' };
 
     function loadPartnerBookings() {
@@ -1306,7 +1777,7 @@
                     + '</div>'
                     + '<div class="db-booking-guest"><strong>' + (b.guest_name || 'Guest') + '</strong>'
                     + (b.guest_phone ? ' &middot; ' + b.guest_phone : '')
-                    + ' &middot; <a href="mailto:' + (b.guest_email||'') + '" style="color:#3B82F6;">' + (b.guest_email||'') + '</a></div>'
+                    + ' &middot; <a href="mailto:' + (b.guest_email||'') + '" style="color:#C9A84C;">' + (b.guest_email||'') + '</a></div>'
                     + '<div class="db-booking-dates">' + pickup + ' &rarr; ' + dropoff + ' &middot; ' + days + ' day' + (days!==1?'s':'') + '</div>'
                     + (b.pickup_location ? '<div class="db-booking-loc">&#128205; ' + b.pickup_location + (b.dropoff_location && b.dropoff_location !== b.pickup_location ? ' &rarr; ' + b.dropoff_location : '') + '</div>' : '')
                     + (function() {
@@ -1317,7 +1788,7 @@
                             return '<div style="margin:6px 0;display:flex;gap:6px;flex-wrap:wrap;">'
                                 + extrasArr.map(function(ex) {
                                     var price = parseFloat(ex.price) || 0;
-                                    return '<span style="padding:3px 8px;background:#dbeafe;color:#2563eb;border-radius:6px;font-size:11px;font-weight:600;">'
+                                    return '<span style="padding:3px 8px;background:rgba(201,168,76,0.12);color:#C9A84C;border-radius:6px;font-size:11px;font-weight:600;">'
                                         + (ex.name || ex.code || 'Extra') + (price > 0 ? ' $' + price : '') + '</span>';
                                 }).join('') + '</div>';
                         }
@@ -1325,7 +1796,7 @@
                     })()
                     + (b.guest_notes ? '<div class="db-booking-notes">Note: ' + b.guest_notes + '</div>' : '')
                     + '<div class="db-booking-price">Total: <strong>$' + (b.total_price || 0) + '</strong>'
-                    + (b.extras_total && parseFloat(b.extras_total) > 0 ? ' <span style="color:#64748b;font-size:12px;">(extras: $' + parseFloat(b.extras_total).toFixed(2) + ')</span>' : '')
+                    + (b.extras_total && parseFloat(b.extras_total) > 0 ? ' <span style="color:#A0A3B0;font-size:12px;">(extras: $' + parseFloat(b.extras_total).toFixed(2) + ')</span>' : '')
                     + ' &middot; <span style="color:#94a3b8;font-size:12px;">Booked ' + created + '</span></div>'
                     + '</div>';
 
@@ -1352,7 +1823,10 @@
     }
 
     // Wire extras availability checkboxes to enable/disable price inputs
-    [['vChildSeatAvail', 'vChildSeat'], ['vChainsAvail', 'vChains'], ['vRoofRackAvail', 'vRoofRack']].forEach(function (pair) {
+    [['vChildSeatAvail', 'vChildSeat'], ['vChainsAvail', 'vChains'], ['vRoofRackAvail', 'vRoofRack'],
+     ['vDriverServiceAvail', 'vDriverServicePrice'], ['vPicnicHouseAvail', 'vPicnicHousePrice'],
+     ['vSvanetiAccepted', 'vSvanetiPrice'], ['vShatiliAccepted', 'vShatiliPrice']
+    ].forEach(function (pair) {
         var cb = document.getElementById(pair[0]);
         var inp = document.getElementById(pair[1]);
         if (cb && inp) {

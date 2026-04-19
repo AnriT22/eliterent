@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const sharp = require('sharp');
 const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
@@ -19,7 +20,7 @@ const storage = multer.diskStorage({
     },
     filename: function (req, file, cb) {
         var ext = path.extname(file.originalname).toLowerCase();
-        var uniqueName = 'vehicle_' + req.user.id + '_' + Date.now() + ext;
+        var uniqueName = 'vehicle_' + req.user.id + '_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8) + ext;
         cb(null, uniqueName);
     }
 });
@@ -42,23 +43,54 @@ const upload = multer({
     limits: { fileSize: 20 * 1024 * 1024 } // 20MB
 });
 
+// Re-encode uploaded image: strip EXIF, resize, compress to JPEG
+async function processImage(filePath) {
+    var outputPath = filePath.replace(/\.[^.]+$/, '.jpg');
+    await sharp(filePath)
+        .rotate() // auto-rotate based on EXIF before stripping
+        .resize(1920, 1080, { fit: 'inside', withoutEnlargement: true })
+        .jpeg({ quality: 85, mozjpeg: true })
+        .toFile(outputPath + '.tmp');
+    // Replace original with processed version
+    if (outputPath !== filePath) {
+        try { fs.unlinkSync(filePath); } catch (e) {}
+    }
+    fs.renameSync(outputPath + '.tmp', outputPath);
+    return path.basename(outputPath);
+}
+
 // POST /api/upload/vehicle-image — upload single image
-router.post('/vehicle-image', authenticateToken, upload.single('image'), (req, res) => {
+router.post('/vehicle-image', authenticateToken, upload.single('image'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: 'No image file provided' });
     }
-    var imageUrl = '/uploads/vehicles/' + req.file.filename;
-    res.json({ message: 'Image uploaded', url: imageUrl });
+    try {
+        var processedName = await processImage(req.file.path);
+        var imageUrl = '/uploads/vehicles/' + processedName;
+        res.json({ message: 'Image uploaded', url: imageUrl });
+    } catch (err) {
+        console.error('Image processing error:', err.message);
+        // Fallback: serve original if processing fails
+        var imageUrl = '/uploads/vehicles/' + req.file.filename;
+        res.json({ message: 'Image uploaded', url: imageUrl });
+    }
 });
 
-// POST /api/upload/vehicle-images — upload multiple images (up to 6)
-router.post('/vehicle-images', authenticateToken, upload.array('images', 6), (req, res) => {
+// POST /api/upload/vehicle-images — upload multiple images (up to 10)
+router.post('/vehicle-images', authenticateToken, upload.array('images', 10), async (req, res) => {
     if (!req.files || req.files.length === 0) {
         return res.status(400).json({ error: 'No image files provided' });
     }
-    var urls = req.files.map(function (f) {
-        return '/uploads/vehicles/' + f.filename;
-    });
+    var urls = [];
+    for (var i = 0; i < req.files.length; i++) {
+        try {
+            var processedName = await processImage(req.files[i].path);
+            urls.push('/uploads/vehicles/' + processedName);
+        } catch (err) {
+            console.error('Image processing error for ' + req.files[i].filename + ':', err.message);
+            urls.push('/uploads/vehicles/' + req.files[i].filename);
+        }
+    }
     res.json({ message: 'Images uploaded', urls: urls });
 });
 

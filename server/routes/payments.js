@@ -17,12 +17,12 @@ router.get('/config', (req, res) => {
 // POST /api/payments/create-order — create PayPal order for a booking's service fee
 router.post('/create-order', authenticateToken, requireRole('guest'), async (req, res) => {
     try {
-        var bookingId = req.body.booking_id;
-        if (!bookingId) return res.status(400).json({ error: 'booking_id required' });
+        var bookingId = parseInt(req.body.booking_id);
+        if (!bookingId || isNaN(bookingId)) return res.status(400).json({ error: 'booking_id required' });
 
         var booking = await queryOne('SELECT * FROM bookings WHERE id = $1', [bookingId]);
         if (!booking) return res.status(404).json({ error: 'Booking not found' });
-        if (booking.guest_id != req.user.id) return res.status(403).json({ error: 'Not your booking' });
+        if (booking.guest_id !== req.user.id) return res.status(403).json({ error: 'Not your booking' });
 
         var pStatus = String(booking.payment_status || 'unpaid');
         if (pStatus === 'paid') return res.status(400).json({ error: 'Already paid' });
@@ -35,7 +35,7 @@ router.post('/create-order', authenticateToken, requireRole('guest'), async (req
         }
 
         var vehicle = await queryOne('SELECT name FROM vehicles WHERE id = $1', [booking.vehicle_id]);
-        var desc = 'Eliterent.ge — ' + (vehicle ? vehicle.name : 'Vehicle') + ' booking #' + bookingId;
+        var desc = 'RoyalCar.rent — ' + (vehicle ? vehicle.name : 'Vehicle') + ' booking #' + bookingId;
 
         var order = await paypal.createOrder(bookingId, serviceFee, 'USD', desc);
 
@@ -53,12 +53,12 @@ router.post('/create-order', authenticateToken, requireRole('guest'), async (req
 router.post('/capture-order', authenticateToken, requireRole('guest'), async (req, res) => {
     try {
         var orderId = req.body.order_id;
-        var bookingId = req.body.booking_id;
-        if (!orderId || !bookingId) return res.status(400).json({ error: 'order_id and booking_id required' });
+        var bookingId = parseInt(req.body.booking_id);
+        if (!orderId || !bookingId || isNaN(bookingId)) return res.status(400).json({ error: 'order_id and booking_id required' });
 
         var booking = await queryOne('SELECT * FROM bookings WHERE id = $1', [bookingId]);
         if (!booking) return res.status(404).json({ error: 'Booking not found' });
-        if (booking.guest_id != req.user.id) return res.status(403).json({ error: 'Not your booking' });
+        if (booking.guest_id !== req.user.id) return res.status(403).json({ error: 'Not your booking' });
 
         if (!paypal.isConfigured()) {
             return res.status(503).json({ error: 'Payment system not configured' });
@@ -104,8 +104,8 @@ router.post('/capture-order', authenticateToken, requireRole('guest'), async (re
 // POST /api/payments/refund — admin refunds a booking's payment
 router.post('/refund', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
-        var bookingId = req.body.booking_id;
-        if (!bookingId) return res.status(400).json({ error: 'booking_id required' });
+        var bookingId = parseInt(req.body.booking_id);
+        if (!bookingId || isNaN(bookingId)) return res.status(400).json({ error: 'booking_id required' });
 
         var booking = await queryOne('SELECT * FROM bookings WHERE id = $1', [bookingId]);
         if (!booking) return res.status(404).json({ error: 'Booking not found' });

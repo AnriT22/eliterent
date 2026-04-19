@@ -61,7 +61,7 @@ function buildApprovalEmailText(booking, recipientLabel) {
         + 'Pickup location: ' + (booking.pickup_location || 'Not specified') + '\n'
         + 'Total price: ' + formatMoney(booking.total_price) + '\n'
         + extrasLine + '\n\n'
-        + 'Thank you for using Eliterent.ge.';
+        + 'Thank you for using RoyalCar.rent.';
 }
 
 // All admin routes require admin role
@@ -128,7 +128,7 @@ router.get('/analytics', async (req, res) => {
 router.get('/users', async (req, res) => {
     try {
         const role = req.query.role;
-        let sql = "SELECT id, email, full_name, phone, role, avatar_url, is_approved, created_at FROM users WHERE role != 'admin'";
+        let sql = "SELECT id, email, full_name, phone, role, avatar_url, google_id, is_approved, is_verified, email_verified, phone_verified, created_at FROM users WHERE role != 'admin'";
         let params = [];
         let paramIdx = 1;
         if (role) { sql += ' AND role = $' + paramIdx++; params.push(role); }
@@ -146,7 +146,7 @@ router.get('/users/:id/detail', async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
         const user = await queryOne(
-            'SELECT id, email, full_name, phone, role, avatar_url, is_approved, admin_notes, created_at, updated_at FROM users WHERE id = $1',
+            'SELECT id, email, full_name, phone, role, avatar_url, google_id, is_approved, is_verified, email_verified, phone_verified, admin_notes, created_at, updated_at FROM users WHERE id = $1',
             [userId]
         );
         if (!user) return res.status(404).json({ error: 'User not found' });
@@ -331,8 +331,8 @@ router.put('/users/:id/notes', async (req, res) => {
 router.get('/partners', async (req, res) => {
     try {
         const partners = await queryAll(
-            `SELECT u.id, u.email, u.full_name, u.phone, u.created_at,
-                    pp.company_name, pp.location, pp.is_verified, pp.description
+            `SELECT u.id, u.email, u.full_name, u.phone, u.google_id, u.phone_verified, u.email_verified, u.is_verified as user_verified, u.created_at,
+                    pp.company_name, pp.location, pp.is_verified, pp.description, pp.whatsapp, pp.telegram
              FROM users u
              LEFT JOIN partner_profiles pp ON u.id = pp.user_id
              WHERE u.role = 'partner'
@@ -350,6 +350,7 @@ router.put('/partners/:id/verify', async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
         await execute('UPDATE partner_profiles SET is_verified = 1 WHERE user_id = $1', [userId]);
+        await execute('UPDATE users SET is_verified = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
         res.json({ message: 'Partner verified' });
     } catch (err) {
         console.error('Verify partner error:', err);
@@ -387,8 +388,8 @@ router.put('/partners/:id/unverify', async (req, res) => {
                         await sendEmail({
                             to: bk.guest_email,
                             subject: 'Reservation Cancelled — ' + (bk.vehicle_name || 'Vehicle'),
-                            text: 'Hello ' + (bk.guest_name || 'Guest') + ',\n\nYour reservation for ' + (bk.vehicle_name || 'a vehicle') + ' (' + bk.pickup_date + ' → ' + bk.dropoff_date + ') has been cancelled because the partner is no longer verified.\n\nWe apologize for the inconvenience. Please book another vehicle on Eliterent.ge.\n\nBest regards,\nEliterent.ge Team',
-                            html: '<p>Hello ' + escapeHtml(bk.guest_name || 'Guest') + ',</p><p>Your reservation for <strong>' + escapeHtml(bk.vehicle_name || 'a vehicle') + '</strong> (' + escapeHtml(bk.pickup_date) + ' → ' + escapeHtml(bk.dropoff_date) + ') has been cancelled because the partner is no longer verified.</p><p>We apologize for the inconvenience. Please book another vehicle on <a href="' + (process.env.BASE_URL || 'http://localhost:3000') + '">Eliterent.ge</a>.</p>'
+                            text: 'Hello ' + (bk.guest_name || 'Guest') + ',\n\nYour reservation for ' + (bk.vehicle_name || 'a vehicle') + ' (' + bk.pickup_date + ' → ' + bk.dropoff_date + ') has been cancelled because the partner is no longer verified.\n\nWe apologize for the inconvenience. Please book another vehicle on RoyalCar.rent.\n\nBest regards,\nRoyalCar.rent Team',
+                            html: '<p>Hello ' + escapeHtml(bk.guest_name || 'Guest') + ',</p><p>Your reservation for <strong>' + escapeHtml(bk.vehicle_name || 'a vehicle') + '</strong> (' + escapeHtml(bk.pickup_date) + ' → ' + escapeHtml(bk.dropoff_date) + ') has been cancelled because the partner is no longer verified.</p><p>We apologize for the inconvenience. Please book another vehicle on <a href="' + (process.env.BASE_URL || 'http://localhost:3000') + '">RoyalCar.rent</a>.</p>'
                         });
                     } catch (emailErr) {
                         console.error('Failed to notify guest #' + bk.guest_id + ':', emailErr.message);
@@ -398,6 +399,7 @@ router.put('/partners/:id/unverify', async (req, res) => {
         }
 
         await execute('UPDATE partner_profiles SET is_verified = 0 WHERE user_id = $1', [userId]);
+        await execute('UPDATE users SET is_verified = 0, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
 
         res.json({
             message: 'Partner unverified' + (activeBookings.length > 0 ? '. ' + activeBookings.length + ' active booking(s) cancelled and guests notified.' : ''),
@@ -649,6 +651,16 @@ router.post('/promo-codes', async (req, res) => {
         if (!code || !discount_type || !discount_value) {
             return res.status(400).json({ error: 'Code, discount type, and value are required' });
         }
+        if (typeof code !== 'string' || code.length > 20 || !/^[A-Za-z0-9_-]+$/.test(code)) {
+            return res.status(400).json({ error: 'Promo code must be alphanumeric, max 20 characters' });
+        }
+        var dv = parseFloat(discount_value);
+        if (isNaN(dv) || dv <= 0) {
+            return res.status(400).json({ error: 'Discount value must be a positive number' });
+        }
+        if (discount_type === 'percent' && dv > 100) {
+            return res.status(400).json({ error: 'Percent discount cannot exceed 100%' });
+        }
         if (!['percent', 'fixed'].includes(discount_type)) {
             return res.status(400).json({ error: 'Discount type must be percent or fixed' });
         }
@@ -763,7 +775,11 @@ router.post('/bulk/approve-vehicles', async (req, res) => {
 
 router.post('/bulk/approve-partners', async (req, res) => {
     try {
-        var result = await execute('UPDATE partner_profiles SET is_verified = 1 WHERE is_verified = 0');
+        var result = await execute('UPDATE partner_profiles SET is_verified = 1 WHERE is_verified = 0 RETURNING user_id');
+        if (result.rows && result.rows.length > 0) {
+            var ids = result.rows.map(function(r) { return r.user_id; });
+            await execute('UPDATE users SET is_verified = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ANY($1::int[])', [ids]);
+        }
         res.json({ message: 'All unverified partners approved', count: result.rowCount || 0 });
     } catch (err) {
         console.error('Bulk approve partners error:', err);
@@ -819,6 +835,44 @@ router.get('/activity', async (req, res) => {
     } catch (err) {
         console.error('Activity feed error:', err);
         res.status(500).json({ error: 'Failed to load activity feed' });
+    }
+});
+
+// ========================================
+// ADMIN CHANGE PASSWORD
+// ========================================
+router.put('/change-password', async (req, res) => {
+    try {
+        const { current_password, new_password } = req.body;
+        if (!current_password || !new_password) {
+            return res.status(400).json({ error: 'Current password and new password are required' });
+        }
+        if (new_password.length < 8) {
+            return res.status(400).json({ error: 'New password must be at least 8 characters' });
+        }
+        if (!/[A-Z]/.test(new_password)) {
+            return res.status(400).json({ error: 'New password must contain at least one uppercase letter' });
+        }
+        if (!/[0-9]/.test(new_password)) {
+            return res.status(400).json({ error: 'New password must contain at least one number' });
+        }
+        if (!/[^A-Za-z0-9]/.test(new_password)) {
+            return res.status(400).json({ error: 'New password must contain at least one special character' });
+        }
+        const admin = await queryOne('SELECT id, password_hash FROM users WHERE id = $1 AND role = $2', [req.user.id, 'admin']);
+        if (!admin) return res.status(404).json({ error: 'Admin not found' });
+
+        const bcrypt = require('bcryptjs');
+        const valid = await bcrypt.compare(current_password, admin.password_hash);
+        if (!valid) return res.status(403).json({ error: 'Current password is incorrect' });
+
+        const newHash = await bcrypt.hash(new_password, 12);
+        await execute('UPDATE users SET password_hash = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [newHash, admin.id]);
+
+        res.json({ message: 'Password changed successfully' });
+    } catch (err) {
+        console.error('Admin change password error:', err);
+        res.status(500).json({ error: 'Failed to change password' });
     }
 });
 

@@ -21,4 +21,10 @@ async function execute(sql, params) {
     return result;
 }
 
-module.exports = { queryAll, queryOne, execute };
+// Get a dedicated client from the pool for transactions
+async function getClient() {
+    const pool = getPool();
+    return pool.connect();
+}
+
+module.exports = { queryAll, queryOne, execute, getClient };

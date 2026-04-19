@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Phone — RoyalCar.rent</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="premium.css">
+    <link rel="stylesheet" href="auth-luxury.css">
+    <style>
+        .vp-container {
+            max-width: 440px; margin: 0 auto; padding: 40px 20px;
+            min-height: 100vh; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .vp-card {
+            background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px; padding: 36px 32px; width: 100%;
+            backdrop-filter: blur(20px); box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .vp-logo { text-align: center; margin-bottom: 24px; }
+        .vp-logo svg { width: 40px; height: 40px; color: #D4AF37; }
+        .vp-title { font-size: 22px; font-weight: 700; color: #fff; text-align: center; margin: 0 0 6px; }
+        .vp-subtitle { font-size: 14px; color: #A0A3B0; text-align: center; margin: 0 0 28px; line-height: 1.5; }
+        .vp-user-info {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.15);
+            border-radius: 10px; padding: 12px 14px; margin-bottom: 24px;
+        }
+        .vp-avatar {
+            width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+        }
+        .vp-avatar-placeholder {
+            width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+            background: linear-gradient(135deg, #D4AF37, #B8963F);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-weight: 700; font-size: 14px;
+        }
+        .vp-user-name { font-size: 14px; font-weight: 600; color: #fff; }
+        .vp-user-email { font-size: 12px; color: #A0A3B0; }
+        .vp-label { display: block; font-size: 13px; font-weight: 600; color: #A0A3B0; margin-bottom: 6px; }
+        .vp-input {
+            width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12); border-radius: 10px;
+            color: #fff; font-size: 15px; outline: none; box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .vp-input:focus { border-color: #D4AF37; }
+        .vp-input::placeholder { color: #A0A3B0; }
+        .vp-input:disabled { opacity: 0.5; cursor: not-allowed; }
+        .vp-otp-row {
+            display: flex; gap: 6px; margin-bottom: 16px; width: 100%; max-width: 100%;
+        }
+        .vp-otp-input {
+            flex: 1; min-width: 0; text-align: center; padding: 12px 4px;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px; color: #fff; font-size: 20px; font-weight: 700;
+            letter-spacing: 0; outline: none; box-sizing: border-box;
+        }
+        .vp-otp-input:focus { border-color: #D4AF37; }
+        .vp-btn {
+            width: 100%; padding: 13px; border: none; border-radius: 10px;
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; margin-top: 8px;
+        }
+        .vp-btn-primary {
+            background: linear-gradient(135deg, #D4AF37, #B8963F);
+            color: #0f172a;
+        }
+        .vp-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(212,175,55,0.3); }
+        .vp-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .vp-btn-ghost {
+            background: transparent; color: #A0A3B0; border: 1px solid rgba(255,255,255,0.08);
+        }
+        .vp-btn-ghost:hover { color: #fff; border-color: rgba(255,255,255,0.2); }
+        .vp-error { color: #f87171; font-size: 13px; margin-top: 8px; display: none; }
+        .vp-success { color: #4ade80; font-size: 13px; margin-top: 8px; display: none; }
+        .vp-timer { color: #A0A3B0; font-size: 12px; text-align: center; margin-top: 10px; }
+        .vp-resend { color: #D4AF37; cursor: pointer; font-size: 13px; text-align: center; margin-top: 10px; display: none; }
+        .vp-resend:hover { text-decoration: underline; }
+        .vp-step { display: none; }
+        .vp-step.active { display: block; }
+        .vp-hint { font-size: 12px; color: #A0A3B0; margin-top: 6px; }
+    </style>
+</head>
+<body class="auth-page">
+    <div class="vp-container">
+        <div class="vp-card">
+            <div class="vp-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 17h2v.5a.5.5 0 0 1-.5.5h-19a.5.5 0 0 1-.5-.5V5a.5.5 0 0 1 .5-.5H16V3a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v3h2a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2Z"/>
+                    <circle cx="6.5" cy="15.5" r="1.5"/>
+                    <circle cx="16.5" cy="15.5" r="1.5"/>
+                </svg>
+            </div>
+
+            <h1 class="vp-title">Verify Your Phone</h1>
+            <p class="vp-subtitle">One more step! Add your phone number so partners can contact you about bookings.</p>
+
+            <div class="vp-user-info" id="userInfoBar" style="display:none;">
+                <div id="userAvatar"></div>
+                <div>
+                    <div class="vp-user-name" id="userName"></div>
+                    <div class="vp-user-email" id="userEmail"></div>
+                </div>
+            </div>
+
+            <!-- STEP 1: Enter phone number -->
+            <div class="vp-step active" id="stepPhone">
+                <label class="vp-label">Phone Number</label>
+                <input type="tel" class="vp-input" id="phoneInput" placeholder="+995 5XX XXX XXX" autocomplete="tel">
+                <p class="vp-hint">International format with country code (e.g. +995 for Georgia)</p>
+                <div class="vp-error" id="phoneError"></div>
+                <button class="vp-btn vp-btn-primary" id="sendCodeBtn" onclick="sendPhoneCode()">Send Verification Code</button>
+                <button class="vp-btn vp-btn-ghost" onclick="skipVerification()">Skip for now</button>
+            </div>
+
+            <!-- STEP 2: Enter OTP code -->
+            <div class="vp-step" id="stepOtp">
+                <p class="vp-subtitle" id="otpSentMsg" style="margin-bottom:16px;"></p>
+                <label class="vp-label">Enter 6-digit code</label>
+                <div class="vp-otp-row">
+                    <input type="text" class="vp-otp-input" id="otp1" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" class="vp-otp-input" id="otp2" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" class="vp-otp-input" id="otp3" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" class="vp-otp-input" id="otp4" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" class="vp-otp-input" id="otp5" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" class="vp-otp-input" id="otp6" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                </div>
+                <div class="vp-error" id="otpError"></div>
+                <div class="vp-success" id="otpSuccess"></div>
+                <button class="vp-btn vp-btn-primary" id="verifyCodeBtn" onclick="verifyCode()">Verify Phone</button>
+                <div class="vp-timer" id="otpTimer"></div>
+                <div class="vp-resend" id="resendLink" onclick="sendPhoneCode()">Resend code</div>
+                <button class="vp-btn vp-btn-ghost" style="margin-top:12px;" onclick="goBackToPhone()">Change phone number</button>
+                <button class="vp-btn vp-btn-ghost" onclick="skipVerification()">Skip for now</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        var token = localStorage.getItem('token');
+        var userStr = localStorage.getItem('user');
+        if (!token || !userStr) {
+            window.location.href = '/login.html';
+            return;
+        }
+
+        var user;
+        try { user = JSON.parse(userStr); } catch(e) { window.location.href = '/login.html'; return; }
+
+        // Show user info
+        var infoBar = document.getElementById('userInfoBar');
+        var avatarEl = document.getElementById('userAvatar');
+        var nameEl = document.getElementById('userName');
+        var emailEl = document.getElementById('userEmail');
+
+        nameEl.textContent = user.full_name || user.email;
+        emailEl.textContent = user.email || '';
+        if (user.avatar_url) {
+            avatarEl.innerHTML = '<img class="vp-avatar" src="' + user.avatar_url + '" onerror="this.parentElement.innerHTML=\'<div class=vp-avatar-placeholder>' + ((user.full_name || '?')[0] || '?').toUpperCase() + '</div>\'">';
+        } else {
+            var initials = ((user.full_name || '?')[0] || '?').toUpperCase();
+            avatarEl.innerHTML = '<div class="vp-avatar-placeholder">' + initials + '</div>';
+        }
+        infoBar.style.display = 'flex';
+
+        // Pre-fill phone number if user already has one (from manual registration)
+        if (user.phone) {
+            document.getElementById('phoneInput').value = user.phone;
+        }
+
+        // Auto-focus OTP inputs
+        var otpInputs = document.querySelectorAll('.vp-otp-input');
+        otpInputs.forEach(function(inp, i) {
+            inp.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value && i < otpInputs.length - 1) {
+                    otpInputs[i + 1].focus();
+                }
+                // Auto-submit when all 6 digits entered
+                if (i === otpInputs.length - 1 && this.value) {
+                    var allFilled = true;
+                    otpInputs.forEach(function(o) { if (!o.value) allFilled = false; });
+                    if (allFilled) verifyCode();
+                }
+            });
+            inp.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !this.value && i > 0) {
+                    otpInputs[i - 1].focus();
+                    otpInputs[i - 1].value = '';
+                }
+            });
+            // Handle paste
+            inp.addEventListener('paste', function(e) {
+                e.preventDefault();
+                var pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
+                if (pasted.length >= 6) {
+                    for (var j = 0; j < 6; j++) {
+                        otpInputs[j].value = pasted[j] || '';
+                    }
+                    otpInputs[5].focus();
+                    verifyCode();
+                }
+            });
+        });
+
+        // Enter key on phone input
+        document.getElementById('phoneInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') sendPhoneCode();
+        });
+
+        var _timerInterval = null;
+
+        window.sendPhoneCode = function() {
+            var phone = document.getElementById('phoneInput').value.trim();
+            var errEl = document.getElementById('phoneError');
+            errEl.style.display = 'none';
+
+            if (!phone || phone.length < 8) {
+                errEl.textContent = 'Please enter a valid phone number';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            var btn = document.getElementById('sendCodeBtn');
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+
+            fetch('/api/otp/phone-verify/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ phone: phone })
+            })
+            .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+            .then(function(result) {
+                btn.disabled = false;
+                btn.textContent = 'Send Verification Code';
+
+                if (!result.ok) {
+                    errEl.textContent = result.data.error || 'Failed to send code';
+                    errEl.style.display = 'block';
+                    return;
+                }
+
+                // Switch to OTP step
+                document.getElementById('stepPhone').classList.remove('active');
+                document.getElementById('stepOtp').classList.add('active');
+                document.getElementById('otpSentMsg').textContent = result.data.message || 'Verification code sent';
+                document.getElementById('otp1').focus();
+
+                // Start countdown timer
+                startTimer(result.data.expiresIn || 300);
+            })
+            .catch(function() {
+                btn.disabled = false;
+                btn.textContent = 'Send Verification Code';
+                errEl.textContent = 'Network error. Please try again.';
+                errEl.style.display = 'block';
+            });
+        };
+
+        window.verifyCode = function() {
+            var code = '';
+            otpInputs.forEach(function(inp) { code += inp.value; });
+
+            var errEl = document.getElementById('otpError');
+            var successEl = document.getElementById('otpSuccess');
+            errEl.style.display = 'none';
+            successEl.style.display = 'none';
+
+            if (code.length !== 6) {
+                errEl.textContent = 'Please enter all 6 digits';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            var btn = document.getElementById('verifyCodeBtn');
+            btn.disabled = true;
+            btn.textContent = 'Verifying...';
+
+            fetch('/api/otp/phone-verify/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ code: code })
+            })
+            .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+            .then(function(result) {
+                btn.disabled = false;
+                btn.textContent = 'Verify Phone';
+
+                if (!result.ok) {
+                    errEl.textContent = result.data.error || 'Verification failed';
+                    errEl.style.display = 'block';
+                    if (result.data.remainingAttempts !== undefined) {
+                        errEl.textContent += ' (' + result.data.remainingAttempts + ' attempts remaining)';
+                    }
+                    // Clear inputs
+                    otpInputs.forEach(function(inp) { inp.value = ''; });
+                    otpInputs[0].focus();
+                    return;
+                }
+
+                // Success!
+                successEl.textContent = 'Phone verified successfully! Redirecting...';
+                successEl.style.display = 'block';
+                clearInterval(_timerInterval);
+
+                setTimeout(function() {
+                    redirectToHome();
+                }, 1500);
+            })
+            .catch(function() {
+                btn.disabled = false;
+                btn.textContent = 'Verify Phone';
+                errEl.textContent = 'Network error. Please try again.';
+                errEl.style.display = 'block';
+            });
+        };
+
+        window.goBackToPhone = function() {
+            document.getElementById('stepOtp').classList.remove('active');
+            document.getElementById('stepPhone').classList.add('active');
+            clearInterval(_timerInterval);
+            otpInputs.forEach(function(inp) { inp.value = ''; });
+            document.getElementById('otpError').style.display = 'none';
+        };
+
+        window.skipVerification = function() {
+            fetch('/api/otp/phone-verify/skip', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                }
+            }).catch(function() {});
+            redirectToHome();
+        };
+
+        function redirectToHome() {
+            var role = user.role;
+            if (role === 'admin') {
+                window.location.href = '/admin.html';
+            } else if (role === 'partner') {
+                window.location.href = '/partner-dashboard.html';
+            } else {
+                window.location.href = '/index.html';
+            }
+        }
+
+        function startTimer(seconds) {
+            clearInterval(_timerInterval);
+            var remaining = seconds;
+            var timerEl = document.getElementById('otpTimer');
+            var resendEl = document.getElementById('resendLink');
+            resendEl.style.display = 'none';
+            timerEl.style.display = 'block';
+
+            function updateTimer() {
+                var m = Math.floor(remaining / 60);
+                var s = remaining % 60;
+                timerEl.textContent = 'Code expires in ' + m + ':' + (s < 10 ? '0' : '') + s;
+                if (remaining <= 0) {
+                    clearInterval(_timerInterval);
+                    timerEl.style.display = 'none';
+                    resendEl.style.display = 'block';
+                }
+                remaining--;
+            }
+            updateTimer();
+            _timerInterval = setInterval(updateTimer, 1000);
+        }
+    })();
+    </script>
+</body>
+</html>

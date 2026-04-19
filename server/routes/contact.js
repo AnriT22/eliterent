@@ -10,7 +10,11 @@ router.post('/submit', async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        const emailText = `New contact form submission from Eliterent.ge
+        if (fullName.length > 100 || email.length > 254 || subject.length > 200 || message.length > 5000 || (phone && phone.length > 20)) {
+            return res.status(400).json({ error: 'One or more fields exceed maximum length' });
+        }
+
+        const emailText = `New contact form submission from RoyalCar.rent
 
 Name: ${fullName}
 Email: ${email}
@@ -21,7 +25,7 @@ Message:
 ${message}
 
 ---
-This message was sent from the contact form at Eliterent.ge`;
+This message was sent from the contact form at RoyalCar.rent`;
 
         const safeFullName = escapeHtml(fullName);
         const safeEmail = escapeHtml(email);
@@ -48,7 +52,7 @@ This message was sent from the contact form at Eliterent.ge`;
             <p style="margin:0;color:#1e293b;font-size:15px;line-height:1.6;white-space:pre-wrap;">${safeMessage}</p>
         </div>
     </div>
-    <p style="text-align:center;color:#94a3b8;font-size:12px;margin-top:20px;">This message was sent from the contact form at Eliterent.ge</p>
+    <p style="text-align:center;color:#94a3b8;font-size:12px;margin-top:20px;">This message was sent from the contact form at RoyalCar.rent</p>
 </div>`;
 
         await sendEmail({

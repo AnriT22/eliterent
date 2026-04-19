@@ -76,7 +76,7 @@
         document.getElementById('vdContent').style.display = 'grid';
 
         var name = v.name || 'Vehicle';
-        document.title = name + ' — Eliterent.ge';
+        document.title = name + ' — RoyalCar.rent';
         document.getElementById('vdBreadcrumbName').textContent = name;
         document.getElementById('vdVehicleName').textContent = name;
 

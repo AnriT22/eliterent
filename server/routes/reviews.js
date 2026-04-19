@@ -59,10 +59,18 @@ router.post('/', authenticateToken, requireRole('guest'), async (req, res) => {
         if (!rating || !body) {
             return res.status(400).json({ error: 'rating and body are required' });
         }
+        if (typeof body === 'string' && body.length > 2000) {
+            return res.status(400).json({ error: 'Review body is too long (max 2000 characters)' });
+        }
+        if (title && typeof title === 'string' && title.length > 150) {
+            return res.status(400).json({ error: 'Review title is too long (max 150 characters)' });
+        }
         rating = parseInt(rating);
         if (rating < 1 || rating > 5) {
             return res.status(400).json({ error: 'rating must be 1–5' });
         }
+        if (vehicle_id) vehicle_id = parseInt(vehicle_id);
+        if (booking_id) booking_id = parseInt(booking_id);
 
         // If booking_id given, verify ownership
         if (booking_id) {
