@@ -55,8 +55,9 @@
     "all": "All"
   },
   "fleet": {
-    "title": "Our Premium Fleet",
-    "subtitle": "Browse our carefully curated selection of vehicles",
+    "title": "Our Fleet",
+    "subtitle": "Meet Some of Our Cars",
+    "show_all": "Show all vehicles",
     "view_all": "View All Vehicles",
     "per_day": "/day",
     "book_now": "Book Now",
@@ -67,13 +68,17 @@
     "manual": "Manual"
   },
   "features": {
-    "title": "Why Rent With Us",
+    "title": "Why Choose Rent Cars Georgia?",
     "verified_title": "Verified Partners",
-    "verified_desc": "Every vehicle owner is thoroughly vetted and verified for your safety.",
+    "verified_desc": "Trusted by 2000+ vehicle owners",
+    "no_deposit_title": "No Deposit Required",
+    "no_deposit_desc": "Start your adventure immediately",
+    "insurance_title": "Insurance Included",
+    "insurance_desc": "Comprehensive coverage on all trips",
+    "support_title": "Local Support 24/7",
+    "support_desc": "Georgian-speaking support team",
     "prices_title": "Best Prices",
     "prices_desc": "Direct connection with owners means no middleman markup.",
-    "support_title": "24/7 Support",
-    "support_desc": "Our team is available around the clock to assist you.",
     "cancel_title": "Free Cancellation",
     "cancel_desc": "Plans change — cancel up to 24h before pickup at no cost."
   },
@@ -85,11 +90,21 @@
     "benefit3": "Manage your calendar",
     "cta": "Register as Partner"
   },
+  "partners_section": {
+    "title": "Trusted by Leading Partners"
+  },
   "testimonials": {
     "title": "What Our Clients Say",
-    "subtitle": "Real reviews from real travelers"
+    "subtitle": "Real reviews from real travelers",
+    "quote1": "Amazing service! The car was spotless and the booking process was incredibly smooth. Will definitely use again.",
+    "author1": "James W. — UK",
+    "quote2": "Best car rental experience in Georgia. Great prices and the support team was very helpful throughout our trip.",
+    "author2": "Maria S. — Germany",
+    "quote3": "Rented a 4x4 for a week-long road trip through the mountains. Everything was perfect from start to finish.",
+    "author3": "Alex K. — USA"
   },
   "footer": {
+    "tagline": "Premium car rental marketplace for Georgia adventures.",
     "description": "Premium car rental marketplace for Georgia adventures.",
     "legal": "Legal",
     "terms": "Terms & Conditions",
@@ -100,11 +115,10 @@
     "whatsapp_label": "WhatsApp",
     "contact_us": "Contact Us",
     "contact_help": "We're here to help! Reach us anytime.",
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "copyright": "© 2026 RoyalCar.rent. All rights reserved."
   },
-  "quick_chat": {
-    "label": "Quick Chat"
-  },
+  "quick_chat": "Quick Chat",
   "about_page": {
     "title": "About RCB",
     "subtitle": "Connecting travelers with premium car rentals across Georgia",
