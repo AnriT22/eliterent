@@ -248,6 +248,13 @@ async function initDB() {
         await pool.query('ALTER TABLE otp_codes ALTER COLUMN reference_id TYPE TEXT USING reference_id::TEXT');
     } catch (e) { /* column already TEXT or doesn't exist */ }
 
+    // Migrate bookings status CHECK constraint to include 'pending_verification' and 'cancel_requested'
+    try {
+        await pool.query('ALTER TABLE bookings DROP CONSTRAINT IF EXISTS bookings_status_check');
+        await pool.query(`ALTER TABLE bookings ADD CONSTRAINT bookings_status_check CHECK(status IN ('pending_verification', 'pending', 'accepted', 'rejected', 'completed', 'cancelled', 'cancel_requested'))`);
+        console.log('bookings_status_check constraint updated');
+    } catch (e) { console.warn('bookings_status_check migration skipped:', e.message); }
+
     // Migrate money columns from REAL (float) to NUMERIC(10,2) for accurate financial math
     try {
         var moneyMigrations = [

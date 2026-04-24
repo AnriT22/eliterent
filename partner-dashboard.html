@@ -49,11 +49,11 @@
 
                 <nav class="nav-menu">
 
-                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="index.html" class="nav-link" data-i18n="nav.home">Home</a>
 
-                    <a href="vehicles.html" class="nav-link">Vehicles</a>
+                    <a href="vehicles.html" class="nav-link" data-i18n="nav.vehicles">Vehicles</a>
 
-                    <a href="partner-dashboard.html" class="nav-link active">Dashboard</a>
+                    <a href="partner-dashboard.html" class="nav-link active" data-i18n="nav.dashboard">Dashboard</a>
 
                 </nav>
 
@@ -61,7 +61,7 @@
 
             <div class="header-right">
 
-                <a href="register-partner.html" class="partner-btn">Become Partner</a>
+                <a href="register-partner.html" class="partner-btn" data-i18n="nav.become_partner">Become Partner</a>
 
             </div>
 
@@ -83,7 +83,7 @@
 
                 <h3 id="dbCompanyName">My Company</h3>
 
-                <span class="db-badge db-badge-partner">Partner</span>
+                <span class="db-badge db-badge-partner" data-i18n="partner_dashboard.partner_badge">Partner</span>
 
                 <span id="dbVerificationStatus"></span>
 
@@ -95,7 +95,7 @@
 
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
 
-                    My Vehicles
+                    <span data-i18n="partner_dashboard.vehicles">My Vehicles</span>
 
                 </a>
 
@@ -103,7 +103,7 @@
 
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
 
-                    Add Vehicle
+                    <span data-i18n="partner_dashboard.add_vehicle">Add Vehicle</span>
 
                 </a>
 
@@ -111,7 +111,7 @@
 
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
 
-                    Bookings
+                    <span data-i18n="partner_dashboard.bookings">Bookings</span>
 
                 </a>
 
@@ -119,7 +119,7 @@
 
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
 
-                    Financials
+                    <span data-i18n="partner_dashboard.financials">Financials</span>
 
                 </a>
 
@@ -127,7 +127,7 @@
 
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
 
-                    Profile
+                    <span data-i18n="partner_dashboard.profile">Profile</span>
 
                 </a>
 
@@ -149,9 +149,9 @@
 
                 <div class="db-tab-header">
 
-                    <h2>My Vehicles</h2>
+                    <h2 data-i18n="partner_dashboard.vehicles">My Vehicles</h2>
 
-                    <button class="btn btn-primary btn-small" id="addVehicleFromList">+ Add Vehicle</button>
+                    <button class="btn btn-primary btn-small" id="addVehicleFromList" data-i18n="partner_dashboard.add_vehicle_btn">+ Add Vehicle</button>
 
                 </div>
 
@@ -161,11 +161,11 @@
 
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#A0A3B0" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
 
-                        <h3>No vehicles yet</h3>
+                        <h3 data-i18n="partner_dashboard.no_vehicles">No vehicles yet</h3>
 
-                        <p>Add your first vehicle to start receiving bookings</p>
+                        <p data-i18n="partner_dashboard.no_vehicles_desc">Add your first vehicle to start receiving bookings</p>
 
-                        <button class="btn btn-primary" id="addFirstVehicle">+ Add Your First Vehicle</button>
+                        <button class="btn btn-primary" id="addFirstVehicle" data-i18n="partner_dashboard.add_first_vehicle">+ Add Your First Vehicle</button>
 
                     </div>
 

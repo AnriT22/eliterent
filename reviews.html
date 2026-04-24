@@ -65,15 +65,15 @@
 
                 <nav class="nav-menu">
 
-                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="index.html" class="nav-link" data-i18n="nav.home">Home</a>
 
-                    <a href="vehicles.html" class="nav-link">Vehicles</a>
+                    <a href="vehicles.html" class="nav-link" data-i18n="nav.vehicles">Vehicles</a>
 
-                    <a href="reviews.html" class="nav-link active">Reviews</a>
+                    <a href="reviews.html" class="nav-link active" data-i18n="nav.reviews">Reviews</a>
 
-                    <a href="about.html" class="nav-link">About</a>
+                    <a href="about.html" class="nav-link" data-i18n="nav.about">About</a>
 
-                    <a href="contact.html" class="nav-link">Contact</a>
+                    <a href="contact.html" class="nav-link" data-i18n="nav.contact">Contact</a>
 
                 </nav>
 
@@ -167,7 +167,7 @@
 
 
 
-                <a href="register-partner.html" class="partner-btn">Become Partner</a>
+                <a href="register-partner.html" class="partner-btn" data-i18n="nav.become_partner">Become Partner</a>
 
             </div>
 
@@ -271,15 +271,15 @@
 
                         <span class="rv-star-btn" data-v="5">★</span>
 
-                        <span id="rvRatingLabel" style="font-size:13px;color:#A0A3B0;margin-left:8px;">Select rating</span>
+                        <span id="rvRatingLabel" style="font-size:13px;color:#A0A3B0;margin-left:8px;" data-i18n="reviews_page.select_rating">Select rating</span>
 
                     </div>
 
                     <input type="hidden" id="rvRating" value="">
 
-                    <input type="text" id="rvTitle" placeholder="Review title (optional)" class="rv-input" maxlength="100">
+                    <input type="text" id="rvTitle" placeholder="Review title (optional)" class="rv-input" maxlength="100" data-i18n-placeholder="reviews_page.review_title_placeholder">
 
-                    <textarea id="rvBody" placeholder="Tell us about your experience..." class="rv-input rv-textarea" maxlength="1000" required></textarea>
+                    <textarea id="rvBody" placeholder="Tell us about your experience..." class="rv-input rv-textarea" maxlength="1000" required data-i18n-placeholder="reviews_page.review_body_placeholder"></textarea>
 
                     <div id="rvMsg" style="display:none;font-size:13px;padding:8px 12px;border-radius:6px;margin-bottom:10px;"></div>
 
@@ -307,13 +307,13 @@
 
                 <div class="reviews-filter">
 
-                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn active" data-filter="all" data-i18n="reviews_page.filter_all">All</button>
 
-                    <button class="filter-btn" data-filter="5">★★★★★ 5 Stars</button>
+                    <button class="filter-btn" data-filter="5" data-i18n="reviews_page.filter_5star">★★★★★ 5 Stars</button>
 
-                    <button class="filter-btn" data-filter="4">★★★★ 4 Stars</button>
+                    <button class="filter-btn" data-filter="4" data-i18n="reviews_page.filter_4star">★★★★ 4 Stars</button>
 
-                    <button class="filter-btn" data-filter="3">★★★ 3 Stars</button>
+                    <button class="filter-btn" data-filter="3" data-i18n="reviews_page.filter_3star">★★★ 3 Stars</button>
 
                 </div>
 
@@ -325,7 +325,7 @@
 
                 <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#A0A3B0;">
 
-                    <p style="font-size:16px;">Loading reviews...</p>
+                    <p style="font-size:16px;" data-i18n="reviews_page.loading">Loading reviews...</p>
 
                 </div>
 
@@ -727,15 +727,15 @@
 
             <div class="footer-column">
 
-                <h4>Legal</h4>
+                <h4 data-i18n="footer.legal">Legal</h4>
 
                 <ul>
 
-                    <li><a href="tos.html">Terms & Conditions</a></li>
+                    <li><a href="tos.html" data-i18n="footer.terms">Terms & Conditions</a></li>
 
-                    <li><a href="privacy.html">Privacy Policy</a></li>
+                    <li><a href="privacy.html" data-i18n="footer.privacy">Privacy Policy</a></li>
 
-                    <li><a href="#" onclick="document.getElementById('contactModal').style.display='flex'; return false;">Contact</a></li>
+                    <li><a href="#" onclick="document.getElementById('contactModal').style.display='flex'; return false;" data-i18n="footer.contact_link">Contact</a></li>
 
                 </ul>
 
@@ -743,13 +743,13 @@
 
             <div class="footer-column">
 
-                <h4>Contact</h4>
+                <h4 data-i18n="footer.contact_title">Contact</h4>
 
                 <p>📧 elite.rental25@gmail.com</p>
 
                 <p>📞 +995 591 522 299</p>
 
-                <p>📍 Tbilisi, Georgia</p>
+                <p>📍 <span data-i18n="footer.address">Tbilisi, Georgia</span></p>
 
             </div>
 
@@ -757,7 +757,7 @@
 
         <div class="footer-bottom">
 
-            <p>&copy; 2026 RoyalCar.rent. All rights reserved.</p>
+            <p data-i18n="footer.copyright">&copy; 2026 RoyalCar.rent. All rights reserved.</p>
 
         </div>
 
