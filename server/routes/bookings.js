@@ -143,6 +143,18 @@ function normalizeVehicleServices(vehicle) {
       name: "Additional Driver",
       perDay: true,
     },
+    {
+      code: "svaneti_roads",
+      key: "svaneti_price",
+      name: "Mestia / Mountain Svaneti Roads",
+      perDay: false,
+    },
+    {
+      code: "shatili_roads",
+      key: "shatili_price",
+      name: "Shatili Mountain Roads",
+      perDay: false,
+    },
   ];
 
   var services = [];
@@ -459,6 +471,7 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
 
     // Send OTP via Twilio Verify API (managed OTP — Twilio generates & sends the code)
     var verifyMode = 'verify';
+    var bookingIdStr = String(booking.id);
     var expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes for Verify API
     var verifyResult = await startVerify(guestUser.phone);
 
@@ -467,7 +480,7 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
       await execute(
         `INSERT INTO otp_codes (user_id, phone, code_hash, type, reference_id, expires_at)
                VALUES ($1, $2, $3, 'reservation', $4, $5)`,
-        [req.user.id, guestUser.phone, 'TWILIO_VERIFY', booking.id, expiresAt],
+        [req.user.id, guestUser.phone, 'TWILIO_VERIFY', bookingIdStr, expiresAt],
       );
     } else {
       // Fallback to direct SMS
@@ -481,7 +494,7 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
         `INSERT INTO otp_codes (user_id, phone, code_hash, type, reference_id, expires_at)
                VALUES ($1, $2, $3, 'reservation', $4, $5)
                RETURNING id`,
-        [req.user.id, guestUser.phone, otpHash, booking.id, legacyExpires],
+        [req.user.id, guestUser.phone, otpHash, bookingIdStr, legacyExpires],
       );
       var otpRecordId =
         otpInsertResult.rows && otpInsertResult.rows[0]
@@ -491,6 +504,26 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
       var smsResult = await sendOTPSMS(guestUser.phone, otp, "reservation");
       if (!smsResult || !smsResult.success) {
         await invalidateOtpRecord(otpRecordId);
+        // In development without SMS, auto-confirm the booking instead of failing
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('[Booking OTP] SMS failed in dev mode — auto-confirming booking', booking.id);
+          await execute("UPDATE bookings SET status = 'pending' WHERE id = $1", [booking.id]);
+          await blockDatesForBooking(vehicle_id, pickup_date, dropoff_date);
+
+          var paypalConfiguredDev = false;
+          try { paypalConfiguredDev = require("../paypal").isConfigured(); } catch (e) {}
+
+          return res.status(201).json({
+            message: "Booking created successfully (verification skipped in dev mode)",
+            booking_id: booking.id,
+            total_price: total_price,
+            rental_days: days,
+            extras_total: extrasTotal,
+            service_fee: serviceFee,
+            payment_required: paypalConfiguredDev && serviceFee > 0,
+            status: "pending",
+          });
+        }
         await execute(
           "UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE id = $1",
           [booking.id],
@@ -525,8 +558,14 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
       expiresIn: 300,
     });
   } catch (err) {
-    console.error("Create booking error:", err);
-    res.status(500).json({ error: "Failed to create booking" });
+    console.error("Create booking error:", err.message, err.stack);
+    console.error("Create booking error details:", JSON.stringify({ code: err.code, detail: err.detail, table: err.table, column: err.column, constraint: err.constraint }));
+    var userMessage = "Failed to create booking";
+    if (err.code === '23505') userMessage = "A booking already exists for these dates";
+    else if (err.code === '23503') userMessage = "Invalid vehicle or user reference";
+    else if (err.code === '23514') userMessage = "Invalid booking data";
+    else if (err.message) userMessage += ": " + err.message;
+    res.status(500).json({ error: userMessage });
   }
 });
 

@@ -706,15 +706,18 @@
         .then(function (r) { return r.json(); })
         .then(function (data) {
             btn.disabled = false;
-            btn.querySelector('span:nth-child(2)').textContent = 'Book now';
+            btn.querySelector('span:nth-child(2)').textContent = (typeof I18n !== 'undefined' ? I18n.t('vehicle_page.book_now') : 'Book now');
             if (data.error) {
                 if (data.phoneRequired) {
-                    if (confirm(data.error + '\n\nWould you like to verify your phone now?')) {
+                    var phoneMsg = (typeof I18n !== 'undefined' ? I18n.t('errors.phone_verify_required') : data.error);
+                    var phonePrompt = (typeof I18n !== 'undefined' ? I18n.t('errors.phone_verify_prompt') : 'Would you like to verify your phone now?');
+                    if (confirm(phoneMsg + '\n\n' + phonePrompt)) {
                         window.location.href = '/verify-phone.html';
                     }
                     return;
                 }
-                alert('Booking failed: ' + data.error);
+                var errLabel = (typeof I18n !== 'undefined' ? I18n.t('errors.booking_failed') : 'Booking failed');
+                alert(errLabel + ': ' + data.error);
                 return;
             }
 
