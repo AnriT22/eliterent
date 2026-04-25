@@ -58,6 +58,8 @@ function buildApprovalEmailText(booking, recipientLabel) {
         + 'The reservation has been accepted.\n\n'
         + 'Car: ' + (booking.vehicle_name || 'Vehicle') + '\n'
         + 'Dates: ' + booking.pickup_date + ' → ' + booking.dropoff_date + '\n'
+        + 'Pick-up time: ' + (booking.pickup_time || 'Not specified') + '\n'
+        + 'Drop-off time: ' + (booking.dropoff_time || 'Not specified') + '\n'
         + 'Pickup location: ' + (booking.pickup_location || 'Not specified') + '\n'
         + 'Total price: ' + formatMoney(booking.total_price) + '\n'
         + extrasLine + '\n\n'
