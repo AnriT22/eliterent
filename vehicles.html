@@ -992,6 +992,17 @@
         .catch(function(err) { console.error('vcLoadVehicles error:', err); if (loadingState) loadingState.style.display = 'none'; });
     }
 
+    function vtVal(raw) {
+        if (!raw) return '';
+        var key = 'vehicle_page.val_' + String(raw).toLowerCase().replace(/[\s\/]+/g, '_').replace(/[^a-z0-9_]/g, '');
+        if (typeof I18n !== 'undefined' && I18n.t) {
+            var val = I18n.t(key);
+            if (val && val !== key) return val;
+        }
+        var s = String(raw).replace(/_/g, ' ');
+        return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+
     function renderVehiclesGrid(vehicles) {
         var grid = document.getElementById('vpGrid');
         if (!grid) return;
@@ -1042,12 +1053,12 @@
                     + '<button class="vc-fav-btn' + (isFav ? ' active' : '') + '">' + (isFav ? '&#9829;' : '&#9825;') + '</button>'
                     + '</div>'
                     + '<div class="vc-body">'
-                    + '<div class="vc-title-row"><span class="vc-name">' + name + '</span><span class="vc-category-tag ' + cat + '">' + cat.charAt(0).toUpperCase() + cat.slice(1) + '</span></div>'
+                    + '<div class="vc-title-row"><span class="vc-name">' + name + '</span><span class="vc-category-tag ' + cat + '">' + vtVal(cat) + '</span></div>'
                     + '<div class="vc-specs">'
-                    + '<span class="vc-spec">' + engine.charAt(0).toUpperCase() + engine.slice(1) + '</span>'
-                    + '<span class="vc-spec">' + gearbox.charAt(0).toUpperCase() + gearbox.slice(1) + '</span>'
+                    + '<span class="vc-spec">' + vtVal(engine) + '</span>'
+                    + '<span class="vc-spec">' + vtVal(gearbox) + '</span>'
                     + '<span class="vc-spec">' + seats + ' <span data-i18n="fleet.seats">Seats</span></span>'
-                    + '<span class="vc-spec">' + drive.toUpperCase() + '</span>'
+                    + '<span class="vc-spec">' + vtVal(drive) + '</span>'
                     + '</div>'
                     + '<div class="vc-price-section">'
                     + '<div class="vc-price-row"><span class="vc-price-label" data-i18n="vehicles.price_per_day">Price per day:</span><span class="vc-price-current">$' + price + '</span><span class="vc-price-unit" data-i18n="fleet.per_day">/day</span></div>'
