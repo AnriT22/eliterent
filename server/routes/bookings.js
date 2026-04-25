@@ -1,10 +1,29 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
+const rateLimit = require("express-rate-limit");
 const { authenticateToken, requireRole } = require("../middleware/auth");
 const { queryAll, queryOne, execute, getClient } = require("../db-helpers");
 const { escapeHtml } = require("../mailer");
 const { sendOTPSMS, startVerify, checkVerify } = require("../services/sms");
+
+const bookingOtpLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 5,
+  message: { error: 'Too many verification attempts. Please wait a moment.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: function (req) { return req.user ? String(req.user.id) : req.ip; }
+});
+
+const bookingResendLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 2,
+  message: { error: 'Too many resend requests. Please wait before trying again.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: function (req) { return req.user ? String(req.user.id) : req.ip; }
+});
 
 const WEBSITE_FEE_PERCENT = 0.3;
 
@@ -574,6 +593,7 @@ router.post(
   "/verify",
   authenticateToken,
   requireRole("guest"),
+  bookingOtpLimiter,
   async (req, res) => {
     try {
       var { booking_id, code } = req.body;
@@ -583,6 +603,8 @@ router.post(
           .status(400)
           .json({ error: "Booking ID and verification code are required" });
       }
+
+      var bookingIdStr = String(booking_id);
 
       // Get booking
       var booking = await queryOne(
@@ -605,7 +627,7 @@ router.post(
         `SELECT * FROM otp_codes
              WHERE reference_id = $1 AND type = 'reservation' AND verified = 0 AND expires_at > NOW()
              ORDER BY created_at DESC LIMIT 1`,
-        [booking_id],
+        [bookingIdStr],
       );
 
       if (!otpRecord) {
@@ -754,6 +776,7 @@ router.post(
   "/resend-otp",
   authenticateToken,
   requireRole("guest"),
+  bookingResendLimiter,
   async (req, res) => {
     try {
       var { booking_id } = req.body;

@@ -249,8 +249,24 @@ router.put('/users/:id/reject', async (req, res) => {
         const userId = parseInt(req.params.id);
         const user = await queryOne('SELECT * FROM users WHERE id = $1 AND role != $2', [userId, 'admin']);
         if (!user) return res.status(404).json({ error: 'User not found' });
+
+        // Cancel active bookings (as guest or partner) and unblock dates
+        var activeBookings = await queryAll(
+            "SELECT b.id, b.vehicle_id, b.pickup_date, b.dropoff_date FROM bookings b WHERE (b.guest_id = $1 OR b.partner_id = $1) AND b.status IN ('pending', 'accepted', 'pending_verification', 'cancel_requested')",
+            [userId]
+        );
+        for (var i = 0; i < activeBookings.length; i++) {
+            await unblockDatesForBooking(activeBookings[i].vehicle_id, activeBookings[i].pickup_date, activeBookings[i].dropoff_date);
+        }
+        await execute("UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE (guest_id = $1 OR partner_id = $1) AND status IN ('pending', 'accepted', 'pending_verification', 'cancel_requested')", [userId]);
+
+        if (user.role === 'partner') {
+            await execute('DELETE FROM partner_profiles WHERE user_id = $1', [userId]);
+            await execute('DELETE FROM vehicles WHERE partner_id = $1', [userId]);
+        }
+        await execute('DELETE FROM otp_codes WHERE user_id = $1', [userId]);
         await execute('DELETE FROM users WHERE id = $1', [userId]);
-        res.json({ message: 'User rejected and removed' });
+        res.json({ message: 'User rejected and removed', cancelled_bookings: activeBookings.length });
     } catch (err) {
         console.error('Reject user error:', err);
         res.status(500).json({ error: 'Failed to reject user' });
@@ -262,11 +278,33 @@ router.delete('/users/:id', async (req, res) => {
         const userId = parseInt(req.params.id);
         const user = await queryOne('SELECT * FROM users WHERE id = $1 AND role != $2', [userId, 'admin']);
         if (!user) return res.status(404).json({ error: 'User not found' });
+
+        // Block if user has paid but unrefunded bookings
+        var paidBookings = await queryOne(
+            "SELECT COUNT(*) as cnt FROM bookings WHERE (guest_id = $1 OR partner_id = $1) AND payment_status = 'paid'",
+            [userId]
+        );
+        if (paidBookings && parseInt(paidBookings.cnt) > 0) {
+            return res.status(400).json({ error: 'Cannot delete user with ' + paidBookings.cnt + ' paid booking(s). Refund them first.' });
+        }
+
+        // Cancel active bookings and unblock dates
+        var activeBookings = await queryAll(
+            "SELECT b.id, b.vehicle_id, b.pickup_date, b.dropoff_date FROM bookings b WHERE (b.guest_id = $1 OR b.partner_id = $1) AND b.status IN ('pending', 'accepted', 'pending_verification', 'cancel_requested')",
+            [userId]
+        );
+        for (var i = 0; i < activeBookings.length; i++) {
+            await unblockDatesForBooking(activeBookings[i].vehicle_id, activeBookings[i].pickup_date, activeBookings[i].dropoff_date);
+        }
+        await execute("UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE (guest_id = $1 OR partner_id = $1) AND status IN ('pending', 'accepted', 'pending_verification', 'cancel_requested')", [userId]);
+
         if (user.role === 'partner') {
+            await execute('DELETE FROM partner_profiles WHERE user_id = $1', [userId]);
             await execute('DELETE FROM vehicles WHERE partner_id = $1', [userId]);
         }
+        await execute('DELETE FROM otp_codes WHERE user_id = $1', [userId]);
         await execute('DELETE FROM users WHERE id = $1', [userId]);
-        res.json({ message: 'User deleted' + (user.role === 'partner' ? ' (all vehicles removed)' : '') });
+        res.json({ message: 'User deleted' + (user.role === 'partner' ? ' (all vehicles removed)' : '') + '. ' + activeBookings.length + ' booking(s) cancelled.' });
     } catch (err) {
         console.error('Delete user error:', err);
         res.status(500).json({ error: 'Failed to delete user' });
@@ -448,8 +486,28 @@ router.put('/vehicles/:id/status', async (req, res) => {
 router.delete('/vehicles/:id/approve-delete', async (req, res) => {
     try {
         const vehicleId = parseInt(req.params.id);
+
+        // Block if vehicle has paid unreffunded bookings
+        var paidBookings = await queryOne(
+            "SELECT COUNT(*) as cnt FROM bookings WHERE vehicle_id = $1 AND payment_status = 'paid'",
+            [vehicleId]
+        );
+        if (paidBookings && parseInt(paidBookings.cnt) > 0) {
+            return res.status(400).json({ error: 'Cannot delete vehicle with ' + paidBookings.cnt + ' paid booking(s). Refund them first.' });
+        }
+
+        // Cancel active bookings and unblock dates
+        var activeBookings = await queryAll(
+            "SELECT id, vehicle_id, pickup_date, dropoff_date FROM bookings WHERE vehicle_id = $1 AND status IN ('pending', 'accepted', 'pending_verification', 'cancel_requested')",
+            [vehicleId]
+        );
+        for (var i = 0; i < activeBookings.length; i++) {
+            await unblockDatesForBooking(activeBookings[i].vehicle_id, activeBookings[i].pickup_date, activeBookings[i].dropoff_date);
+        }
+        await execute("UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE vehicle_id = $1 AND status IN ('pending', 'accepted', 'pending_verification', 'cancel_requested')", [vehicleId]);
+
         await execute('DELETE FROM vehicles WHERE id = $1', [vehicleId]);
-        res.json({ message: 'Vehicle deletion approved and vehicle removed' });
+        res.json({ message: 'Vehicle deletion approved and vehicle removed. ' + activeBookings.length + ' booking(s) cancelled.' });
     } catch (err) {
         console.error('Admin approve delete error:', err);
         res.status(500).json({ error: 'Failed to approve vehicle deletion' });
@@ -470,8 +528,28 @@ router.put('/vehicles/:id/reject-delete', async (req, res) => {
 router.delete('/vehicles/:id', async (req, res) => {
     try {
         const vehicleId = parseInt(req.params.id);
+
+        // Block if vehicle has paid unreffunded bookings
+        var paidBookings = await queryOne(
+            "SELECT COUNT(*) as cnt FROM bookings WHERE vehicle_id = $1 AND payment_status = 'paid'",
+            [vehicleId]
+        );
+        if (paidBookings && parseInt(paidBookings.cnt) > 0) {
+            return res.status(400).json({ error: 'Cannot delete vehicle with ' + paidBookings.cnt + ' paid booking(s). Refund them first.' });
+        }
+
+        // Cancel active bookings and unblock dates
+        var activeBookings = await queryAll(
+            "SELECT id, vehicle_id, pickup_date, dropoff_date FROM bookings WHERE vehicle_id = $1 AND status IN ('pending', 'accepted', 'pending_verification', 'cancel_requested')",
+            [vehicleId]
+        );
+        for (var i = 0; i < activeBookings.length; i++) {
+            await unblockDatesForBooking(activeBookings[i].vehicle_id, activeBookings[i].pickup_date, activeBookings[i].dropoff_date);
+        }
+        await execute("UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE vehicle_id = $1 AND status IN ('pending', 'accepted', 'pending_verification', 'cancel_requested')", [vehicleId]);
+
         await execute('DELETE FROM vehicles WHERE id = $1', [vehicleId]);
-        res.json({ message: 'Vehicle deleted' });
+        res.json({ message: 'Vehicle deleted. ' + activeBookings.length + ' booking(s) cancelled.' });
     } catch (err) {
         console.error('Admin delete vehicle error:', err);
         res.status(500).json({ error: 'Failed to delete vehicle' });

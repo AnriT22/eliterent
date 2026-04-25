@@ -3,6 +3,7 @@
    ======================================== */
 
 (function () {
+    function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
     var vehicleId = null;
     var vehicleData = null;
     var blockedDates = {};
@@ -12,6 +13,15 @@
     var vdCalDisplay = null; // current month in calendar
     var vdTempPickupDate = null;
     var vdTempDropoffDate = null;
+
+    // Translation helper
+    function vt(key, fallback) {
+        if (typeof I18n !== 'undefined' && I18n.t) {
+            var val = I18n.t(key);
+            if (val && val !== key) return val;
+        }
+        return fallback;
+    }
 
     // Parse ?id= from URL
     var params = new URLSearchParams(window.location.search);
@@ -133,29 +143,29 @@
 
         // Specs grid
         var specs = [
-            { label: 'Category',  val: cap(cat) },
-            { label: 'Year',      val: year },
-            { label: 'Engine',    val: cap(engine) },
-            { label: 'Gearbox',   val: cap(gearbox) },
-            { label: 'Drive',     val: (v.drive_type || '').toUpperCase() },
-            { label: 'Seats',     val: (v.seats || 5) + ' seats' },
-            { label: 'Doors',     val: (v.doors || 4) + ' doors' },
-            { label: 'Interior',  val: cap(v.interior_type || 'fabric') },
-            { label: 'Steering',  val: cap(v.steering_side || 'left') + ' Hand' },
-            { label: 'Color',     val: cap(v.color || '') },
-            { label: 'Fuel Policy', val: cap((v.fuel_policy || 'full_to_full').replace(/_/g, ' ')) },
-            { label: 'Deposit',   val: v.deposit_amount ? '$' + v.deposit_amount : 'None' },
-            { label: 'Min Age',   val: (v.min_age || 21) + ' years' },
-            { label: 'Price/day', val: '$' + (v.price_per_day || 0) }
+            { label: vt('vehicle_page.category', 'Category'),  val: cap(cat) },
+            { label: vt('vehicle_page.year', 'Year'),      val: year },
+            { label: vt('vehicle_page.engine', 'Engine'),    val: cap(engine) },
+            { label: vt('vehicle_page.gearbox', 'Gearbox'),   val: cap(gearbox) },
+            { label: vt('vehicle_page.drive', 'Drive'),     val: (v.drive_type || '').toUpperCase() },
+            { label: vt('vehicle_page.seats', 'Seats'),     val: (v.seats || 5) + ' ' + vt('vehicle_page.seats_suffix', 'seats') },
+            { label: vt('vehicle_page.doors', 'Doors'),     val: (v.doors || 4) + ' ' + vt('vehicle_page.doors_suffix', 'doors') },
+            { label: vt('vehicle_page.interior', 'Interior'),  val: cap(v.interior_type || 'fabric') },
+            { label: vt('vehicle_page.steering', 'Steering'),  val: cap(v.steering_side || 'left') },
+            { label: vt('vehicle_page.color', 'Color'),     val: cap(v.color || '') },
+            { label: vt('vehicle_page.fuel_policy', 'Fuel Policy'), val: cap((v.fuel_policy || 'full_to_full').replace(/_/g, ' ')) },
+            { label: vt('vehicle_page.deposit', 'Deposit'),   val: v.deposit_amount ? '$' + v.deposit_amount : 'None' },
+            { label: vt('vehicle_page.min_age', 'Min Age'),   val: (v.min_age || 21) + ' ' + vt('vehicle_page.years_suffix', 'years') },
+            { label: vt('vehicle_page.price_day', 'Price/Day'), val: '$' + (v.price_per_day || 0) }
         ];
-        if (v.fuel_consumption) specs.push({ label: 'Fuel', val: v.fuel_consumption });
-        if (v.mileage_limit_enabled && v.mileage_km) specs.push({ label: 'Mileage Limit', val: v.mileage_km + ' km' });
-        else if (!v.mileage_limit_enabled) specs.push({ label: 'Mileage', val: 'Unlimited' });
+        if (v.fuel_consumption) specs.push({ label: vt('vehicle_page.fuel', 'Fuel'), val: v.fuel_consumption });
+        if (v.mileage_limit_enabled && v.mileage_km) specs.push({ label: vt('vehicle_page.mileage_limit', 'Mileage Limit'), val: v.mileage_km + ' km' });
+        else if (!v.mileage_limit_enabled) specs.push({ label: vt('vehicle_page.mileage', 'Mileage'), val: vt('vehicle_page.unlimited', 'Unlimited') });
         var specsGrid = document.getElementById('vdSpecsGrid');
         specs.forEach(function(s) {
             var div = document.createElement('div');
             div.className = 'vd-spec-item';
-            div.innerHTML = '<span class="vd-spec-label">' + s.label + '</span><span class="vd-spec-val">' + s.val + '</span>';
+            div.innerHTML = '<span class="vd-spec-label">' + esc(s.label) + '</span><span class="vd-spec-val">' + esc(s.val) + '</span>';
             specsGrid.appendChild(div);
         });
 
@@ -172,7 +182,7 @@
         if (Array.isArray(rawFeatures)) {
             features = rawFeatures;
         } else if (rawFeatures && typeof rawFeatures === 'object') {
-            var featureLabels = { ac: 'Air Conditioning', cruise_control: 'Cruise Control', rear_camera: 'Rear Camera', parking_assist: 'Parking Assist', abs: 'ABS', esp: 'ESP', heated_seats: 'Heated Seats', sunroof: 'Sunroof' };
+            var featureLabels = { ac: vt('vehicle_page.ac','Air Conditioning'), cruise_control: vt('vehicle_page.cruise_control','Cruise Control'), rear_camera: vt('vehicle_page.rear_camera','Rear Camera'), parking_assist: vt('vehicle_page.parking_assist','Parking Assist'), abs: 'ABS', esp: 'ESP', heated_seats: vt('vehicle_page.heated_seats','Heated Seats'), sunroof: vt('vehicle_page.sunroof','Sunroof') };
             Object.keys(rawFeatures).forEach(function(key) {
                 if (rawFeatures[key]) features.push(featureLabels[key] || cap(key.replace(/_/g, ' ')));
             });
@@ -182,7 +192,7 @@
         var rawMm = v.multimedia;
         if (typeof rawMm === 'string') { try { rawMm = JSON.parse(rawMm); } catch(e) { rawMm = {}; } }
         if (rawMm && typeof rawMm === 'object') {
-            var mmLabels = { android_auto: 'Android Auto', apple_carplay: 'Apple CarPlay', bluetooth: 'Bluetooth', touch_screen: 'Touch Screen' };
+            var mmLabels = { android_auto: vt('vehicle_page.android_auto','Android Auto'), apple_carplay: vt('vehicle_page.apple_carplay','Apple CarPlay'), bluetooth: vt('vehicle_page.bluetooth','Bluetooth'), touch_screen: vt('vehicle_page.touch_screen','Touch Screen') };
             Object.keys(rawMm).forEach(function(key) {
                 if (rawMm[key]) features.push(mmLabels[key] || cap(key.replace(/_/g, ' ')));
             });
@@ -192,10 +202,10 @@
         var vdExtras = v.extras;
         if (typeof vdExtras === 'string') { try { vdExtras = JSON.parse(vdExtras); } catch(e) { vdExtras = {}; } }
         vdExtras = vdExtras || {};
-        if (vdExtras.svaneti_roads) features.push('Svaneti Roads Accepted');
+        if (vdExtras.svaneti_roads) features.push(vt('vehicle_page.svaneti_accepted','Svaneti Roads Accepted'));
 
-        if (v.insurance_included) features.unshift('Insurance Included');
-        if (v.free_cancellation) features.unshift('Free Cancellation');
+        if (v.insurance_included) features.unshift(vt('vehicle_page.insurance_included','Insurance Included'));
+        if (v.free_cancellation) features.unshift(vt('vehicle_page.free_cancellation','Free Cancellation'));
         if (features.length > 0) {
             var featEl = document.getElementById('vdFeatures');
             features.forEach(function(f) {

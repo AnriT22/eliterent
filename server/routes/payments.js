@@ -68,9 +68,21 @@ router.post('/capture-order', authenticateToken, requireRole('guest'), async (re
 
         if (capture.status === 'COMPLETED') {
             var captureId = '';
+            var capturedAmount = 0;
             try {
-                captureId = capture.purchase_units[0].payments.captures[0].id;
+                var capData = capture.purchase_units[0].payments.captures[0];
+                captureId = capData.id;
+                capturedAmount = parseFloat(capData.amount.value) || 0;
             } catch (e) {}
+
+            var expectedFee = parseFloat(booking.service_fee) || 0;
+            if (Math.abs(capturedAmount - expectedFee) > 0.01) {
+                console.error('PAYMENT MISMATCH: booking #' + bookingId + ' expected $' + expectedFee.toFixed(2) + ' but PayPal captured $' + capturedAmount.toFixed(2));
+                return res.status(400).json({
+                    error: 'Payment amount mismatch. Expected $' + expectedFee.toFixed(2) + ' but received $' + capturedAmount.toFixed(2) + '. Please contact support.',
+                    status: 'MISMATCH'
+                });
+            }
 
             await execute(
                 `UPDATE bookings SET
@@ -81,7 +93,7 @@ router.post('/capture-order', authenticateToken, requireRole('guest'), async (re
                     deposit_paid = $3,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id = $4`,
-                [orderId, captureId, parseFloat(booking.service_fee) || 0, bookingId]
+                [orderId, captureId, capturedAmount, bookingId]
             );
 
             res.json({

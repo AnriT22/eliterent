@@ -97,8 +97,8 @@
                 </svg>
             </div>
 
-            <h1 class="vp-title">Verify Your Phone</h1>
-            <p class="vp-subtitle">One more step! Add your phone number so partners can contact you about bookings.</p>
+            <h1 class="vp-title" data-i18n="verify_phone.title">Verify Your Phone</h1>
+            <p class="vp-subtitle" data-i18n="verify_phone.subtitle">One more step! Add your phone number so partners can contact you about bookings.</p>
 
             <div class="vp-user-info" id="userInfoBar" style="display:none;">
                 <div id="userAvatar"></div>
@@ -110,18 +110,18 @@
 
             <!-- STEP 1: Enter phone number -->
             <div class="vp-step active" id="stepPhone">
-                <label class="vp-label">Phone Number</label>
+                <label class="vp-label" data-i18n="verify_phone.phone_label">Phone Number</label>
                 <input type="tel" class="vp-input" id="phoneInput" placeholder="+995 5XX XXX XXX" autocomplete="tel">
                 <p class="vp-hint">International format with country code (e.g. +995 for Georgia)</p>
                 <div class="vp-error" id="phoneError"></div>
-                <button class="vp-btn vp-btn-primary" id="sendCodeBtn" onclick="sendPhoneCode()">Send Verification Code</button>
-                <button class="vp-btn vp-btn-ghost" onclick="skipVerification()">Skip for now</button>
+                <button class="vp-btn vp-btn-primary" id="sendCodeBtn" onclick="sendPhoneCode()" data-i18n="verify_phone.send_code">Send Verification Code</button>
+                <button class="vp-btn vp-btn-ghost" onclick="skipVerification()" data-i18n="verify_phone.skip">Skip for now</button>
             </div>
 
             <!-- STEP 2: Enter OTP code -->
             <div class="vp-step" id="stepOtp">
                 <p class="vp-subtitle" id="otpSentMsg" style="margin-bottom:16px;"></p>
-                <label class="vp-label">Enter 6-digit code</label>
+                <label class="vp-label" data-i18n="verify_phone.enter_code">Enter 6-digit code</label>
                 <div class="vp-otp-row">
                     <input type="text" class="vp-otp-input" id="otp1" maxlength="1" inputmode="numeric" pattern="[0-9]">
                     <input type="text" class="vp-otp-input" id="otp2" maxlength="1" inputmode="numeric" pattern="[0-9]">
@@ -132,11 +132,11 @@
                 </div>
                 <div class="vp-error" id="otpError"></div>
                 <div class="vp-success" id="otpSuccess"></div>
-                <button class="vp-btn vp-btn-primary" id="verifyCodeBtn" onclick="verifyCode()">Verify Phone</button>
+                <button class="vp-btn vp-btn-primary" id="verifyCodeBtn" onclick="verifyCode()" data-i18n="verify_phone.verify">Verify Phone</button>
                 <div class="vp-timer" id="otpTimer"></div>
-                <div class="vp-resend" id="resendLink" onclick="sendPhoneCode()">Resend code</div>
-                <button class="vp-btn vp-btn-ghost" style="margin-top:12px;" onclick="goBackToPhone()">Change phone number</button>
-                <button class="vp-btn vp-btn-ghost" onclick="skipVerification()">Skip for now</button>
+                <div class="vp-resend" id="resendLink" onclick="sendPhoneCode()" data-i18n="verify_phone.resend">Resend code</div>
+                <button class="vp-btn vp-btn-ghost" style="margin-top:12px;" onclick="goBackToPhone()" data-i18n="verify_phone.change_phone">Change phone number</button>
+                <button class="vp-btn vp-btn-ghost" onclick="skipVerification()" data-i18n="verify_phone.skip">Skip for now</button>
             </div>
         </div>
     </div>

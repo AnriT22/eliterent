@@ -19,7 +19,7 @@
         <div class="container header-content">
             <div class="header-left">
                 <a href="/" class="logo">
-                    <img src="images/logo.png" alt="RoyalCar.rent" class="logo-img">
+                    <img src="images/logo.webp" alt="RoyalCar.rent" class="logo-img">
                     <span class="logo-text">RoyalCar.rent</span>
                 </a>
             </div>
@@ -52,16 +52,16 @@
     <!-- LOADING STATE -->
     <div class="vd-loading" id="vdLoading">
         <div class="vd-loading-spinner"></div>
-        <p>Loading vehicle...</p>
+        <p data-i18n="vehicle_page.loading">Loading vehicle...</p>
     </div>
 
     <!-- ERROR STATE -->
     <div class="vd-error" id="vdError">
         <div class="vd-error-inner">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#A0A3B0" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <h2>Vehicle Not Found</h2>
-            <p>This vehicle may have been removed or is no longer available.</p>
-            <a href="vehicles.html" class="vd-back-btn">Browse All Vehicles</a>
+            <h2 data-i18n="vehicle_page.not_found">Vehicle Not Found</h2>
+            <p data-i18n="vehicle_page.not_found_desc">This vehicle may have been removed or is no longer available.</p>
+            <a href="vehicles.html" class="vd-back-btn" data-i18n="vehicle_page.browse_all">Browse All Vehicles</a>
         </div>
     </div>
 
@@ -82,19 +82,19 @@
 
             <!-- Specs -->
             <div class="vd-section">
-                <h2 class="vd-section-title">Specifications</h2>
+                <h2 class="vd-section-title" data-i18n="vehicle_page.specs">Specifications</h2>
                 <div class="vd-specs-grid" id="vdSpecsGrid"></div>
             </div>
 
             <!-- Description -->
             <div class="vd-section" id="vdDescSection" style="display:none;">
-                <h2 class="vd-section-title">About This Vehicle</h2>
+                <h2 class="vd-section-title" data-i18n="vehicle_page.about_vehicle">About This Vehicle</h2>
                 <p class="vd-description" id="vdDescription"></p>
             </div>
 
             <!-- Features -->
             <div class="vd-section" id="vdFeaturesSection" style="display:none;">
-                <h2 class="vd-section-title">Features & Amenities</h2>
+                <h2 class="vd-section-title" data-i18n="vehicle_page.features">Features & Amenities</h2>
                 <div class="vd-features-grid" id="vdFeatures"></div>
             </div>
         </div>
@@ -109,7 +109,7 @@
 
                 <div class="vd-price-display">
                     <span class="vd-price-amount" id="vdPrice">$0</span>
-                    <span class="vd-price-unit">/ day</span>
+                    <span class="vd-price-unit" data-i18n="vehicle_page.per_day">/ day</span>
                 </div>
 
                 <div class="vd-partner-info" id="vdPartnerInfo" style="display:none;">
@@ -121,17 +121,17 @@
                 <div class="vd-date-section">
                     <div class="vd-date-row">
                         <div class="vd-date-box" id="vdPickupBox" onclick="vdOpenCalendar('pickup')">
-                            <div class="vd-date-label">Pick-up Date</div>
-                            <div class="vd-date-val" id="vdPickupVal">Select date</div>
+                            <div class="vd-date-label" data-i18n="vehicle_page.pickup_date">Pick-up Date</div>
+                            <div class="vd-date-val" id="vdPickupVal" data-i18n="vehicle_page.select_date">Select date</div>
                         </div>
                         <div class="vd-date-box" id="vdDropoffBox" onclick="vdOpenCalendar('dropoff')">
-                            <div class="vd-date-label">Drop-off Date</div>
-                            <div class="vd-date-val" id="vdDropoffVal">Select date</div>
+                            <div class="vd-date-label" data-i18n="vehicle_page.dropoff_date">Drop-off Date</div>
+                            <div class="vd-date-val" id="vdDropoffVal" data-i18n="vehicle_page.select_date">Select date</div>
                         </div>
                     </div>
                     <div class="vd-time-row">
                         <div class="vd-time-group">
-                            <label class="vd-time-label">Pick-up Time</label>
+                            <label class="vd-time-label" data-i18n="vehicle_page.pickup_time">Pick-up Time</label>
                             <select class="vd-time-select" id="vdPickupTime">
                                 <option value="00:00">00:00</option><option value="01:00">01:00</option>
                                 <option value="02:00">02:00</option><option value="03:00">03:00</option>
@@ -148,7 +148,7 @@
                             </select>
                         </div>
                         <div class="vd-time-group">
-                            <label class="vd-time-label">Drop-off Time</label>
+                            <label class="vd-time-label" data-i18n="vehicle_page.dropoff_time">Drop-off Time</label>
                             <select class="vd-time-select" id="vdDropoffTime">
                                 <option value="00:00">00:00</option><option value="01:00">01:00</option>
                                 <option value="02:00">02:00</option><option value="03:00">03:00</option>
@@ -166,16 +166,16 @@
                         </div>
                     </div>
                     <div class="vd-total-row" id="vdTotalRow" style="display:none;">
-                        <span class="vd-total-label">Total Estimate</span>
+                        <span class="vd-total-label" data-i18n="vehicle_page.total_estimate">Total Estimate</span>
                         <span class="vd-total-amount" id="vdTotalAmount"></span>
                     </div>
                 </div>
 
                 <div class="vd-badges" id="vdBadges"></div>
 
-                <button class="vd-book-btn" id="vdBookBtn">Next →</button>
-                <button class="vd-clear-btn" id="vdClearBtn" style="display:none;">Clear Dates</button>
-                <button class="vd-back-link" onclick="history.back()">← Back to Vehicles</button>
+                <button class="vd-book-btn" id="vdBookBtn" data-i18n="vehicle_page.next">Next →</button>
+                <button class="vd-clear-btn" id="vdClearBtn" style="display:none;" data-i18n="vehicle_page.clear_dates">Clear Dates</button>
+                <button class="vd-back-link" onclick="history.back()" data-i18n="vehicle_page.back">← Back to Vehicles</button>
             </div>
         </div>
 
@@ -185,7 +185,7 @@
     <div class="bk-overlay" id="vdBookingModal" style="display:none;">
         <div class="bk-modal">
             <button class="bk-close" id="vdBookingClose">&#x2715;</button>
-            <h2 class="bk-title">Confirm Your Booking</h2>
+            <h2 class="bk-title" data-i18n="vehicle_page.confirm_booking">Confirm Your Booking</h2>
 
             <div class="bk-vehicle-row">
                 <img class="bk-vehicle-img" id="vdBkImg" src="" alt="">
@@ -197,49 +197,49 @@
 
             <div class="bk-dates-row">
                 <div class="bk-date-box">
-                    <div class="bk-date-label">Pick-up</div>
+                    <div class="bk-date-label" data-i18n="vehicle_page.pickup">Pick-up</div>
                     <div class="bk-date-val" id="vdBkPickup"></div>
                 </div>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A0A3B0" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 <div class="bk-date-box">
-                    <div class="bk-date-label">Drop-off</div>
+                    <div class="bk-date-label" data-i18n="vehicle_page.dropoff">Drop-off</div>
                     <div class="bk-date-val" id="vdBkDropoff"></div>
                 </div>
                 <div class="bk-date-box bk-days-box">
-                    <div class="bk-date-label">Duration</div>
+                    <div class="bk-date-label" data-i18n="vehicle_page.duration">Duration</div>
                     <div class="bk-date-val" id="vdBkDays"></div>
                 </div>
             </div>
 
             <div class="bk-price-row">
-                <span class="bk-price-label">Total Price</span>
+                <span class="bk-price-label" data-i18n="vehicle_page.total_price">Total Price</span>
                 <span class="bk-price-total" id="vdBkTotal"></span>
             </div>
 
             <div class="bk-field-group">
-                <label class="bk-label">Pick-up Location</label>
+                <label class="bk-label" data-i18n="vehicle_page.pickup_location">Pick-up Location</label>
                 <input type="text" class="bk-input" id="vdBkPickupLoc" placeholder="e.g. Tbilisi Airport" value="Tbilisi">
             </div>
             <div class="bk-field-group">
-                <label class="bk-label">Drop-off Location</label>
+                <label class="bk-label" data-i18n="vehicle_page.dropoff_location">Drop-off Location</label>
                 <input type="text" class="bk-input" id="vdBkDropoffLoc" placeholder="Same as pick-up or specify" value="Tbilisi">
             </div>
             <div class="bk-field-group">
-                <label class="bk-label">Notes (optional)</label>
+                <label class="bk-label" data-i18n="vehicle_page.notes">Notes (optional)</label>
                 <textarea class="bk-input bk-textarea" id="vdBkNotes" placeholder="Any special requests..."></textarea>
             </div>
 
             <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;margin-bottom:14px;">
-                <p style="color:#dc2626;font-size:13px;font-weight:600;margin:0 0 6px;">Please send the following documents to the owner via WhatsApp:</p>
+                <p style="color:#dc2626;font-size:13px;font-weight:600;margin:0 0 6px;" data-i18n="vehicle_page.docs_warning">Please send the following documents to the owner via WhatsApp:</p>
                 <ul style="color:#dc2626;font-size:13px;margin:0;padding-left:20px;line-height:1.7;">
-                    <li>Driver's license (both sides)</li>
-                    <li>Passport photo page</li>
+                    <li data-i18n="vehicle_page.doc_license">Driver's license (both sides)</li>
+                    <li data-i18n="vehicle_page.doc_passport">Passport photo page</li>
                 </ul>
             </div>
 
             <div class="bk-error" id="vdBkError" style="display:none;"></div>
-            <button class="bk-submit-btn" id="vdBkSubmit">Confirm Booking</button>
-            <p class="bk-note">You will not be charged now. The partner will confirm your booking.</p>
+            <button class="bk-submit-btn" id="vdBkSubmit" data-i18n="vehicle_page.confirm_btn">Confirm Booking</button>
+            <p class="bk-note" data-i18n="vehicle_page.confirm_note">You will not be charged now. The partner will confirm your booking.</p>
         </div>
     </div>
 
@@ -247,11 +247,11 @@
     <div class="bk-overlay" id="vdSuccessModal" style="display:none;">
         <div class="bk-modal bk-success-modal">
             <div class="bk-success-icon">&#x2714;</div>
-            <h2 class="bk-title">Booking Submitted!</h2>
-            <p class="bk-success-msg">Your booking request has been sent to the partner. You'll see it in <strong>My Bookings</strong> in your profile.</p>
+            <h2 class="bk-title" data-i18n="vehicle_page.booking_submitted">Booking Submitted!</h2>
+            <p class="bk-success-msg" data-i18n="vehicle_page.booking_submitted_msg">Your booking request has been sent to the partner. You'll see it in My Bookings in your profile.</p>
             <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-                <a href="guest-profile.html#bookings" class="bk-submit-btn" style="text-decoration:none;display:inline-block;">View My Bookings</a>
-                <a href="vehicles.html" class="bk-cancel-btn" style="text-decoration:none;display:inline-block;text-align:center;">Browse More</a>
+                <a href="guest-profile.html#bookings" class="bk-submit-btn" style="text-decoration:none;display:inline-block;" data-i18n="vehicle_page.view_bookings">View My Bookings</a>
+                <a href="vehicles.html" class="bk-cancel-btn" style="text-decoration:none;display:inline-block;text-align:center;" data-i18n="vehicle_page.browse_more">Browse More</a>
             </div>
         </div>
     </div>
@@ -270,8 +270,8 @@
             </div>
             <div class="vd-cal-grid" id="vdCalGrid"></div>
             <div class="vd-cal-footer">
-                <span id="vdCalInstruction">Select a date</span>
-                <button class="vd-cal-apply" id="vdCalApply">Apply</button>
+                <span id="vdCalInstruction" data-i18n="vehicle_page.select_a_date">Select a date</span>
+                <button class="vd-cal-apply" id="vdCalApply" data-i18n="vehicle_page.apply">Apply</button>
             </div>
         </div>
     </div>
@@ -285,7 +285,7 @@
         <div class="container footer-content">
             <div class="footer-column"><h4 data-i18n="footer.tagline">RoyalCar.rent</h4><p data-i18n="footer.tagline">Premium car rental marketplace for Georgia adventures.</p><div class="social-icons"><a href="https://www.facebook.com/profile.php?id=61583448788067" target="_blank" class="social-icon" title="Facebook"><img src="images/Facebook_Logo.png" alt="Facebook" width="18" height="18" style="object-fit:contain;"></a><a href="https://www.instagram.com/eliterentalgeorgia/" target="_blank" class="social-icon" title="Instagram"><img src="images/Instagram.png" alt="Instagram" width="18" height="18" style="object-fit:contain;"></a></div></div>
             <div class="footer-column"><h4 data-i18n="footer.legal">Legal</h4><ul><li><a href="tos.html" data-i18n="footer.terms">Terms & Conditions</a></li><li><a href="privacy.html" data-i18n="footer.privacy">Privacy Policy</a></li><li><a href="#" onclick="document.getElementById('contactModal').style.display='flex'; return false;">Contact</a></li></ul></div>
-            <div class="footer-column"><h4>Contact</h4><p>📧 elite.rental25@gmail.com</p><p>📞 +995 591 522 299</p><p>📍 Tbilisi, Georgia</p></div>
+            <div class="footer-column"><h4 data-i18n="footer.contact_title">Contact</h4><p>📧 elite.rental25@gmail.com</p><p>📞 +995 591 522 299</p><p>📍 <span data-i18n="footer.address">Tbilisi, Georgia</span></p></div>
         </div>
         <div class="footer-bottom"><p data-i18n="footer.copyright">&copy; 2026 RoyalCar.rent. All rights reserved.</p></div>
     </footer>
