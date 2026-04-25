@@ -154,6 +154,10 @@
             color: #A0A3B0;
         }
         .pay-footer a { color: #D4AF37; text-decoration: none; }
+        @keyframes payTimerPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
+        }
         @media (max-width: 560px) {
             .pay-container { margin: 20px auto; }
             .pay-header, .pay-body { padding: 20px; }
@@ -217,7 +221,7 @@
     </div>
 
     <script src="navbar-auth.js?v=2"></script>
-    <script src="payment.js"></script>
+    <script src="payment.js?v=2"></script>
 <script src="premium-animations.js"></script>
 </body>
 </html>
