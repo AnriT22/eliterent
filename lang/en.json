@@ -1023,7 +1023,12 @@
     "submitted": "Reservation Submitted!",
     "view_bookings": "View My Bookings",
     "browse_more": "Browse More",
-    "booking_failed": "Booking failed"
+    "booking_failed": "Booking failed",
+    "verify_title": "Verify Your Phone",
+    "verify_desc": "We will send a verification code to",
+    "send_code": "Send Code",
+    "sending": "Sending...",
+    "cancel": "Cancel"
   },
   "reviews_page": {
     "title": "Customer Reviews",

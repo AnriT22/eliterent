@@ -664,11 +664,8 @@
             });
         });
     }
-    document.getElementById('rvBookBtn').addEventListener('click', function () {
-        var btn = this;
-        btn.disabled = true;
-        btn.querySelector('span:nth-child(2)').textContent = 'Submitting...';
-
+    // Collect form data for booking
+    function collectBookingData() {
         var pickupLoc = document.querySelector('input[name="pickupLoc"]:checked');
         var dropoffLoc = document.querySelector('input[name="dropoffLoc"]:checked');
         var pickupLocation = pickupLoc ? pickupLoc.value : 'Tbilisi';
@@ -683,30 +680,81 @@
             dropoffLocation += ' — ' + dropoffCustom.value.trim();
         }
 
-        var selectedExtras = getSelectedExtras().map(function (service) { return service.code; });
-        var notes = document.getElementById('rvNotes').value.trim();
-        var locationFee = getLocationSurcharge('pickupLoc') + getLocationSurcharge('dropoffLoc');
+        return {
+            vehicle_id: vehicleId,
+            pickup_date: fmtD(pickupDate),
+            dropoff_date: fmtD(dropoffDate),
+            pickup_time: pickupTime,
+            dropoff_time: dropoffTime,
+            pickup_location: pickupLocation,
+            dropoff_location: dropoffLocation,
+            selected_extras: getSelectedExtras().map(function (service) { return service.code; }),
+            location_fee: getLocationSurcharge('pickupLoc') + getLocationSurcharge('dropoffLoc'),
+            guest_notes: document.getElementById('rvNotes').value.trim()
+        };
+    }
 
+    // Show Send Code confirmation modal
+    function showSendCodeModal(bookingPayload, btn) {
+        var phone = (user && user.phone) ? user.phone : '';
+        var maskedPhone = phone ? '****' + phone.slice(-4) : '****';
+
+        // Remove existing modal if any
+        var existing = document.getElementById('sendCodeOverlay');
+        if (existing) existing.remove();
+
+        var t = function(key, fallback) {
+            return (typeof I18n !== 'undefined' && I18n.t) ? (function() { var v = I18n.t(key); return (v && v !== key) ? v : fallback; })() : fallback;
+        };
+
+        var html = '<div id="sendCodeOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);">'
+            + '<div style="background:#1C1E26;border:1px solid #3A3F4B;border-radius:20px;padding:40px;max-width:400px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);">'
+            + '<div style="width:64px;height:64px;background:linear-gradient(135deg,#D4AF37,#B8963F);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px;">'
+            + '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>'
+            + '</div>'
+            + '<h2 style="color:#EAEAEA;font-size:20px;font-weight:700;margin-bottom:8px;">' + t('reservation.verify_title', 'Verify Your Phone') + '</h2>'
+            + '<p style="color:#A0A3B0;font-size:14px;margin-bottom:24px;">' + t('reservation.verify_desc', 'We will send a verification code to') + '<br><strong style="color:#D4AF37;font-size:16px;">' + maskedPhone + '</strong></p>'
+            + '<button id="sendCodeBtn" style="width:100%;padding:14px;background:linear-gradient(135deg,#C9A84C,#B8963F);border:none;border-radius:12px;color:#1C1E26;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.2s;margin-bottom:12px;">' + t('reservation.send_code', 'Send Code') + '</button>'
+            + '<button id="sendCodeCancel" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:#A0A3B0;font-size:14px;cursor:pointer;transition:all 0.2s;">' + t('reservation.cancel', 'Cancel') + '</button>'
+            + '</div></div>';
+
+        document.body.insertAdjacentHTML('beforeend', html);
+
+        document.getElementById('sendCodeCancel').addEventListener('click', function() {
+            document.getElementById('sendCodeOverlay').remove();
+            btn.disabled = false;
+            btn.querySelector('span:nth-child(2)').textContent = (typeof I18n !== 'undefined' ? I18n.t('vehicle_page.book_now') : 'Book now');
+        });
+        document.getElementById('sendCodeOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.remove();
+                btn.disabled = false;
+                btn.querySelector('span:nth-child(2)').textContent = (typeof I18n !== 'undefined' ? I18n.t('vehicle_page.book_now') : 'Book now');
+            }
+        });
+
+        document.getElementById('sendCodeBtn').addEventListener('click', function() {
+            var sendBtn = this;
+            sendBtn.disabled = true;
+            sendBtn.textContent = t('reservation.sending', 'Sending...');
+            submitBooking(bookingPayload, btn, function() {
+                document.getElementById('sendCodeOverlay').remove();
+            });
+        });
+    }
+
+    // Submit booking to server
+    function submitBooking(payload, bookBtn, onDone) {
         fetch('/api/bookings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-            body: JSON.stringify({
-                vehicle_id: vehicleId,
-                pickup_date: fmtD(pickupDate),
-                dropoff_date: fmtD(dropoffDate),
-                pickup_time: pickupTime,
-                dropoff_time: dropoffTime,
-                pickup_location: pickupLocation,
-                dropoff_location: dropoffLocation,
-                selected_extras: selectedExtras,
-                location_fee: locationFee,
-                guest_notes: notes
-            })
+            body: JSON.stringify(payload)
         })
         .then(function (r) { return r.json(); })
         .then(function (data) {
-            btn.disabled = false;
-            btn.querySelector('span:nth-child(2)').textContent = (typeof I18n !== 'undefined' ? I18n.t('vehicle_page.book_now') : 'Book now');
+            bookBtn.disabled = false;
+            bookBtn.querySelector('span:nth-child(2)').textContent = (typeof I18n !== 'undefined' ? I18n.t('vehicle_page.book_now') : 'Book now');
+            if (onDone) onDone();
             if (data.error) {
                 if (data.phoneRequired) {
                     var phoneMsg = (typeof I18n !== 'undefined' ? I18n.t('errors.phone_verify_required') : data.error);
@@ -764,10 +812,19 @@
             document.getElementById('rvSuccessModal').style.display = 'flex';
         })
         .catch(function () {
-            btn.disabled = false;
-            btn.querySelector('span:nth-child(2)').textContent = 'Book now';
+            bookBtn.disabled = false;
+            bookBtn.querySelector('span:nth-child(2)').textContent = 'Book now';
+            if (onDone) onDone();
             alert('Network error. Please try again.');
         });
+    }
+
+    document.getElementById('rvBookBtn').addEventListener('click', function () {
+        var btn = this;
+        btn.disabled = true;
+        btn.querySelector('span:nth-child(2)').textContent = (typeof I18n !== 'undefined' ? I18n.t('reservation.sending', 'Submitting...') : 'Submitting...');
+        var payload = collectBookingData();
+        showSendCodeModal(payload, btn);
     });
 
     // Approval modal continue button
