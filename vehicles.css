@@ -332,6 +332,10 @@
     width: 180px;
     transition: border-color 0.2s;
     background: #1A1814;
+    color: #F0ECE2;
+}
+.vp-search-input::placeholder {
+    color: #9A9082;
 }
 .vp-search-input:focus {
     border-color: #C9A84C;
@@ -377,6 +381,10 @@
 }
 .vp-sort-select:focus {
     border-color: #C9A84C;
+}
+.vp-sort-select option {
+    background: #1A1814;
+    color: #F0ECE2;
 }
 
 /* ========================================
