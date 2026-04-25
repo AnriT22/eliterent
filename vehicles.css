@@ -841,7 +841,7 @@
 
 .calendar-content {
     position: relative;
-    background: white;
+    background: #1E2230;
     border-radius: 16px;
     width: 90%;
     max-width: 800px;
@@ -862,9 +862,9 @@
     width: 40px;
     height: 40px;
     border-radius: 8px;
-    border: 1px solid #2A2520;
-    background: white;
-    color: #9A9082;
+    border: 1px solid #3A3F4B;
+    background: #262A35;
+    color: #EAEAEA;
     font-size: 18px;
     cursor: pointer;
     display: flex;
@@ -874,8 +874,8 @@
 }
 
 .nav-btn:hover {
-    background: #151210;
-    border-color: #A89E8C;
+    background: #2A2F3A;
+    border-color: #C9A84C;
 }
 
 .month-year-selector {
@@ -1008,7 +1008,7 @@
 .time-group label {
     font-size: 13px;
     font-weight: 600;
-    color: #C4BAA8;
+    color: #EAEAEA;
     min-width: 100px;
 }
 
@@ -1018,12 +1018,23 @@
     gap: 4px;
 }
 
+.time-inputs span {
+    color: #EAEAEA;
+    font-weight: 600;
+}
+
 .time-select {
     padding: 6px 8px;
-    border: 1px solid #d1d5db;
+    border: 1px solid #3A3F4B;
     border-radius: 6px;
     font-size: 13px;
-    background: white;
+    background: #262A35;
+    color: #EAEAEA;
+}
+
+.time-select option {
+    background: #1a1e28;
+    color: #EAEAEA;
 }
 
 .calendar-actions {
@@ -1036,10 +1047,10 @@
 
 .btn-cancel {
     padding: 10px 20px;
-    border: 1px solid #2A2520;
+    border: 1px solid #3A3F4B;
     border-radius: 8px;
-    background: white;
-    color: #9A9082;
+    background: transparent;
+    color: #EAEAEA;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -1047,8 +1058,8 @@
 }
 
 .btn-cancel:hover {
-    background: #151210;
-    border-color: #A89E8C;
+    background: #262A35;
+    border-color: #C9A84C;
 }
 
 .btn-apply {
