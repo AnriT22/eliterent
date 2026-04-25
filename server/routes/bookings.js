@@ -262,10 +262,16 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
       return res.status(403).json({ error: "Please verify your phone number before making a reservation.", phoneRequired: true });
     }
 
+    // Auto-cancel stale pending_verification bookings (older than 10 minutes)
+    await execute(
+      "UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE guest_id = $1 AND status = 'pending_verification' AND created_at < NOW() - INTERVAL '10 minutes'",
+      [req.user.id],
+    );
+
     // Limit active bookings per user to prevent abuse
     var MAX_ACTIVE_BOOKINGS = 5;
     var activeCount = await queryOne(
-      "SELECT COUNT(*) as count FROM bookings WHERE guest_id = $1 AND status IN ('pending', 'accepted', 'pending_verification', 'cancel_requested')",
+      "SELECT COUNT(*) as count FROM bookings WHERE guest_id = $1 AND status IN ('pending', 'accepted', 'cancel_requested')",
       [req.user.id],
     );
     if (activeCount && parseInt(activeCount.count) >= MAX_ACTIVE_BOOKINGS) {
