@@ -140,21 +140,34 @@
 
             input.addEventListener('paste', function(e) {
                 e.preventDefault();
-                var paste = (e.clipboardData || window.clipboardData).getData('text');
+                var cbd = e.clipboardData || window.clipboardData;
+                var paste = cbd ? cbd.getData('text') : '';
                 var digits = paste.replace(/\D/g, '').slice(0, 6);
 
-                digits.split('').forEach(function(digit, i) {
-                    if (OTPModal.inputs[i]) {
-                        OTPModal.inputs[i].value = digit;
-                    }
-                });
-
                 if (digits.length > 0) {
+                    digits.split('').forEach(function(digit, i) {
+                        if (OTPModal.inputs[i]) {
+                            OTPModal.inputs[i].value = digit;
+                        }
+                    });
                     OTPModal.inputs[Math.min(digits.length, 5)].focus();
+                    updateInputStates();
+                    checkComplete();
+                } else {
+                    // Fallback: some mobile browsers don't expose clipboardData
+                    var self = this;
+                    setTimeout(function() {
+                        var val = self.value.replace(/\D/g, '');
+                        if (val.length > 1) {
+                            val.slice(0, 6).split('').forEach(function(digit, i) {
+                                if (OTPModal.inputs[i]) OTPModal.inputs[i].value = digit;
+                            });
+                            OTPModal.inputs[Math.min(val.length, 5)].focus();
+                            updateInputStates();
+                            checkComplete();
+                        }
+                    }, 0);
                 }
-
-                updateInputStates();
-                checkComplete();
             });
 
             input.addEventListener('focus', function(e) {
