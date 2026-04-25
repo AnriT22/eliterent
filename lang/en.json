@@ -65,6 +65,7 @@
     "show_all": "Show all vehicles",
     "view_all": "View All Vehicles",
     "per_day": "/day",
+    "select_vehicle": "Select Vehicle",
     "book_now": "Book Now",
     "details": "Details",
     "no_results": "No vehicles match your filters",
@@ -537,7 +538,9 @@
     "role": "Role",
     "danger_zone": "Danger Zone",
     "delete_warning": "Once you delete your account, there is no going back.",
-    "delete_account": "Delete Account"
+    "delete_account": "Delete Account",
+    "view_details": "View Details",
+    "remove": "Remove"
   },
   "partner_dashboard": {
     "title": "Partner Dashboard",
@@ -728,6 +731,10 @@
     "wz_pricing": "Pricing",
     "wz_location": "Location",
     "wz_photos": "Photos",
+    "edit_btn": "Edit",
+    "dates_btn": "DATES",
+    "delete_btn": "Request Delete",
+    "awaiting_deletion": "Awaiting admin approval for deletion",
     "verified": "Verified",
     "not_approved": "Not Approved Yet",
     "pending_title": "Your account is pending verification",
