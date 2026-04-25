@@ -821,7 +821,94 @@
     border-color: #C9A84C;
 }
 
-/* Calendar styles inherited from style.css (same as homepage) */
+/* Calendar day/header styles for vehicles page (JS uses .day / .day-header class names) */
+.month-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-dark, #EAEAEA);
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.day-header {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-light, #A0A3B0);
+    text-align: center;
+    padding: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm, 8px);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    color: var(--text-dark, #EAEAEA);
+    border: 1px solid transparent;
+}
+
+.day:hover:not(.other-month):not(.disabled):not(.empty) {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: #C9A84C;
+}
+
+.day.empty {
+    cursor: default;
+    background: transparent;
+}
+
+.day.other-month {
+    color: var(--text-light, #A0A3B0);
+    opacity: 0.4;
+    cursor: default;
+}
+
+.day.disabled,
+.day.past {
+    color: #555;
+    cursor: not-allowed;
+    background: rgba(255,255,255,0.02);
+}
+
+.day.today {
+    border-color: #C9A84C;
+    font-weight: 700;
+}
+
+.day.selected {
+    background: #C9A84C;
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(201, 168, 76, 0.3);
+}
+
+.day.selected.start {
+    background: #C9A84C;
+    color: white;
+}
+
+.day.selected.end {
+    background: #C9A84C;
+    color: white;
+}
+
+.day.in-range {
+    background: rgba(201, 168, 76, 0.15);
+    color: var(--text-dark, #EAEAEA);
+    border-radius: 0;
+    font-weight: 500;
+}
+
+.day.in-range:hover {
+    background: rgba(201, 168, 76, 0.25);
+}
 
 /* Favorites Button */
 .vc-fav-btn {

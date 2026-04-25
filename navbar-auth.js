@@ -198,8 +198,9 @@
         hamburger.innerHTML = '<span></span><span></span><span></span>';
         headerRight.appendChild(hamburger);
 
-        // Detect current page for active link
+        // Detect current page and language for active link
         var currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        var currentLang = (typeof I18n !== 'undefined' && I18n.lang) ? I18n.lang() : 'en';
 
         // Build nav links
         var navPages = [
@@ -251,6 +252,10 @@
             + '</div>'
             + '<div class="mobile-nav-links">' + linksHTML + '</div>'
             + '<div class="mobile-nav-footer">'
+            + '<div id="mobileLangSwitch" style="display:flex;gap:8px;margin-bottom:12px;">'
+            + '  <button class="mobile-lang-btn' + (currentLang === 'en' ? ' active' : '') + '" data-lang="en" style="flex:1;padding:10px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;border:1px solid ' + (currentLang === 'en' ? '#C9A84C' : '#3A3F4B') + ';background:' + (currentLang === 'en' ? '#C9A84C' : 'transparent') + ';color:' + (currentLang === 'en' ? '#0B0C10' : '#EAEAEA') + ';">EN</button>'
+            + '  <button class="mobile-lang-btn' + (currentLang === 'ka' ? ' active' : '') + '" data-lang="ka" style="flex:1;padding:10px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;border:1px solid ' + (currentLang === 'ka' ? '#C9A84C' : '#3A3F4B') + ';background:' + (currentLang === 'ka' ? '#C9A84C' : 'transparent') + ';color:' + (currentLang === 'ka' ? '#0B0C10' : '#EAEAEA') + ';">GE ქართული</button>'
+            + '</div>'
             + (token && user
                 ? '<button class="partner-btn" id="mobileLogoutBtn" style="background:#ef4444;">' + t('nav.logout','Log Out') + '</button>'
                 : '<a href="register-partner.html" class="partner-btn">' + t('nav.become_partner','Become a Partner') + '</a>')
@@ -278,6 +283,17 @@
         // Close on nav link click
         panel.querySelectorAll('.mobile-nav-links a').forEach(function(a) {
             a.addEventListener('click', closeMobileNav);
+        });
+
+        // Language switcher
+        panel.querySelectorAll('.mobile-lang-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var lang = this.getAttribute('data-lang');
+                if (typeof I18n !== 'undefined' && I18n.setLang) {
+                    I18n.setLang(lang);
+                }
+                closeMobileNav();
+            });
         });
     }
 
