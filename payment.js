@@ -101,7 +101,7 @@
             + '<div id="paypal-button-container"></div>';
 
         // Load PayPal JS SDK dynamically
-        var sdkUrl = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(config.clientId) + '&currency=USD&intent=capture';
+        var sdkUrl = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(config.clientId) + '&currency=USD&intent=capture&disable-funding=credit,paylater';
         var script = document.createElement('script');
         script.src = sdkUrl;
         script.setAttribute('data-csp-nonce', '');
