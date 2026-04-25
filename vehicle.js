@@ -40,16 +40,46 @@
         return;
     }
 
-    // Load vehicle data
+    // Load vehicle data — wait for both fetch and I18n to be ready
+    var fetchedData = null;
+    var i18nReady = false;
+    var pageRendered = false;
+
+    function tryRender() {
+        if (fetchedData && i18nReady && !pageRendered) {
+            pageRendered = true;
+            vehicleData = fetchedData;
+            renderPage(vehicleData);
+            loadBlockedDates();
+        }
+    }
+
     fetch('/api/vehicles/' + vehicleId)
     .then(function(r) { return r.json(); })
     .then(function(data) {
         if (data.error || !data.vehicle) { showError(); return; }
-        vehicleData = data.vehicle;
-        renderPage(vehicleData);
-        loadBlockedDates();
+        fetchedData = data.vehicle;
+        tryRender();
     })
     .catch(function() { showError(); });
+
+    if (typeof I18n !== 'undefined' && I18n.onReady) {
+        I18n.onReady(function() { i18nReady = true; tryRender(); });
+    } else {
+        i18nReady = true;
+        tryRender();
+    }
+
+    // Re-render specs & features when language changes
+    document.addEventListener('languageChanged', function() {
+        if (vehicleData) {
+            var specsGrid = document.getElementById('vdSpecsGrid');
+            if (specsGrid) specsGrid.innerHTML = '';
+            var featEl = document.getElementById('vdFeatures');
+            if (featEl) featEl.innerHTML = '';
+            renderPage(vehicleData);
+        }
+    });
 
     // Load blocked/booked dates for this vehicle
     function loadBlockedDates() {
