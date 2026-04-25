@@ -472,7 +472,7 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
 
     if (!guestUser || !guestUser.phone) {
       // If no phone, auto-confirm (legacy flow)
-      await execute("UPDATE bookings SET status = 'pending' WHERE id = $1", [
+      await execute("UPDATE bookings SET status = 'pending', payment_expires_at = NOW() + INTERVAL '6 minutes' WHERE id = $1", [
         booking.id,
       ]);
       await blockDatesForBooking(vehicle_id, pickup_date, dropoff_date);
@@ -532,7 +532,7 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
         // In development without SMS, auto-confirm the booking instead of failing
         if (process.env.NODE_ENV !== 'production') {
           console.warn('[Booking OTP] SMS failed in dev mode — auto-confirming booking', booking.id);
-          await execute("UPDATE bookings SET status = 'pending' WHERE id = $1", [booking.id]);
+          await execute("UPDATE bookings SET status = 'pending', payment_expires_at = NOW() + INTERVAL '6 minutes' WHERE id = $1", [booking.id]);
           await blockDatesForBooking(vehicle_id, pickup_date, dropoff_date);
 
           var paypalConfiguredDev = false;
@@ -691,9 +691,10 @@ router.post(
         otpRecord.id,
       ]);
 
-      // Update booking status to pending (awaiting partner approval)
+      // Update booking status to pending with 6-minute payment window
+      var PAYMENT_WINDOW_MINUTES = 6;
       await execute(
-        "UPDATE bookings SET status = 'pending', updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+        "UPDATE bookings SET status = 'pending', updated_at = CURRENT_TIMESTAMP, payment_expires_at = NOW() + INTERVAL '" + PAYMENT_WINDOW_MINUTES + " minutes' WHERE id = $1",
         [booking_id],
       );
 

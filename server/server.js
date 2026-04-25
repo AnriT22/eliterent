@@ -261,25 +261,41 @@ initDB().then(() => {
         console.log(`Static files served from: ${path.join(__dirname, '..')}`);
     });
 
-    // Background task: auto-expire stale bookings every 5 minutes
+    // Background task: auto-expire stale bookings every 1 minute
     const { getPool } = require('./db');
     setInterval(async () => {
         try {
             const pool = getPool();
             if (!pool) return;
 
-            // Cancel pending_verification bookings older than 15 minutes (guest never completed OTP)
+            // Cancel pending_verification bookings older than 10 minutes (guest never completed OTP)
             const pvResult = await pool.query(
-                "UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE status = 'pending_verification' AND created_at < NOW() - INTERVAL '15 minutes'"
+                "UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE status = 'pending_verification' AND created_at < NOW() - INTERVAL '10 minutes'"
             );
             if (pvResult.rowCount > 0) {
                 console.log('[Cleanup] Auto-cancelled ' + pvResult.rowCount + ' expired pending_verification bookings');
             }
 
-            // Cancel pending bookings older than 72 hours (partner never responded)
-            // Also unblock dates for these bookings
+            // Cancel unpaid pending bookings whose payment window has expired (6 min timer)
+            // Unblock dates for these bookings
+            const expiredPayment = await pool.query(
+                "SELECT id, vehicle_id, pickup_date, dropoff_date FROM bookings WHERE status = 'pending' AND payment_expires_at IS NOT NULL AND payment_expires_at < NOW() AND (payment_status IS NULL OR payment_status != 'paid')"
+            );
+            if (expiredPayment.rows.length > 0) {
+                for (var j = 0; j < expiredPayment.rows.length; j++) {
+                    var ep = expiredPayment.rows[j];
+                    await pool.query("UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE id = $1", [ep.id]);
+                    await pool.query(
+                        "DELETE FROM vehicle_availability WHERE vehicle_id = $1 AND date >= $2 AND date < $3 AND status = 'booked'",
+                        [ep.vehicle_id, ep.pickup_date, ep.dropoff_date]
+                    );
+                }
+                console.log('[Cleanup] Auto-cancelled ' + expiredPayment.rows.length + ' unpaid pending bookings (payment timer expired)');
+            }
+
+            // Cancel pending bookings older than 72 hours with no payment_expires_at (legacy, partner never responded)
             const staleBookings = await pool.query(
-                "SELECT id, vehicle_id, pickup_date, dropoff_date FROM bookings WHERE status = 'pending' AND created_at < NOW() - INTERVAL '72 hours'"
+                "SELECT id, vehicle_id, pickup_date, dropoff_date FROM bookings WHERE status = 'pending' AND payment_expires_at IS NULL AND created_at < NOW() - INTERVAL '72 hours'"
             );
             if (staleBookings.rows.length > 0) {
                 for (var i = 0; i < staleBookings.rows.length; i++) {
@@ -295,7 +311,7 @@ initDB().then(() => {
         } catch (e) {
             console.error('[Cleanup] Booking expiry error:', e.message);
         }
-    }, 5 * 60 * 1000); // every 5 minutes
+    }, 60 * 1000); // every 1 minute
 
 }).catch((err) => {
     console.error('Failed to initialize database:', err);
