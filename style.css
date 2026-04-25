@@ -949,6 +949,11 @@ body {
     border-color: var(--terracotta);
 }
 
+.time-select option {
+    background: #1a1e28;
+    color: #EAEAEA;
+}
+
 .time-inputs span {
     color: var(--text-dark);
     font-weight: 600;
