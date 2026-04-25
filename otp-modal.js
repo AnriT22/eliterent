@@ -50,12 +50,12 @@
                     </div>
 
                     <div class="otp-inputs" id="otpInputs">
-                        <input type="text" inputmode="numeric" maxlength="1" class="otp-input" data-index="0" autocomplete="one-time-code">
-                        <input type="text" inputmode="numeric" maxlength="1" class="otp-input" data-index="1">
-                        <input type="text" inputmode="numeric" maxlength="1" class="otp-input" data-index="2">
-                        <input type="text" inputmode="numeric" maxlength="1" class="otp-input" data-index="3">
-                        <input type="text" inputmode="numeric" maxlength="1" class="otp-input" data-index="4">
-                        <input type="text" inputmode="numeric" maxlength="1" class="otp-input" data-index="5">
+                        <input type="text" inputmode="numeric" class="otp-input" data-index="0" autocomplete="one-time-code">
+                        <input type="text" inputmode="numeric" class="otp-input" data-index="1">
+                        <input type="text" inputmode="numeric" class="otp-input" data-index="2">
+                        <input type="text" inputmode="numeric" class="otp-input" data-index="3">
+                        <input type="text" inputmode="numeric" class="otp-input" data-index="4">
+                        <input type="text" inputmode="numeric" class="otp-input" data-index="5">
                     </div>
 
                     <div class="otp-timer">
@@ -104,6 +104,21 @@
         OTPModal.inputs.forEach(function(input, index) {
             input.addEventListener('input', function(e) {
                 var value = e.target.value.replace(/\D/g, '');
+
+                // Multi-digit paste detected (mobile often fires input instead of paste)
+                if (value.length > 1) {
+                    var digits = value.slice(0, 6);
+                    digits.split('').forEach(function(digit, i) {
+                        if (OTPModal.inputs[i]) {
+                            OTPModal.inputs[i].value = digit;
+                        }
+                    });
+                    OTPModal.inputs[Math.min(digits.length, 5)].focus();
+                    updateInputStates();
+                    checkComplete();
+                    return;
+                }
+
                 e.target.value = value.slice(0, 1);
 
                 if (value && index < 5) {
