@@ -23,6 +23,14 @@
         return fallback;
     }
 
+    // Translate a spec value (e.g. "automatic" -> "ავტომატური")
+    function vtVal(raw) {
+        if (!raw) return '';
+        var key = 'vehicle_page.val_' + String(raw).toLowerCase().replace(/[\s\/]+/g, '_').replace(/[^a-z0-9_]/g, '');
+        var translated = vt(key, null);
+        return translated || cap(String(raw).replace(/_/g, ' '));
+    }
+
     // Parse ?id= from URL
     var params = new URLSearchParams(window.location.search);
     vehicleId = parseInt(params.get('id'));
@@ -143,18 +151,18 @@
 
         // Specs grid
         var specs = [
-            { label: vt('vehicle_page.category', 'Category'),  val: cap(cat) },
+            { label: vt('vehicle_page.category', 'Category'),  val: vtVal(cat) },
             { label: vt('vehicle_page.year', 'Year'),      val: year },
-            { label: vt('vehicle_page.engine', 'Engine'),    val: cap(engine) },
-            { label: vt('vehicle_page.gearbox', 'Gearbox'),   val: cap(gearbox) },
-            { label: vt('vehicle_page.drive', 'Drive'),     val: (v.drive_type || '').toUpperCase() },
+            { label: vt('vehicle_page.engine', 'Engine'),    val: vtVal(engine) },
+            { label: vt('vehicle_page.gearbox', 'Gearbox'),   val: vtVal(gearbox) },
+            { label: vt('vehicle_page.drive', 'Drive'),     val: vtVal(v.drive_type || '') },
             { label: vt('vehicle_page.seats', 'Seats'),     val: (v.seats || 5) + ' ' + vt('vehicle_page.seats_suffix', 'seats') },
             { label: vt('vehicle_page.doors', 'Doors'),     val: (v.doors || 4) + ' ' + vt('vehicle_page.doors_suffix', 'doors') },
-            { label: vt('vehicle_page.interior', 'Interior'),  val: cap(v.interior_type || 'fabric') },
-            { label: vt('vehicle_page.steering', 'Steering'),  val: cap(v.steering_side || 'left') },
-            { label: vt('vehicle_page.color', 'Color'),     val: cap(v.color || '') },
-            { label: vt('vehicle_page.fuel_policy', 'Fuel Policy'), val: cap((v.fuel_policy || 'full_to_full').replace(/_/g, ' ')) },
-            { label: vt('vehicle_page.deposit', 'Deposit'),   val: v.deposit_amount ? '$' + v.deposit_amount : 'None' },
+            { label: vt('vehicle_page.interior', 'Interior'),  val: vtVal(v.interior_type || 'fabric') },
+            { label: vt('vehicle_page.steering', 'Steering'),  val: vtVal(v.steering_side || 'left') },
+            { label: vt('vehicle_page.color', 'Color'),     val: vtVal(v.color || '') },
+            { label: vt('vehicle_page.fuel_policy', 'Fuel Policy'), val: vtVal(v.fuel_policy || 'full_to_full') },
+            { label: vt('vehicle_page.deposit', 'Deposit'),   val: v.deposit_amount ? '$' + v.deposit_amount : vt('vehicle_page.val_none', 'None') },
             { label: vt('vehicle_page.min_age', 'Min Age'),   val: (v.min_age || 21) + ' ' + vt('vehicle_page.years_suffix', 'years') },
             { label: vt('vehicle_page.price_day', 'Price/Day'), val: '$' + (v.price_per_day || 0) }
         ];
