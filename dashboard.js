@@ -31,11 +31,11 @@
         if (verified) {
             statusEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(34,197,94,0.15);color:#22c55e;border-radius:20px;font-size:12px;font-weight:600;margin-top:6px;">'
                 + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>'
-                + 'Verified</span>';
+                + (typeof I18n !== 'undefined' ? I18n.t('partner_dashboard.verified') : 'Verified') + '</span>';
         } else {
             statusEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(249,115,22,0.15);color:#f97316;border-radius:20px;font-size:12px;font-weight:600;margin-top:6px;">'
                 + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
-                + 'Not Approved Yet</span>';
+                + (typeof I18n !== 'undefined' ? I18n.t('partner_dashboard.not_approved') : 'Not Approved Yet') + '</span>';
         }
     }
 
@@ -46,8 +46,8 @@
         banner.id = 'verificationBanner';
         banner.style.cssText = 'background:linear-gradient(135deg,rgba(249,115,22,0.1),rgba(249,115,22,0.05));border:1px solid rgba(249,115,22,0.3);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;';
         banner.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
-            + '<div><p style="margin:0;color:#f97316;font-weight:600;font-size:14px;">Your account is pending verification</p>'
-            + '<p style="margin:4px 0 0;color:#94a3b8;font-size:13px;">An admin will review and verify your account. Until verified, you cannot add vehicles or receive bookings. This page updates automatically.</p></div>';
+            + '<div><p style="margin:0;color:#f97316;font-weight:600;font-size:14px;">' + (typeof I18n !== 'undefined' ? I18n.t('partner_dashboard.pending_title') : 'Your account is pending verification') + '</p>'
+            + '<p style="margin:4px 0 0;color:#94a3b8;font-size:13px;">' + (typeof I18n !== 'undefined' ? I18n.t('partner_dashboard.pending_desc') : 'An admin will review and verify your account. Until verified, you cannot add vehicles or receive bookings. This page updates automatically.') + '</p></div>';
         var dbMain = document.querySelector('.db-main');
         if (dbMain) dbMain.insertBefore(banner, dbMain.firstChild);
     }

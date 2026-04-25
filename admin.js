@@ -160,9 +160,9 @@ function escHtml(s) {
                     : '<button class="admin-action-btn success" onclick="adminUnsuspendUser(' + u.id + ')">Unsuspend</button>';
                 return '<tr>'
                     + '<td>' + u.id + '</td>'
-                    + '<td><strong><a href="#" onclick="adminViewUser(' + u.id + ');return false;" style="color:#C9A84C;text-decoration:none;">' + (u.full_name || '-') + '</a></strong>' + googleBadge + '</td>'
-                    + '<td>' + (u.email || '-') + '</td>'
-                    + '<td>' + (u.phone || '-') + '</td>'
+                    + '<td><strong><a href="#" onclick="adminViewUser(' + u.id + ');return false;" style="color:#C9A84C;text-decoration:none;">' + escHtml(u.full_name || '-') + '</a></strong>' + googleBadge + '</td>'
+                    + '<td>' + escHtml(u.email || '-') + '</td>'
+                    + '<td>' + escHtml(u.phone || '-') + '</td>'
                     + '<td><span class="admin-status ' + u.role + '">' + u.role + '</span>' + verifiedBadge + phoneVerBadge + emailVerBadge + '</td>'
                     + '<td>' + approvedBadge + '</td>'
                     + '<td>' + date + '</td>'
@@ -246,10 +246,10 @@ function escHtml(s) {
                     : '<button class="admin-action-btn success" onclick="adminVerifyPartner(' + p.id + ')">Verify</button>';
                 return '<tr>'
                     + '<td>' + p.id + '</td>'
-                    + '<td><strong><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:#C9A84C;text-decoration:none;">' + (p.full_name || '-') + '</a></strong></td>'
-                    + '<td><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:#C9A84C;text-decoration:none;">' + (p.company_name || '-') + '</a></td>'
-                    + '<td>' + (p.email || '-') + '</td>'
-                    + '<td>' + (p.phone || '-') + pPhoneBadge + '</td>'
+                    + '<td><strong><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:#C9A84C;text-decoration:none;">' + escHtml(p.full_name || '-') + '</a></strong></td>'
+                    + '<td><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:#C9A84C;text-decoration:none;">' + escHtml(p.company_name || '-') + '</a></td>'
+                    + '<td>' + escHtml(p.email || '-') + '</td>'
+                    + '<td>' + escHtml(p.phone || '-') + pPhoneBadge + '</td>'
                     + '<td><span class="admin-status ' + verified + '">' + verified + '</span></td>'
                     + '<td>' + date + '</td>'
                     + '<td>'
@@ -297,8 +297,8 @@ function escHtml(s) {
                 return '<tr>'
                     + '<td>' + v.id + '</td>'
                     + '<td>' + imgTag + '</td>'
-                    + '<td><strong>' + (v.name || '-') + '</strong></td>'
-                    + '<td>' + (v.company_name || v.partner_name || '-') + '</td>'
+                    + '<td><strong>' + escHtml(v.name || '-') + '</strong></td>'
+                    + '<td>' + escHtml(v.company_name || v.partner_name || '-') + '</td>'
                     + '<td>$' + (v.price_per_day || 0) + '</td>'
                     + '<td><span class="admin-status ' + status + '">' + status + '</span></td>'
                     + '<td>' + date + '</td>'
@@ -495,9 +495,9 @@ function escHtml(s) {
                 }
                 return '<tr>'
                     + '<td>' + b.id + '</td>'
-                    + '<td><strong>' + (b.vehicle_name || '-') + '</strong></td>'
-                    + '<td>' + (b.guest_name || '-') + '<br><span class="admin-subtle">' + (b.guest_email || '') + '</span></td>'
-                    + '<td>' + partnerLabel + '</td>'
+                    + '<td><strong>' + escHtml(b.vehicle_name || '-') + '</strong></td>'
+                    + '<td>' + escHtml(b.guest_name || '-') + '<br><span class="admin-subtle">' + escHtml(b.guest_email || '') + '</span></td>'
+                    + '<td>' + escHtml(partnerLabel) + '</td>'
                     + '<td>' + dateRange + '</td>'
                     + '<td><strong>' + fmtMoney(b.total_price) + '</strong><br><span class="admin-subtle">Fee ' + fmtMoney(b.service_fee) + '</span> ' + payBadge + '</td>'
                     + '<td><span class="admin-status ' + status + '" data-status="' + status + '">' + statusLabel + '</span></td>'
@@ -629,8 +629,8 @@ function escHtml(s) {
             var tr = document.createElement('tr');
             tr.innerHTML =
                 '<td>#' + r.id + '</td>' +
-                '<td>' + (r.vehicle_name || '') + '</td>' +
-                '<td>' + (r.guest_name || r.guest_email || '') + '</td>' +
+                '<td>' + escHtml(r.vehicle_name || '') + '</td>' +
+                '<td>' + escHtml(r.guest_name || r.guest_email || '') + '</td>' +
                 '<td>' + (r.pickup_date || '') + ' → ' + (r.dropoff_date || '') + '</td>' +
                 '<td>$' + r.rental_total.toFixed(2) + '</td>' +
                 '<td>$' + r.extras_total.toFixed(2) + '</td>' +

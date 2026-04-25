@@ -36,6 +36,13 @@
             return;
         }
 
+        if (config.mode === 'sandbox') {
+            var warn = document.createElement('div');
+            warn.style.cssText = 'background:#fef3c7;color:#92400e;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:16px;text-align:center;border:1px solid #fcd34d;';
+            warn.textContent = '⚠ SANDBOX MODE — payments are not real. Switch to live before launch.';
+            payBody.parentNode.insertBefore(warn, payBody);
+        }
+
         var booking = bookingData.booking;
         var serviceFee = parseFloat(booking.service_fee) || 0;
         var pStatus = String(booking.payment_status || 'unpaid');
