@@ -974,21 +974,22 @@
             html += '<span class="db-vehicle-tag">' + (v.gearbox || '—') + '</span>';
             html += '<span class="db-vehicle-tag">' + (v.year || '—') + '</span>';
             html += '</div>';
-            html += '<div class="db-vehicle-price">$' + (v.price_per_day || 0) + ' <span>' + (typeof I18n !== 'undefined' ? I18n.t('fleet.per_day') : '/day') + '</span></div>';
+            html += '<div class="db-vehicle-price">$' + (v.price_per_day || 0) + ' <span data-i18n="fleet.per_day">/day</span></div>';
             html += verBadge;
             html += '<div class="db-vehicle-actions">';
             if (statusClass !== 'delete_requested') {
-                html += '<button class="db-btn-edit" onclick="editVehicle(' + v.id + ')">' + (typeof I18n !== 'undefined' ? I18n.t('partner_dashboard.edit_btn') : 'Edit') + '</button>';
-                html += '<button class="db-btn-dates" onclick="openAvailabilityCalendar(' + v.id + ')">' + (typeof I18n !== 'undefined' ? I18n.t('partner_dashboard.dates_btn') : 'DATES') + '</button>';
-                html += '<button class="db-btn-delete" onclick="deleteVehicle(' + v.id + ')">' + (typeof I18n !== 'undefined' ? I18n.t('partner_dashboard.delete_btn') : 'Request Delete') + '</button>';
+                html += '<button class="db-btn-edit" onclick="editVehicle(' + v.id + ')" data-i18n="partner_dashboard.edit_btn">Edit</button>';
+                html += '<button class="db-btn-dates" onclick="openAvailabilityCalendar(' + v.id + ')" data-i18n="partner_dashboard.dates_btn">DATES</button>';
+                html += '<button class="db-btn-delete" onclick="deleteVehicle(' + v.id + ')" data-i18n="partner_dashboard.delete_btn">Request Delete</button>';
             } else {
-                html += '<span style="color:#ef4444;font-size:12px;font-style:italic;">' + (typeof I18n !== 'undefined' ? I18n.t('partner_dashboard.awaiting_deletion') : 'Awaiting admin approval for deletion') + '</span>';
+                html += '<span style="color:#ef4444;font-size:12px;font-style:italic;" data-i18n="partner_dashboard.awaiting_deletion">Awaiting admin approval for deletion</span>';
             }
             html += '</div>';
             html += '</div></div>';
         });
 
         grid.innerHTML = html;
+        if (typeof I18n !== 'undefined' && I18n.translatePage) I18n.translatePage(grid);
     }
 
     // ========================================
