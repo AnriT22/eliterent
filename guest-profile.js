@@ -136,15 +136,16 @@
             if (favorites.length === 0) {
                 favoritesTab.innerHTML = `
                     <div class="gp-tab-header">
-                        <h2>${typeof I18n !== 'undefined' ? I18n.t('guest_profile.my_favorites') : 'My Favorites'}</h2>
+                        <h2 data-i18n="guest_profile.my_favorites">My Favorites</h2>
                     </div>
                     <div class="gp-empty-state">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#A0A3B0" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                        <h3>${typeof I18n !== 'undefined' ? I18n.t('guest_profile.no_favorites') : 'No favorites yet'}</h3>
-                        <p>${typeof I18n !== 'undefined' ? I18n.t('guest_profile.no_favorites_desc') : 'Save vehicles you like by clicking the heart icon'}</p>
-                        <a href="vehicles.html" class="btn btn-primary">${typeof I18n !== 'undefined' ? I18n.t('guest_profile.browse_vehicles') : 'Browse Vehicles'}</a>
+                        <h3 data-i18n="guest_profile.no_favorites">No favorites yet</h3>
+                        <p data-i18n="guest_profile.no_favorites_desc">Save vehicles you like by clicking the heart icon</p>
+                        <a href="vehicles.html" class="btn btn-primary" data-i18n="guest_profile.browse_vehicles">Browse Vehicles</a>
                     </div>
                 `;
+                if (typeof I18n !== 'undefined' && I18n.translatePage) I18n.translatePage(favoritesTab);
                 return;
             }
 
@@ -169,10 +170,10 @@
                                 <span>${v.engine || 'N/A'}</span>
                                 <span>${v.gearbox || 'N/A'}</span>
                             </div>
-                            <div class="gp-fav-price">$${price}${typeof I18n !== 'undefined' ? I18n.t('fleet.per_day') : '/day'}</div>
+                            <div class="gp-fav-price">$${price}<span data-i18n="fleet.per_day">/day</span></div>
                             <div class="gp-fav-actions">
-                                <a href="vehicle.html?id=${v.id}" class="btn btn-primary btn-sm">${typeof I18n !== 'undefined' ? I18n.t('guest_profile.view_details') : 'View Details'}</a>
-                                <button class="btn btn-danger btn-sm" onclick="removeFavorite(${v.id})">${typeof I18n !== 'undefined' ? I18n.t('guest_profile.remove') : 'Remove'}</button>
+                                <a href="vehicle.html?id=${v.id}" class="btn btn-primary btn-sm" data-i18n="guest_profile.view_details">View Details</a>
+                                <button class="btn btn-danger btn-sm" onclick="removeFavorite(${v.id})" data-i18n="guest_profile.remove">Remove</button>
                             </div>
                         </div>
                     </div>
@@ -182,10 +183,11 @@
 
             favoritesTab.innerHTML = `
                 <div class="gp-tab-header">
-                    <h2>${typeof I18n !== 'undefined' ? I18n.t('guest_profile.my_favorites') : 'My Favorites'}</h2>
+                    <h2 data-i18n="guest_profile.my_favorites">My Favorites</h2>
                 </div>
                 ${favoritesGrid}
             `;
+            if (typeof I18n !== 'undefined' && I18n.translatePage) I18n.translatePage(favoritesTab);
         })
         .catch(function (err) {
             console.error('Load favorites error:', err);

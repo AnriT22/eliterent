@@ -226,7 +226,8 @@
     "price_per_day": "Price per Day",
     "reset_all": "Reset All Filters",
     "no_vehicles_title": "No vehicles yet",
-    "no_vehicles_desc": "Partners can add vehicles from their dashboard"
+    "no_vehicles_desc": "Partners can add vehicles from their dashboard",
+    "cars_available": "{{count}} cars available"
   },
   "filter_options": {
     "economy": "Economy",

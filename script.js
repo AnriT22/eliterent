@@ -534,17 +534,18 @@ function renderCarousel(vehicles) {
                     <div class="fleet-card-price-row">
                         <div class="fleet-card-price">
                             <span class="fleet-price-amount">$${v.price_per_day || 0}</span>
-                            <span class="fleet-price-unit">${typeof I18n !== 'undefined' ? I18n.t('fleet.per_day') : '/day'}</span>
+                            <span class="fleet-price-unit" data-i18n="fleet.per_day">/day</span>
                         </div>
                         <span class="fleet-card-year">${v.year || 'N/A'}</span>
                     </div>
-                    <button class="fleet-card-btn" onclick="selectVehicle(${v.id})">${typeof I18n !== 'undefined' ? I18n.t('fleet.select_vehicle') : 'Select Vehicle'}</button>
+                    <button class="fleet-card-btn" onclick="selectVehicle(${v.id})" data-i18n="fleet.select_vehicle">Select Vehicle</button>
                 </div>
             </div>
         `;
     });
     
     carouselTrack.innerHTML = html;
+    if (typeof I18n !== 'undefined' && I18n.translatePage) I18n.translatePage(carouselTrack);
 }
 
 function clearDatesAndReload() {
