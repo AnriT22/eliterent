@@ -34,6 +34,43 @@ function maskEmail(email) {
   return `${local.slice(0, 2)}***@${domain}`;
 }
 
+// ── Resend provider ──
+let resendClient = null;
+
+function getResendClient() {
+  if (resendClient) return resendClient;
+  if (!process.env.RESEND_API_KEY) return null;
+  const { Resend } = require("resend");
+  resendClient = new Resend(process.env.RESEND_API_KEY);
+  return resendClient;
+}
+
+async function sendViaResend(options, from) {
+  const client = getResendClient();
+  if (!client) return null;
+
+  const { data, error } = await client.emails.send({
+    from: from,
+    to: [options.to],
+    subject: options.subject,
+    text: options.text,
+    html: options.html,
+  });
+
+  if (error) {
+    console.error("[email:resend] Error:", error);
+    return null;
+  }
+
+  console.log("[email:resend] Sent successfully", {
+    id: data && data.id,
+    to: maskEmail(options.to),
+    subject: options.subject,
+  });
+  return { sent: true, provider: "resend" };
+}
+
+// ── SMTP provider (nodemailer) ──
 let transporter = null;
 
 function getTransporter() {
@@ -60,38 +97,9 @@ function getTransporter() {
   return transporter;
 }
 
-async function sendEmail(options) {
+async function sendViaSMTP(options, from) {
   const tx = getTransporter();
-  const from =
-    process.env.SMTP_FROM || process.env.SMTP_USER || "noreply@royalcar.rent";
-
-  if (!tx) {
-    if (isProduction()) {
-      console.error(
-        "[email] SMTP is not configured in production. Email delivery skipped.",
-        {
-          to: maskEmail(options && options.to),
-          subject: options && options.subject,
-        },
-      );
-      return { sent: false, fallback: false, error: "SMTP is not configured" };
-    }
-
-    if (isEmailDebugEnabled()) {
-      console.log("[email:debug] Simulated email delivery", {
-        from,
-        to: maskEmail(options && options.to),
-        subject: options && options.subject,
-      });
-    } else {
-      console.log("[email] SMTP not configured; email delivery skipped", {
-        to: maskEmail(options && options.to),
-        subject: options && options.subject,
-      });
-    }
-
-    return { sent: false, fallback: true };
-  }
+  if (!tx) return null;
 
   await tx.sendMail({
     from,
@@ -101,12 +109,64 @@ async function sendEmail(options) {
     html: options.html,
   });
 
-  console.log("[email] Sent successfully", {
-    to: maskEmail(options && options.to),
-    subject: options && options.subject,
+  console.log("[email:smtp] Sent successfully", {
+    to: maskEmail(options.to),
+    subject: options.subject,
   });
+  return { sent: true, provider: "smtp" };
+}
 
-  return { sent: true, fallback: false };
+// ── Main send function: tries Resend first, then SMTP ──
+async function sendEmail(options) {
+  const from =
+    process.env.EMAIL_FROM || process.env.SMTP_FROM || process.env.SMTP_USER || "RoyalCar <onboarding@resend.dev>";
+
+  // Try Resend first
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const result = await sendViaResend(options, from);
+      if (result) return result;
+    } catch (err) {
+      console.error("[email:resend] Failed, trying SMTP fallback:", err.message);
+    }
+  }
+
+  // Try SMTP fallback
+  if (getTransporter()) {
+    try {
+      const result = await sendViaSMTP(options, from);
+      if (result) return result;
+    } catch (err) {
+      console.error("[email:smtp] Failed:", err.message);
+    }
+  }
+
+  // No provider available
+  if (isProduction()) {
+    console.error(
+      "[email] No email provider configured. Email delivery skipped.",
+      {
+        to: maskEmail(options && options.to),
+        subject: options && options.subject,
+      },
+    );
+    return { sent: false, fallback: false, error: "No email provider configured" };
+  }
+
+  if (isEmailDebugEnabled()) {
+    console.log("[email:debug] Simulated email delivery", {
+      from,
+      to: maskEmail(options && options.to),
+      subject: options && options.subject,
+    });
+  } else {
+    console.log("[email] No provider configured; email delivery skipped", {
+      to: maskEmail(options && options.to),
+      subject: options && options.subject,
+    });
+  }
+
+  return { sent: false, fallback: true };
 }
 
 // Send OTP verification email
