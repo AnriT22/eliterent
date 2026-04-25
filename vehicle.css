@@ -225,7 +225,7 @@
     transition: border-color 0.2s;
 }
 .vd-time-select:hover, .vd-time-select:focus { border-color: #C9A84C; }
-.vd-time-select option { background: #1a1e28; color: #EAEAEA; }
+.vd-time-select option { background: #000000; color: #EAEAEA; }
 .vd-clear-btn {
     width: 100%;
     padding: 10px;
