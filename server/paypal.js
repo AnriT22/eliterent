@@ -58,7 +58,10 @@ async function createOrder(bookingId, amount, currency, description) {
                     currency_code: currency || 'USD',
                     value: parseFloat(amount).toFixed(2)
                 }
-            }]
+            }],
+            application_context: {
+                shipping_preference: 'NO_SHIPPING'
+            }
         })
     });
 
