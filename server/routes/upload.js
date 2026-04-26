@@ -46,17 +46,24 @@ const upload = multer({
 // Re-encode uploaded image: strip EXIF, resize, compress to JPEG
 async function processImage(filePath) {
     var outputPath = filePath.replace(/\.[^.]+$/, '.jpg');
-    await sharp(filePath)
-        .rotate() // auto-rotate based on EXIF before stripping
-        .resize(1920, 1080, { fit: 'inside', withoutEnlargement: true })
-        .jpeg({ quality: 85, mozjpeg: true })
-        .toFile(outputPath + '.tmp');
-    // Replace original with processed version
-    if (outputPath !== filePath) {
-        try { fs.unlinkSync(filePath); } catch (e) {}
+    var tmpPath = outputPath + '.tmp';
+    try {
+        await sharp(filePath, { failOnError: false, limitInputPixels: 100000000 })
+            .rotate() // auto-rotate based on EXIF before stripping
+            .resize(1920, 1080, { fit: 'inside', withoutEnlargement: true })
+            .jpeg({ quality: 85, mozjpeg: true })
+            .toFile(tmpPath);
+        // Replace original with processed version
+        if (outputPath !== filePath) {
+            try { fs.unlinkSync(filePath); } catch (e) {}
+        }
+        fs.renameSync(tmpPath, outputPath);
+        return path.basename(outputPath);
+    } catch (err) {
+        // Clean up tmp file if it was partially created
+        try { fs.unlinkSync(tmpPath); } catch (e) {}
+        throw err;
     }
-    fs.renameSync(outputPath + '.tmp', outputPath);
-    return path.basename(outputPath);
 }
 
 // POST /api/upload/vehicle-image — upload single image
