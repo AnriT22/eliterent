@@ -41,7 +41,11 @@ function initDropdowns() {
                 e.stopPropagation();
                 const currency = item.dataset.currency;
                 appState.currentCurrency = currency;
-                currencyBtn.querySelector('.selector-text').textContent = currency;
+                if (typeof Currency !== 'undefined' && Currency.set) {
+                    Currency.set(currency);
+                } else {
+                    currencyBtn.querySelector('.selector-text').textContent = currency;
+                }
                 closeDropdown(currencyBtn, currencyDropdown);
             });
         });
