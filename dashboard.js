@@ -613,8 +613,11 @@
             var target = parseInt(this.getAttribute('data-step'));
             // Allow going backward freely, validate going forward
             if (target > currentWizardStep) {
-                // Validate all steps between current and target
                 for (var st = currentWizardStep; st < target; st++) {
+                    var fields = stepRequiredFields[st] || [];
+                    if (fields.length === 0) continue; // skip optional steps
+                    // Navigate to the step first so user sees the fields
+                    goToWizardStep(st);
                     if (!validateWizardStep(st)) return;
                 }
             }
@@ -1395,10 +1398,28 @@
         hideFormMessage();
     }
 
+    var formMsgTimer = null;
     function showFormMessage(msg, type) {
         var el = document.getElementById('vehicleFormMessage');
         el.textContent = msg;
         el.className = 'db-form-message ' + type;
+        el.style.display = '';
+        // For validation errors, also show a fixed toast at the top
+        if (type === 'error') {
+            var toast = document.getElementById('wizardToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'wizardToast';
+                toast.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;background:#dc2626;color:#fff;padding:12px 28px;border-radius:10px;font-size:15px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.3);transition:opacity 0.3s;pointer-events:none;';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = msg;
+            toast.style.opacity = '1';
+            if (formMsgTimer) clearTimeout(formMsgTimer);
+            formMsgTimer = setTimeout(function () {
+                toast.style.opacity = '0';
+            }, 3500);
+        }
     }
 
     function hideFormMessage() {
