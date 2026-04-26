@@ -104,7 +104,12 @@
         currentCurrency = currency;
         localStorage.setItem(STORAGE_KEY, currency);
         updateSelectorUI();
-        applyToPage();
+        if (rates) {
+            applyToPage();
+        } else {
+            // Rates not loaded yet — apply when ready
+            onReadyCallbacks.push(function () { applyToPage(); });
+        }
         // Dispatch event
         var event;
         try {
@@ -142,17 +147,19 @@
 
     // Find and convert all price elements on the page
     function applyToPage() {
-        if (!rates) return;
-
+        // For USD with no rates, still show $ formatting
         // Elements with data-price-usd attribute (explicit)
         document.querySelectorAll('[data-price-usd]').forEach(function (el) {
             var usd = parseFloat(el.getAttribute('data-price-usd'));
             if (isNaN(usd)) return;
-            el.textContent = formatPrice(usd);
+            if (currentCurrency === 'USD') {
+                el.textContent = '$' + usd.toFixed(2);
+            } else if (rates) {
+                el.textContent = formatPrice(usd);
+            }
         });
 
-        // Auto-detect price patterns: $XX.XX or $XX
-        // Only for elements with class 'vc-price-amount' or similar known price containers
+        // Auto-detect price patterns from known price containers
         var priceSelectors = [
             '.vc-price-amount',
             '.price-amount',
@@ -164,7 +171,7 @@
                 // Store original USD price
                 if (!el.hasAttribute('data-price-usd')) {
                     var text = el.textContent.trim();
-                    var match = text.match(/\$?\s*([\d,]+\.?\d*)/);
+                    var match = text.match(/[\$\€\₾]?\s*([\d,]+\.?\d*)/);
                     if (match) {
                         var val = parseFloat(match[1].replace(/,/g, ''));
                         if (!isNaN(val)) {
@@ -174,7 +181,11 @@
                 }
                 var usd = parseFloat(el.getAttribute('data-price-usd'));
                 if (!isNaN(usd)) {
-                    el.textContent = formatPrice(usd);
+                    if (currentCurrency === 'USD') {
+                        el.textContent = '$' + usd.toFixed(2);
+                    } else if (rates) {
+                        el.textContent = formatPrice(usd);
+                    }
                 }
             });
         });
