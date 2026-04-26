@@ -125,7 +125,8 @@
     }
 
     function fmtMoney(value) {
-        return '$' + (parseFloat(value) || 0).toFixed(2);
+        var v = parseFloat(value) || 0;
+        return (typeof Currency !== 'undefined') ? Currency.formatPrice(v) : ('$' + v.toFixed(2));
     }
 
     function fmtD(d) {
