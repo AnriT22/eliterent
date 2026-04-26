@@ -481,6 +481,22 @@
     background: transparent;
 }
 
+.db-input.vf-invalid {
+    border-bottom-color: #ef4444 !important;
+    box-shadow: 0 2px 0 0 #ef4444;
+}
+
+select.db-input.vf-invalid {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 1px #ef4444;
+}
+
+.color-swatches.vf-invalid {
+    outline: 2px solid #ef4444;
+    outline-offset: 4px;
+    border-radius: 8px;
+}
+
 .db-input::placeholder {
     color: #94a3b8;
 }
