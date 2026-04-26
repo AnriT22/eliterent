@@ -605,11 +605,16 @@
     }
 
     var uploadBatchCounter = 0;
+    var isUploading = false;
 
     function handleImageFiles(files) {
         var remaining = 10 - uploadedUrls.length;
         if (remaining <= 0) {
             showFormMessage('Maximum 10 images allowed', 'error');
+            return;
+        }
+        if (isUploading) {
+            showFormMessage('Please wait for current upload to finish', 'error');
             return;
         }
 
@@ -630,13 +635,16 @@
 
         if (validFiles.length === 0) return;
 
-        // Unique batch ID so concurrent uploads don't interfere
+        isUploading = true;
         var batchId = '__uploading_' + (++uploadBatchCounter) + '__';
 
-        // Add placeholders for all files being uploaded (tagged with batch ID)
+        // Add placeholders for all files being uploaded
         var placeholderStart = uploadedUrls.length;
-        validFiles.forEach(function () {
-            uploadedUrls.push(batchId);
+        var placeholderIds = [];
+        validFiles.forEach(function (_, i) {
+            var pid = batchId + i;
+            placeholderIds.push(pid);
+            uploadedUrls.push(pid);
         });
         renderUploadPreviews();
 
@@ -651,12 +659,6 @@
             reader.readAsDataURL(file);
         });
 
-        // Build single FormData with ALL files
-        var formData = new FormData();
-        validFiles.forEach(function (file) {
-            formData.append('images', file);
-        });
-
         // Progress bar elements
         var progressWrap = document.getElementById('uploadProgressWrap');
         var progressFill = document.getElementById('uploadProgressFill');
@@ -665,82 +667,136 @@
         if (progressWrap) {
             progressWrap.style.display = 'flex';
             progressFill.style.width = '0%';
-            progressText.textContent = 'Uploading...';
+            progressText.textContent = 'Uploading 1/' + validFiles.length + '...';
         }
 
-        // Upload with XHR for real-time progress
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/upload/vehicle-images');
-        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        // Upload one image at a time (more reliable than batch)
+        var uploaded = 0;
+        var failed = 0;
 
-        xhr.upload.addEventListener('progress', function (e) {
-            if (e.lengthComputable && progressFill) {
-                var pct = Math.round((e.loaded / e.total) * 100);
-                progressFill.style.width = pct + '%';
-                progressText.textContent = pct < 100 ? pct + '%' : 'Processing images...';
-            }
-        });
-
-        xhr.onload = function () {
-            if (progressWrap) progressWrap.style.display = 'none';
-
-            // Handle HTTP errors first
-            if (xhr.status === 413) {
-                uploadedUrls = uploadedUrls.filter(function (u) { return u !== batchId; });
-                showFormMessage('Upload failed — total file size too large. Try fewer or smaller images.', 'error');
+        function uploadSingleFile(fileIndex) {
+            if (fileIndex >= validFiles.length) {
+                // All done
+                isUploading = false;
+                if (progressWrap) progressWrap.style.display = 'none';
+                // Clean up any remaining placeholders (failed uploads)
+                uploadedUrls = uploadedUrls.filter(function (u) {
+                    return typeof u !== 'string' || u.indexOf(batchId) !== 0;
+                });
                 renderUploadPreviews();
-                return;
-            }
-            if (xhr.status >= 400) {
-                uploadedUrls = uploadedUrls.filter(function (u) { return u !== batchId; });
-                var errMsg = 'Upload failed (HTTP ' + xhr.status + ')';
-                try { errMsg = JSON.parse(xhr.responseText).error || errMsg; } catch (e) {}
-                showFormMessage(errMsg, 'error');
-                renderUploadPreviews();
-                return;
-            }
-
-            try {
-                var data = JSON.parse(xhr.responseText);
-                if (data.urls && data.urls.length > 0) {
-                    var urlIdx = 0;
-                    for (var i = 0; i < uploadedUrls.length && urlIdx < data.urls.length; i++) {
-                        if (uploadedUrls[i] === batchId) {
-                            uploadedUrls[i] = data.urls[urlIdx];
-                            urlIdx++;
-                        }
-                    }
-                    uploadedUrls = uploadedUrls.filter(function (u) { return u !== batchId; });
-                    showFormMessage(data.urls.length + ' image(s) uploaded', 'success');
+                syncImageFields();
+                if (uploaded > 0 && failed === 0) {
+                    showFormMessage(uploaded + ' image(s) uploaded successfully', 'success');
+                } else if (uploaded > 0 && failed > 0) {
+                    showFormMessage(uploaded + ' uploaded, ' + failed + ' failed', 'error');
                 } else {
-                    uploadedUrls = uploadedUrls.filter(function (u) { return u !== batchId; });
-                    showFormMessage('Upload failed: ' + (data.error || 'Unknown error'), 'error');
+                    showFormMessage('All uploads failed — please try again', 'error');
                 }
-            } catch (e) {
-                uploadedUrls = uploadedUrls.filter(function (u) { return u !== batchId; });
-                showFormMessage('Upload failed — invalid server response', 'error');
+                return;
             }
-            renderUploadPreviews();
-            syncImageFields();
-        };
 
-        xhr.timeout = 120000; // 120 seconds
+            var file = validFiles[fileIndex];
+            var pid = placeholderIds[fileIndex];
 
-        xhr.onerror = function () {
-            if (progressWrap) progressWrap.style.display = 'none';
-            uploadedUrls = uploadedUrls.filter(function (u) { return u !== batchId; });
-            showFormMessage('Upload failed — check connection', 'error');
-            renderUploadPreviews();
-        };
+            if (progressText) {
+                progressText.textContent = 'Uploading ' + (fileIndex + 1) + '/' + validFiles.length + '...';
+            }
+            if (progressFill) {
+                progressFill.style.width = Math.round((fileIndex / validFiles.length) * 100) + '%';
+            }
 
-        xhr.ontimeout = function () {
-            if (progressWrap) progressWrap.style.display = 'none';
-            uploadedUrls = uploadedUrls.filter(function (u) { return u !== batchId; });
-            showFormMessage('Upload timed out — try uploading fewer images at once', 'error');
-            renderUploadPreviews();
-        };
+            var formData = new FormData();
+            formData.append('image', file);
 
-        xhr.send(formData);
+            uploadWithRetry(formData, pid, fileIndex, 0, function () {
+                uploadSingleFile(fileIndex + 1);
+            });
+        }
+
+        function uploadWithRetry(formData, pid, fileIndex, attempt, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/upload/vehicle-image');
+            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            xhr.timeout = 60000; // 60s per image
+
+            xhr.upload.addEventListener('progress', function (e) {
+                if (e.lengthComputable && progressFill) {
+                    var filePortion = 1 / validFiles.length;
+                    var basePct = (fileIndex / validFiles.length) * 100;
+                    var filePct = (e.loaded / e.total) * filePortion * 100;
+                    progressFill.style.width = Math.round(basePct + filePct) + '%';
+                    if (e.loaded >= e.total && progressText) {
+                        progressText.textContent = 'Processing ' + (fileIndex + 1) + '/' + validFiles.length + '...';
+                    }
+                }
+            });
+
+            xhr.onload = function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        var data = JSON.parse(xhr.responseText);
+                        if (data.url) {
+                            // Replace placeholder with real URL
+                            var idx = uploadedUrls.indexOf(pid);
+                            if (idx !== -1) uploadedUrls[idx] = data.url;
+                            uploaded++;
+                            renderUploadPreviews();
+                            syncImageFields();
+                            callback();
+                            return;
+                        }
+                    } catch (e) {}
+                }
+                // Failed — retry once
+                if (attempt < 1) {
+                    console.warn('[Upload] Retrying image ' + (fileIndex + 1) + '...');
+                    if (progressText) progressText.textContent = 'Retrying ' + (fileIndex + 1) + '/' + validFiles.length + '...';
+                    setTimeout(function () {
+                        uploadWithRetry(formData, pid, fileIndex, attempt + 1, callback);
+                    }, 1000);
+                } else {
+                    failed++;
+                    // Remove failed placeholder
+                    var idx = uploadedUrls.indexOf(pid);
+                    if (idx !== -1) uploadedUrls.splice(idx, 1);
+                    renderUploadPreviews();
+                    callback();
+                }
+            };
+
+            xhr.onerror = function () {
+                if (attempt < 1) {
+                    setTimeout(function () {
+                        uploadWithRetry(formData, pid, fileIndex, attempt + 1, callback);
+                    }, 1500);
+                } else {
+                    failed++;
+                    var idx = uploadedUrls.indexOf(pid);
+                    if (idx !== -1) uploadedUrls.splice(idx, 1);
+                    renderUploadPreviews();
+                    callback();
+                }
+            };
+
+            xhr.ontimeout = function () {
+                if (attempt < 1) {
+                    setTimeout(function () {
+                        uploadWithRetry(formData, pid, fileIndex, attempt + 1, callback);
+                    }, 1000);
+                } else {
+                    failed++;
+                    var idx = uploadedUrls.indexOf(pid);
+                    if (idx !== -1) uploadedUrls.splice(idx, 1);
+                    renderUploadPreviews();
+                    callback();
+                }
+            };
+
+            xhr.send(formData);
+        }
+
+        // Start sequential upload
+        uploadSingleFile(0);
     }
 
     function addThumbPreview(src, idx) {
