@@ -2,6 +2,15 @@
    RENT CARS GEORGIA - MASTER STYLESHEET
    ======================================== */
 
+/* USD-only: hide currency selector */
+.currency-btn,
+#currencyBtn,
+#currencyDropdown,
+.currency-btn ~ .dropdown-menu,
+.selector-group:has(#currencyBtn) {
+    display: none !important;
+}
+
 /* VARIABLES & COLOR PALETTE — Dark Luxury */
 :root {
     --sage-grey: #0B0C10;
