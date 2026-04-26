@@ -203,6 +203,41 @@ app.get('/api/config/google-client-id', (req, res) => {
     res.json({ clientId: process.env.GOOGLE_CLIENT_ID || null });
 });
 
+// Exchange rates proxy (NBG) — cached 1 hour
+let ratesCache = { data: null, ts: 0 };
+app.get('/api/exchange-rates', async (req, res) => {
+    try {
+        var now = Date.now();
+        if (ratesCache.data && (now - ratesCache.ts) < 3600000) {
+            return res.json(ratesCache.data);
+        }
+        const https = require('https');
+        const url = 'https://nbg.gov.ge/gw/api/ct/monetarypolicy/currencies/en/json/';
+        const fetchRates = () => new Promise((resolve, reject) => {
+            https.get(url, { timeout: 5000 }, (resp) => {
+                let body = '';
+                resp.on('data', (c) => body += c);
+                resp.on('end', () => { try { resolve(JSON.parse(body)); } catch (e) { reject(e); } });
+            }).on('error', reject);
+        });
+        const nbgData = await fetchRates();
+        if (nbgData && nbgData[0] && nbgData[0].currencies) {
+            var rates = {};
+            nbgData[0].currencies.forEach(function(c) {
+                rates[c.code] = c.rate / c.quantity;
+            });
+            rates['GEL'] = 1;
+            ratesCache = { data: { rates: rates, date: nbgData[0].date }, ts: now };
+            return res.json(ratesCache.data);
+        }
+        res.status(502).json({ error: 'Invalid NBG response' });
+    } catch (e) {
+        console.error('[Exchange rates] Error:', e.message);
+        if (ratesCache.data) return res.json(ratesCache.data);
+        res.status(502).json({ error: 'Failed to fetch rates' });
+    }
+});
+
 // API Routes
 app.use('/api/check-availability', rateLimit({
     windowMs: 15 * 60 * 1000,

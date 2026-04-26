@@ -137,7 +137,10 @@
             [cap(cat), year, cap(engine), cap(gearbox)].filter(Boolean).join(' · ');
 
         // Price
-        document.getElementById('vdPrice').textContent = '$' + (v.price_per_day || 0);
+        var priceEl = document.getElementById('vdPrice');
+        priceEl.setAttribute('data-price-usd', v.price_per_day || 0);
+        priceEl.classList.add('vd-price-amount');
+        priceEl.textContent = (typeof Currency !== 'undefined') ? Currency.formatPrice(v.price_per_day || 0) : ('$' + (v.price_per_day || 0));
 
         // Partner
         if (v.company_name) {
@@ -192,9 +195,9 @@
             { label: vt('vehicle_page.steering', 'Steering'),  val: vtVal(v.steering_side || 'left') },
             { label: vt('vehicle_page.color', 'Color'),     val: vtVal(v.color || '') },
             { label: vt('vehicle_page.fuel_policy', 'Fuel Policy'), val: vtVal(v.fuel_policy || 'full_to_full') },
-            { label: vt('vehicle_page.deposit', 'Deposit'),   val: v.deposit_amount ? '$' + v.deposit_amount : vt('vehicle_page.val_none', 'None') },
+            { label: vt('vehicle_page.deposit', 'Deposit'),   val: v.deposit_amount ? ((typeof Currency !== 'undefined') ? Currency.formatPrice(v.deposit_amount) : ('$' + v.deposit_amount)) : vt('vehicle_page.val_none', 'None') },
             { label: vt('vehicle_page.min_age', 'Min Age'),   val: (v.min_age || 21) + ' ' + vt('vehicle_page.years_suffix', 'years') },
-            { label: vt('vehicle_page.price_day', 'Price/Day'), val: '$' + (v.price_per_day || 0) }
+            { label: vt('vehicle_page.price_day', 'Price/Day'), val: (typeof Currency !== 'undefined') ? Currency.formatPrice(v.price_per_day || 0) : ('$' + (v.price_per_day || 0)) }
         ];
         if (v.fuel_consumption) specs.push({ label: vt('vehicle_page.fuel', 'Fuel'), val: v.fuel_consumption });
         if (v.mileage_limit_enabled && v.mileage_km) specs.push({ label: vt('vehicle_page.mileage_limit', 'Mileage Limit'), val: v.mileage_km + ' km' });
@@ -492,7 +495,9 @@
             var days = vdDayCount(vdPickupDate, vdDropoffDate, pTime, dTime);
             var dailyRate = vdGetDailyRateByTier(days);
             var total = (days * dailyRate).toFixed(2);
-            totalAmt.textContent = '$' + total + ' (' + days + ' day' + (days !== 1 ? 's' : '') + ' × $' + dailyRate.toFixed(2) + ')';
+            var fmtTotal = (typeof Currency !== 'undefined') ? Currency.formatPrice(parseFloat(total)) : ('$' + total);
+            var fmtDaily = (typeof Currency !== 'undefined') ? Currency.formatPrice(dailyRate) : ('$' + dailyRate.toFixed(2));
+            totalAmt.textContent = fmtTotal + ' (' + days + ' day' + (days !== 1 ? 's' : '') + ' × ' + fmtDaily + ')';
             totalRow.style.display = 'flex';
         } else {
             totalRow.style.display = 'none';
@@ -605,6 +610,32 @@
 
     document.getElementById('vdSuccessModal').addEventListener('click', function(e) {
         if (e.target === this) this.style.display = 'none';
+    });
+
+    // Re-render prices on currency change
+    document.addEventListener('currencyChanged', function() {
+        if (vehicleData) {
+            var priceEl = document.getElementById('vdPrice');
+            if (priceEl) {
+                priceEl.textContent = (typeof Currency !== 'undefined') ? Currency.formatPrice(vehicleData.price_per_day || 0) : ('$' + (vehicleData.price_per_day || 0));
+            }
+            if (typeof Currency !== 'undefined') Currency.refresh();
+            // Re-calc booking total if dates selected
+            if (vdPickupDate && vdDropoffDate) {
+                var totalRow = document.getElementById('vdTotalRow');
+                var totalAmt = document.getElementById('vdTotalAmt');
+                if (totalRow && totalAmt) {
+                    var pTime = document.getElementById('vdPickupTime').value || '10:00';
+                    var dTime = document.getElementById('vdDropoffTime').value || '10:00';
+                    var days = vdDayCount(vdPickupDate, vdDropoffDate, pTime, dTime);
+                    var dailyRate = vdGetDailyRateByTier(days);
+                    var total = (days * dailyRate).toFixed(2);
+                    var fmtTotal = Currency.formatPrice(parseFloat(total));
+                    var fmtDaily = Currency.formatPrice(dailyRate);
+                    totalAmt.textContent = fmtTotal + ' (' + days + ' day' + (days !== 1 ? 's' : '') + ' × ' + fmtDaily + ')';
+                }
+            }
+        }
     });
 
     function cap(s) {

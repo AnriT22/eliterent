@@ -638,7 +638,9 @@
             visible.forEach(function (c) { c.style.display = ''; grid.appendChild(c); });
 
             var badge = document.getElementById('vpCountBadge');
-            if (badge) badge.textContent = visible.length + ' car' + (visible.length !== 1 ? 's' : '') + ' available';
+            if (badge) {
+                badge.textContent = typeof I18n !== 'undefined' ? I18n.t('vehicles.cars_available', {count: visible.length}) : (visible.length + ' car' + (visible.length !== 1 ? 's' : '') + ' available');
+            }
         }
         window.applyFilters = applyFilters;
 
@@ -1061,7 +1063,7 @@
                     + '<span class="vc-spec">' + vtVal(drive) + '</span>'
                     + '</div>'
                     + '<div class="vc-price-section">'
-                    + '<div class="vc-price-row"><span class="vc-price-label" data-i18n="vehicles.price_per_day">Price per day:</span><span class="vc-price-current">$' + price + '</span><span class="vc-price-unit" data-i18n="fleet.per_day">/day</span></div>'
+                    + '<div class="vc-price-row"><span class="vc-price-label" data-i18n="vehicles.price_per_day">Price per day:</span><span class="vc-price-amount" data-price-usd="' + price + '">$' + price + '</span><span class="vc-price-unit" data-i18n="fleet.per_day">/day</span></div>'
                     + '<button class="vc-book-btn" data-i18n="fleet.book_now">Book Now</button>'
                     + (v.company_name ? '<div class="vc-partner-name">by ' + v.company_name + '</div>' : '')
                     + '</div>'
@@ -1100,6 +1102,7 @@
                 badge.textContent = carsWord;
             }
             if (typeof I18n !== 'undefined' && I18n.translatePage) I18n.translatePage(grid);
+            if (typeof Currency !== 'undefined' && Currency.refresh) Currency.refresh();
         }
 
         if (token && user && user.role === 'guest') {
@@ -1114,6 +1117,11 @@
             buildCards({});
         }
     }
+
+    // Re-apply currency on change
+    document.addEventListener('currencyChanged', function() {
+        if (typeof Currency !== 'undefined') Currency.refresh();
+    });
 
     // Toggle favorite function
     window.toggleFavorite = function(vehicleId, btn) {
@@ -1234,7 +1242,7 @@
     })();
     </script>
     <script src="navbar-auth.js?v=2"></script>
-
+    <script src="currency.js?v=1"></script>
 <script src="premium-animations.js"></script>
 </body>
 </html>
