@@ -521,9 +521,87 @@
         if (formTop) formTop.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
+    // Per-step required fields validation
+    var stepRequiredFields = {
+        1: [
+            { id: 'vName', label: 'Vehicle Name' },
+            { id: 'vBrand', label: 'Brand' },
+            { id: 'vModel', label: 'Model' },
+            { id: 'vYear', label: 'Year' },
+            { id: 'vCategory', label: 'Category' },
+            { id: 'vColor', label: 'Color' },
+            { id: 'vEngine', label: 'Engine Type' },
+            { id: 'vGearbox', label: 'Gearbox' },
+            { id: 'vDriveType', label: 'Drive Type' },
+            { id: 'vLuggage', label: 'Luggage Capacity' }
+        ],
+        2: [], // checkboxes — all optional
+        3: [
+            { id: 'vPrice', label: 'Daily Price' }
+        ],
+        4: [
+            { id: 'vLocationCity', label: 'Pickup City' },
+            { id: 'vRegion', label: 'Region' }
+        ],
+        5: [] // validated at submit (photos + passport + reg number)
+    };
+
+    function validateWizardStep(step) {
+        var fields = stepRequiredFields[step] || [];
+        var firstInvalid = null;
+
+        // Clear previous highlights
+        document.querySelectorAll('.db-input.vf-invalid').forEach(function (el) {
+            el.classList.remove('vf-invalid');
+        });
+        document.querySelectorAll('.color-swatches.vf-invalid').forEach(function (el) {
+            el.classList.remove('vf-invalid');
+        });
+
+        for (var i = 0; i < fields.length; i++) {
+            var f = fields[i];
+            var el = document.getElementById(f.id);
+            if (!el) continue;
+            var val = el.value ? el.value.trim() : '';
+            if (!val) {
+                if (f.id === 'vColor') {
+                    // Color swatch — highlight the swatch container
+                    var swatches = document.getElementById('colorSwatches');
+                    if (swatches) swatches.classList.add('vf-invalid');
+                    if (!firstInvalid) firstInvalid = swatches;
+                } else {
+                    el.classList.add('vf-invalid');
+                    if (!firstInvalid) firstInvalid = el;
+                }
+            }
+        }
+
+        if (firstInvalid) {
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (firstInvalid.focus) firstInvalid.focus();
+            showFormMessage('Please fill in all required fields', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    // Remove error highlight when user fills the field
+    document.querySelectorAll('.db-input').forEach(function (inp) {
+        inp.addEventListener('input', function () {
+            this.classList.remove('vf-invalid');
+        });
+        inp.addEventListener('change', function () {
+            this.classList.remove('vf-invalid');
+        });
+    });
+
     // Next / Prev buttons
     document.querySelectorAll('.wz-btn-next').forEach(function (btn) {
-        btn.addEventListener('click', function () { goToWizardStep(this.getAttribute('data-next')); });
+        btn.addEventListener('click', function () {
+            if (validateWizardStep(currentWizardStep)) {
+                goToWizardStep(this.getAttribute('data-next'));
+            }
+        });
     });
     document.querySelectorAll('.wz-btn-prev').forEach(function (btn) {
         btn.addEventListener('click', function () { goToWizardStep(this.getAttribute('data-prev')); });
@@ -531,7 +609,17 @@
 
     // Click wizard step indicators
     document.querySelectorAll('.wz-step').forEach(function (s) {
-        s.addEventListener('click', function () { goToWizardStep(this.getAttribute('data-step')); });
+        s.addEventListener('click', function () {
+            var target = parseInt(this.getAttribute('data-step'));
+            // Allow going backward freely, validate going forward
+            if (target > currentWizardStep) {
+                // Validate all steps between current and target
+                for (var st = currentWizardStep; st < target; st++) {
+                    if (!validateWizardStep(st)) return;
+                }
+            }
+            goToWizardStep(target);
+        });
     });
 
     // ========================================
@@ -547,6 +635,8 @@
             var c = swatch.getAttribute('data-color');
             if (colorInput) colorInput.value = c;
             if (colorLabel) colorLabel.textContent = c;
+            var swatchContainer = document.getElementById('colorSwatches');
+            if (swatchContainer) swatchContainer.classList.remove('vf-invalid');
         });
     });
 
