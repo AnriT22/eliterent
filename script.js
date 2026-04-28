@@ -988,13 +988,33 @@ function initHeaderScrollEffects() {
 // ========================================
 
 function initResponsiveMenu() {
-    // Add mobile menu functionality if needed
-    // This can be expanded for mobile navigation
-    if (window.innerWidth <= 768) {
-        const header = document.querySelector('.header-right');
-        header.setAttribute('role', 'navigation');
-        header.setAttribute('aria-label', 'Authentication and settings');
+    const hamburger = document.getElementById('hamburgerBtn');
+    const overlay = document.getElementById('mobileNavOverlay');
+    const panel = document.getElementById('mobileNavPanel');
+    const closeBtn = document.getElementById('mobileNavClose');
+    if (!hamburger || !overlay || !panel) return;
+
+    function openMenu() {
+        hamburger.classList.add('open');
+        overlay.classList.add('open');
+        panel.classList.add('open');
+        document.body.style.overflow = 'hidden';
     }
+    function closeMenu() {
+        hamburger.classList.remove('open');
+        overlay.classList.remove('open');
+        panel.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    hamburger.addEventListener('click', openMenu);
+    if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+    overlay.addEventListener('click', closeMenu);
+
+    // Close on nav link click
+    panel.querySelectorAll('a').forEach(function(a) {
+        a.addEventListener('click', closeMenu);
+    });
 }
 
 // ========================================
@@ -1070,11 +1090,29 @@ function initAdvancedFilters() {
         });
     }
 
-    // Apply filters — filter carousel cars on home page
+    // Apply filters — redirect to vehicles.html with query params
     if (btnApplyFilters) {
         btnApplyFilters.addEventListener('click', () => {
             advancedFiltersModal.classList.remove('active');
-            applyHomeFilters();
+            const params = new URLSearchParams();
+
+            // Pickup/dropoff from hero form
+            const pickup = document.getElementById('pickupInput');
+            const dropoff = document.getElementById('dropoffInput');
+            const dates = document.getElementById('dateRangeInput');
+            if (pickup && pickup.value) params.set('pickup', pickup.value);
+            if (dropoff && dropoff.value) params.set('dropoff', dropoff.value);
+            if (dates && dates.value) params.set('dates', dates.value);
+
+            // Collect checked filter values
+            [['category','category'],['engine','engine'],['gearbox','gearbox'],
+             ['drivetype','drive'],['interior','interior'],['steering','steering'],
+             ['payment','payment']].forEach(function(pair) {
+                const vals = getHomeFilterChecked(pair[0]);
+                if (vals.length) params.set(pair[1], vals.join(','));
+            });
+
+            window.location.href = 'vehicles.html' + (params.toString() ? '?' + params.toString() : '');
         });
     }
 
