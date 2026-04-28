@@ -1871,15 +1871,31 @@ body {
 }
 
 .partners-slider {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 20px;
+    display: flex;
+    overflow: hidden;
     padding: 20px 0;
+    gap: 0;
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.partners-slider-track {
+    display: flex;
+    gap: 0;
+    animation: partnersScroll 22s linear infinite;
+    will-change: transform;
+}
+
+.partners-slider:hover .partners-slider-track { animation-play-state: paused; }
+
+@keyframes partnersScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
 }
 
 .partner-logo {
     background: #1C1E26;
-    padding: 30px;
+    padding: 22px 36px;
     border-radius: var(--radius-md);
     text-align: center;
     font-weight: 600;

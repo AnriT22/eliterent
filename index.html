@@ -19,7 +19,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="RoyalCar.rent — Premium Car Rental in Georgia">
     <meta name="twitter:description" content="Rent premium cars in Georgia from verified partners.">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
     <link rel="stylesheet" href="premium.css">
     <link rel="stylesheet" href="navbar-auth.css">
     <script src="api-helper.js"></script>
@@ -95,9 +95,33 @@
 
                 <!-- Partner Button -->
                 <a href="register-partner.html" class="partner-btn" data-i18n="nav.become_partner">Become Partner</a>
+
+                <!-- Hamburger -->
+                <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">
+                    <span></span><span></span><span></span>
+                </button>
             </div>
         </div>
     </header>
+
+    <!-- MOBILE NAV -->
+    <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+    <div class="mobile-nav-panel" id="mobileNavPanel">
+        <div class="mobile-nav-header">
+            <a href="/" class="logo"><img src="images/logo.webp" alt="RoyalCar.rent"><span>RoyalCar.rent</span></a>
+            <button class="mobile-nav-close" id="mobileNavClose">&#10005;</button>
+        </div>
+        <nav class="mobile-nav-links">
+            <a href="index.html" class="active" data-i18n="nav.home">Home</a>
+            <a href="vehicles.html" data-i18n="nav.vehicles">Vehicles</a>
+            <a href="reviews.html" data-i18n="nav.reviews">Reviews</a>
+            <a href="about.html" data-i18n="nav.about">About</a>
+            <a href="contact.html" data-i18n="nav.contact">Contact</a>
+        </nav>
+        <div class="mobile-nav-footer">
+            <a href="register-partner.html" class="partner-btn" data-i18n="nav.become_partner">Become Partner</a>
+        </div>
+    </div>
 
     <!-- HERO SECTION -->
     <section class="hero">
@@ -506,14 +530,13 @@
         <div class="container">
             <h2 class="section-title" data-i18n="features.title">Why Choose Rent Cars Georgia?</h2>
             <div class="bento-grid">
-                <!-- Large Video Tile -->
-                <div class="bento-tile large">
-                    <div class="bento-video-placeholder">
-                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-                        </svg>
-                        <p>Driving through Svaneti</p>
+                <!-- Large Scenic Tile -->
+                <div class="bento-tile large" style="position:relative;overflow:hidden;padding:0;min-height:320px;">
+                    <img src="/images/svaneti.jpg" alt="Driving through Georgian mountains" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:inherit;">
+                    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 60%);border-radius:inherit;"></div>
+                    <div style="position:absolute;bottom:24px;left:24px;color:#fff;">
+                        <div style="font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#D4AF37;margin-bottom:6px;">Georgia</div>
+                        <div style="font-size:22px;font-weight:800;line-height:1.2;">Drive Through<br>the Mountains</div>
                     </div>
                 </div>
 
@@ -558,13 +581,31 @@
     <!-- PARTNERS SLIDER -->
     <section class="partners-section">
         <div class="container">
-            <h2 class="section-title" data-i18n="partners_section.title">Trusted by Leading Partners</h2>
+            <h2 class="section-title" data-i18n="partners_section.title">Our Fleet Includes</h2>
             <div class="partners-slider">
-                <div class="partner-logo">🏢 Partner 1</div>
-                <div class="partner-logo">🏢 Partner 2</div>
-                <div class="partner-logo">🏢 Partner 3</div>
-                <div class="partner-logo">🏢 Partner 4</div>
-                <div class="partner-logo">🏢 Partner 5</div>
+                <div class="partners-slider-track">
+                    <div class="partner-logo brand-logo">Toyota</div>
+                    <div class="partner-logo brand-logo">BMW</div>
+                    <div class="partner-logo brand-logo">Mercedes</div>
+                    <div class="partner-logo brand-logo">Hyundai</div>
+                    <div class="partner-logo brand-logo">Lexus</div>
+                    <div class="partner-logo brand-logo">Nissan</div>
+                    <div class="partner-logo brand-logo">KIA</div>
+                    <div class="partner-logo brand-logo">Honda</div>
+                    <div class="partner-logo brand-logo">Mitsubishi</div>
+                    <div class="partner-logo brand-logo">Land Rover</div>
+                    <!-- Duplicate set for seamless infinite loop -->
+                    <div class="partner-logo brand-logo" aria-hidden="true">Toyota</div>
+                    <div class="partner-logo brand-logo" aria-hidden="true">BMW</div>
+                    <div class="partner-logo brand-logo" aria-hidden="true">Mercedes</div>
+                    <div class="partner-logo brand-logo" aria-hidden="true">Hyundai</div>
+                    <div class="partner-logo brand-logo" aria-hidden="true">Lexus</div>
+                    <div class="partner-logo brand-logo" aria-hidden="true">Nissan</div>
+                    <div class="partner-logo brand-logo" aria-hidden="true">KIA</div>
+                    <div class="partner-logo brand-logo" aria-hidden="true">Honda</div>
+                    <div class="partner-logo brand-logo" aria-hidden="true">Mitsubishi</div>
+                    <div class="partner-logo brand-logo" aria-hidden="true">Land Rover</div>
+                </div>
             </div>
         </div>
     </section>
@@ -764,7 +805,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=2"></script>
+    <script src="script.js?v=3"></script>
     <script src="navbar-auth.js?v=2"></script>
     <script src="currency.js?v=3"></script>
 <script src="premium-animations.js"></script>
