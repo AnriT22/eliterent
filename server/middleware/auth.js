@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken');
+﻿const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
 let JWT_SECRET = process.env.JWT_SECRET;
@@ -42,7 +42,7 @@ function generateToken(user) {
     return jwt.sign(
         { id: user.id, email: String(user.email || ''), role: String(user.role || ''), full_name: String(user.full_name || '') },
         JWT_SECRET,
-        { expiresIn: '7d', issuer: 'royalcar.rent', audience: 'royalcar-api' }
+        { expiresIn: '7d', issuer: 'EliteAuto.rent', audience: 'EliteAuto-api' }
     );
 }
 

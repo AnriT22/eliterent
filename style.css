@@ -1,15 +1,8 @@
 /* ========================================
-   RENT CARS GEORGIA - MASTER STYLESHEET
+   ELITEAUTO.RENT - MASTER STYLESHEET
    ======================================== */
 
-/* USD-only: hide currency selector */
-.currency-btn,
-#currencyBtn,
-#currencyDropdown,
-.currency-btn ~ .dropdown-menu,
-.selector-group:has(#currencyBtn) {
-    display: none !important;
-}
+/* Currency selector — now enabled */
 
 /* VARIABLES & COLOR PALETTE — Dark Luxury */
 :root {
@@ -108,10 +101,11 @@ body {
 .header-left .logo img.logo-img,
 .header-left .logo svg,
 .header-left .logo .logo-icon {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
     flex-shrink: 0;
+    border-radius: 50%;
 }
 
 /* Navigation Menu */
@@ -3762,6 +3756,121 @@ body {
 .rv-submit-btn:hover { background: #FFD970; }
 .rv-submit-btn:disabled { background: #8B7A3A; cursor: not-allowed; }
 
+/* ========================================
+   TRUST BAR
+   ======================================== */
+.trust-bar {
+    background: linear-gradient(135deg, #141922 0%, #1a2233 100%);
+    border-top: 1px solid rgba(212,175,55,0.15);
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+    padding: 16px 0;
+    overflow: hidden;
+}
+.trust-bar-items {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+.trust-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #EAEAEA;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+.trust-icon {
+    font-size: 18px;
+}
+@media (max-width: 768px) {
+    .trust-bar-items {
+        gap: 16px;
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        animation: trustScroll 20s linear infinite;
+    }
+    .trust-item { font-size: 13px; }
+    @keyframes trustScroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+}
+
+/* ========================================
+   FAQ SECTION
+   ======================================== */
+.faq-section {
+    padding: 80px 0;
+    background: var(--bg-secondary, #111827);
+}
+.faq-subtitle {
+    text-align: center;
+    color: #A0A3B0;
+    font-size: 16px;
+    margin-bottom: 40px;
+}
+.faq-grid {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.faq-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+.faq-item:hover {
+    border-color: rgba(212,175,55,0.3);
+}
+.faq-question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    font-weight: 600;
+    color: #EAEAEA;
+    font-size: 16px;
+}
+.faq-toggle {
+    font-size: 24px;
+    color: #D4AF37;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+    width: 24px;
+    text-align: center;
+}
+.faq-item.open .faq-toggle {
+    transform: rotate(45deg);
+}
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+.faq-item.open .faq-answer {
+    max-height: 300px;
+    padding: 0 24px 20px;
+}
+.faq-answer p {
+    color: #A0A3B0;
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0;
+}
+@media (max-width: 768px) {
+    .faq-section { padding: 48px 0; }
+    .faq-question { padding: 16px 18px; font-size: 14px; }
+    .faq-item.open .faq-answer { padding: 0 18px 16px; }
+    .faq-answer p { font-size: 14px; }
+}
+
 /* PRINT STYLES */
 @media print {
     .header,
@@ -3770,4 +3879,63 @@ body {
     .modal {
         display: none;
     }
+}
+
+/* ── STICKY MOBILE CTA BAR ── */
+.mobile-cta-bar {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9998;
+    background: rgba(11, 12, 16, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+    padding: 10px 16px;
+    gap: 10px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+}
+@media (max-width: 768px) {
+    .mobile-cta-bar {
+        display: flex;
+    }
+    body {
+        padding-bottom: 70px;
+    }
+    .floating-whatsapp {
+        bottom: 80px !important;
+    }
+}
+.mobile-cta-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+}
+.mobile-cta-book {
+    background: linear-gradient(135deg, #D4AF37, #B8963F);
+    color: #0B0C10;
+}
+.mobile-cta-book:hover {
+    background: linear-gradient(135deg, #FFD970, #D4AF37);
+    transform: translateY(-1px);
+}
+.mobile-cta-whatsapp {
+    background: #22c55e;
+    color: #fff;
+}
+.mobile-cta-whatsapp:hover {
+    background: #16a34a;
+    transform: translateY(-1px);
 }

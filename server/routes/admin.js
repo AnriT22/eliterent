@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const { queryAll, queryOne, execute } = require('../db-helpers');
 const { sendEmail, escapeHtml } = require('../mailer');
@@ -63,7 +63,7 @@ function buildApprovalEmailText(booking, recipientLabel) {
         + 'Pickup location: ' + (booking.pickup_location || 'Not specified') + '\n'
         + 'Total price: ' + formatMoney(booking.total_price) + '\n'
         + extrasLine + '\n\n'
-        + 'Thank you for using RoyalCar.rent.';
+        + 'Thank you for using EliteAuto.rent.';
 }
 
 // All admin routes require admin role
@@ -428,8 +428,8 @@ router.put('/partners/:id/unverify', async (req, res) => {
                         await sendEmail({
                             to: bk.guest_email,
                             subject: 'Reservation Cancelled — ' + (bk.vehicle_name || 'Vehicle'),
-                            text: 'Hello ' + (bk.guest_name || 'Guest') + ',\n\nYour reservation for ' + (bk.vehicle_name || 'a vehicle') + ' (' + bk.pickup_date + ' → ' + bk.dropoff_date + ') has been cancelled because the partner is no longer verified.\n\nWe apologize for the inconvenience. Please book another vehicle on RoyalCar.rent.\n\nBest regards,\nRoyalCar.rent Team',
-                            html: '<p>Hello ' + escapeHtml(bk.guest_name || 'Guest') + ',</p><p>Your reservation for <strong>' + escapeHtml(bk.vehicle_name || 'a vehicle') + '</strong> (' + escapeHtml(bk.pickup_date) + ' → ' + escapeHtml(bk.dropoff_date) + ') has been cancelled because the partner is no longer verified.</p><p>We apologize for the inconvenience. Please book another vehicle on <a href="' + (process.env.BASE_URL || 'http://localhost:3000') + '">RoyalCar.rent</a>.</p>'
+                            text: 'Hello ' + (bk.guest_name || 'Guest') + ',\n\nYour reservation for ' + (bk.vehicle_name || 'a vehicle') + ' (' + bk.pickup_date + ' → ' + bk.dropoff_date + ') has been cancelled because the partner is no longer verified.\n\nWe apologize for the inconvenience. Please book another vehicle on EliteAuto.rent.\n\nBest regards,\nEliteAuto.rent Team',
+                            html: '<p>Hello ' + escapeHtml(bk.guest_name || 'Guest') + ',</p><p>Your reservation for <strong>' + escapeHtml(bk.vehicle_name || 'a vehicle') + '</strong> (' + escapeHtml(bk.pickup_date) + ' → ' + escapeHtml(bk.dropoff_date) + ') has been cancelled because the partner is no longer verified.</p><p>We apologize for the inconvenience. Please book another vehicle on <a href="' + (process.env.BASE_URL || 'http://localhost:3000') + '">EliteAuto.rent</a>.</p>'
                         });
                     } catch (emailErr) {
                         console.error('Failed to notify guest #' + bk.guest_id + ':', emailErr.message);

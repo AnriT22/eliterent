@@ -1,4 +1,4 @@
-const express = require("express");
+﻿const express = require("express");
 const bcrypt = require("bcryptjs");
 const dns = require("dns").promises;
 const { authenticateToken, generateToken } = require("../middleware/auth");
@@ -1366,19 +1366,19 @@ router.post("/forgot-password", async (req, res) => {
     const { sendEmail } = require("../mailer");
     await sendEmail({
       to: user.email,
-      subject: "Password Reset — RoyalCar.rent",
+      subject: "Password Reset — EliteAuto.rent",
       text:
         "Hello " +
         (user.full_name || "") +
         ",\n\nYou requested a password reset. Click the link below to set a new password:\n\n" +
         resetUrl +
-        "\n\nThis link expires in 1 hour.\n\nIf you did not request this, please ignore this email.\n\nRoyalCar.rent Team",
+        "\n\nThis link expires in 1 hour.\n\nIf you did not request this, please ignore this email.\n\nEliteAuto.rent Team",
       html:
         "<p>Hello " +
         (user.full_name || "") +
         ',</p><p>You requested a password reset. Click the link below to set a new password:</p><p><a href="' +
         resetUrl +
-        '" style="display:inline-block;padding:12px 28px;background:#c8a961;color:#0f172a;border-radius:8px;text-decoration:none;font-weight:700;">Reset Password</a></p><p>This link expires in 1 hour.</p><p>If you did not request this, please ignore this email.</p><p>RoyalCar.rent Team</p>',
+        '" style="display:inline-block;padding:12px 28px;background:#c8a961;color:#0f172a;border-radius:8px;text-decoration:none;font-weight:700;">Reset Password</a></p><p>This link expires in 1 hour.</p><p>If you did not request this, please ignore this email.</p><p>EliteAuto.rent Team</p>',
     });
 
     res.json({ message: "If that email exists, a reset link has been sent." });

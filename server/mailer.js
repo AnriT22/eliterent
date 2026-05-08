@@ -1,4 +1,4 @@
-const nodemailer = require("nodemailer");
+﻿const nodemailer = require("nodemailer");
 
 function escapeHtml(str) {
   return String(str || "")
@@ -119,7 +119,7 @@ async function sendViaSMTP(options, from) {
 // ── Main send function: tries Resend first, then SMTP ──
 async function sendEmail(options) {
   const from =
-    process.env.EMAIL_FROM || process.env.SMTP_FROM || process.env.SMTP_USER || "RoyalCar <onboarding@resend.dev>";
+    process.env.EMAIL_FROM || process.env.SMTP_FROM || process.env.SMTP_USER || "EliteAuto <onboarding@resend.dev>";
 
   // Try Resend first
   if (process.env.RESEND_API_KEY) {
@@ -175,12 +175,12 @@ async function sendOTPEmail(email, otp, type = "verification") {
 
   switch (type) {
     case "registration":
-      subject = "RoyalCar.rent - Verify Your Account";
+      subject = "EliteAuto.rent - Verify Your Account";
       text = `Your verification code is: ${otp}\n\nThis code expires in 5 minutes.\nIf you didn't create an account, please ignore this email.`;
       html = `
                 <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
                     <div style="text-align: center; margin-bottom: 30px;">
-                        <h1 style="color: #1e293b; margin: 0;">RoyalCar.rent</h1>
+                        <h1 style="color: #1e293b; margin: 0;">EliteAuto.rent</h1>
                         <p style="color: #64748b; margin: 5px 0;">Premium Car Rental</p>
                     </div>
                     <div style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-radius: 12px; padding: 30px; text-align: center;">
@@ -198,12 +198,12 @@ async function sendOTPEmail(email, otp, type = "verification") {
             `;
       break;
     case "reservation":
-      subject = "RoyalCar.rent - Confirm Your Booking";
+      subject = "EliteAuto.rent - Confirm Your Booking";
       text = `Your booking confirmation code is: ${otp}\n\nThis code expires in 5 minutes.\nEnter this code to confirm your reservation.`;
       html = `
                 <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px;">
                     <div style="text-align: center; margin-bottom: 30px;">
-                        <h1 style="color: #1e293b; margin: 0;">RoyalCar.rent</h1>
+                        <h1 style="color: #1e293b; margin: 0;">EliteAuto.rent</h1>
                         <p style="color: #64748b; margin: 5px 0;">Premium Car Rental</p>
                     </div>
                     <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-radius: 12px; padding: 30px; text-align: center;">
@@ -221,7 +221,7 @@ async function sendOTPEmail(email, otp, type = "verification") {
             `;
       break;
     default:
-      subject = "RoyalCar.rent - Verification Code";
+      subject = "EliteAuto.rent - Verification Code";
       text = `Your verification code is: ${otp}\n\nThis code expires in 5 minutes.`;
       html = `<p>Your verification code is: <strong>${otp}</strong></p><p>This code expires in 5 minutes.</p>`;
   }

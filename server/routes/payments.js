@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const { queryOne, execute } = require('../db-helpers');
 const paypal = require('../paypal');
@@ -35,7 +35,7 @@ router.post('/create-order', authenticateToken, requireRole('guest'), async (req
         }
 
         var vehicle = await queryOne('SELECT name FROM vehicles WHERE id = $1', [booking.vehicle_id]);
-        var desc = 'RoyalCar.rent — ' + (vehicle ? vehicle.name : 'Vehicle') + ' booking #' + bookingId;
+        var desc = 'EliteAuto.rent — ' + (vehicle ? vehicle.name : 'Vehicle') + ' booking #' + bookingId;
 
         var order = await paypal.createOrder(bookingId, serviceFee, 'USD', desc);
 

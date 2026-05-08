@@ -1,5 +1,5 @@
-/* ========================================
-   RENT CARS GEORGIA - JAVASCRIPT
+﻿/* ========================================
+   ELITEAUTO.RENT - JAVASCRIPT
    ======================================== */
 
 // ========================================
@@ -74,7 +74,7 @@ function initDropdowns() {
     }
 
     // Restore saved language on load
-    const savedLang = (window.I18n && window.I18n.lang()) || localStorage.getItem('royalcar_lang') || 'en';
+    const savedLang = (window.I18n && window.I18n.lang()) || localStorage.getItem('EliteAuto_lang') || 'en';
     appState.currentLanguage = savedLang;
     updateLanguageButton(savedLang);
 
@@ -1375,4 +1375,4 @@ function getVehicleRecommendations(trip) {
     return recommendations[trip] || recommendations['city'];
 }
 
-console.log('Rent Cars Georgia - Ready to explore!');
+console.log('EliteAuto.rent - Ready to explore!');

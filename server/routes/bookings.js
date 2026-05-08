@@ -1,4 +1,4 @@
-const express = require("express");
+﻿const express = require("express");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const rateLimit = require("express-rate-limit");
@@ -739,7 +739,7 @@ router.post(
               booking.dropoff_date +
               "\nTotal: $" +
               booking.total_price.toFixed(2) +
-              "\n\nPlease review and accept/reject in your dashboard.\n\nRoyalCar.rent",
+              "\n\nPlease review and accept/reject in your dashboard.\n\nEliteAuto.rent",
             html:
               "<p>Hello " +
               escapeHtml(
@@ -755,7 +755,7 @@ router.post(
               escapeHtml(booking.dropoff_date) +
               "</li><li><strong>Total:</strong> $" +
               booking.total_price.toFixed(2) +
-              "</li></ul><p>Please review and accept/reject in your dashboard.</p><p>RoyalCar.rent</p>",
+              "</li></ul><p>Please review and accept/reject in your dashboard.</p><p>EliteAuto.rent</p>",
           });
         }
       } catch (emailErr) {
@@ -1008,7 +1008,7 @@ router.patch("/:id/status", authenticateToken, async (req, res) => {
             dates +
             ") has been accepted by the partner.\n\nTotal: $" +
             (parseFloat(booking.total_price) || 0).toFixed(2) +
-            "\n\nThank you for using RoyalCar.rent!",
+            "\n\nThank you for using EliteAuto.rent!",
           html:
             "<p>Hello " +
             escapeHtml(booking.guest_name || "Guest") +
@@ -1018,7 +1018,7 @@ router.patch("/:id/status", authenticateToken, async (req, res) => {
             escapeHtml(dates) +
             ') has been <strong style="color:#16a34a;">accepted</strong>.</p><p>Total: <strong>$' +
             (parseFloat(booking.total_price) || 0).toFixed(2) +
-            "</strong></p><p>Thank you for using RoyalCar.rent!</p>",
+            "</strong></p><p>Thank you for using EliteAuto.rent!</p>",
         });
       }
       if (status === "rejected" && booking.guest_email) {
@@ -1032,7 +1032,7 @@ router.patch("/:id/status", authenticateToken, async (req, res) => {
             vehicleName +
             " (" +
             dates +
-            ") was not accepted.\n\nPlease try another vehicle or different dates.\n\nRoyalCar.rent Team",
+            ") was not accepted.\n\nPlease try another vehicle or different dates.\n\nEliteAuto.rent Team",
           html:
             "<p>Hello " +
             escapeHtml(booking.guest_name || "Guest") +
@@ -1040,7 +1040,7 @@ router.patch("/:id/status", authenticateToken, async (req, res) => {
             escapeHtml(vehicleName) +
             "</strong> (" +
             escapeHtml(dates) +
-            ') was <strong style="color:#dc2626;">declined</strong>.</p><p>Please try another vehicle or different dates.</p><p>RoyalCar.rent Team</p>',
+            ') was <strong style="color:#dc2626;">declined</strong>.</p><p>Please try another vehicle or different dates.</p><p>EliteAuto.rent Team</p>',
         });
       }
       if (status === "cancel_requested" && booking.partner_email) {
@@ -1056,7 +1056,7 @@ router.patch("/:id/status", authenticateToken, async (req, res) => {
             vehicleName +
             " (" +
             dates +
-            ").\n\nPlease review in your dashboard.\n\nRoyalCar.rent",
+            ").\n\nPlease review in your dashboard.\n\nEliteAuto.rent",
           html:
             "<p>Hello " +
             escapeHtml(
@@ -1082,7 +1082,7 @@ router.patch("/:id/status", authenticateToken, async (req, res) => {
             vehicleName +
             " (" +
             dates +
-            ") has been cancelled.\n\nRoyalCar.rent Team",
+            ") has been cancelled.\n\nEliteAuto.rent Team",
           html:
             "<p>Hello " +
             escapeHtml(booking.guest_name || "Guest") +
@@ -1090,7 +1090,7 @@ router.patch("/:id/status", authenticateToken, async (req, res) => {
             escapeHtml(vehicleName) +
             "</strong> (" +
             escapeHtml(dates) +
-            ") has been <strong>cancelled</strong>.</p><p>RoyalCar.rent Team</p>",
+            ") has been <strong>cancelled</strong>.</p><p>EliteAuto.rent Team</p>",
         });
       }
     } catch (emailErr) {

@@ -401,9 +401,36 @@
     .vd-specs-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 480px) {
-    .vd-container { padding: 16px 10px; }
-    .vd-specs-grid { grid-template-columns: 1fr 1fr; }
+    .vd-container { padding: 12px 8px; gap: 16px; }
+    .vd-booking-panel { padding: 18px 14px; border-radius: 14px; }
+    .vd-vehicle-name { font-size: 18px; }
+    .vd-price-amount { font-size: 26px; }
+    .vd-price-unit { font-size: 13px; }
+    .vd-vehicle-meta { font-size: 12px; margin-bottom: 12px; }
+    .vd-partner-info { font-size: 12px; padding: 6px 10px; }
+    .vd-specs-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .vd-spec-item { padding: 10px; }
+    .vd-spec-label { font-size: 10px; }
+    .vd-spec-val { font-size: 13px; }
     .vd-date-row { flex-direction: column; }
+    .vd-date-box { padding: 8px 12px; }
+    .vd-date-label { font-size: 10px; }
+    .vd-date-val { font-size: 13px; }
+    .vd-time-select { padding: 8px 10px; font-size: 13px; }
+    .vd-book-btn { padding: 13px; font-size: 15px; border-radius: 10px; }
+    .vd-back-link { font-size: 13px; padding: 8px; }
+    .vd-clear-btn { font-size: 13px; padding: 8px; }
+    .vd-section-title { font-size: 16px; }
+    .vd-description { font-size: 13px; }
+    .vd-feature-tag { font-size: 12px; padding: 5px 10px; }
+    .vd-badge { font-size: 11px; padding: 3px 10px; }
+    .vd-badges { gap: 6px; margin-bottom: 14px; }
+    .vd-main-img-wrap { border-radius: 12px; }
+    .vd-thumb { width: 64px; height: 44px; border-radius: 6px; }
+    .vd-thumbs { gap: 6px; margin-top: 8px; }
+    .vd-total-row { padding: 10px 12px; }
+    .vd-total-label { font-size: 13px; }
+    .vd-total-amount { font-size: 17px; }
 
     /* Calendar mobile fix — prevent last column overflow */
     .vd-cal-overlay { padding: 8px; }
@@ -417,4 +444,28 @@
     .vd-cal-footer { margin-top: 16px; padding-top: 12px; }
     .vd-cal-footer span { font-size: 13px; }
     .vd-cal-apply { padding: 10px 22px; font-size: 15px; border-radius: 10px; }
+
+    /* Booking modal mobile */
+    .bk-modal { padding: 20px 16px; border-radius: 16px; }
+    .bk-title { font-size: 18px; margin-bottom: 14px; }
+    .bk-vehicle-img { width: 70px; height: 50px; }
+    .bk-vehicle-name { font-size: 14px; }
+    .bk-vehicle-meta { font-size: 12px; }
+    .bk-vehicle-row { padding: 10px; gap: 10px; }
+    .bk-price-total { font-size: 20px; }
+    .bk-submit-btn { padding: 12px; font-size: 14px; }
+}
+
+@media (max-width: 360px) {
+    .vd-container { padding: 10px 6px; }
+    .vd-booking-panel { padding: 14px 10px; }
+    .vd-vehicle-name { font-size: 16px; }
+    .vd-price-amount { font-size: 24px; }
+    .vd-specs-grid { gap: 6px; }
+    .vd-spec-item { padding: 8px; }
+    .vd-spec-val { font-size: 12px; }
+    .vd-thumb { width: 54px; height: 38px; }
+    .vd-book-btn { padding: 12px; font-size: 14px; }
+    .vd-cal-day { min-height: 36px; font-size: 13px; border-radius: 8px; }
+    .vd-cal-grid { gap: 2px; }
 }

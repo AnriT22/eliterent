@@ -1,6 +1,6 @@
-module.exports = {
+﻿module.exports = {
   apps: [{
-    name: 'royalcar',
+    name: 'eliteauto',
     script: 'server/server.js',
     instances: 1,
     exec_mode: 'fork',
@@ -11,8 +11,8 @@ module.exports = {
       NODE_ENV: 'production',
       PORT: 3000
     },
-    error_file: '/root/.pm2/logs/royalcar-error.log',
-    out_file: '/root/.pm2/logs/royalcar-out.log',
+    error_file: '/root/.pm2/logs/eliteauto-error.log',
+    out_file: '/root/.pm2/logs/eliteauto-out.log',
     log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
     merge_logs: true,
     // Graceful shutdown

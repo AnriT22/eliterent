@@ -775,11 +775,11 @@ function escHtml(s) {
                 var icon = iconMap[a.icon] || iconMap.check;
                 var color = colorMap[a.type] || '#A0A3B0';
                 var timeAgo = getTimeAgo(a.time);
-                return '<div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #3A3F4B;">'
+                return '<div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #E2E5EB;">'
                     + '<div style="width:32px;height:32px;border-radius:50%;background:' + color + '10;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + icon + '</div>'
                     + '<div style="flex:1;min-width:0;">'
-                    + '<p style="margin:0;font-size:13px;color:#EAEAEA;">' + a.text + '</p>'
-                    + '<p style="margin:2px 0 0;font-size:11px;color:#A0A3B0;">' + timeAgo + '</p>'
+                    + '<p style="margin:0;font-size:13px;color:#1e293b;">' + a.text + '</p>'
+                    + '<p style="margin:2px 0 0;font-size:11px;color:#64748b;">' + timeAgo + '</p>'
                     + '</div></div>';
             }).join('');
         }).catch(function () {

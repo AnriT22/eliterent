@@ -1178,8 +1178,8 @@ body > *:not(.header):not(.footer):not(script):not(link):not(style):not(.floatin
     .header-left .logo img.logo-img,
     .header-left .logo svg,
     .header-left .logo .logo-icon {
-        width: 32px;
-        height: 32px;
+        width: 38px;
+        height: 38px;
     }
 
     .header-left .logo {
@@ -1784,23 +1784,7 @@ body > *:not(.header):not(.footer):not(script):not(link):not(style):not(.floatin
     }
 
     /* === VEHICLE DETAIL PAGE === */
-    .vd-container {
-        grid-template-columns: 1fr;
-        padding: 16px;
-        gap: 16px;
-    }
-
-    .vd-booking-panel {
-        position: static;
-    }
-
-    .vd-specs-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .vd-gallery-main img {
-        height: 220px;
-    }
+    /* Main responsive rules are in vehicle.css */
 
     /* === ABOUT PAGE EXTRA === */
     .about-section {
@@ -2006,8 +1990,8 @@ body > *:not(.header):not(.footer):not(script):not(link):not(style):not(.floatin
     .header-left .logo img.logo-img,
     .header-left .logo svg,
     .header-left .logo .logo-icon {
-        width: 28px;
-        height: 28px;
+        width: 34px;
+        height: 34px;
     }
 
     .fleet-card-body {

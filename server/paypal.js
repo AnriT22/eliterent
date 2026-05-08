@@ -1,4 +1,4 @@
-// PayPal REST API helper — no SDK, direct HTTP calls
+﻿// PayPal REST API helper — no SDK, direct HTTP calls
 // Your server NEVER sees card numbers. PayPal handles all payment data securely.
 
 const PAYPAL_MODE = process.env.PAYPAL_MODE || 'sandbox';
@@ -53,7 +53,7 @@ async function createOrder(bookingId, amount, currency, description) {
             intent: 'CAPTURE',
             purchase_units: [{
                 reference_id: 'BOOKING-' + bookingId,
-                description: description || 'RoyalCar.rent — Booking #' + bookingId + ' Service Fee',
+                description: description || 'EliteAuto.rent — Booking #' + bookingId + ' Service Fee',
                 amount: {
                     currency_code: currency || 'USD',
                     value: parseFloat(amount).toFixed(2)

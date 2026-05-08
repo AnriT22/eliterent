@@ -1,4 +1,4 @@
-# 🔥 RoyalCar.rent — Full Security & QA Audit Report
+﻿# 🔥 EliteAuto.rent — Full Security & QA Audit Report
 **Date:** March 28, 2026  
 **Scope:** Complete backend + frontend code review  
 **Server:** 178.104.99.239 (Hetzner VPS, Ubuntu 24.04)
@@ -391,7 +391,7 @@ if (days > 365) return res.status(400).json({ error: 'Maximum booking duration i
 **Issue:** JWT doesn't include `aud` or `iss` claims. If another service uses the same JWT_SECRET, tokens are interchangeable.  
 **Fix:**
 ```js
-jwt.sign(payload, JWT_SECRET, { expiresIn: '7d', issuer: 'royalcar.rent', audience: 'royalcar-api' });
+jwt.sign(payload, JWT_SECRET, { expiresIn: '7d', issuer: 'EliteAuto.rent', audience: 'EliteAuto-api' });
 ```
 **Priority Score:** 2/10
 

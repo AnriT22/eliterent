@@ -1,4 +1,4 @@
-/* ========================================
+﻿/* ========================================
    GUEST PROFILE — JAVASCRIPT
    ======================================== */
 
@@ -105,7 +105,7 @@
                 pvIcon.style.color = '#f97316';
                 pvTitle.style.color = '#f97316';
                 pvTitle.textContent = 'Phone Not Verified';
-                pvDesc.textContent = 'Verify your phone number to make reservations on RoyalCar.rent.';
+                pvDesc.textContent = 'Verify your phone number to make reservations on EliteAuto.rent.';
                 pvBtn.style.display = 'inline-block';
                 pvBtn.addEventListener('click', function () {
                     window.location.href = '/verify-phone.html';
