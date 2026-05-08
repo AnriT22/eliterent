@@ -37,6 +37,20 @@
     var galleryImages = [];
     var currentImgIdx = 0;
 
+    var fetchedVehicle = null;
+    var i18nReady = false;
+    var pageRendered = false;
+
+    function tryRenderReservation() {
+        if (fetchedVehicle && i18nReady && !pageRendered) {
+            pageRendered = true;
+            vehicleData = fetchedVehicle;
+            document.getElementById('rvLoading').style.display = 'none';
+            document.getElementById('rvContent').style.display = 'grid';
+            renderReservation();
+        }
+    }
+
     fetch('/api/vehicles/' + vehicleId)
     .then(function (r) { return r.json(); })
     .then(function (data) {
@@ -44,14 +58,19 @@
             window.location.href = 'vehicles.html';
             return;
         }
-        vehicleData = data.vehicle;
-        document.getElementById('rvLoading').style.display = 'none';
-        document.getElementById('rvContent').style.display = 'grid';
-        renderReservation();
+        fetchedVehicle = data.vehicle;
+        tryRenderReservation();
     })
     .catch(function () {
         window.location.href = 'vehicles.html';
     });
+
+    if (typeof I18n !== 'undefined' && I18n.onReady) {
+        I18n.onReady(function() { i18nReady = true; tryRenderReservation(); });
+    } else {
+        i18nReady = true;
+        tryRenderReservation();
+    }
 
     function cap(s) {
         if (!s) return '';
@@ -568,13 +587,13 @@
         renderInsurance();
         renderExtraServices();
 
-        document.getElementById('rvSumDays').textContent = days + ' day' + (days !== 1 ? 's' : '');
+        document.getElementById('rvSumDays').textContent = days + ' ' + rvt('reservation.days', 'days');
         document.getElementById('rvSumCar').textContent = v.name;
         document.getElementById('rvSumPickupDate').textContent = fmtDatetime(pickupDate);
         document.getElementById('rvSumDropoffDate').textContent = fmtDatetime(dropoffDate);
         var effectiveDaily = getDailyRateByTier(days);
-        document.getElementById('rvSumCarPrice').textContent = fmtMoney(effectiveDaily) + '/day';
-        document.getElementById('rvSumRentalLabel').textContent = 'Car Rental (' + days + ' day' + (days !== 1 ? 's' : '') + ')';
+        document.getElementById('rvSumCarPrice').textContent = fmtMoney(effectiveDaily) + rvt('reservation_extras.per_day', '/day');
+        document.getElementById('rvSumRentalLabel').textContent = rvt('reservation.car_rental', 'Car Rental') + ' (' + days + ' ' + rvt('reservation.days', 'days') + ')';
         document.getElementById('rvEditDates').href = 'vehicle.html?id=' + vehicleId;
 
         updatePriceSummary();
@@ -604,7 +623,7 @@
         document.getElementById('rvSumPayNow').textContent = fmtMoney(payNow);
         document.getElementById('rvSumPayPickup').textContent = fmtMoney(payOnPickup);
         document.getElementById('rvSumRentalTotal').textContent = fmtMoney(rentalTotal);
-        document.getElementById('rvSumDeposit').textContent = deposit > 0 ? fmtMoney(deposit) : 'None';
+        document.getElementById('rvSumDeposit').textContent = deposit > 0 ? fmtMoney(deposit) : rvt('vehicle_page.val_none', 'None');
 
         var extrasRow = document.getElementById('rvSumExtrasRow');
         if (extrasTotal > 0) {
