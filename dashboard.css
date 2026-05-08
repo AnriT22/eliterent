@@ -7,6 +7,8 @@
     display: flex;
     min-height: calc(100vh - 70px);
     background: #0F0F0F;
+    max-width: 100vw;
+    overflow-x: hidden;
 }
 
 /* Sidebar */
@@ -96,6 +98,7 @@
     flex: 1;
     padding: 28px 32px;
     min-width: 0;
+    overflow-x: hidden;
 }
 
 /* Tabs */
@@ -126,6 +129,8 @@
     font-size: 24px;
     font-weight: 700;
     color: #F0ECE2;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 /* User info in header */
@@ -1277,81 +1282,6 @@ select.db-input option:checked {
 }
 
 @media (max-width: 768px) {
-    .db-layout {
-        flex-direction: column;
-    }
-
-    .db-sidebar {
-        width: 100%;
-        min-width: unset;
-        position: static;
-        height: auto;
-        border-bottom: 1px solid #2A2520;
-        padding: 12px;
-        overflow-x: auto;
-        border-right: none;
-        border-bottom: 1px solid #2A2520;
-    }
-
-    .db-sidebar-header {
-        display: none;
-    }
-
-    .db-nav {
-        flex-direction: row;
-        gap: 6px;
-        padding: 0;
-    }
-
-    .db-nav-item {
-        white-space: nowrap;
-        padding: 8px 14px;
-        font-size: 13px;
-        color: #F0ECE2;
-        background: #2A2520;
-        border-radius: 8px;
-        font-weight: 600;
-    }
-
-    .db-nav-item.active {
-        background: #C9A84C;
-        color: #fff;
-    }
-
-    .db-nav-item svg {
-        display: none;
-    }
-
-    .db-main {
-        padding: 16px;
-    }
-
-    .db-form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .db-form-grid-3 {
-        grid-template-columns: 1fr;
-    }
-
-    .db-col-2,
-    .db-col-3 {
-        grid-column: span 1;
-    }
-
-    .db-vehicles-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .vf-section {
-        padding: 20px 16px;
-    }
-
-    .vf-toggles-row {
-        flex-direction: column;
-        gap: 16px;
-    }
-
     .vf-checkbox-row {
         flex-direction: column;
         gap: 8px;
@@ -1939,6 +1869,31 @@ select.db-input option:checked {
         width: 100%;
         height: 160px;
         border-radius: 10px 10px 0 0;
+    }
+
+    .db-main {
+        padding: 12px;
+    }
+
+    .db-tab-header h2 {
+        font-size: 18px;
+    }
+
+    .db-nav {
+        gap: 4px;
+        padding: 6px 8px 8px;
+    }
+    .db-nav-item {
+        padding: 6px 8px;
+        font-size: 11px;
+        min-width: 55px;
+    }
+
+    .db-sidebar-header {
+        padding: 0 10px 10px;
+    }
+    .db-sidebar-header h3 {
+        font-size: 14px;
     }
 }
 

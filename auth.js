@@ -1302,7 +1302,7 @@ async function submitRegistration() {
 
             successEl.innerHTML = '<div class="success-icon" style="background:#88BDF2;color:#0c1117;">&#10003;</div>'
 
-                + '<h3 style="color:#fff;">Welcome to Rent Cars Georgia!</h3>'
+                + '<h3 style="color:#fff;">Welcome to EliteAuto!</h3>'
 
                 + '<p style="color:#94a3b8;margin-bottom:12px;">Your account has been created successfully.</p>'
 

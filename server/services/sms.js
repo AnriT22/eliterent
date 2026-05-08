@@ -1,4 +1,4 @@
-let twilioClient = null;
+﻿let twilioClient = null;
 let twilioVerifyServiceSid = null;
 let smsReady = false;
 
@@ -103,16 +103,16 @@ async function sendOTPSMS(phone, otp, type = "verification") {
   let message;
   switch (type) {
     case "registration":
-      message = `RoyalCar.rent: Your verification code is ${otp}. Valid for 5 minutes. Do not share this code.`;
+      message = `EliteAuto.rent: Your verification code is ${otp}. Valid for 5 minutes. Do not share this code.`;
       break;
     case "reservation":
-      message = `RoyalCar.rent: Confirm your booking with code ${otp}. Valid for 5 minutes. Do not share this code.`;
+      message = `EliteAuto.rent: Confirm your booking with code ${otp}. Valid for 5 minutes. Do not share this code.`;
       break;
     case "login":
-      message = `RoyalCar.rent: Your login code is ${otp}. Valid for 5 minutes. If you didn't request this, ignore it.`;
+      message = `EliteAuto.rent: Your login code is ${otp}. Valid for 5 minutes. If you didn't request this, ignore it.`;
       break;
     default:
-      message = `RoyalCar.rent: Your verification code is ${otp}. Valid for 5 minutes.`;
+      message = `EliteAuto.rent: Your verification code is ${otp}. Valid for 5 minutes.`;
   }
   return sendSMS(phone, message);
 }

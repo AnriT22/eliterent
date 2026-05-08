@@ -450,7 +450,7 @@
         var v = vehicleData;
         var days = getRentalDays();
 
-        document.title = 'Reservation — ' + v.name + ' — RoyalCar.rent';
+        document.title = 'Reservation — ' + v.name + ' — EliteAuto.rent';
 
         galleryImages = [];
         if (v.image_url) galleryImages.push(v.image_url);

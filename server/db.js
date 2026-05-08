@@ -1,4 +1,4 @@
-const { Pool } = require('pg');
+﻿const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
@@ -326,11 +326,11 @@ async function initDB() {
         const hash = bcrypt.hashSync(adminPassword, 12);
         await pool.query(
             "INSERT INTO users (email, password_hash, full_name, role, is_approved) VALUES ($1, $2, $3, 'admin', 1)",
-            ['admin@royalcar.rent', hash, 'Admin']
+            ['admin@EliteAuto.rent', hash, 'Admin']
         );
         console.log('=======================================================');
         console.log('DEFAULT ADMIN CREATED');
-        console.log('Email:    admin@royalcar.rent');
+        console.log('Email:    admin@EliteAuto.rent');
         console.log('Password: ' + adminPassword);
         console.log('CHANGE THIS PASSWORD IMMEDIATELY AFTER FIRST LOGIN!');
         console.log('=======================================================');

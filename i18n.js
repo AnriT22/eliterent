@@ -1,6 +1,6 @@
-/* ========================================
+﻿/* ========================================
    i18n — Internationalization Engine
-   Supports: EN (English), KA (Georgian)
+   Supports: EN (English), KA (Georgian), RU (Russian)
    Uses data-i18n attributes + JSON translation files
    Persists language choice in localStorage
    ======================================== */
@@ -8,9 +8,9 @@
 (function () {
     'use strict';
 
-    var SUPPORTED_LANGS = ['en', 'ka'];
+    var SUPPORTED_LANGS = ['en', 'ka', 'ru'];
     var DEFAULT_LANG = 'en';
-    var STORAGE_KEY = 'royalcar_lang';
+    var STORAGE_KEY = 'EliteAuto_lang';
     var translations = {};
     var currentLang = DEFAULT_LANG;
     var loadedLangs = {};

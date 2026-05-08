@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const { sendEmail, escapeHtml } = require('../mailer');
 const router = express.Router();
 
@@ -14,7 +14,7 @@ router.post('/submit', async (req, res) => {
             return res.status(400).json({ error: 'One or more fields exceed maximum length' });
         }
 
-        const emailText = `New contact form submission from RoyalCar.rent
+        const emailText = `New contact form submission from EliteAuto.rent
 
 Name: ${fullName}
 Email: ${email}
@@ -25,7 +25,7 @@ Message:
 ${message}
 
 ---
-This message was sent from the contact form at RoyalCar.rent`;
+This message was sent from the contact form at EliteAuto.rent`;
 
         const safeFullName = escapeHtml(fullName);
         const safeEmail = escapeHtml(email);
@@ -52,7 +52,7 @@ This message was sent from the contact form at RoyalCar.rent`;
             <p style="margin:0;color:#1e293b;font-size:15px;line-height:1.6;white-space:pre-wrap;">${safeMessage}</p>
         </div>
     </div>
-    <p style="text-align:center;color:#94a3b8;font-size:12px;margin-top:20px;">This message was sent from the contact form at RoyalCar.rent</p>
+    <p style="text-align:center;color:#94a3b8;font-size:12px;margin-top:20px;">This message was sent from the contact form at EliteAuto.rent</p>
 </div>`;
 
         await sendEmail({

@@ -1,4 +1,4 @@
-/* ========================================
+﻿/* ========================================
    VEHICLE DETAIL PAGE — JAVASCRIPT
    ======================================== */
 
@@ -124,7 +124,7 @@
         document.getElementById('vdContent').style.display = 'grid';
 
         var name = v.name || 'Vehicle';
-        document.title = name + ' — RoyalCar.rent';
+        document.title = name + ' — EliteAuto.rent';
         document.getElementById('vdBreadcrumbName').textContent = name;
         document.getElementById('vdVehicleName').textContent = name;
 

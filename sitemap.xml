@@ -1,14 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://royalcar.rent/</loc><lastmod>2026-04-28</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
-  <url><loc>https://royalcar.rent/vehicles.html</loc><lastmod>2026-04-28</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>
-  <url><loc>https://royalcar.rent/vehicle.html</loc><lastmod>2026-04-28</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>https://royalcar.rent/reviews.html</loc><lastmod>2026-04-28</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://royalcar.rent/about.html</loc><lastmod>2026-04-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://royalcar.rent/contact.html</loc><lastmod>2026-04-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://royalcar.rent/register-partner.html</loc><lastmod>2026-04-28</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://royalcar.rent/register.html</loc><lastmod>2026-04-28</lastmod><changefreq>monthly</changefreq><priority>0.4</priority></url>
-  <url><loc>https://royalcar.rent/login.html</loc><lastmod>2026-04-28</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://royalcar.rent/privacy.html</loc><lastmod>2026-04-28</lastmod><changefreq>yearly</changefreq><priority>0.2</priority></url>
-  <url><loc>https://royalcar.rent/tos.html</loc><lastmod>2026-04-28</lastmod><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://eliteauto.rent/</loc><lastmod>2026-05-06</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://eliteauto.rent/vehicles.html</loc><lastmod>2026-05-06</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://eliteauto.rent/vehicle.html</loc><lastmod>2026-05-06</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://eliteauto.rent/reviews.html</loc><lastmod>2026-05-06</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://eliteauto.rent/about.html</loc><lastmod>2026-05-06</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://eliteauto.rent/contact.html</loc><lastmod>2026-05-06</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://eliteauto.rent/register-partner.html</loc><lastmod>2026-05-06</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://eliteauto.rent/register.html</loc><lastmod>2026-05-06</lastmod><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://eliteauto.rent/login.html</loc><lastmod>2026-05-06</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://eliteauto.rent/privacy.html</loc><lastmod>2026-05-06</lastmod><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://eliteauto.rent/tos.html</loc><lastmod>2026-05-06</lastmod><changefreq>yearly</changefreq><priority>0.2</priority></url>
 </urlset>

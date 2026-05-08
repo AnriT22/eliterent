@@ -1,7 +1,7 @@
-{
+﻿{
   "name": "myrent-com",
   "version": "1.0.0",
-  "description": "RoyalCar.rent - Premium car rental marketplace in Georgia",
+  "description": "EliteAuto.rent - Premium car rental marketplace in Georgia",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",

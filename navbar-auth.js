@@ -1,4 +1,4 @@
-/* ========================================
+﻿/* ========================================
    NAVBAR AUTH — Shows user profile or login
    button based on authentication state.
    Include this script on every page.
@@ -245,8 +245,8 @@
         panel.innerHTML = ''
             + '<div class="mobile-nav-header">'
             + '  <a href="/" class="logo">'
-            + '    <img src="images/logo.webp" alt="RoyalCar.rent" onerror="this.style.display=\'none\'">'
-            + '    <span>RoyalCar.rent</span>'
+            + '    <img src="images/logo.webp" alt="EliteAuto.rent" onerror="this.style.display=\'none\'">'
+            + '    <span>EliteAuto.rent</span>'
             + '  </a>'
             + '  <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">&#x2715;</button>'
             + '</div>'
