@@ -58,6 +58,14 @@
         return s.charAt(0).toUpperCase() + s.slice(1);
     }
 
+    function rvt(key, fallback) {
+        if (typeof I18n !== 'undefined' && I18n.t) {
+            var val = I18n.t(key);
+            if (val && val !== key) return val;
+        }
+        return fallback;
+    }
+
     function parseJsonArray(value) {
         if (!value) return [];
         if (Array.isArray(value)) return value;
@@ -259,11 +267,13 @@
         });
     }
 
-    var INSURANCE_ITEMS = [
-        { key: 'tpl', name: 'TPL – Third Party Liability', desc: 'Covers damage caused to other vehicles. Does not cover your rented vehicle.', icon: '🛡️' },
-        { key: 'cdw', name: 'CDW – Collision Damage Waiver', desc: 'Covers damage to the rented vehicle in case of an accident. Does not cover tires, glass, or interior.', icon: '🔰' },
-        { key: 'full_coverage', name: 'Full Coverage', desc: 'Covers all damages, theft, and roadside assistance. Includes TPL + CDW + full protection.', icon: '✅' }
-    ];
+    function getInsuranceItems() {
+        return [
+            { key: 'tpl', name: rvt('reservation_extras.tpl_name', 'TPL – Third Party Liability'), desc: rvt('reservation_extras.tpl_desc', 'Covers damage caused to other vehicles. Does not cover your rented vehicle.'), icon: '🛡️' },
+            { key: 'cdw', name: rvt('reservation_extras.cdw_name', 'CDW – Collision Damage Waiver'), desc: rvt('reservation_extras.cdw_desc', 'Covers damage to the rented vehicle in case of an accident. Does not cover tires, glass, or interior.'), icon: '🔰' },
+            { key: 'full_coverage', name: rvt('reservation_extras.full_coverage_name', 'Full Coverage'), desc: rvt('reservation_extras.full_coverage_desc', 'Covers all damages, theft, and roadside assistance. Includes TPL + CDW + full protection.'), icon: '✅' }
+        ];
+    }
 
     function getInsurancePricing() {
         if (!vehicleData) return {};
@@ -291,7 +301,7 @@
         var count = 0;
         var html = '<div class="rv-insurance-grid">';
 
-        INSURANCE_ITEMS.forEach(function (item) {
+        getInsuranceItems().forEach(function (item) {
             var price = ins[item.key];
             var offered = price !== null && price !== undefined && price !== '';
             var isFree = offered && parseFloat(price) === 0;
@@ -301,7 +311,7 @@
             if (item.key === 'full_coverage') cls += ' rv-full-coverage';
             html += '<div class="' + cls + '">'
                 + '<div class="rv-ins-header-row">'
-            var badgeText = !offered ? 'NOT OFFERED' : (isFree ? 'INCLUDED FREE' : fmtMoney(pricePerDay) + '/day');
+            var badgeText = !offered ? 'NOT OFFERED' : (isFree ? rvt('reservation_extras.included_free', 'INCLUDED FREE') : fmtMoney(pricePerDay) + rvt('reservation_extras.per_day', '/day'));
                 html += '<span class="rv-ins-badge ' + (offered ? 'included' : '') + '">' + badgeText + '</span>';
             if (offered) {
                 html += '<svg class="rv-ins-check" width="22" height="22" viewBox="0 0 24 24" fill="#22c55e"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="2" fill="none"/></svg>';
@@ -310,8 +320,8 @@
                 + '<div class="rv-ins-name">' + item.name + '</div>'
                 + '<div class="rv-ins-desc">' + item.desc + '</div>'
                 + '<div class="rv-ins-status">'
-                + '<span>' + (offered ? (isFree ? 'Included free' : fmtMoney(pricePerDay) + '/day') : 'Not offered') + '</span>'
-                + (isFree ? '<span class="rv-ins-free">✓ Free</span>' : '')
+                + '<span>' + (offered ? (isFree ? rvt('reservation_extras.included_free_label', 'Included free') : fmtMoney(pricePerDay) + rvt('reservation_extras.per_day', '/day')) : 'Not offered') + '</span>'
+                + (isFree ? '<span class="rv-ins-free">✓ ' + rvt('reservation_extras.free', 'Free') + '</span>' : '')
                 + '</div>'
                 + '</div>';
         });
@@ -321,11 +331,11 @@
 
         if (anyOffered) {
             document.getElementById('rvInsuranceBadge').style.display = 'inline-block';
-            document.getElementById('rvInsuranceBadge').textContent = count + ' AVAILABLE';
-            document.getElementById('rvInsuranceSubtitle').textContent = '✓ ' + count + ' protection' + (count !== 1 ? 's' : '') + ' available';
+            document.getElementById('rvInsuranceBadge').textContent = count + ' ' + rvt('reservation_extras.available', 'AVAILABLE');
+            document.getElementById('rvInsuranceSubtitle').textContent = '✓ ' + count + ' ' + (count !== 1 ? rvt('reservation_extras.protections_available', 'protections available') : rvt('reservation_extras.protection_available', 'protection available'));
         } else {
             document.getElementById('rvInsuranceBadge').style.display = 'none';
-            document.getElementById('rvInsuranceSubtitle').textContent = 'No insurance offered with this vehicle';
+            document.getElementById('rvInsuranceSubtitle').textContent = rvt('reservation_extras.no_insurance', 'No insurance offered with this vehicle');
         }
     }
 
@@ -358,12 +368,12 @@
         ext = ext || {};
 
         var EXTRA_DEFS = [
-            { code: 'child_seat', key: 'child_seat', availKey: 'child_seat_available', name: 'Child Seat (up to 5 years)', icon: '🍼', perDay: true },
-            { code: 'snow_chains', key: 'snow_chains', availKey: 'snow_chains_available', name: 'Snow Chains', icon: '⛓️', perDay: false },
-            { code: 'roof_rack', key: 'roof_rack', availKey: 'roof_rack_available', name: 'Roof Luggage Carrier', icon: '🧳', perDay: true },
-            { code: 'third_driver', key: 'third_driver', availKey: null, name: 'Additional Driver', icon: '👤', perDay: true },
-            { code: 'svaneti_roads', key: 'svaneti_price', availKey: 'svaneti_roads', name: 'Mestia / Mountain Svaneti Roads', icon: '🏔️', perDay: false },
-            { code: 'shatili_roads', key: 'shatili_price', availKey: 'shatili_roads', name: 'Shatili Mountain Roads', icon: '🏔️', perDay: false }
+            { code: 'child_seat', key: 'child_seat', availKey: 'child_seat_available', name: rvt('reservation_extras.child_seat', 'Child Seat (up to 5 years)'), icon: '🍼', perDay: true },
+            { code: 'snow_chains', key: 'snow_chains', availKey: 'snow_chains_available', name: rvt('reservation_extras.snow_chains', 'Snow Chains'), icon: '⛓️', perDay: false },
+            { code: 'roof_rack', key: 'roof_rack', availKey: 'roof_rack_available', name: rvt('reservation_extras.roof_rack', 'Roof Luggage Carrier'), icon: '🧳', perDay: true },
+            { code: 'third_driver', key: 'third_driver', availKey: null, name: rvt('reservation_extras.additional_driver', 'Additional Driver'), icon: '👤', perDay: true },
+            { code: 'svaneti_roads', key: 'svaneti_price', availKey: 'svaneti_roads', name: rvt('reservation_extras.svaneti_roads', 'Mestia / Mountain Svaneti Roads'), icon: '🏔️', perDay: false },
+            { code: 'shatili_roads', key: 'shatili_price', availKey: 'shatili_roads', name: rvt('reservation_extras.shatili_roads', 'Shatili Mountain Roads'), icon: '🏔️', perDay: false }
         ];
 
         var services = [];
@@ -410,7 +420,7 @@
         var gridHtml = '';
 
         services.forEach(function (service) {
-            var priceLabel = service.perDay ? fmtMoney(service.price) + '/day' : fmtMoney(service.price) + ' once';
+            var priceLabel = service.perDay ? fmtMoney(service.price) + rvt('reservation_extras.per_day', '/day') : fmtMoney(service.price) + ' ' + rvt('reservation_extras.once', 'once');
             gridHtml += '<label class="rv-service-item">'
                 + '<input type="checkbox" name="extras" value="' + service.code + '" data-price="' + service.price + '"' + (service.perDay ? ' data-perday="1"' : '') + '>'
                 + '<div class="rv-service-info">'
@@ -527,7 +537,8 @@
         var minAge = v.min_age || 21;
         var driverWarning = document.querySelector('.rv-driver-warning-content p');
         if (driverWarning) {
-            driverWarning.textContent = 'Driver must be at least ' + minAge + ' years old with a valid driving license.';
+            var driverMsg = rvt('reservation.driver_req_text', 'Driver must be at least {age} years old with a minimum of 2 years driving experience.').replace('{age}', minAge);
+            driverWarning.textContent = driverMsg;
         }
 
         // Mountain destination badges
@@ -537,11 +548,11 @@
         var mountainHtml = '';
         if (ext.svaneti_roads) {
             var svPrice = parseFloat(ext.svaneti_price) || 0;
-            mountainHtml += '<span style="display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;">🏔️ Mestia / Svaneti roads accepted' + (svPrice > 0 ? ' (+$' + svPrice.toFixed(2) + ')' : '') + '</span>';
+            mountainHtml += '<span style="display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;">🏔️ ' + rvt('reservation_extras.svaneti_accepted', 'Mestia / Svaneti roads accepted') + (svPrice > 0 ? ' (+' + fmtMoney(svPrice) + ')' : '') + '</span>';
         }
         if (ext.shatili_roads) {
             var shPrice = parseFloat(ext.shatili_price) || 0;
-            mountainHtml += '<span style="display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;margin-left:6px;">🏔️ Shatili roads accepted' + (shPrice > 0 ? ' (+$' + shPrice.toFixed(2) + ')' : '') + '</span>';
+            mountainHtml += '<span style="display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;margin-left:6px;">🏔️ ' + rvt('reservation_extras.shatili_accepted', 'Shatili roads accepted') + (shPrice > 0 ? ' (+' + fmtMoney(shPrice) + ')' : '') + '</span>';
         }
         if (mountainHtml) {
             var mountainEl = document.createElement('div');
