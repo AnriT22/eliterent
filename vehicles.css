@@ -709,15 +709,7 @@
     margin-top: 8px;
 }
 
-.social-icon {
-    font-size: 20px;
-    text-decoration: none;
-    transition: transform 0.2s;
-    display: inline-block;
-}
-.social-icon:hover {
-    transform: scale(1.2);
-}
+/* social-icon styles inherited from style.css/premium.css */
 
 .footer-bottom {
     border-top: 1px solid rgba(255,255,255,0.1);
