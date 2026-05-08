@@ -242,10 +242,18 @@
         var panel = document.createElement('div');
         panel.id = 'mobileNavPanel';
         panel.className = 'mobile-nav-panel';
+        var langBtnStyle = function(lang) {
+            var isActive = currentLang === lang;
+            return 'flex:1;padding:12px 8px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;'
+                + 'border:1px solid ' + (isActive ? '#C9A84C' : '#3A3F4B') + ';'
+                + 'background:' + (isActive ? 'linear-gradient(135deg,#C9A84C,#B8963F)' : 'rgba(255,255,255,0.04)') + ';'
+                + 'color:' + (isActive ? '#0B0C10' : '#EAEAEA') + ';text-align:center;';
+        };
+
         panel.innerHTML = ''
             + '<div class="mobile-nav-header">'
             + '  <a href="/" class="logo">'
-            + '    <img src="images/logo.webp" alt="EliteAuto.rent" onerror="this.style.display=\'none\'">'
+            + '    <img src="images/logo3.png" alt="EliteAuto.rent" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" onerror="this.style.display=\'none\'">'
             + '    <span>EliteAuto.rent</span>'
             + '  </a>'
             + '  <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">&#x2715;</button>'
@@ -253,8 +261,9 @@
             + '<div class="mobile-nav-links">' + linksHTML + '</div>'
             + '<div class="mobile-nav-footer">'
             + '<div id="mobileLangSwitch" style="display:flex;gap:8px;margin-bottom:12px;">'
-            + '  <button class="mobile-lang-btn' + (currentLang === 'en' ? ' active' : '') + '" data-lang="en" style="flex:1;padding:10px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;border:1px solid ' + (currentLang === 'en' ? '#C9A84C' : '#3A3F4B') + ';background:' + (currentLang === 'en' ? '#C9A84C' : 'transparent') + ';color:' + (currentLang === 'en' ? '#0B0C10' : '#EAEAEA') + ';">EN</button>'
-            + '  <button class="mobile-lang-btn' + (currentLang === 'ka' ? ' active' : '') + '" data-lang="ka" style="flex:1;padding:10px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;border:1px solid ' + (currentLang === 'ka' ? '#C9A84C' : '#3A3F4B') + ';background:' + (currentLang === 'ka' ? '#C9A84C' : 'transparent') + ';color:' + (currentLang === 'ka' ? '#0B0C10' : '#EAEAEA') + ';">GE ქართული</button>'
+            + '  <button class="mobile-lang-btn' + (currentLang === 'en' ? ' active' : '') + '" data-lang="en" style="' + langBtnStyle('en') + '">\uD83C\uDDEC\uD83C\uDDE7 EN</button>'
+            + '  <button class="mobile-lang-btn' + (currentLang === 'ka' ? ' active' : '') + '" data-lang="ka" style="' + langBtnStyle('ka') + '">\uD83C\uDDEC\uD83C\uDDEA KA</button>'
+            + '  <button class="mobile-lang-btn' + (currentLang === 'ru' ? ' active' : '') + '" data-lang="ru" style="' + langBtnStyle('ru') + '">\uD83C\uDDF7\uD83C\uDDFA RU</button>'
             + '</div>'
             + (token && user
                 ? '<button class="partner-btn" id="mobileLogoutBtn" style="background:#ef4444;">' + t('nav.logout','Log Out') + '</button>'

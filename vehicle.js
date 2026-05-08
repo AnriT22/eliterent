@@ -134,7 +134,7 @@
         var gearbox = v.gearbox || '';
         var year = v.year || '';
         document.getElementById('vdVehicleMeta').textContent =
-            [cap(cat), year, cap(engine), cap(gearbox)].filter(Boolean).join(' · ');
+            [vtVal(cat), year, vtVal(engine), vtVal(gearbox)].filter(Boolean).join(' · ');
 
         // Price
         var priceEl = document.getElementById('vdPrice');
