@@ -2039,21 +2039,28 @@ body {
 
 .social-icons {
     display: flex;
-    gap: 8px;
-    margin-top: 8px;
+    gap: 12px;
+    margin-top: 10px;
 }
 
 .social-icon {
-    width: 36px;
-    height: 36px;
-    background: rgba(255,255,255,0.06);
+    width: 38px;
+    height: 38px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
     border-radius: 50%;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     color: #EAEAEA;
     text-decoration: none;
     transition: var(--transition);
+}
+
+.social-icon img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
 }
 
 .social-icon:hover {
@@ -3446,17 +3453,7 @@ body {
     opacity: 1;
 }
 
-.social-icon {
-    display: inline-block;
-    font-size: 20px;
-    margin-right: 12px;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.social-icon:hover {
-    transform: scale(1.2);
-}
+/* social-icon styles defined above in footer section */
 
 .footer-bottom {
     border-top: 1px solid #3A3F4B;

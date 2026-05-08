@@ -4,6 +4,10 @@ Disallow: /api/
 Disallow: /admin.html
 Disallow: /partner-dashboard.html
 Disallow: /partner-financials.html
+Disallow: /guest-profile.html
+Disallow: /verify-phone.html
+Disallow: /reset-password.html
+Disallow: /onboarding.html
 Disallow: /uploads/
 
-Sitemap: https://EliteAuto.rent/sitemap.xml
+Sitemap: https://eliteauto.rent/sitemap.xml
