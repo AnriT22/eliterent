@@ -260,10 +260,10 @@
 
         // Badges in booking panel
         var badges = document.getElementById('vdBadges');
-        if (v.insurance_included) badges.innerHTML += '<span class="vd-badge green">Insurance \u2713</span>';
-        if (v.free_cancellation) badges.innerHTML += '<span class="vd-badge green">Free Cancel \u2713</span>';
-        if (v.deposit_amount && v.deposit_amount > 0) badges.innerHTML += '<span class="vd-badge">Deposit $' + v.deposit_amount + '</span>';
-        if (vdExtras.svaneti_roads) badges.innerHTML += '<span class="vd-badge green">Svaneti Roads \u2713</span>';
+        if (v.insurance_included) badges.innerHTML += '<span class="vd-badge green">' + esc(vt('vehicle_page.badge_insurance','Insurance')) + ' \u2713</span>';
+        if (v.free_cancellation) badges.innerHTML += '<span class="vd-badge green">' + esc(vt('vehicle_page.badge_free_cancel','Free Cancel')) + ' \u2713</span>';
+        if (v.deposit_amount && v.deposit_amount > 0) badges.innerHTML += '<span class="vd-badge">' + esc(vt('vehicle_page.badge_deposit','Deposit')) + ' ' + ((typeof Currency !== 'undefined') ? Currency.formatPrice(v.deposit_amount) : ('$' + v.deposit_amount)) + '</span>';
+        if (vdExtras.svaneti_roads) badges.innerHTML += '<span class="vd-badge green">' + esc(vt('vehicle_page.badge_svaneti','Svaneti Roads')) + ' \u2713</span>';
 
         // Fav button
         var favBtn = document.getElementById('vdFavBtn');
