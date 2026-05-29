@@ -1,6 +1,9 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4XTKG24HN6"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-4XTKG24HN6');</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel — EliteAuto.rent</title>
@@ -82,6 +85,32 @@
                 <div class="admin-stats-grid" id="statsGrid">
                     <!-- Stats cards injected by JS -->
                 </div>
+                <div style="margin-top:24px;">
+                    <h3 style="color:#e2e8f0;font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        Visitors
+                    </h3>
+                    <div class="admin-stats-grid" id="visitorStatsGrid">
+                        <!-- Visitor stats injected by JS -->
+                    </div>
+                </div>
+                <div class="admin-charts-row">
+                    <div class="admin-card">
+                        <h3>Daily Visitors (14 days)</h3>
+                        <div id="dailyVisitorsChart" class="admin-chart-placeholder"></div>
+                    </div>
+                    <div class="admin-card">
+                        <h3>Top Pages This Week</h3>
+                        <div id="topPagesTable" style="overflow-x:auto;"></div>
+                    </div>
+                </div>
+                <div class="admin-card" style="margin-top:20px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                        <h3 style="margin:0;">Recent Visitors (last 30 days)</h3>
+                        <span id="recentVisitorsCallerIp" style="font-size:12px;color:#64748b;"></span>
+                    </div>
+                    <div id="recentVisitorsTable" style="overflow-x:auto;"></div>
+                </div>
                 <div class="admin-charts-row">
                     <div class="admin-card">
                         <h3>Recent Vehicle Uploads (7 days)</h3>
@@ -107,7 +136,7 @@
                 <div class="admin-table-wrap">
                     <table class="admin-table" id="usersTable">
                         <thead>
-                            <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
+                            <tr><th>ID</th><th>Name</th><th class="hide-mobile">Email</th><th class="hide-mobile">Phone</th><th>Role</th><th>Status</th><th class="hide-mobile">Joined</th><th>Actions</th></tr>
                         </thead>
                         <tbody id="usersTableBody"></tbody>
                     </table>
@@ -123,7 +152,7 @@
                 <div class="admin-table-wrap">
                     <table class="admin-table" id="partnersTable">
                         <thead>
-                            <tr><th>ID</th><th>Name</th><th>Company</th><th>Email</th><th>Phone</th><th>Verified</th><th>Joined</th><th>Actions</th></tr>
+                            <tr><th>ID</th><th>Name</th><th class="hide-mobile">Company</th><th class="hide-mobile">Email</th><th class="hide-mobile">Phone</th><th>Verified</th><th class="hide-mobile">Joined</th><th>Actions</th></tr>
                         </thead>
                         <tbody id="partnersTableBody"></tbody>
                     </table>
@@ -145,7 +174,7 @@
                 <div class="admin-table-wrap">
                     <table class="admin-table" id="vehiclesTable">
                         <thead>
-                            <tr><th>ID</th><th>Image</th><th>Name</th><th>Partner</th><th>Price</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+                            <tr><th>ID</th><th class="hide-mobile">Image</th><th>Name</th><th class="hide-mobile">Partner</th><th>Price</th><th>Status</th><th class="hide-mobile">Created</th><th>Actions</th></tr>
                         </thead>
                         <tbody id="vehiclesTableBody"></tbody>
                     </table>
@@ -170,7 +199,7 @@
                 <div class="admin-table-wrap">
                     <table class="admin-table" id="bookingsTable">
                         <thead>
-                            <tr><th>ID</th><th>Vehicle</th><th>Guest</th><th>Partner</th><th>Dates</th><th>Total</th><th>Status</th><th>Actions</th></tr>
+                            <tr><th>ID</th><th>Vehicle</th><th class="hide-mobile">Guest</th><th class="hide-mobile">Partner</th><th class="hide-mobile">Dates</th><th>Total</th><th>Status</th><th>Actions</th></tr>
                         </thead>
                         <tbody id="bookingsTableBody"></tbody>
                     </table>
@@ -214,13 +243,13 @@
                             <tr>
                                 <th>Booking</th>
                                 <th>Vehicle</th>
-                                <th>Guest</th>
-                                <th>Dates</th>
-                                <th>Rental</th>
-                                <th>Extras</th>
+                                <th class="hide-mobile">Guest</th>
+                                <th class="hide-mobile">Dates</th>
+                                <th class="hide-mobile">Rental</th>
+                                <th class="hide-mobile">Extras</th>
                                 <th>Service Fee</th>
                                 <th>Total</th>
-                                <th>Payment</th>
+                                <th class="hide-mobile">Payment</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -273,7 +302,7 @@
                 <div class="admin-table-wrap">
                     <table class="admin-table" id="promosTable">
                         <thead>
-                            <tr><th>ID</th><th>Code</th><th>Discount</th><th>Min Order</th><th>Uses</th><th>Valid Until</th><th>Active</th><th>Actions</th></tr>
+                            <tr><th>ID</th><th>Code</th><th>Discount</th><th class="hide-mobile">Min Order</th><th class="hide-mobile">Uses</th><th class="hide-mobile">Valid Until</th><th>Active</th><th>Actions</th></tr>
                         </thead>
                         <tbody id="promosTableBody"></tbody>
                     </table>
@@ -315,11 +344,11 @@
     </div>
 
     <!-- User/Partner Detail Modal -->
-    <div id="userDetailModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);overflow-y:auto;backdrop-filter:blur(4px);">
-        <div style="max-width:800px;margin:40px auto;background:#1C1E26;border-radius:16px;border:1px solid #3A3F4B;box-shadow:0 24px 48px rgba(0,0,0,0.2);overflow:hidden;width:calc(100% - 32px);">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #3A3F4B;background:#262A35;">
+    <div id="userDetailModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);overflow-y:auto;-webkit-overflow-scrolling:touch;backdrop-filter:blur(4px);">
+        <div style="max-width:800px;margin:40px auto;background:#1C1E26;border-radius:16px;border:1px solid #3A3F4B;box-shadow:0 24px 48px rgba(0,0,0,0.2);width:calc(100% - 32px);margin-bottom:40px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #3A3F4B;background:#262A35;position:sticky;top:0;z-index:10;border-radius:16px 16px 0 0;">
                 <h3 style="margin:0;font-size:18px;font-weight:700;color:#EAEAEA;" id="udTitle">User Details</h3>
-                <button onclick="document.getElementById('userDetailModal').style.display='none'" style="background:none;border:none;font-size:24px;cursor:pointer;color:#A0A3B0;">&times;</button>
+                <button onclick="document.getElementById('userDetailModal').style.display='none'" style="background:none;border:none;font-size:24px;cursor:pointer;color:#A0A3B0;padding:8px;">&times;</button>
             </div>
             <div id="udContent" style="padding:24px;">
                 <p style="color:#A0A3B0;text-align:center;padding:40px;">Loading...</p>
@@ -328,11 +357,11 @@
     </div>
 
     <!-- Vehicle Detail Modal -->
-    <div id="vehicleDetailModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);overflow-y:auto;">
-        <div style="max-width:720px;margin:40px auto;background:#1C1E26;border-radius:16px;border:1px solid #3A3F4B;box-shadow:0 24px 48px rgba(0,0,0,0.2);overflow:hidden;width:calc(100% - 32px);">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #3A3F4B;background:#262A35;">
+    <div id="vehicleDetailModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);overflow-y:auto;-webkit-overflow-scrolling:touch;">
+        <div style="max-width:720px;margin:40px auto;background:#1C1E26;border-radius:16px;border:1px solid #3A3F4B;box-shadow:0 24px 48px rgba(0,0,0,0.2);width:calc(100% - 32px);margin-bottom:40px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #3A3F4B;background:#262A35;position:sticky;top:0;z-index:10;border-radius:16px 16px 0 0;">
                 <h3 style="margin:0;font-size:18px;font-weight:700;color:#EAEAEA;" id="vdTitle">Vehicle Details</h3>
-                <button onclick="document.getElementById('vehicleDetailModal').style.display='none'" style="background:none;border:none;font-size:24px;cursor:pointer;color:#A0A3B0;">&times;</button>
+                <button onclick="document.getElementById('vehicleDetailModal').style.display='none'" style="background:none;border:none;font-size:24px;cursor:pointer;color:#A0A3B0;padding:8px;">&times;</button>
             </div>
             <div id="vdContent" style="padding:24px;"></div>
         </div>
@@ -349,6 +378,13 @@
         function closeSidebar() { sidebar.classList.remove('open'); if(overlay) overlay.classList.remove('open'); toggle.innerHTML='☰'; }
         toggle.addEventListener('click', function() { sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
         if(overlay) overlay.addEventListener('click', closeSidebar);
+        // Close sidebar when nav item is tapped on mobile
+        var navItems = sidebar.querySelectorAll('.admin-nav-item');
+        for (var i = 0; i < navItems.length; i++) {
+            navItems[i].addEventListener('click', function() {
+                if (window.innerWidth <= 768) closeSidebar();
+            });
+        }
     })();
     </script>
     <script src="admin.js"></script>

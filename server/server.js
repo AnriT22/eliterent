@@ -97,7 +97,9 @@ app.use(helmet({
                 "https://accounts.google.com",
                 "https://www.paypal.com",
                 "https://www.sandbox.paypal.com",
-                "https://cdn.jsdelivr.net"
+                "https://cdn.jsdelivr.net",
+                "https://pay.google.com",
+                "https://www.gstatic.com"
             ],
             scriptSrcAttr: ["'unsafe-inline'"],
             styleSrc: ["'self'", "'unsafe-inline'"],
@@ -108,13 +110,17 @@ app.use(helmet({
                 "https://accounts.google.com",
                 "https://oauth2.googleapis.com",
                 "https://www.paypal.com",
-                "https://www.sandbox.paypal.com"
+                "https://www.sandbox.paypal.com",
+                "https://pay.google.com",
+                "https://payments.google.com"
             ],
             frameSrc: [
                 "https://accounts.google.com",
                 "https://www.google.com",
                 "https://www.paypal.com",
-                "https://www.sandbox.paypal.com"
+                "https://www.sandbox.paypal.com",
+                "https://pay.google.com",
+                "https://payments.google.com"
             ],
             fontSrc: ["'self'", "data:"],
             objectSrc: ["'none'"],
@@ -168,6 +174,45 @@ app.use((req, res, next) => {
 // admin.html, partner-dashboard.html, partner-financials.html are protected
 // client-side (admin.js, dashboard.js check localStorage token+role → redirect to login).
 // All sensitive data/actions are protected server-side via API-level JWT auth middleware.
+
+// Visitor tracking — log page views for HTML pages (non-blocking)
+app.use((req, res, next) => {
+    if (req.method !== 'GET') return next();
+    var p = req.path;
+    // Track root, .html pages — skip assets, API, uploads
+    if (p !== '/' && !p.endsWith('.html')) return next();
+    // Skip bots/crawlers
+    var ua = req.headers['user-agent'] || '';
+    if (/bot|crawl|spider|slurp|facebook|twitter|whatsapp/i.test(ua)) return next();
+    // Get or set visitor cookie
+    var cookies = {};
+    (req.headers.cookie || '').split(';').forEach(function(c) {
+        var parts = c.trim().split('=');
+        if (parts.length === 2) cookies[parts[0]] = parts[1];
+    });
+    var vid = cookies['vid'];
+    if (!vid) {
+        vid = crypto.randomBytes(12).toString('hex');
+        res.setHeader('Set-Cookie', 'vid=' + vid + '; Path=/; HttpOnly; SameSite=Lax; Max-Age=31536000');
+    }
+    // Fire-and-forget insert
+    var { getPool } = require('./db');
+    var pool = getPool();
+    if (pool) {
+        var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+        if (ip.includes(',')) ip = ip.split(',')[0].trim();
+        pool.query(
+            'INSERT INTO page_visits (page, ip, user_agent, referrer, visitor_id) VALUES ($1, $2, $3, $4, $5)',
+            [p, ip, (ua || '').substring(0, 500), (req.headers['referer'] || '').substring(0, 500), vid]
+        ).catch(function() {});
+    }
+    next();
+});
+
+// SEO: server-render vehicle/review listings for crawlers (before static)
+const seoPrerender = require('./seo-prerender');
+app.get('/vehicles.html', seoPrerender.middleware);
+app.get('/reviews.html', seoPrerender.middleware);
 
 // Serve static files with caching
 app.use(express.static(path.join(__dirname, '..'), {
@@ -321,7 +366,7 @@ initDB().then(() => {
                     var ep = expiredPayment.rows[j];
                     await pool.query("UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE id = $1", [ep.id]);
                     await pool.query(
-                        "DELETE FROM vehicle_availability WHERE vehicle_id = $1 AND date >= $2 AND date < $3 AND status = 'booked'",
+                        "DELETE FROM vehicle_availability WHERE vehicle_id = $1 AND date >= $2 AND date <= $3 AND status = 'booked'",
                         [ep.vehicle_id, ep.pickup_date, ep.dropoff_date]
                     );
                 }
@@ -337,7 +382,7 @@ initDB().then(() => {
                     var bk = staleBookings.rows[i];
                     await pool.query("UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE id = $1", [bk.id]);
                     await pool.query(
-                        "DELETE FROM vehicle_availability WHERE vehicle_id = $1 AND date >= $2 AND date < $3 AND status = 'booked'",
+                        "DELETE FROM vehicle_availability WHERE vehicle_id = $1 AND date >= $2 AND date <= $3 AND status = 'booked'",
                         [bk.vehicle_id, bk.pickup_date, bk.dropoff_date]
                     );
                 }
@@ -347,6 +392,18 @@ initDB().then(() => {
             console.error('[Cleanup] Booking expiry error:', e.message);
         }
     }, 60 * 1000); // every 1 minute
+
+    // Cleanup old page visits (older than 90 days) — runs every hour
+    setInterval(async () => {
+        try {
+            const pool = getPool();
+            if (!pool) return;
+            const result = await pool.query("DELETE FROM page_visits WHERE created_at < NOW() - INTERVAL '90 days'");
+            if (result.rowCount > 0) {
+                console.log('[Cleanup] Removed ' + result.rowCount + ' old page visit records (90d+)');
+            }
+        } catch (e) { /* ignore */ }
+    }, 3600 * 1000);
 
 }).catch((err) => {
     console.error('Failed to initialize database:', err);

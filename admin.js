@@ -85,6 +85,149 @@ function escHtml(s) {
         }).catch(function () {
             document.getElementById('statsGrid').innerHTML = '<p style="color:#ef4444;">Failed to load analytics</p>';
         });
+
+        loadVisitors();
+    }
+
+    function loadVisitors() {
+        apiGet('/api/admin/visitors').then(function (data) {
+            var vGrid = document.getElementById('visitorStatsGrid');
+            if (!vGrid) return;
+
+            var liveHtml = data.live > 0
+                ? '<span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;background:#22c55e;border-radius:50%;display:inline-block;animation:livePulse 1.5s ease-in-out infinite;"></span>' + data.live + ' online now</span>'
+                : '0 online now';
+
+            vGrid.innerHTML = ''
+                + statCard('Visitors Today', data.unique.today, 'orange', data.views.today + ' page views')
+                + statCard('Visitors This Week', data.unique.week, 'blue', data.views.week + ' page views')
+                + statCard('Visitors This Month', data.unique.month, 'purple', data.views.month + ' page views')
+                + statCard('Live Now', data.live, 'green', liveHtml);
+
+            // Daily visitors chart
+            renderDualBarChart('dailyVisitorsChart', data.daily, 140);
+
+            // Top pages table
+            renderTopPages('topPagesTable', data.topPages);
+        }).catch(function () {
+            var vGrid = document.getElementById('visitorStatsGrid');
+            if (vGrid) vGrid.innerHTML = '<p style="color:#A0A3B0;font-size:13px;">Visitor tracking will appear after some traffic</p>';
+        });
+
+        loadRecentVisitors();
+    }
+
+    function loadRecentVisitors() {
+        apiGet('/api/admin/visitors/recent?limit=100').then(function (data) {
+            var el = document.getElementById('recentVisitorsTable');
+            if (!el) return;
+            var visitors = data.visitors || [];
+            var callerIp = data.callerIp || '';
+            var ipLabel = document.getElementById('recentVisitorsCallerIp');
+            if (ipLabel && callerIp) {
+                ipLabel.textContent = 'Your IP: ' + callerIp + ' (highlighted)';
+            }
+            if (visitors.length === 0) {
+                el.innerHTML = '<p style="color:#94a3b8;font-size:13px;padding:12px;">No visitors yet</p>';
+                return;
+            }
+            function detectDevice(ua) {
+                if (!ua) return '?';
+                if (/iphone|ipad|ipod/i.test(ua)) return '📱 iOS';
+                if (/android/i.test(ua)) return '📱 Android';
+                if (/windows/i.test(ua)) return '🖥️ Windows';
+                if (/mac os|macintosh/i.test(ua)) return '🖥️ Mac';
+                if (/linux/i.test(ua)) return '🖥️ Linux';
+                return '?';
+            }
+            function fmtTime(ts) {
+                if (!ts) return '-';
+                var d = new Date(ts);
+                var now = new Date();
+                var diffMin = Math.floor((now - d) / 60000);
+                if (diffMin < 1) return 'just now';
+                if (diffMin < 60) return diffMin + 'm ago';
+                if (diffMin < 1440) return Math.floor(diffMin / 60) + 'h ago';
+                return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+            var html = '<table class="admin-table" style="font-size:12px;">'
+                + '<thead><tr>'
+                + '<th>IP</th>'
+                + '<th>Device</th>'
+                + '<th>Visits</th>'
+                + '<th class="hide-mobile">Pages</th>'
+                + '<th>Last seen</th>'
+                + '<th class="hide-mobile">First seen</th>'
+                + '</tr></thead><tbody>';
+            visitors.forEach(function (v) {
+                var isYou = v.ip === callerIp;
+                var rowStyle = isYou ? 'background:rgba(201,168,76,0.12);' : '';
+                var youBadge = isYou ? ' <span class="admin-status" style="background:#C9A84C;color:#fff;font-size:9px;">YOU</span>' : '';
+                var pages = (v.pages || []).map(function(p) { return escHtml(p); }).join(', ');
+                html += '<tr style="' + rowStyle + '">'
+                    + '<td style="font-family:monospace;font-size:11px;">' + escHtml(v.ip || '-') + youBadge + '</td>'
+                    + '<td>' + detectDevice(v.user_agent || '') + '</td>'
+                    + '<td><strong>' + v.visits + '</strong></td>'
+                    + '<td class="hide-mobile" style="font-size:11px;color:#64748b;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + pages + '">' + pages + '</td>'
+                    + '<td>' + fmtTime(v.last_seen) + '</td>'
+                    + '<td class="hide-mobile">' + fmtTime(v.first_seen) + '</td>'
+                    + '</tr>';
+            });
+            html += '</tbody></table>';
+            el.innerHTML = html;
+        }).catch(function () {
+            var el = document.getElementById('recentVisitorsTable');
+            if (el) el.innerHTML = '<p style="color:#94a3b8;font-size:13px;padding:12px;">Failed to load visitor log</p>';
+        });
+    }
+
+    function renderDualBarChart(containerId, data, maxHeight) {
+        var el = document.getElementById(containerId);
+        if (!el) return;
+        if (!data || data.length === 0) {
+            el.innerHTML = '<p style="color:#A0A3B0;font-size:13px;margin:auto;">No data yet — visitor tracking just started</p>';
+            return;
+        }
+        var maxVal = Math.max.apply(null, data.map(function (d) { return parseInt(d.views) || 0; }));
+        if (maxVal === 0) maxVal = 1;
+        el.innerHTML = '';
+        el.style.paddingBottom = '24px';
+        data.reverse().forEach(function (d) {
+            var views = parseInt(d.views) || 0;
+            var unique = parseInt(d.unique_visitors) || 0;
+            var h = Math.max(8, (views / maxVal) * (maxHeight - 40));
+            var bar = document.createElement('div');
+            bar.className = 'admin-bar';
+            bar.style.height = h + 'px';
+            var lbl = (d.date || '').replace(/^\d{4}-/, '');
+            bar.innerHTML = '<span class="bar-value" title="' + views + ' views / ' + unique + ' unique">' + unique + '</span><span class="bar-label">' + lbl + '</span>';
+            el.appendChild(bar);
+        });
+    }
+
+    function renderTopPages(containerId, pages) {
+        var el = document.getElementById(containerId);
+        if (!el) return;
+        if (!pages || pages.length === 0) {
+            el.innerHTML = '<p style="color:#A0A3B0;font-size:13px;">No data yet</p>';
+            return;
+        }
+        var html = '<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+            + '<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.1);">'
+            + '<th style="text-align:left;padding:8px;color:#A0A3B0;font-weight:600;">Page</th>'
+            + '<th style="text-align:right;padding:8px;color:#A0A3B0;font-weight:600;">Views</th>'
+            + '<th style="text-align:right;padding:8px;color:#A0A3B0;font-weight:600;">Unique</th>'
+            + '</tr></thead><tbody>';
+        pages.forEach(function (p) {
+            var pageName = p.page === '/' ? 'Homepage' : p.page.replace(/^\//, '').replace(/\.html$/, '');
+            html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">'
+                + '<td style="padding:8px;color:#e2e8f0;">' + escHtml(pageName) + '</td>'
+                + '<td style="padding:8px;color:#C9A84C;text-align:right;font-weight:600;">' + (parseInt(p.views) || 0) + '</td>'
+                + '<td style="padding:8px;color:#94a3b8;text-align:right;">' + (parseInt(p.unique_visitors) || 0) + '</td>'
+                + '</tr>';
+        });
+        html += '</tbody></table>';
+        el.innerHTML = html;
     }
 
     function fmtMoney(value) {
@@ -161,11 +304,11 @@ function escHtml(s) {
                 return '<tr>'
                     + '<td>' + u.id + '</td>'
                     + '<td><strong><a href="#" onclick="adminViewUser(' + u.id + ');return false;" style="color:#C9A84C;text-decoration:none;">' + escHtml(u.full_name || '-') + '</a></strong>' + googleBadge + '</td>'
-                    + '<td>' + escHtml(u.email || '-') + '</td>'
-                    + '<td>' + escHtml(u.phone || '-') + '</td>'
+                    + '<td class="hide-mobile">' + escHtml(u.email || '-') + '</td>'
+                    + '<td class="hide-mobile">' + escHtml(u.phone || '-') + '</td>'
                     + '<td><span class="admin-status ' + u.role + '">' + u.role + '</span>' + verifiedBadge + phoneVerBadge + emailVerBadge + '</td>'
                     + '<td>' + approvedBadge + '</td>'
-                    + '<td>' + date + '</td>'
+                    + '<td class="hide-mobile">' + date + '</td>'
                     + '<td>'
                     + approveBtn
                     + suspendBtn
@@ -247,11 +390,11 @@ function escHtml(s) {
                 return '<tr>'
                     + '<td>' + p.id + '</td>'
                     + '<td><strong><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:#C9A84C;text-decoration:none;">' + escHtml(p.full_name || '-') + '</a></strong></td>'
-                    + '<td><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:#C9A84C;text-decoration:none;">' + escHtml(p.company_name || '-') + '</a></td>'
-                    + '<td>' + escHtml(p.email || '-') + '</td>'
-                    + '<td>' + escHtml(p.phone || '-') + pPhoneBadge + '</td>'
+                    + '<td class="hide-mobile"><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:#C9A84C;text-decoration:none;">' + escHtml(p.company_name || '-') + '</a></td>'
+                    + '<td class="hide-mobile">' + escHtml(p.email || '-') + '</td>'
+                    + '<td class="hide-mobile">' + escHtml(p.phone || '-') + pPhoneBadge + '</td>'
                     + '<td><span class="admin-status ' + verified + '">' + verified + '</span></td>'
-                    + '<td>' + date + '</td>'
+                    + '<td class="hide-mobile">' + date + '</td>'
                     + '<td>'
                     + verifyBtn
                     + '<button class="admin-action-btn danger" onclick="adminDeleteUser(' + p.id + ')">Delete</button>'
@@ -296,12 +439,12 @@ function escHtml(s) {
                 var status = v.status || 'active';
                 return '<tr>'
                     + '<td>' + v.id + '</td>'
-                    + '<td>' + imgTag + '</td>'
+                    + '<td class="hide-mobile">' + imgTag + '</td>'
                     + '<td><strong>' + escHtml(v.name || '-') + '</strong></td>'
-                    + '<td>' + escHtml(v.company_name || v.partner_name || '-') + '</td>'
+                    + '<td class="hide-mobile">' + escHtml(v.company_name || v.partner_name || '-') + '</td>'
                     + '<td>$' + (v.price_per_day || 0) + '</td>'
                     + '<td><span class="admin-status ' + status + '">' + status + '</span></td>'
-                    + '<td>' + date + '</td>'
+                    + '<td class="hide-mobile">' + date + '</td>'
                     + '<td>'
                     + '<button class="admin-action-btn primary" onclick="adminViewVehicle(' + v.id + ')">View</button>'
                     + (status === 'pending' ? '<button class="admin-action-btn success" onclick="adminSetVehicleStatus(' + v.id + ',\'active\')">Approve</button>' : '')
@@ -496,9 +639,9 @@ function escHtml(s) {
                 return '<tr>'
                     + '<td>' + b.id + '</td>'
                     + '<td><strong>' + escHtml(b.vehicle_name || '-') + '</strong></td>'
-                    + '<td>' + escHtml(b.guest_name || '-') + '<br><span class="admin-subtle">' + escHtml(b.guest_email || '') + '</span></td>'
-                    + '<td>' + escHtml(partnerLabel) + '</td>'
-                    + '<td>' + dateRange + '</td>'
+                    + '<td class="hide-mobile">' + escHtml(b.guest_name || '-') + '<br><span class="admin-subtle">' + escHtml(b.guest_email || '') + '</span></td>'
+                    + '<td class="hide-mobile">' + escHtml(partnerLabel) + '</td>'
+                    + '<td class="hide-mobile">' + dateRange + '</td>'
                     + '<td><strong>' + fmtMoney(b.total_price) + '</strong><br><span class="admin-subtle">Fee ' + fmtMoney(b.service_fee) + '</span> ' + payBadge + '</td>'
                     + '<td><span class="admin-status ' + status + '" data-status="' + status + '">' + statusLabel + '</span></td>'
                     + '<td>' + actions + '</td>'
@@ -630,13 +773,13 @@ function escHtml(s) {
             tr.innerHTML =
                 '<td>#' + r.id + '</td>' +
                 '<td>' + escHtml(r.vehicle_name || '') + '</td>' +
-                '<td>' + escHtml(r.guest_name || r.guest_email || '') + '</td>' +
-                '<td>' + (r.pickup_date || '') + ' → ' + (r.dropoff_date || '') + '</td>' +
-                '<td>$' + r.rental_total.toFixed(2) + '</td>' +
-                '<td>$' + r.extras_total.toFixed(2) + '</td>' +
+                '<td class="hide-mobile">' + escHtml(r.guest_name || r.guest_email || '') + '</td>' +
+                '<td class="hide-mobile">' + (r.pickup_date || '') + ' → ' + (r.dropoff_date || '') + '</td>' +
+                '<td class="hide-mobile">$' + r.rental_total.toFixed(2) + '</td>' +
+                '<td class="hide-mobile">$' + r.extras_total.toFixed(2) + '</td>' +
                 '<td><strong>$' + r.service_fee.toFixed(2) + '</strong></td>' +
                 '<td>$' + r.total_price.toFixed(2) + '</td>' +
-                '<td><span class="' + payCls + '" style="' + (payCls ? '' : 'color:#A0A3B0;font-size:11px;') + '">' + payLabel + '</span></td>' +
+                '<td class="hide-mobile"><span class="' + payCls + '" style="' + (payCls ? '' : 'color:#A0A3B0;font-size:11px;') + '">' + payLabel + '</span></td>' +
                 '<td><span class="' + statusCls + '">' + statusLabel + '</span></td>';
             if (!r.is_active) tr.style.opacity = '0.6';
             tbody.appendChild(tr);
@@ -710,9 +853,9 @@ function escHtml(s) {
                     + '<td>' + c.id + '</td>'
                     + '<td><strong style="font-family:monospace;letter-spacing:1px;">' + c.code + '</strong></td>'
                     + '<td>' + discountLabel + '</td>'
-                    + '<td>$' + (c.min_order || 0) + '</td>'
-                    + '<td>' + usesLabel + '</td>'
-                    + '<td>' + validUntil + '</td>'
+                    + '<td class="hide-mobile">$' + (c.min_order || 0) + '</td>'
+                    + '<td class="hide-mobile">' + usesLabel + '</td>'
+                    + '<td class="hide-mobile">' + validUntil + '</td>'
                     + '<td>' + activeBadge + '</td>'
                     + '<td>' + toggleBtn + ' <button class="admin-action-btn danger" onclick="adminDeletePromo(' + c.id + ')">Delete</button></td>'
                     + '</tr>';

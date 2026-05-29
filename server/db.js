@@ -299,6 +299,19 @@ async function initDB() {
         )
     `);
 
+    // Page visits tracking
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS page_visits (
+            id SERIAL PRIMARY KEY,
+            page TEXT NOT NULL,
+            ip TEXT,
+            user_agent TEXT,
+            referrer TEXT,
+            visitor_id TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
     // Create indexes
     const indexes = [
         'CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)',
@@ -313,7 +326,9 @@ async function initDB() {
         'CREATE INDEX IF NOT EXISTS idx_favorites_guest ON favorites(guest_id)',
         'CREATE INDEX IF NOT EXISTS idx_favorites_vehicle ON favorites(vehicle_id)',
         'CREATE INDEX IF NOT EXISTS idx_availability_vehicle ON vehicle_availability(vehicle_id)',
-        'CREATE INDEX IF NOT EXISTS idx_availability_date ON vehicle_availability(date)'
+        'CREATE INDEX IF NOT EXISTS idx_availability_date ON vehicle_availability(date)',
+        'CREATE INDEX IF NOT EXISTS idx_page_visits_created ON page_visits(created_at)',
+        'CREATE INDEX IF NOT EXISTS idx_page_visits_visitor ON page_visits(visitor_id)'
     ];
     for (const sql of indexes) {
         await pool.query(sql);

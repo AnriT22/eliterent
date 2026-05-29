@@ -16,6 +16,10 @@ router.get('/', async (req, res) => {
         var paramIdx = 1;
 
         // Optional filters
+        if (req.query.location) {
+            sql += ' AND LOWER(v.location_city) = LOWER($' + paramIdx++ + ')';
+            params.push(req.query.location);
+        }
         if (req.query.category) {
             sql += ' AND v.category = $' + paramIdx++;
             params.push(req.query.category);

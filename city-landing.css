@@ -1,0 +1,257 @@
+/* ========================================
+   CITY LANDING PAGES — Responsive Styles
+   ======================================== */
+
+.city-hero {
+    background: linear-gradient(135deg, #0B0C10 0%, #1C1E26 100%);
+    padding: 100px 20px 60px;
+    text-align: center;
+}
+.city-hero .breadcrumb {
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #94a3b8;
+}
+.city-hero .breadcrumb a {
+    color: #C9A84C;
+    text-decoration: none;
+}
+.city-hero h1 {
+    font-size: clamp(32px, 6vw, 52px);
+    color: #F0ECE2;
+    font-weight: 800;
+    margin-bottom: 16px;
+    line-height: 1.15;
+}
+.city-hero h1 .gold { color: #C9A84C; }
+.city-hero .subtitle {
+    font-size: clamp(15px, 3vw, 18px);
+    color: #cbd5e1;
+    max-width: 600px;
+    margin: 0 auto 32px;
+    line-height: 1.5;
+}
+.city-hero .cta-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #D4AF37, #C9A84C);
+    color: #fff;
+    padding: 15px 44px;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px rgba(201,168,76,0.3);
+}
+.city-hero .cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(201,168,76,0.4);
+}
+
+/* FEATURE CARDS */
+.city-section { padding: 60px 20px; }
+.city-section.dark { background: #0B0C10; }
+.city-section.medium { background: #13141A; }
+.city-section h2 {
+    font-size: clamp(22px, 4vw, 30px);
+    color: #F0ECE2;
+    text-align: center;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+.city-section .section-sub {
+    text-align: center;
+    color: #94a3b8;
+    margin-bottom: 40px;
+    font-size: 15px;
+}
+
+.city-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 20px;
+    max-width: 960px;
+    margin: 0 auto;
+}
+.city-feature-card {
+    background: #1C1E26;
+    border-radius: 16px;
+    padding: 28px 24px;
+    border: 1px solid #2A2F3A;
+    transition: border-color 0.3s, transform 0.2s;
+}
+.city-feature-card:hover {
+    border-color: rgba(201,168,76,0.3);
+    transform: translateY(-3px);
+}
+.city-feature-card .icon {
+    font-size: 36px;
+    margin-bottom: 14px;
+    display: block;
+}
+.city-feature-card h3 {
+    color: #C9A84C;
+    margin-bottom: 10px;
+    font-size: 17px;
+    font-weight: 700;
+}
+.city-feature-card p {
+    color: #94a3b8;
+    font-size: 14px;
+    line-height: 1.65;
+    margin: 0;
+}
+
+/* CAR CARDS */
+.city-cars {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    max-width: 960px;
+    margin: 0 auto;
+}
+.city-car-card {
+    background: #1C1E26;
+    border-radius: 16px;
+    padding: 24px 20px;
+    border: 1px solid #2A2F3A;
+    text-align: center;
+    transition: border-color 0.3s;
+}
+.city-car-card:hover {
+    border-color: rgba(201,168,76,0.3);
+}
+.city-car-card h3 {
+    color: #F0ECE2;
+    font-size: 16px;
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+.city-car-card .price {
+    color: #C9A84C;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 6px;
+}
+.city-car-card .desc {
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.city-view-all {
+    text-align: center;
+    margin-top: 28px;
+}
+.city-view-all a {
+    color: #C9A84C;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 15px;
+    transition: color 0.2s;
+}
+.city-view-all a:hover { color: #D4AF37; }
+
+/* FAQ */
+.city-faq {
+    max-width: 750px;
+    margin: 0 auto;
+}
+.city-faq-item {
+    margin-bottom: 14px;
+    background: #1C1E26;
+    border-radius: 12px;
+    padding: 20px 24px;
+    border: 1px solid #2A2F3A;
+}
+.city-faq-item h3 {
+    color: #F0ECE2;
+    font-size: 15px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+.city-faq-item p {
+    color: #94a3b8;
+    font-size: 14px;
+    line-height: 1.65;
+    margin: 0;
+}
+
+/* CTA */
+.city-cta {
+    text-align: center;
+    padding: 60px 20px;
+    background: #0B0C10;
+}
+.city-cta h2 {
+    font-size: clamp(22px, 4vw, 30px);
+    color: #F0ECE2;
+    margin-bottom: 14px;
+    font-weight: 700;
+}
+.city-cta p {
+    color: #94a3b8;
+    margin-bottom: 28px;
+    font-size: 16px;
+}
+.city-cta .cta-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #D4AF37, #C9A84C);
+    color: #fff;
+    padding: 16px 52px;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 17px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px rgba(201,168,76,0.3);
+}
+.city-cta .cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(201,168,76,0.4);
+}
+
+/* INTERNAL LINKS GRID */
+.city-links {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.city-links a {
+    background: #1C1E26;
+    border: 1px solid #2A2F3A;
+    border-radius: 10px;
+    padding: 14px 24px;
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: border-color 0.2s, color 0.2s;
+}
+.city-links a:hover {
+    border-color: #C9A84C;
+    color: #C9A84C;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+    .city-hero { padding: 80px 16px 48px; }
+    .city-hero .cta-btn { padding: 14px 36px; font-size: 15px; width: 100%; max-width: 320px; }
+    .city-section { padding: 40px 16px; }
+    .city-features { grid-template-columns: 1fr; gap: 14px; }
+    .city-cars { grid-template-columns: 1fr; gap: 12px; }
+    .city-faq-item { padding: 16px 18px; }
+    .city-cta { padding: 48px 16px; }
+    .city-cta .cta-btn { width: 100%; max-width: 320px; padding: 15px 32px; }
+    .city-links { flex-direction: column; align-items: center; }
+    .city-links a { width: 100%; max-width: 300px; text-align: center; }
+}
+
+@media (max-width: 380px) {
+    .city-hero h1 { font-size: 26px; }
+    .city-feature-card { padding: 20px 16px; }
+    .city-feature-card .icon { font-size: 28px; }
+}
