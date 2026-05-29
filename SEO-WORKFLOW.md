@@ -49,7 +49,7 @@ Buckets: **A** = done locally, just needs deploy · **B** = exists but wrong, fi
 - **Done when:** No `AggregateRating` / `ratingValue` in any shipped JSON-LD; Google Rich Results Test shows **no** review star snippet for the homepage.
 
 ### 1.2 — Reconcile trust stats & soften the 4.8 claim
-- **Status:** `[x]` · inflated counts & fake 4.9 removed; about stats honest
+- **Status:** `[x]` · all fake ratings/counts removed across HTML + en/ka/ru.json (also caught login `4.9★`/`50K+`); register fallback + JSON BOM also fixed
 - **Impact / Effort:** High (trust / E-E-A-T) · **M**
 - **Depends on:** none
 - **Files & current values:**
@@ -78,14 +78,14 @@ Buckets: **A** = done locally, just needs deploy · **B** = exists but wrong, fi
 - **Done when:** title ≈ og:title ≈ visible H1, and the H1 is present in raw HTML (view-source, not devtools).
 
 ### 1.5 — Trim over-length titles to ≤60 chars
-- **Status:** `[x]` · homepage title trimmed
+- **Status:** `[x]` · all titles ≤60 (home, vehicles, batumi, suv + both blogs trimmed; now match og:title)
 - **Impact / Effort:** Low · **XS**
 - **Depends on:** none
 - **Files:** `index.html` L9 ("Car Rental Georgia | Tbilisi Airport Pickup 24/7 | EliteAuto.rent" ≈ 64 chars) and any title >60
 - **Done when:** Every `<title>` is ≤60 chars and still leads with the primary keyword.
 
 ### 1.6 — Triage `#` placeholder links
-- **Status:** `[~]` · footer Contact → `contact.html` on key pages; currency/lang `#` kept as JS controls
+- **Status:** `[x]` · verified: footer/nav use real hrefs; remaining 89 `#` are JS currency/language/auth controls (no crawlable dead-ends). Optional: convert to `<button>` for semantics
 - **Impact / Effort:** Low–Med · **M**
 - **Depends on:** none
 - **Files:** site-wide; priority = footer "Contact" (should point to `contact.html`, which exists), then currency/language toggles
@@ -99,7 +99,7 @@ Buckets: **A** = done locally, just needs deploy · **B** = exists but wrong, fi
 - **Done when:** No `<meta name="keywords">` remains.
 
 ### 1.8 — Image alt text + per-page OG images
-- **Status:** `[~]` · unique OG on city/blog/vehicles; blog heroes differentiated
+- **Status:** `[x]` · static alt 84/85; the 5 gaps are JS-hydrated images and `vehicle.js` already sets `alt` at runtime; city/blog/category/airport/no-deposit pages all have distinct OG (brand pages keep og-preview, which is appropriate)
 - **Impact / Effort:** Low–Med · **M**
 - **Depends on:** none (candidate images `images/1–4.png` already in repo)
 - **Files:** site-wide `<img>`; `og:image` on the 13 pages currently pointing at `og-preview.jpg`
@@ -148,14 +148,14 @@ Buckets: **A** = done locally, just needs deploy · **B** = exists but wrong, fi
 - **Done when:** Real reviews in static HTML; schema rating matches what's on the page and in the DB.
 
 ### 2.3 — Build category & high-intent landing pages
-- **Status:** `[~]` · SUV + **TBS airport** + **no-deposit** live; economy/luxury/minivan still TODO
+- **Status:** `[x]` · SUV + TBS airport + no-deposit + **economy + sedan + luxury + 7-seater/minivan** all live (Product+FAQ+Breadcrumb schema, cross-linked, in sitemap, linked from homepage footer)
 - **Impact / Effort:** High · **L**
 - **Depends on:** 2.1 (inventory data)
 - **Build:** **TBS Tbilisi Airport** page, **No-deposit / no-card** page, plus **economy / sedan / luxury / minivan-7-seater** category pages (mirror the `suv-rental-georgia.html` pattern).
 - **Done when:** Each target keyword from the audit's table has a dedicated, indexable page with FAQ schema and internal links.
 
 ### 2.4 — Georgia road-trip content cluster
-- **Status:** `[~]` · 2 posts exist; reuse same hero + share publish date
+- **Status:** `[x]` · 5 new interlinked posts added (itinerary **pillar** + Tbilisi→Batumi + Kakheti + Svaneti + safety/FAQ); staggered dates, distinct hero per new post, FAQPage schema on safety post, all in sitemap + blog index. Note: only 6 stock images exist, so the Svaneti post shares `svaneti.jpg` with the Kazbegi post — fully-unique heroes need a few real photos
 - **Impact / Effort:** High · **XL (ongoing)**
 - **Build:** 7–10 day itinerary pillar; Svaneti/Mestia; Tbilisi→Batumi; Kakheti wine; Gudauri winter; "is it safe to drive in Georgia" safety/FAQ. Interlink with city + category pages. Give each post a unique hero image + staggered real publish dates.
 - **Done when:** ≥5 new interlinked posts live; no two posts share a hero image or publish date.
