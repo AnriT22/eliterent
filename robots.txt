@@ -7,7 +7,8 @@ Disallow: /partner-financials.html
 Disallow: /guest-profile.html
 Disallow: /verify-phone.html
 Disallow: /reset-password.html
-Disallow: /onboarding.html
+Disallow: /payment.html
+Disallow: /google-auth-success.html
 Disallow: /uploads/
 
 Sitemap: https://eliteauto.rent/sitemap.xml

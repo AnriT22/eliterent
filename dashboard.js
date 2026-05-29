@@ -485,6 +485,125 @@
     }
 
     // ========================================
+    // BRAND SEARCH DROPDOWN
+    // ========================================
+    var BRAND_LIST = [
+        'Acura','Aston Martin','Audi','Bentley','BMW','BYD','Cadillac','Chery','Chevrolet',
+        'Chrysler','Citroen','Dacia','Daewoo','Dodge','Ferrari','Fiat','Ford','Geely','Genesis',
+        'Haval','Honda','Hyundai','Infiniti','Jaguar','Jeep','Kia','Lamborghini','Land Rover',
+        'Lexus','Lincoln','Lucid','Maserati','Mazda','McLaren','Mercedes-Benz','MG','Mitsubishi',
+        'NIO','Nissan','Opel','Peugeot','Polestar','Porsche','Renault','Rivian','Rolls-Royce',
+        'SEAT','Skoda','Subaru','Suzuki','Tesla','Toyota','Volkswagen','Volvo','Other'
+    ];
+
+    (function initBrandSearch() {
+        var wrapper = document.getElementById('brandSearchWrapper');
+        var input = document.getElementById('brandSearchInput');
+        var dropdown = document.getElementById('brandDropdown');
+        var list = document.getElementById('brandDropdownList');
+        var hidden = document.getElementById('vBrand');
+        if (!wrapper || !input || !dropdown || !list || !hidden) return;
+
+        var selectedBrand = '';
+
+        function renderList(filter) {
+            var q = (filter || '').toLowerCase();
+            var filtered = BRAND_LIST.filter(function(b) {
+                return !q || b.toLowerCase().indexOf(q) !== -1;
+            });
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="brand-dropdown-empty">No brands found</div>';
+                return;
+            }
+            var html = '';
+            filtered.forEach(function(brand) {
+                var isSelected = brand === selectedBrand;
+                var letter = brand.charAt(0).toUpperCase();
+                html += '<div class="brand-dropdown-item' + (isSelected ? ' selected' : '') + '" data-brand="' + brand + '">'
+                    + '<span class="brand-letter">' + letter + '</span>'
+                    + '<span>' + highlightMatch(brand, q) + '</span>'
+                    + '</div>';
+            });
+            list.innerHTML = html;
+        }
+
+        function highlightMatch(text, query) {
+            if (!query) return text;
+            var idx = text.toLowerCase().indexOf(query);
+            if (idx === -1) return text;
+            return text.slice(0, idx) + '<strong style="color:#C9A84C;">' + text.slice(idx, idx + query.length) + '</strong>' + text.slice(idx + query.length);
+        }
+
+        function openDropdown() {
+            wrapper.classList.add('open');
+            renderList(input.value);
+        }
+
+        function closeDropdown() {
+            wrapper.classList.remove('open');
+        }
+
+        function selectBrand(brand) {
+            selectedBrand = brand;
+            hidden.value = brand;
+            input.value = brand;
+            wrapper.querySelector('.brand-search-input').classList.add('has-value');
+            wrapper.classList.remove('vf-invalid');
+            closeDropdown();
+        }
+
+        input.addEventListener('focus', function() {
+            openDropdown();
+            if (selectedBrand && input.value === selectedBrand) {
+                input.select();
+            }
+        });
+
+        input.addEventListener('input', function() {
+            openDropdown();
+            renderList(input.value);
+        });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeDropdown();
+                input.blur();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                var first = list.querySelector('.brand-dropdown-item');
+                if (first) selectBrand(first.getAttribute('data-brand'));
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                var items = list.querySelectorAll('.brand-dropdown-item');
+                if (items.length > 0) items[0].focus();
+            }
+        });
+
+        list.addEventListener('click', function(e) {
+            var item = e.target.closest('.brand-dropdown-item');
+            if (item) selectBrand(item.getAttribute('data-brand'));
+        });
+
+        // Close on click outside
+        document.addEventListener('click', function(e) {
+            if (!wrapper.contains(e.target)) closeDropdown();
+        });
+
+        // Expose setter for edit mode
+        window._setBrandValue = function(val) {
+            if (val) {
+                selectedBrand = val;
+                hidden.value = val;
+                input.value = val;
+                wrapper.querySelector('.brand-search-input').classList.add('has-value');
+            }
+        };
+
+        // Initial render
+        renderList('');
+    })();
+
+    // ========================================
     // WIZARD STEP NAVIGATION
     // ========================================
     var currentWizardStep = 1;
@@ -557,6 +676,9 @@
         document.querySelectorAll('.color-swatches.vf-invalid').forEach(function (el) {
             el.classList.remove('vf-invalid');
         });
+        document.querySelectorAll('.brand-search-wrapper.vf-invalid').forEach(function (el) {
+            el.classList.remove('vf-invalid');
+        });
 
         for (var i = 0; i < fields.length; i++) {
             var f = fields[i];
@@ -569,6 +691,11 @@
                     var swatches = document.getElementById('colorSwatches');
                     if (swatches) swatches.classList.add('vf-invalid');
                     if (!firstInvalid) firstInvalid = swatches;
+                } else if (f.id === 'vBrand') {
+                    // Brand search wrapper — highlight the wrapper
+                    var brandWrapper = document.getElementById('brandSearchWrapper');
+                    if (brandWrapper) brandWrapper.classList.add('vf-invalid');
+                    if (!firstInvalid) firstInvalid = document.getElementById('brandSearchInput');
                 } else {
                     el.classList.add('vf-invalid');
                     if (!firstInvalid) firstInvalid = el;
@@ -1372,6 +1499,16 @@
         if (visEl) visEl.checked = true;
         var blockEl = document.getElementById('vReturnFormatted');
         if (blockEl) blockEl.checked = true;
+        // Clear brand search
+        if (window._setBrandValue) window._setBrandValue('');
+        var brandInput = document.getElementById('brandSearchInput');
+        if (brandInput) brandInput.value = '';
+        var brandWrapper = document.getElementById('brandSearchWrapper');
+        if (brandWrapper) {
+            brandWrapper.classList.remove('vf-invalid', 'open');
+            var bsi = brandWrapper.querySelector('.brand-search-input');
+            if (bsi) bsi.classList.remove('has-value');
+        }
         // Clear color swatch selection
         document.querySelectorAll('.color-swatch').forEach(function (s) { s.classList.remove('selected'); });
         if (colorInput) colorInput.value = '';
@@ -1447,6 +1584,7 @@
             document.getElementById('vEditId').value = v.id;
             setVal('vName', v.name || '');
             setVal('vBrand', v.brand || '');
+            if (window._setBrandValue) window._setBrandValue(v.brand || '');
             setVal('vModel', v.model || '');
             setVal('vColor', v.color || '');
             // Restore color swatch selection

@@ -787,49 +787,8 @@
             bookBtn.querySelector('span:nth-child(2)').textContent = (typeof I18n !== 'undefined' ? I18n.t('vehicle_page.book_now') : 'Book now');
             if (onDone) onDone();
             if (data.error) {
-                if (data.phoneRequired) {
-                    var phoneMsg = (typeof I18n !== 'undefined' ? I18n.t('errors.phone_verify_required') : data.error);
-                    var phonePrompt = (typeof I18n !== 'undefined' ? I18n.t('errors.phone_verify_prompt') : 'Would you like to verify your phone now?');
-                    if (confirm(phoneMsg + '\n\n' + phonePrompt)) {
-                        window.location.href = '/verify-phone.html';
-                    }
-                    return;
-                }
                 var errLabel = (typeof I18n !== 'undefined' ? I18n.t('errors.booking_failed') : 'Booking failed');
                 alert(errLabel + ': ' + data.error);
-                return;
-            }
-
-            // Check if OTP verification is required
-            if (data.requiresVerification && data.booking_id) {
-                if (typeof OTPModal !== 'undefined') {
-                    OTPModal.show({
-                        title: 'Confirm Your Booking',
-                        subtitle: 'Enter the 6-digit code sent to <strong>****' + (data.phoneLast4 || '****') + '</strong>',
-                        phoneLast4: data.phoneLast4,
-                        expiresIn: data.expiresIn || 300,
-                        resendCooldown: 60,
-                        verifyUrl: '/api/bookings/verify',
-                        resendUrl: '/api/bookings/resend-otp',
-                        bookingId: data.booking_id,
-                        token: token,
-                        onSuccess: function(verifyData) {
-                            // Booking verified - check if payment required
-                            if (data.payment_required || data.service_fee > 0) {
-                                sessionStorage.setItem('pending_booking_id', data.booking_id);
-                                sessionStorage.setItem('pending_service_fee', data.service_fee);
-                                document.getElementById('rvApprovalModal').style.display = 'flex';
-                            } else {
-                                document.getElementById('rvSuccessModal').style.display = 'flex';
-                            }
-                        },
-                        onCancel: function() {
-                            alert('Booking requires phone verification. Please try again.');
-                        }
-                    });
-                } else {
-                    alert('Verification required. Please check your phone for the code.');
-                }
                 return;
             }
 
@@ -855,7 +814,7 @@
         btn.disabled = true;
         btn.querySelector('span:nth-child(2)').textContent = (typeof I18n !== 'undefined' ? I18n.t('reservation.sending', 'Submitting...') : 'Submitting...');
         var payload = collectBookingData();
-        showSendCodeModal(payload, btn);
+        submitBooking(payload, btn);
     });
 
     // Approval modal continue button

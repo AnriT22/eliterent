@@ -2,6 +2,40 @@
    VEHICLES PAGE — DEDICATED STYLES
    ======================================== */
 
+/* Crawlable fleet (sr-only for sighted users; visible without JS) */
+.seo-crawlable-fleet,
+.seo-crawlable-reviews {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.vp-page-header {
+    padding: 20px 24px 0;
+    max-width: 100%;
+}
+
+.vp-page-header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #EAEAEA;
+    margin: 0 0 6px;
+    line-height: 1.25;
+}
+
+.vp-page-header p {
+    font-size: 14px;
+    color: #A0A3B0;
+    margin: 0;
+    max-width: 640px;
+}
+
 /* PAGE LAYOUT */
 .vp-layout {
     display: flex;
@@ -26,6 +60,7 @@
     gap: 10px;
     position: sticky;
     top: 62px;
+    align-self: flex-start;
     max-height: calc(100vh - 70px);
     overflow-y: auto;
     scrollbar-width: thin;

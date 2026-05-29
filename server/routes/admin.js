@@ -125,6 +125,87 @@ router.get('/analytics', async (req, res) => {
 });
 
 // ========================================
+// VISITORS
+// ========================================
+router.get('/visitors', async (req, res) => {
+    try {
+        // Total page views
+        const todayViews = await queryOne("SELECT COUNT(*) as count FROM page_visits WHERE created_at >= CURRENT_DATE");
+        const weekViews = await queryOne("SELECT COUNT(*) as count FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'");
+        const monthViews = await queryOne("SELECT COUNT(*) as count FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'");
+
+        // Unique visitors (by visitor_id cookie)
+        const todayUnique = await queryOne("SELECT COUNT(DISTINCT visitor_id) as count FROM page_visits WHERE created_at >= CURRENT_DATE");
+        const weekUnique = await queryOne("SELECT COUNT(DISTINCT visitor_id) as count FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'");
+        const monthUnique = await queryOne("SELECT COUNT(DISTINCT visitor_id) as count FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'");
+
+        // Top pages this week
+        const topPages = await queryAll(
+            "SELECT page, COUNT(*) as views, COUNT(DISTINCT visitor_id) as unique_visitors FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '7 days' GROUP BY page ORDER BY views DESC LIMIT 10"
+        );
+
+        // Daily breakdown (last 14 days)
+        const dailyBreakdown = await queryAll(
+            "SELECT created_at::date as date, COUNT(*) as views, COUNT(DISTINCT visitor_id) as unique_visitors FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '14 days' GROUP BY date ORDER BY date DESC"
+        );
+
+        // Live — visitors in last 5 minutes
+        const liveNow = await queryOne("SELECT COUNT(DISTINCT visitor_id) as count FROM page_visits WHERE created_at >= NOW() - INTERVAL '5 minutes'");
+
+        res.json({
+            views: {
+                today: parseInt(todayViews.count),
+                week: parseInt(weekViews.count),
+                month: parseInt(monthViews.count)
+            },
+            unique: {
+                today: parseInt(todayUnique.count),
+                week: parseInt(weekUnique.count),
+                month: parseInt(monthUnique.count)
+            },
+            live: parseInt(liveNow.count),
+            topPages: topPages,
+            daily: dailyBreakdown
+        });
+    } catch (err) {
+        console.error('Visitors analytics error:', err);
+        res.status(500).json({ error: 'Failed to load visitor stats' });
+    }
+});
+
+// Recent visitors log — grouped by IP + visitor_id
+router.get('/visitors/recent', async (req, res) => {
+    try {
+        const limit = Math.min(parseInt(req.query.limit) || 100, 500);
+        // Group by visitor_id + ip — show first/last seen, total visits, pages
+        const rows = await queryAll(
+            `SELECT
+                visitor_id,
+                ip,
+                COUNT(*) as visits,
+                MIN(created_at) as first_seen,
+                MAX(created_at) as last_seen,
+                (array_agg(DISTINCT page))[1:5] as pages,
+                (array_agg(user_agent ORDER BY created_at DESC))[1] as user_agent,
+                (array_agg(referrer ORDER BY created_at DESC))[1] as referrer
+            FROM page_visits
+            WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
+            GROUP BY visitor_id, ip
+            ORDER BY last_seen DESC
+            LIMIT $1`,
+            [limit]
+        );
+        // Caller IP so admin can identify their own visits
+        let callerIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+        if (callerIp.includes(',')) callerIp = callerIp.split(',')[0].trim();
+        res.json({ visitors: rows, callerIp: callerIp });
+    } catch (err) {
+        console.error('Recent visitors error:', err);
+        res.status(500).json({ error: 'Failed to load recent visitors' });
+    }
+});
+
+// ========================================
 // USER MANAGEMENT
 // ========================================
 router.get('/users', async (req, res) => {
