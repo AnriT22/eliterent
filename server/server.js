@@ -209,8 +209,10 @@ app.use((req, res, next) => {
     next();
 });
 
-// SEO: server-render vehicle/review listings for crawlers (before static)
+// SEO: server-render homepage fleet + vehicle/review listings for crawlers (before static)
 const seoPrerender = require('./seo-prerender');
+app.get('/', seoPrerender.middleware);
+app.get('/index.html', seoPrerender.middleware);
 app.get('/vehicles.html', seoPrerender.middleware);
 app.get('/reviews.html', seoPrerender.middleware);
 
