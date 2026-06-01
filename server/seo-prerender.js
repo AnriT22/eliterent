@@ -296,4 +296,11 @@ async function middleware(req, res, next) {
     }
 }
 
-module.exports = { middleware, fetchActiveVehicles, fetchPublicReviews };
+module.exports = {
+    middleware,
+    fetchActiveVehicles,
+    fetchPublicReviews,
+    renderVehiclesPage,
+    renderReviewsPage,
+    renderHomePage
+};

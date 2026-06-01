@@ -216,6 +216,35 @@ app.get('/index.html', seoPrerender.middleware);
 app.get('/vehicles.html', seoPrerender.middleware);
 app.get('/reviews.html', seoPrerender.middleware);
 
+// SEO: server-render localized RU/KA pages for crawlers (before static).
+// Self-guards on path and falls through to next() for everything else.
+const i18nRender = require('./i18n-render');
+app.use(i18nRender.middleware);
+
+// SEO: pretty-URL aliases → 301 to the canonical landing pages.
+// Gives clean, shareable URLs and consolidates link equity onto the real pages.
+// Guarded: only GET + only known paths; everything else falls through.
+const PRETTY_REDIRECTS = {
+    '/rent-a-car/tbilisi': '/rent-car-tbilisi.html',
+    '/rent-a-car/batumi': '/rent-car-batumi.html',
+    '/rent-a-car/kutaisi': '/rent-car-kutaisi.html',
+    '/rent-a-car/tbilisi-airport': '/tbilisi-airport-car-rental.html',
+    '/car-rental/suv': '/suv-rental-georgia.html',
+    '/car-rental/economy': '/economy-car-rental-georgia.html',
+    '/car-rental/sedan': '/sedan-rental-georgia.html',
+    '/car-rental/luxury': '/luxury-car-rental-tbilisi.html',
+    '/car-rental/minivan': '/minivan-7-seater-rental-georgia.html',
+    '/no-deposit': '/no-deposit-car-rental-georgia.html'
+};
+app.use((req, res, next) => {
+    try {
+        if (req.method !== 'GET') return next();
+        var p = req.path.replace(/\/+$/, '') || '/';
+        if (PRETTY_REDIRECTS[p]) return res.redirect(301, PRETTY_REDIRECTS[p]);
+        next();
+    } catch (e) { next(); }
+});
+
 // Serve static files with caching
 app.use(express.static(path.join(__dirname, '..'), {
     maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
