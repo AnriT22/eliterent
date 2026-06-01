@@ -14,6 +14,10 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="dns-prefetch" href="https://eliteauto.rent">
     <link rel="preconnect" href="https://eliteauto.rent">
+    <!-- CWV: connect early to the analytics origin and preload the LCP hero image -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    <link rel="preload" as="image" href="images/s-class.webp" fetchpriority="high">
     <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="Car Rental Georgia — Tbilisi, Batumi &amp; Kutaisi">
@@ -30,7 +34,7 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "LocalBusiness",
+      "@type": "AutoRental",
       "name": "EliteAuto.rent",
       "description": "Premium car rental marketplace in Georgia. Browse SUVs, sedans, economy & luxury vehicles from verified partners.",
       "url": "https://eliteauto.rent",
@@ -48,6 +52,22 @@
         "longitude": 44.8271
       },
       "priceRange": "$$",
+      "areaServed": [
+        {"@type": "City", "name": "Tbilisi"},
+        {"@type": "City", "name": "Batumi"},
+        {"@type": "City", "name": "Kutaisi"}
+      ],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Car rental categories in Georgia",
+        "itemListElement": [
+          {"@type": "Offer", "url": "https://eliteauto.rent/economy-car-rental-georgia.html", "priceCurrency": "USD", "price": "25", "itemOffered": {"@type": "Service", "name": "Economy car rental in Georgia"}},
+          {"@type": "Offer", "url": "https://eliteauto.rent/sedan-rental-georgia.html", "priceCurrency": "USD", "price": "30", "itemOffered": {"@type": "Service", "name": "Sedan rental in Georgia"}},
+          {"@type": "Offer", "url": "https://eliteauto.rent/suv-rental-georgia.html", "priceCurrency": "USD", "price": "50", "itemOffered": {"@type": "Service", "name": "SUV & 4x4 rental in Georgia"}},
+          {"@type": "Offer", "url": "https://eliteauto.rent/minivan-7-seater-rental-georgia.html", "priceCurrency": "USD", "price": "45", "itemOffered": {"@type": "Service", "name": "7-seater & minivan rental in Georgia"}},
+          {"@type": "Offer", "url": "https://eliteauto.rent/luxury-car-rental-tbilisi.html", "priceCurrency": "USD", "price": "80", "itemOffered": {"@type": "Service", "name": "Luxury car rental in Tbilisi"}}
+        ]
+      },
       "openingHoursSpecification": {
         "@type": "OpeningHoursSpecification",
         "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],

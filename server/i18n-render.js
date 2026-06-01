@@ -1,0 +1,236 @@
+/* ============================================================================
+   Server-side localization renderer  —  /ru/* and /ka/*
+   ----------------------------------------------------------------------------
+   Serves crawlable localized HTML by applying the SAME translation files the
+   client uses (lang/ru.json, lang/ka.json) to the existing English pages.
+
+   For each localized request it:
+     1. translates [data-i18n] (text) and [data-i18n-html] (markup) nodes,
+        mirroring i18n.js (English fallback; untranslated keys are left as-is so
+        the client i18n.js can still finish them — progressive enhancement);
+     2. sets <html lang>, rewrites <title>/<meta description> (RU map below),
+        rewrites canonical + og:url to the localized URL, and injects correct
+        bidirectional hreflang (en / ru / ka / x-default);
+     3. makes relative asset URLs root-absolute so CSS/JS/images still load
+        from "/" when the page is served under "/ru/…" (page links stay relative
+        so in-language navigation works);
+     4. seeds localStorage so the client i18n doesn't translate the page back.
+
+   SAFETY: everything runs inside try/catch; on ANY error it calls next(), so the
+   English site is never affected. Only whitelisted marketing pages are localized.
+   ========================================================================== */
+
+const fs = require('fs');
+const path = require('path');
+const seoPrerender = require('./seo-prerender');
+
+const ROOT = path.join(__dirname, '..');
+const SITE = 'https://eliteauto.rent';
+const LANGS = ['ru', 'ka'];
+
+// Marketing pages we localize. Auth/app/dashboard pages are intentionally excluded.
+const LOCALIZABLE = {
+    '': 1, 'index.html': 1, 'vehicles.html': 1, 'reviews.html': 1, 'about.html': 1,
+    'contact.html': 1, 'rent-car-tbilisi.html': 1, 'rent-car-batumi.html': 1,
+    'rent-car-kutaisi.html': 1, 'tbilisi-airport-car-rental.html': 1,
+    'no-deposit-car-rental-georgia.html': 1, 'suv-rental-georgia.html': 1,
+    'economy-car-rental-georgia.html': 1, 'sedan-rental-georgia.html': 1,
+    'luxury-car-rental-tbilisi.html': 1, 'minivan-7-seater-rental-georgia.html': 1,
+    'blog.html': 1, 'blog-car-rental-georgia-guide.html': 1,
+    'blog-tbilisi-to-kazbegi.html': 1, 'georgia-road-trip-itinerary.html': 1,
+    'tbilisi-to-batumi-drive.html': 1, 'kakheti-wine-region-by-car.html': 1,
+    'svaneti-mestia-road-trip.html': 1, 'is-it-safe-to-drive-in-georgia.html': 1,
+    'tbilisi-to-gudauri-winter-drive.html': 1
+};
+
+// Localized <title> / meta description for the core money pages.
+// RU is provided; KA bodies are localized from ka.json but KA <title>/<meta>
+// should be filled by a native speaker (see SEO-CHANGES.md).
+const SEO = {
+    ru: {
+        'index.html': { title: 'Аренда авто в Грузии — Тбилиси, Батуми и Кутаиси', desc: 'Аренда автомобиля в Грузии от $25/день. Выдача в аэропортах Тбилиси, Батуми и Кутаиси. Внедорожники, седаны и люкс от проверенных партнёров. Без депозита, страховка включена.' },
+        'vehicles.html': { title: 'Аренда авто в Грузии — от $25/день | EliteAuto', desc: 'Выберите автомобиль для аренды в Грузии — внедорожники, седаны, эконом и люкс. Без депозита, выдача в аэропорту, страховка включена. От $25/день.' },
+        'reviews.html': { title: 'Отзывы об аренде авто в Грузии | EliteAuto.rent', desc: 'Реальные отзывы и истории путешественников, арендовавших авто в Грузии через EliteAuto.rent — Тбилиси, Батуми и Кутаиси.' },
+        'about.html': { title: 'О нас — EliteAuto.rent | Аренда авто в Грузии', desc: 'Узнайте об EliteAuto.rent — маркетплейс аренды авто в Грузии, объединяющий путешественников с проверенными местными партнёрами.' },
+        'contact.html': { title: 'Контакты — EliteAuto.rent', desc: 'Свяжитесь с EliteAuto.rent — поддержка по аренде авто в Грузии. WhatsApp, email и телефон. Помощь в Тбилиси, Батуми и Кутаиси.' },
+        'rent-car-tbilisi.html': { title: 'Аренда авто в Тбилиси — аэропорт 24/7 | EliteAuto', desc: 'Аренда автомобиля в Тбилиси от проверенных партнёров. Выдача в аэропорту Тбилиси (TBS) круглосуточно. Без депозита, страховка включена, от $25/день.' },
+        'rent-car-batumi.html': { title: 'Аренда авто в Батуми — море и горы | EliteAuto', desc: 'Аренда автомобиля в Батуми от проверенных партнёров. Выдача в аэропорту, без депозита, страховка включена. Идеально для побережья и горных поездок.' },
+        'rent-car-kutaisi.html': { title: 'Аренда авто в Кутаиси — выдача в аэропорту | EliteAuto', desc: 'Аренда автомобиля в Кутаиси с выдачей в аэропорту (KUT). Проверенные партнёры, без депозита, страховка включена, от $25/день.' },
+        'tbilisi-airport-car-rental.html': { title: 'Аренда авто в аэропорту Тбилиси (TBS) | 24/7', desc: 'Аренда авто в аэропорту Тбилиси (TBS) с выдачей 24/7. Бесплатная встреча, без депозита, страховка включена. Бронируйте онлайн от $25/день.' },
+        'no-deposit-car-rental-georgia.html': { title: 'Аренда авто в Грузии без депозита | Без карты', desc: 'Аренда авто в Грузии без депозита и с гибкой оплатой. Партнёры в Тбилиси, Батуми и Кутаиси с опцией без залога. Бронируйте онлайн от $25/день.' },
+        'suv-rental-georgia.html': { title: 'Аренда внедорожников и 4x4 в Грузии | EliteAuto', desc: 'Аренда внедорожника или 4x4 в Грузии от $50/день. Идеально для Казбеги, Сванети и Тушети. Toyota Land Cruiser, Hyundai Tucson. Выдача в аэропорту.' },
+        'economy-car-rental-georgia.html': { title: 'Аренда эконом-авто в Грузии | от $25/день', desc: 'Дешёвая аренда эконом-авто в Грузии от $25/день. Экономичные хэтчбеки в Тбилиси, Батуми и Кутаиси. Без депозита, выдача в аэропорту, страховка включена.' },
+        'sedan-rental-georgia.html': { title: 'Аренда седана в Грузии | от $30/день', desc: 'Аренда комфортного седана в Грузии от $30/день. Toyota Camry, Hyundai Sonata в Тбилиси, Батуми и Кутаиси. Для бизнеса, трансферов и трасс.' },
+        'luxury-car-rental-tbilisi.html': { title: 'Аренда люкс-авто в Тбилиси | Премиум-класс', desc: 'Аренда люксовых и представительских авто в Тбилиси. Mercedes S-Class, BMW 7 Series и Range Rover. Для свадеб, бизнеса и VIP. От $80/день.' },
+        'minivan-7-seater-rental-georgia.html': { title: 'Аренда минивэна и 7-местных авто в Грузии', desc: 'Аренда 7-местного авто или минивэна в Грузии от $45/день. Toyota Alphard, Kia Carnival для семей и групп в Тбилиси, Батуми и Кутаиси.' }
+    },
+    ka: {
+        'index.html': { title: 'მანქანის ქირაობა საქართველოში — თბილისი, ბათუმი, ქუთაისი', desc: 'იქირავეთ ავტომობილი საქართველოში დღეში $25-დან. აყვანა თბილისის, ბათუმისა და ქუთაისის აეროპორტებში. ჯიპები, სედანები და ლუქს კლასი ვერიფიცირებული პარტნიორებისგან. დეპოზიტის გარეშე, დაზღვევა შედის.' },
+        'vehicles.html': { title: 'მანქანის ქირაობა საქართველოში — დღეში $25-დან | EliteAuto', desc: 'აირჩიეთ გასაქირავებელი ავტომობილი საქართველოში — ჯიპები, სედანები, ეკონომ და ლუქს კლასი. დეპოზიტის გარეშე, აყვანა აეროპორტში, დაზღვევა შედის. დღეში $25-დან.' },
+        'reviews.html': { title: 'შეფასებები — მანქანის ქირაობა საქართველოში | EliteAuto', desc: 'ნამდვილი შეფასებები მოგზაურებისგან, რომლებმაც იქირავეს მანქანა საქართველოში EliteAuto.rent-ით — თბილისი, ბათუმი და ქუთაისი.' },
+        'about.html': { title: 'ჩვენს შესახებ — EliteAuto.rent | მანქანის ქირაობა', desc: 'გაიგეთ EliteAuto.rent-ის შესახებ — მანქანის ქირაობის პლატფორმა საქართველოში, რომელიც მოგზაურებს უკავშირებს ვერიფიცირებულ ადგილობრივ პარტნიორებს.' },
+        'contact.html': { title: 'კონტაქტი — EliteAuto.rent', desc: 'დაგვიკავშირდით EliteAuto.rent-ს — მხარდაჭერა მანქანის ქირაობაში საქართველოში. WhatsApp, ელფოსტა და ტელეფონი. დახმარება თბილისში, ბათუმსა და ქუთაისში.' },
+        'rent-car-tbilisi.html': { title: 'მანქანის ქირაობა თბილისში — აეროპორტი 24/7 | EliteAuto', desc: 'იქირავეთ ავტომობილი თბილისში ვერიფიცირებული პარტნიორებისგან. აყვანა თბილისის აეროპორტში (TBS) 24/7. დეპოზიტის გარეშე, დაზღვევა შედის, დღეში $25-დან.' },
+        'rent-car-batumi.html': { title: 'მანქანის ქირაობა ბათუმში — ზღვა და მთა | EliteAuto', desc: 'იქირავეთ ავტომობილი ბათუმში ვერიფიცირებული პარტნიორებისგან. აყვანა აეროპორტში, დეპოზიტის გარეშე, დაზღვევა შედის. იდეალურია სანაპიროსა და მთის მოგზაურობისთვის.' },
+        'rent-car-kutaisi.html': { title: 'მანქანის ქირაობა ქუთაისში — აეროპორტში აყვანა | EliteAuto', desc: 'იქირავეთ ავტომობილი ქუთაისში აეროპორტში აყვანით (KUT). ვერიფიცირებული პარტნიორები, დეპოზიტის გარეშე, დაზღვევა შედის, დღეში $25-დან.' },
+        'tbilisi-airport-car-rental.html': { title: 'მანქანის ქირაობა თბილისის აეროპორტში (TBS) | 24/7', desc: 'მანქანის ქირაობა თბილისის აეროპორტში (TBS) აყვანით 24/7. უფასო შეხვედრა, დეპოზიტის გარეშე, დაზღვევა შედის. დაჯავშნეთ ონლაინ დღეში $25-დან.' },
+        'no-deposit-car-rental-georgia.html': { title: 'მანქანის ქირაობა დეპოზიტის გარეშე საქართველოში', desc: 'იქირავეთ მანქანა საქართველოში დეპოზიტის გარეშე და მოქნილი გადახდით. პარტნიორები თბილისში, ბათუმსა და ქუთაისში დეპოზიტის გარეშე ვარიანტებით. დაჯავშნეთ ონლაინ დღეში $25-დან.' },
+        'suv-rental-georgia.html': { title: 'ჯიპებისა და 4x4-ის ქირაობა საქართველოში | EliteAuto', desc: 'იქირავეთ ჯიპი ან 4x4 საქართველოში დღეში $50-დან. იდეალურია ყაზბეგის, სვანეთისა და თუშეთის გზებისთვის. Toyota Land Cruiser, Hyundai Tucson. აყვანა აეროპორტში.' },
+        'economy-car-rental-georgia.html': { title: 'ეკონომ კლასის მანქანის ქირაობა საქართველოში | $25/დღე', desc: 'იაფი ეკონომ კლასის მანქანის ქირაობა საქართველოში დღეში $25-დან. ეკონომიური ჰეტჩბექები თბილისში, ბათუმსა და ქუთაისში. დეპოზიტის გარეშე, აყვანა აეროპორტში, დაზღვევა შედის.' },
+        'sedan-rental-georgia.html': { title: 'სედანის ქირაობა საქართველოში | $30/დღე', desc: 'იქირავეთ კომფორტული სედანი საქართველოში დღეში $30-დან. Toyota Camry, Hyundai Sonata თბილისში, ბათუმსა და ქუთაისში. ბიზნესის, ტრანსფერებისა და მაგისტრალებისთვის.' },
+        'luxury-car-rental-tbilisi.html': { title: 'ლუქს კლასის მანქანის ქირაობა თბილისში | პრემიუმ', desc: 'ლუქს და წარმომადგენლობითი კლასის მანქანების ქირაობა თბილისში. Mercedes S-Class, BMW 7 Series და Range Rover. ქორწილების, ბიზნესისა და VIP-ისთვის. დღეში $80-დან.' },
+        'minivan-7-seater-rental-georgia.html': { title: 'მინივენისა და 7-ადგილიანის ქირაობა საქართველოში', desc: 'იქირავეთ 7-ადგილიანი ავტომობილი ან მინივენი საქართველოში დღეში $45-დან. Toyota Alphard, Kia Carnival ოჯახებისა და ჯგუფებისთვის თბილისში, ბათუმსა და ქუთაისში.' }
+    }
+};
+
+var cache = {};
+function loadLang(lang) {
+    if (cache[lang]) return cache[lang];
+    try {
+        cache[lang] = JSON.parse(fs.readFileSync(path.join(ROOT, 'lang', lang + '.json'), 'utf8'));
+    } catch (e) {
+        console.error('[i18n-render] load ' + lang + ':', e.message);
+        cache[lang] = {};
+    }
+    return cache[lang];
+}
+
+function resolveKey(obj, key) {
+    if (!obj) return undefined;
+    var parts = key.split('.');
+    for (var i = 0; i < parts.length; i++) {
+        if (obj === undefined || obj === null) return undefined;
+        obj = obj[parts[i]];
+    }
+    return obj;
+}
+
+function makeT(lang) {
+    var primary = loadLang(lang);
+    var fallback = loadLang('en');
+    return function (key) {
+        var v = resolveKey(primary, key);
+        if (v === undefined || v === null) v = resolveKey(fallback, key);
+        return (typeof v === 'string') ? v : null;
+    };
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function escapeAttr(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function localize(html, lang, page, t) {
+    // 1) Body: [data-i18n] → textContent (escaped); [data-i18n-html] → innerHTML (raw)
+    html = html.replace(
+        /(<([a-zA-Z][\w-]*)\b[^>]*\bdata-i18n="([^"]+)"[^>]*>)([\s\S]*?)(<\/\2>)/g,
+        function (m, open, tag, key, inner, close) {
+            var v = t(key);
+            return (v == null) ? m : open + escapeHtml(v) + close;
+        }
+    );
+    html = html.replace(
+        /(<([a-zA-Z][\w-]*)\b[^>]*\bdata-i18n-html="([^"]+)"[^>]*>)([\s\S]*?)(<\/\2>)/g,
+        function (m, open, tag, key, inner, close) {
+            var v = t(key);
+            return (v == null) ? m : open + v + close;
+        }
+    );
+
+    // 2) <html lang="en"> → localized
+    html = html.replace(/(<html\b[^>]*\blang=")[^"]*(")/i, '$1' + lang + '$2');
+
+    // 3) Localized <title> / meta description (RU map; KA optional).
+    // NOTE: replacement VALUES can contain "$" (e.g. "$25/день"), so we use
+    // function replacements everywhere — string replacements would treat "$2" as
+    // a backreference and corrupt the output.
+    var seo = (SEO[lang] || {})[page || 'index.html'];
+    if (seo) {
+        if (seo.title) {
+            html = html.replace(/<title>[\s\S]*?<\/title>/, function () { return '<title>' + escapeHtml(seo.title) + '</title>'; });
+            html = html.replace(/(<meta\s+property="og:title"\s+content=")[^"]*(")/i, function (mm, a, b) { return a + escapeAttr(seo.title) + b; });
+            html = html.replace(/(<meta\s+name="twitter:title"\s+content=")[^"]*(")/i, function (mm, a, b) { return a + escapeAttr(seo.title) + b; });
+        }
+        if (seo.desc) {
+            html = html.replace(/(<meta\s+name="description"\s+content=")[^"]*(")/i, function (mm, a, b) { return a + escapeAttr(seo.desc) + b; });
+            html = html.replace(/(<meta\s+property="og:description"\s+content=")[^"]*(")/i, function (mm, a, b) { return a + escapeAttr(seo.desc) + b; });
+        }
+    }
+
+    // 4) Canonical + og:url → localized URL; rebuild hreflang alternates
+    var urlPage = (page === 'index.html') ? '' : page; // homepage canonical stays "/lang/"
+    var enUrl = SITE + '/' + urlPage;
+    var ruUrl = SITE + '/ru/' + urlPage;
+    var kaUrl = SITE + '/ka/' + urlPage;
+    var selfUrl = SITE + '/' + lang + '/' + urlPage;
+    html = html.replace(/(<link rel="canonical" href=")[^"]*(">)/i, function (mm, a, b) { return a + selfUrl + b; });
+    html = html.replace(/(<meta property="og:url" content=")[^"]*(">)/i, function (mm, a, b) { return a + selfUrl + b; });
+    // strip any existing alternates, then inject the correct set after canonical
+    html = html.replace(/[ \t]*<link rel="alternate" hreflang="[^"]*" href="[^"]*">\s*/gi, '');
+    var alts = [
+        '<link rel="alternate" hreflang="en" href="' + enUrl + '">',
+        '<link rel="alternate" hreflang="ru" href="' + ruUrl + '">',
+        '<link rel="alternate" hreflang="ka" href="' + kaUrl + '">',
+        '<link rel="alternate" hreflang="x-default" href="' + enUrl + '">'
+    ].join('\n    ');
+    html = html.replace(/(<link rel="canonical" href="[^"]*">)/i, function (mm, a) { return a + '\n    ' + alts; });
+
+    // 5) Make relative asset URLs root-absolute (CSS/JS/images/fonts) so they load
+    //    from "/" under the /ru/ or /ka/ path. Page (.html) links stay relative,
+    //    so in-language navigation correctly remains within /ru/ or /ka/.
+    html = html.replace(
+        /(\b(?:src|href)=")(?!https?:|\/\/|\/|#|mailto:|tel:|data:)([^"]+\.(?:js|css|png|jpe?g|webp|svg|gif|ico|woff2?|ttf)(?:\?[^"]*)?)(")/gi,
+        '$1/$2$3'
+    );
+
+    // Prerendered SEO blocks use root-absolute links. Keep those in-language too.
+    html = html.replace(/href="\/([^"#?]+\.html)([^"]*)"/g, function (m, p, suffix) {
+        return Object.prototype.hasOwnProperty.call(LOCALIZABLE, p)
+            ? 'href="/' + lang + '/' + p + suffix + '"'
+            : m;
+    });
+    html = html.replace(/href="\/"/g, 'href="/' + lang + '/"');
+
+    // 6) Seed the client language so i18n.js doesn't re-translate the page back.
+    html = html.replace(/<head([^>]*)>/i,
+        '<head$1>\n    <script>try{localStorage.setItem("EliteAuto_lang","' + lang + '");}catch(e){}</script>');
+
+    return html;
+}
+
+async function renderSourceHtml(fileName) {
+    if (fileName === 'index.html') return seoPrerender.renderHomePage();
+    if (fileName === 'vehicles.html') return seoPrerender.renderVehiclesPage();
+    if (fileName === 'reviews.html') return seoPrerender.renderReviewsPage();
+    return fs.readFileSync(path.join(ROOT, fileName), 'utf8');
+}
+
+async function middleware(req, res, next) {
+    try {
+        var m = /^\/(ru|ka)(?:\/(.*))?$/.exec(req.path);
+        if (!m) return next();
+        var lang = m[1];
+        var page = (m[2] || '').replace(/\/+$/, ''); // trim trailing slash
+        if (page === '' || page === 'index') page = '';            // → index.html
+        var fileName = page === '' ? 'index.html' : page;
+        if (LANGS.indexOf(lang) === -1) return next();
+        if (!Object.prototype.hasOwnProperty.call(LOCALIZABLE, page)) return next();
+        if (fileName.indexOf('..') !== -1 || !/^[a-zA-Z0-9._-]+\.html$/.test(fileName)) return next();
+
+        if (!fs.existsSync(path.join(ROOT, fileName))) return next();
+
+        var html = await renderSourceHtml(fileName);
+        html = localize(html, lang, page, makeT(lang));
+
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Cache-Control', 'public, max-age=300');
+        res.send(html);
+    } catch (err) {
+        console.error('[i18n-render] error:', err.message);
+        next();
+    }
+}
+
+module.exports = { middleware, LOCALIZABLE, LANGS };
