@@ -3400,66 +3400,8 @@ body {
     opacity: 0.9;
 }
 
-/* ========================================
-   FOOTER
-   ======================================== */
-
-.footer {
-    background: #0D1B2A;
-    color: #EAEAEA;
-    padding: 60px 0 20px;
-    margin-top: 80px;
-    border-top: 1px solid #3A3F4B;
-}
-
-.footer-content {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 40px;
-    margin-bottom: 40px;
-}
-
-.footer-section h4 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 16px;
-}
-
-.footer-section p {
-    font-size: 14px;
-    opacity: 0.8;
-    line-height: 1.6;
-}
-
-.footer-section ul {
-    list-style: none;
-}
-
-.footer-section ul li {
-    margin-bottom: 8px;
-}
-
-.footer-section a {
-    color: #A0A3B0;
-    text-decoration: none;
-    font-size: 14px;
-    opacity: 0.8;
-    transition: opacity 0.3s ease;
-}
-
-.footer-section a:hover {
-    opacity: 1;
-}
-
-/* social-icon styles defined above in footer section */
-
-.footer-bottom {
-    border-top: 1px solid #3A3F4B;
-    padding-top: 20px;
-    text-align: center;
-    font-size: 13px;
-    opacity: 0.7;
-}
+/* Footer styles are defined earlier (compact version). Duplicate oversized
+   block removed to avoid overriding the compact footer. */
 
 /* ========================================
    RESPONSIVE DESIGN
@@ -3888,19 +3830,28 @@ body {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-top: 1px solid rgba(212, 175, 55, 0.2);
-    padding: 10px 16px;
-    gap: 10px;
+    padding: 6px 10px;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom));
+    gap: 8px;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
 }
 @media (max-width: 768px) {
     .mobile-cta-bar {
         display: flex;
     }
-    body {
-        padding-bottom: 70px;
+    /* html body → beat premium.css `body { padding: 0 }` (same specificity, loads later)
+       so the fixed bar reserves space instead of overlapping page content. */
+    html body {
+        padding-bottom: calc(52px + env(safe-area-inset-bottom));
     }
     .floating-whatsapp {
-        bottom: 80px !important;
+        bottom: calc(60px + env(safe-area-inset-bottom)) !important;
+    }
+    /* On pages that already show the bottom bar (with its own WhatsApp button),
+       hide the floating WhatsApp bubble to avoid a duplicate. Pages without the
+       bar keep the bubble. Progressive enhancement — no effect where :has() is unsupported. */
+    body:has(.mobile-cta-bar) .floating-whatsapp {
+        display: none;
     }
 }
 .mobile-cta-btn {
@@ -3908,14 +3859,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 12px 16px;
-    border-radius: 10px;
-    font-size: 14px;
+    gap: 6px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    font-size: 13px;
     font-weight: 700;
     text-decoration: none;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
     transition: all 0.2s ease;
 }
 .mobile-cta-book {

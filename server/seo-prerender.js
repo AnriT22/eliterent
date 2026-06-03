@@ -275,14 +275,28 @@ async function renderHomePage() {
     return html;
 }
 
+// Detect search-engine crawlers / social scrapers by User-Agent.
+function isCrawler(req) {
+    var ua = (req.headers['user-agent'] || '').toLowerCase();
+    return /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandex|sogou|exabot|facebookexternalhit|facebot|twitterbot|linkedinbot|embedly|quora link preview|pinterest|slackbot|vkshare|w3c_validator|whatsapp|telegrambot|applebot|petalbot|bytespider|ahrefsbot|semrushbot|crawler|spider|crawling/i.test(ua);
+}
+
 async function middleware(req, res, next) {
     try {
         var html;
+        var crawler = isCrawler(req);
         if (req.path === '/vehicles.html') {
+            // Featured-cards block duplicates the JS grid for real users —
+            // only serve the injected SEO block to crawlers.
+            if (!crawler) return next();
             html = await renderVehiclesPage();
         } else if (req.path === '/reviews.html') {
+            // Reviews SEO block duplicates the JS reviews list for real users.
+            if (!crawler) return next();
             html = await renderReviewsPage();
         } else if (req.path === '/' || req.path === '/index.html') {
+            // Homepage block is navigation (categories + cities), not duplicative —
+            // keep it for all visitors.
             html = await renderHomePage();
         } else {
             return next();
