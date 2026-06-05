@@ -566,6 +566,21 @@ router.put('/vehicles/:id/status', async (req, res) => {
     }
 });
 
+router.put('/vehicles/:id/priority', async (req, res) => {
+    try {
+        const vehicleId = parseInt(req.params.id);
+        var priority = parseInt(req.body.priority);
+        if (isNaN(priority)) priority = 0;
+        if (priority < 0) priority = 0;
+        if (priority > 1000000) priority = 1000000;
+        await execute('UPDATE vehicles SET priority = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [priority, vehicleId]);
+        res.json({ message: 'Vehicle priority updated', priority: priority });
+    } catch (err) {
+        console.error('Update vehicle priority error:', err);
+        res.status(500).json({ error: 'Failed to update vehicle priority' });
+    }
+});
+
 router.delete('/vehicles/:id/approve-delete', async (req, res) => {
     try {
         const vehicleId = parseInt(req.params.id);
