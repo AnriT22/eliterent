@@ -737,11 +737,31 @@
             visible.forEach(function (c) { c.style.display = ''; grid.appendChild(c); });
 
             var badge = document.getElementById('vpCountBadge');
-            if (badge) {
-                badge.textContent = typeof I18n !== 'undefined' ? I18n.t('vehicles_page.cars_available', {count: visible.length}) : (visible.length + ' car' + (visible.length !== 1 ? 's' : '') + ' available');
-            }
+            if (badge) badge.textContent = window.carsAvailableText(visible.length);
         }
         window.applyFilters = applyFilters;
+
+        // Builds the "N cars available" label. Falls back to a plain string when
+        // I18n is missing OR translations haven't loaded yet (t() returns the key).
+        window.carsAvailableText = function (n) {
+            if (typeof I18n !== 'undefined' && I18n.t) {
+                var t = I18n.t('vehicles_page.cars_available', { count: n });
+                if (t && t !== 'vehicles_page.cars_available') return t;
+            }
+            return n + ' car' + (n !== 1 ? 's' : '') + ' available';
+        };
+        // The badge is set via textContent, so it won't auto-translate when the
+        // language file finishes loading (initial race) or the user switches
+        // language. Refresh it from the currently visible cards.
+        document.addEventListener('languageChanged', function () {
+            var badge = document.getElementById('vpCountBadge');
+            if (!badge) return;
+            var shown = 0;
+            document.querySelectorAll('.vc-card').forEach(function (c) {
+                if (c.style.display !== 'none') shown++;
+            });
+            badge.textContent = window.carsAvailableText(shown);
+        });
 
         /* Panel collapse */
         document.querySelectorAll('.vf-panel-header').forEach(function (h) {
@@ -1213,10 +1233,7 @@
             if (typeof applyFilters === 'function') applyFilters();
 
             var badge = document.getElementById('vpCountBadge');
-            if (badge) {
-                var carsWord = typeof I18n !== 'undefined' ? I18n.t('vehicles_page.cars_available', {count: vehicles.length}) : (vehicles.length + ' car' + (vehicles.length !== 1 ? 's' : '') + ' available');
-                badge.textContent = carsWord;
-            }
+            if (badge) badge.textContent = window.carsAvailableText(vehicles.length);
             if (typeof I18n !== 'undefined' && I18n.translatePage) I18n.translatePage(grid);
             if (typeof Currency !== 'undefined' && Currency.refresh) Currency.refresh();
         }
