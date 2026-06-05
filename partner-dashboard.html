@@ -1040,51 +1040,31 @@
 
                                 <div class="db-form-group">
 
-                                    <label class="db-label" data-i18n="partner_dashboard.pickup_city">Pickup & Dropoff City *</label>
+                                    <label class="db-label" data-i18n="partner_dashboard.country">Country *</label>
 
-                                    <select class="db-input" id="vLocationCity" required>
+                                    <select class="db-input" id="vCountry" required>
 
-                                        <option value="" data-i18n="partner_dashboard.select_location">Select Location</option>
+                                        <option value="georgia">Georgia</option>
 
-                                        <option value="Tbilisi">Tbilisi</option>
+                                        <option value="armenia">Armenia</option>
 
-                                        <option value="Batumi">Batumi</option>
-
-                                        <option value="Kutaisi">Kutaisi</option>
-
-                                        <option value="Tbilisi Airport">Tbilisi Airport</option>
-
-                                        <option value="Batumi Airport">Batumi Airport</option>
-
-                                        <option value="Kutaisi Airport">Kutaisi Airport</option>
+                                        <option value="usa">United States</option>
 
                                     </select>
 
                                 </div>
 
-                                <div class="db-form-group">
+                                <div class="db-form-group vf-city-group">
 
-                                    <label class="db-label" data-i18n="partner_dashboard.region">Region *</label>
+                                    <label class="db-label" data-i18n="partner_dashboard.pickup_city">Pickup & Dropoff City *</label>
 
-                                    <select class="db-input" id="vRegion">
+                                    <input type="text" class="db-input" id="vLocationCity" autocomplete="off" required data-i18n-placeholder="partner_dashboard.search_city" placeholder="Type to search city...">
 
-                                        <option value="" data-i18n="partner_dashboard.select_region">Select Region</option>
+                                    <input type="hidden" id="vRegion">
 
-                                        <option value="tbilisi">Tbilisi</option>
+                                    <div class="vf-city-results" id="vCityResults"></div>
 
-                                        <option value="adjara">Adjara</option>
-
-                                        <option value="imereti">Imereti</option>
-
-                                        <option value="kakheti">Kakheti</option>
-
-                                        <option value="mtskheta_mtianeti">Mtskheta-Mtianeti</option>
-
-                                        <option value="samegrelo">Samegrelo</option>
-
-                                        <option value="guria">Guria</option>
-
-                                    </select>
+                                    <p class="db-field-hint"><span data-i18n="partner_dashboard.region">Region</span>: <span id="vRegionDisplay">—</span></p>
 
                                 </div>
 
@@ -1502,7 +1482,9 @@
 
     <script src="navbar-auth.js?v=2"></script>
 
-    <script src="dashboard.js?v=3"></script>
+    <script src="location-data.js?v=1"></script>
+
+    <script src="dashboard.js?v=4"></script>
 
 <script src="premium-animations.js"></script>
 

@@ -745,6 +745,56 @@ select.db-input option:checked {
     line-height: 1.4;
 }
 
+/* ── Searchable city autocomplete ── */
+.vf-city-group {
+    position: relative;
+}
+.vf-city-results {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    margin-top: 4px;
+    max-height: 280px;
+    overflow-y: auto;
+    background: #1C1E26;
+    border: 1px solid #3A3F4B;
+    border-radius: 10px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.4);
+    -webkit-overflow-scrolling: touch;
+}
+.vf-city-results.open {
+    display: block;
+}
+.vf-city-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.vf-city-item:last-child {
+    border-bottom: none;
+}
+.vf-city-item:hover,
+.vf-city-item.active {
+    background: rgba(201,168,76,0.15);
+}
+.vf-city-name {
+    font-size: 14px;
+    color: #EAEAEA;
+    font-weight: 500;
+}
+.vf-city-region {
+    font-size: 12px;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
 /* ── Locations Builder ── */
 .db-locations-builder {
     display: grid;

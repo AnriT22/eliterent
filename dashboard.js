@@ -659,8 +659,8 @@
             { id: 'vPrice', label: 'Daily Price' }
         ],
         4: [
-            { id: 'vLocationCity', label: 'Pickup City' },
-            { id: 'vRegion', label: 'Region' }
+            { id: 'vCountry', label: 'Country' },
+            { id: 'vLocationCity', label: 'Pickup City' }
         ],
         5: [] // validated at submit (photos + passport + reg number)
     };
@@ -1298,6 +1298,7 @@
             color: getVal('vColor').trim(),
             min_age: getInt('vMinAge') || 21,
             location_city: getVal('vLocationCity'),
+            country: getVal('vCountry') || 'georgia',
             category: getVal('vCategory'),
             year: getInt('vYear'),
             engine: getVal('vEngine'),
@@ -1408,8 +1409,8 @@
             { field: payload.doors, name: 'Doors' },
             { field: payload.fuel_policy, name: 'Fuel Policy' },
             { field: payload.luggage, name: 'Luggage Capacity' },
+            { field: payload.country, name: 'Country' },
             { field: payload.location_city, name: 'City / Location' },
-            { field: payload.region, name: 'Region' },
             { field: payload.price_per_day, name: 'Price per Day' },
             { field: payload.deposit_amount !== null && payload.deposit_amount !== undefined ? String(payload.deposit_amount) : '', name: 'Deposit Amount (enter 0 if none)' },
             { field: payload.registration_number, name: 'Registration Number' },
@@ -1494,6 +1495,8 @@
         document.getElementById('submitVehicleBtn').textContent = 'Add Vehicle';
         // Reset wizard to step 1
         goToWizardStep(1);
+        // Reset location fields (country/city/region display)
+        if (typeof window.setLocationFields === 'function') window.setLocationFields('georgia', '', '');
         // Restore default toggles
         var visEl = document.getElementById('vVisibleInSearch');
         if (visEl) visEl.checked = true;
@@ -1595,7 +1598,12 @@
                 if (colorLabel) colorLabel.textContent = v.color;
             }
             setVal('vMinAge', v.min_age || 21);
+            setVal('vCountry', v.country || 'georgia');
             setVal('vLocationCity', v.location_city || '');
+            setVal('vRegion', v.region || '');
+            if (typeof window.setLocationFields === 'function') {
+                window.setLocationFields(v.country || 'georgia', v.location_city || '', v.region || '');
+            }
             setVal('vCategory', v.category || '');
             setVal('vYear', v.year || '');
             setVal('vEngine', v.engine || '');
@@ -2142,6 +2150,117 @@
             });
         }
     });
+
+    // ========================================
+    // LOCATION: country -> searchable city -> auto region
+    // ========================================
+    (function initLocationSearch() {
+        var countrySel = document.getElementById('vCountry');
+        var cityInput = document.getElementById('vLocationCity');
+        var regionHidden = document.getElementById('vRegion');
+        var regionDisplay = document.getElementById('vRegionDisplay');
+        var results = document.getElementById('vCityResults');
+        if (!countrySel || !cityInput || !results) return;
+
+        var DATA = window.LOCATION_DATA || {};
+        var activeIndex = -1;
+        var current = [];
+
+        function cityList() {
+            var c = countrySel.value || 'georgia';
+            return (DATA[c] && DATA[c].cities) ? DATA[c].cities : [];
+        }
+
+        function setRegion(region) {
+            if (regionHidden) regionHidden.value = region || '';
+            if (regionDisplay) regionDisplay.textContent = region || '—';
+        }
+
+        function hideResults() {
+            results.classList.remove('open');
+            results.innerHTML = '';
+            activeIndex = -1;
+        }
+
+        function pick(item) {
+            cityInput.value = item.name;
+            setRegion(item.region);
+            cityInput.classList.remove('vf-invalid');
+            hideResults();
+        }
+
+        function render(matches) {
+            current = matches;
+            if (!matches.length) { hideResults(); return; }
+            results.innerHTML = matches.map(function (m, i) {
+                return '<div class="vf-city-item' + (i === activeIndex ? ' active' : '') + '" data-i="' + i + '">'
+                    + '<span class="vf-city-name">' + m.name + '</span>'
+                    + '<span class="vf-city-region">' + m.region + '</span>'
+                    + '</div>';
+            }).join('');
+            results.classList.add('open');
+        }
+
+        function search(q) {
+            var list = cityList();
+            q = (q || '').toLowerCase().trim();
+            var matches;
+            if (!q) {
+                matches = list.slice(0, 30);
+            } else {
+                matches = list.filter(function (c) {
+                    return c.name.toLowerCase().indexOf(q) !== -1
+                        || c.region.toLowerCase().indexOf(q) !== -1;
+                }).slice(0, 30);
+            }
+            activeIndex = -1;
+            render(matches);
+        }
+
+        cityInput.addEventListener('focus', function () { search(cityInput.value); });
+        cityInput.addEventListener('input', function () {
+            // typing a custom value clears any previously derived region until re-matched
+            var typed = cityInput.value.toLowerCase().trim();
+            var exact = cityList().filter(function (c) { return c.name.toLowerCase() === typed; })[0];
+            setRegion(exact ? exact.region : '');
+            search(cityInput.value);
+        });
+        cityInput.addEventListener('keydown', function (e) {
+            if (!results.classList.contains('open')) return;
+            if (e.key === 'ArrowDown') { e.preventDefault(); activeIndex = Math.min(activeIndex + 1, current.length - 1); render(current); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); activeIndex = Math.max(activeIndex - 1, 0); render(current); }
+            else if (e.key === 'Enter') {
+                if (activeIndex >= 0 && current[activeIndex]) { e.preventDefault(); pick(current[activeIndex]); }
+            } else if (e.key === 'Escape') { hideResults(); }
+        });
+
+        results.addEventListener('mousedown', function (e) {
+            var item = e.target.closest('.vf-city-item');
+            if (!item) return;
+            e.preventDefault();
+            var idx = parseInt(item.getAttribute('data-i'), 10);
+            if (current[idx]) pick(current[idx]);
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.vf-city-group')) hideResults();
+        });
+
+        countrySel.addEventListener('change', function () {
+            cityInput.value = '';
+            setRegion('');
+            hideResults();
+        });
+
+        // Helper used by edit-populate to restore saved values
+        window.setLocationFields = function (country, city, region) {
+            countrySel.value = (country && DATA[country]) ? country : 'georgia';
+            cityInput.value = city || '';
+            // Prefer the dataset region for the saved city; fall back to stored region
+            var match = cityList().filter(function (c) { return c.name.toLowerCase() === (city || '').toLowerCase(); })[0];
+            setRegion(match ? match.region : (region || ''));
+        };
+    })();
 
     console.log('✓ Partner dashboard initialized');
 })();
