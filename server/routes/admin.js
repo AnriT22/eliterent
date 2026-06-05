@@ -542,7 +542,7 @@ router.get('/vehicles', async (req, res) => {
              FROM vehicles v
              JOIN users u ON v.partner_id = u.id
              LEFT JOIN partner_profiles pp ON u.id = pp.user_id
-             ORDER BY v.created_at DESC`
+             ORDER BY v.priority DESC, v.created_at DESC`
         );
         res.json({ vehicles, count: vehicles.length });
     } catch (err) {
@@ -563,6 +563,28 @@ router.put('/vehicles/:id/status', async (req, res) => {
     } catch (err) {
         console.error('Update vehicle status error:', err);
         res.status(500).json({ error: 'Failed to update vehicle status' });
+    }
+});
+
+// Reorder vehicles by drag-and-drop: body { order: [id1, id2, ...] } top-first.
+// Highest position gets the highest priority so it shows first on the page.
+router.put('/vehicles/reorder', async (req, res) => {
+    try {
+        var order = req.body.order;
+        if (!Array.isArray(order) || order.length === 0) {
+            return res.status(400).json({ error: 'order must be a non-empty array of vehicle ids' });
+        }
+        var total = order.length;
+        for (var i = 0; i < total; i++) {
+            var id = parseInt(order[i]);
+            if (isNaN(id)) continue;
+            var priority = total - i; // first item = highest priority
+            await execute('UPDATE vehicles SET priority = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [priority, id]);
+        }
+        res.json({ message: 'Vehicle order updated', count: total });
+    } catch (err) {
+        console.error('Reorder vehicles error:', err);
+        res.status(500).json({ error: 'Failed to reorder vehicles' });
     }
 });
 

@@ -437,16 +437,14 @@ function escHtml(s) {
                 var imgSrc = v.image_url || '';
                 var imgTag = imgSrc ? '<img src="' + imgSrc + '" class="vehicle-thumb">' : '<div class="vehicle-thumb" style="display:inline-flex;align-items:center;justify-content:center;background:#262A35;font-size:14px;">-</div>';
                 var status = v.status || 'active';
-                var priorityVal = (v.priority !== undefined && v.priority !== null) ? v.priority : 0;
-                return '<tr>'
+                return '<tr draggable="true" data-id="' + v.id + '" class="vehicle-row">'
                     + '<td>' + v.id + '</td>'
                     + '<td class="hide-mobile">' + imgTag + '</td>'
                     + '<td><strong>' + escHtml(v.name || '-') + '</strong></td>'
                     + '<td class="hide-mobile">' + escHtml(v.company_name || v.partner_name || '-') + '</td>'
                     + '<td>$' + (v.price_per_day || 0) + '</td>'
                     + '<td><span class="admin-status ' + status + '">' + status + '</span></td>'
-                    + '<td style="white-space:nowrap;"><input type="number" id="priorityInput' + v.id + '" value="' + priorityVal + '" min="0" style="width:64px;padding:4px 6px;background:#1A1D26;color:#EAEAEA;border:1px solid #3A3F4B;border-radius:6px;"> '
-                    + '<button class="admin-action-btn primary" onclick="adminSetVehiclePriority(' + v.id + ')">Save</button></td>'
+                    + '<td class="drag-handle" style="text-align:center;color:#A0A3B0;cursor:grab;font-size:20px;user-select:none;" title="Drag to reorder">\u2059</td>'
                     + '<td class="hide-mobile">' + date + '</td>'
                     + '<td>'
                     + '<button class="admin-action-btn primary" onclick="adminViewVehicle(' + v.id + ')">View</button>'
@@ -460,18 +458,57 @@ function escHtml(s) {
             }).join('');
 
             applyVehicleFilters();
+            setupVehicleDnd();
+        });
+    }
+
+    var _dragSrcRow = null;
+    function setupVehicleDnd() {
+        var tbody = document.getElementById('vehiclesTableBody');
+        if (!tbody) return;
+        var rows = tbody.querySelectorAll('tr.vehicle-row');
+        rows.forEach(function (row) {
+            row.addEventListener('dragstart', function (e) {
+                _dragSrcRow = row;
+                row.style.opacity = '0.4';
+                e.dataTransfer.effectAllowed = 'move';
+                try { e.dataTransfer.setData('text/plain', row.getAttribute('data-id')); } catch (err) {}
+            });
+            row.addEventListener('dragend', function () {
+                row.style.opacity = '';
+            });
+            row.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                if (!_dragSrcRow || _dragSrcRow === row) return;
+                var rect = row.getBoundingClientRect();
+                var after = (e.clientY - rect.top) > rect.height / 2;
+                if (after) {
+                    row.parentNode.insertBefore(_dragSrcRow, row.nextSibling);
+                } else {
+                    row.parentNode.insertBefore(_dragSrcRow, row);
+                }
+            });
+            row.addEventListener('drop', function (e) {
+                e.preventDefault();
+                persistVehicleOrder();
+            });
+        });
+    }
+
+    function persistVehicleOrder() {
+        var rows = document.querySelectorAll('#vehiclesTableBody tr.vehicle-row');
+        var ids = Array.prototype.map.call(rows, function (r) { return parseInt(r.getAttribute('data-id')); });
+        ids = ids.filter(function (id) { return !isNaN(id); });
+        if (ids.length === 0) return;
+        apiPut('/api/admin/vehicles/reorder', { order: ids }).then(function () {
+            // keep local cache in sync so re-renders preserve order
+            _adminVehicles.sort(function (a, b) { return ids.indexOf(a.id) - ids.indexOf(b.id); });
         });
     }
 
     window.adminSetVehicleStatus = function (id, status) {
         apiPut('/api/admin/vehicles/' + id + '/status', { status: status }).then(function () { loadVehicles(); });
-    };
-    window.adminSetVehiclePriority = function (id) {
-        var input = document.getElementById('priorityInput' + id);
-        if (!input) return;
-        var priority = parseInt(input.value);
-        if (isNaN(priority) || priority < 0) priority = 0;
-        apiPut('/api/admin/vehicles/' + id + '/priority', { priority: priority }).then(function () { loadVehicles(); });
     };
     window.adminDeleteVehicle = function (id) {
         if (!confirm('Delete this vehicle? This cannot be undone.')) return;
