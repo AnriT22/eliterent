@@ -17,23 +17,34 @@
 }
 
 .vp-page-header {
-    padding: 20px 24px 0;
+    padding: 28px 24px 6px;
     max-width: 100%;
 }
 
 .vp-page-header h1 {
-    font-size: 26px;
+    font-size: 32px;
     font-weight: 800;
-    color: #EAEAEA;
-    margin: 0 0 6px;
-    line-height: 1.25;
+    color: #F5F5F5;
+    margin: 0 0 10px;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+}
+
+.vp-header-accent {
+    display: block;
+    background: linear-gradient(90deg, #E7C66B 0%, #C9A84C 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #C9A84C;
 }
 
 .vp-page-header p {
-    font-size: 14px;
-    color: #A0A3B0;
+    font-size: 15px;
+    color: #A8ABB8;
     margin: 0;
-    max-width: 640px;
+    max-width: 680px;
+    line-height: 1.6;
 }
 
 /* PAGE LAYOUT */
@@ -343,12 +354,26 @@
 }
 
 .vp-count-badge {
-    background: #C9A84C;
-    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(201, 168, 76, 0.12);
+    color: #E7C66B;
     font-size: 13px;
     font-weight: 700;
-    padding: 5px 14px;
+    padding: 6px 15px;
     border-radius: 20px;
+    border: 1px solid rgba(201, 168, 76, 0.35);
+    letter-spacing: 0.2px;
+}
+
+.vp-count-badge::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
 }
 
 .vp-topbar-right {
