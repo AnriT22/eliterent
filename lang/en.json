@@ -206,6 +206,7 @@
     "subtitle": "Browse and book from our curated selection of quality vehicles",
     "search_placeholder": "Search vehicles...",
     "sort_label": "Sort by",
+    "sort_default": "Featured",
     "sort_newest": "Newest",
     "sort_price_asc": "Price: Low to High",
     "sort_price_desc": "Price: High to Low",
