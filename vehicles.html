@@ -350,7 +350,7 @@
         <!-- MAIN CONTENT -->
         <main class="vp-main">
             <header class="vp-page-header">
-                <h1>Rent a Car in Georgia — Tbilisi, Batumi &amp; Kutaisi</h1>
+                <h1>Rent a Car in Georgia <span class="vp-header-accent">Tbilisi, Batumi &amp; Kutaisi</span></h1>
                 <p>Compare verified local partners. SUVs, sedans, economy and luxury cars from $25/day with airport pickup.</p>
             </header>
             <!-- SEO_PRERENDER_VEHICLES -->
@@ -738,7 +738,7 @@
 
             var badge = document.getElementById('vpCountBadge');
             if (badge) {
-                badge.textContent = typeof I18n !== 'undefined' ? I18n.t('vehicles.cars_available', {count: visible.length}) : (visible.length + ' car' + (visible.length !== 1 ? 's' : '') + ' available');
+                badge.textContent = typeof I18n !== 'undefined' ? I18n.t('vehicles_page.cars_available', {count: visible.length}) : (visible.length + ' car' + (visible.length !== 1 ? 's' : '') + ' available');
             }
         }
         window.applyFilters = applyFilters;
@@ -1214,7 +1214,7 @@
 
             var badge = document.getElementById('vpCountBadge');
             if (badge) {
-                var carsWord = typeof I18n !== 'undefined' ? I18n.t('vehicles.cars_available', {count: vehicles.length}) : (vehicles.length + ' car' + (vehicles.length !== 1 ? 's' : '') + ' available');
+                var carsWord = typeof I18n !== 'undefined' ? I18n.t('vehicles_page.cars_available', {count: vehicles.length}) : (vehicles.length + ' car' + (vehicles.length !== 1 ? 's' : '') + ' available');
                 badge.textContent = carsWord;
             }
             if (typeof I18n !== 'undefined' && I18n.translatePage) I18n.translatePage(grid);
