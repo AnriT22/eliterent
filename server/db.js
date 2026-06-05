@@ -112,6 +112,7 @@ async function initDB() {
             color TEXT,
             min_age INTEGER DEFAULT 21,
             location_city TEXT,
+            country TEXT DEFAULT 'georgia',
             fuel_policy TEXT DEFAULT 'full_to_full',
             luggage TEXT,
             region TEXT,
@@ -130,6 +131,7 @@ async function initDB() {
             custom_pricing_enabled INTEGER DEFAULT 0,
             custom_pricing_ranges TEXT,
             registration_number TEXT,
+            priority INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (partner_id) REFERENCES users(id) ON DELETE CASCADE
@@ -274,6 +276,16 @@ async function initDB() {
         }
         console.log('Money columns migrated to NUMERIC(10,2)');
     } catch (e) { /* columns may already be NUMERIC or table not yet created */ }
+
+    // Add country column to vehicles for multi-country support (existing DBs)
+    try {
+        await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS country TEXT DEFAULT 'georgia'`);
+    } catch (e) { /* column may already exist or table not yet created */ }
+
+    // Add priority column to vehicles so admin can pin/order vehicles on the page (existing DBs)
+    try {
+        await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS priority INTEGER DEFAULT 0`);
+    } catch (e) { /* column may already exist or table not yet created */ }
 
     // Create indexes for OTP lookups
     try {

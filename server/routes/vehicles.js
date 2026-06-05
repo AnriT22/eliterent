@@ -73,7 +73,8 @@ router.get('/', async (req, res) => {
             'newest': 'v.created_at DESC'
         };
         var sort = sortMap[req.query.sort] || 'v.created_at DESC';
-        sql += ' ORDER BY ' + sort;
+        // Admin-set priority always wins (higher priority shown first), then the chosen sort
+        sql += ' ORDER BY v.priority DESC, ' + sort;
 
         var vehicles = await queryAll(sql, params);
 
@@ -162,7 +163,7 @@ router.post('/', authenticateToken, requireRole('partner'), async (req, res) => 
 
         await execute(`
             INSERT INTO vehicles
-            (partner_id, name, brand, model, color, min_age, location_city,
+            (partner_id, name, brand, model, color, min_age, location_city, country,
              category, engine, gearbox, drive_type,
              interior_type, steering_side,
              price_per_day, year, seats, doors,
@@ -177,7 +178,7 @@ router.post('/', authenticateToken, requireRole('partner'), async (req, res) => 
              custom_pricing_enabled, custom_pricing_ranges, registration_number,
              deposit_amount,
              tech_passport_front, tech_passport_back, status)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,'pending')`,
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,'pending')`,
             [
                 req.user.id,
                 b.name,
@@ -186,6 +187,7 @@ router.post('/', authenticateToken, requireRole('partner'), async (req, res) => 
                 b.color || null,
                 parseInt(b.min_age) || 21,
                 b.location_city || null,
+                b.country || 'georgia',
                 b.category,
                 b.engine,
                 b.gearbox,
@@ -266,8 +268,8 @@ router.put('/:id', authenticateToken, requireRole('partner'), async (req, res) =
                 custom_pricing_enabled = $37, custom_pricing_ranges = $38, registration_number = $39,
                 deposit_amount = $40,
                 tech_passport_front = $41, tech_passport_back = $42,
-                status = $43, updated_at = CURRENT_TIMESTAMP
-            WHERE id = $44 AND partner_id = $45`,
+                status = $43, country = $44, updated_at = CURRENT_TIMESTAMP
+            WHERE id = $45 AND partner_id = $46`,
             [
                 b.name || existing.name,
                 b.brand !== undefined ? b.brand : existing.brand,
@@ -312,6 +314,7 @@ router.put('/:id', authenticateToken, requireRole('partner'), async (req, res) =
                 b.tech_passport_front !== undefined ? b.tech_passport_front : existing.tech_passport_front,
                 b.tech_passport_back !== undefined ? b.tech_passport_back : existing.tech_passport_back,
                 existing.status, // Partners cannot change their own vehicle status — admin only
+                b.country !== undefined ? b.country : (existing.country || 'georgia'),
                 vehicleId,
                 req.user.id
             ]

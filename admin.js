@@ -429,7 +429,7 @@ function escHtml(s) {
             var vehicles = data.vehicles || [];
             _adminVehicles = vehicles;
             if (vehicles.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#A0A3B0;padding:30px;">No vehicles found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#A0A3B0;padding:30px;">No vehicles found</td></tr>';
                 return;
             }
             tbody.innerHTML = vehicles.map(function (v) {
@@ -437,6 +437,7 @@ function escHtml(s) {
                 var imgSrc = v.image_url || '';
                 var imgTag = imgSrc ? '<img src="' + imgSrc + '" class="vehicle-thumb">' : '<div class="vehicle-thumb" style="display:inline-flex;align-items:center;justify-content:center;background:#262A35;font-size:14px;">-</div>';
                 var status = v.status || 'active';
+                var priorityVal = (v.priority !== undefined && v.priority !== null) ? v.priority : 0;
                 return '<tr>'
                     + '<td>' + v.id + '</td>'
                     + '<td class="hide-mobile">' + imgTag + '</td>'
@@ -444,6 +445,8 @@ function escHtml(s) {
                     + '<td class="hide-mobile">' + escHtml(v.company_name || v.partner_name || '-') + '</td>'
                     + '<td>$' + (v.price_per_day || 0) + '</td>'
                     + '<td><span class="admin-status ' + status + '">' + status + '</span></td>'
+                    + '<td style="white-space:nowrap;"><input type="number" id="priorityInput' + v.id + '" value="' + priorityVal + '" min="0" style="width:64px;padding:4px 6px;background:#1A1D26;color:#EAEAEA;border:1px solid #3A3F4B;border-radius:6px;"> '
+                    + '<button class="admin-action-btn primary" onclick="adminSetVehiclePriority(' + v.id + ')">Save</button></td>'
                     + '<td class="hide-mobile">' + date + '</td>'
                     + '<td>'
                     + '<button class="admin-action-btn primary" onclick="adminViewVehicle(' + v.id + ')">View</button>'
@@ -462,6 +465,13 @@ function escHtml(s) {
 
     window.adminSetVehicleStatus = function (id, status) {
         apiPut('/api/admin/vehicles/' + id + '/status', { status: status }).then(function () { loadVehicles(); });
+    };
+    window.adminSetVehiclePriority = function (id) {
+        var input = document.getElementById('priorityInput' + id);
+        if (!input) return;
+        var priority = parseInt(input.value);
+        if (isNaN(priority) || priority < 0) priority = 0;
+        apiPut('/api/admin/vehicles/' + id + '/priority', { priority: priority }).then(function () { loadVehicles(); });
     };
     window.adminDeleteVehicle = function (id) {
         if (!confirm('Delete this vehicle? This cannot be undone.')) return;
