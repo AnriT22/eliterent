@@ -725,6 +725,10 @@
                 if (sortVal === 'price-desc') return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
                 if (sortVal === 'year-desc') return parseInt(b.dataset.year, 10) - parseInt(a.dataset.year, 10);
                 if (sortVal === 'name-asc') return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+                // Default: admin-set priority wins (higher first), then newest
+                var pa = parseInt(a.dataset.priority, 10) || 0;
+                var pb = parseInt(b.dataset.priority, 10) || 0;
+                if (pb !== pa) return pb - pa;
                 return (b.dataset.created || '').localeCompare(a.dataset.created || '');
             });
 
@@ -1155,6 +1159,7 @@
                 card.setAttribute('data-price',     price);
                 card.setAttribute('data-name',      name);
                 card.setAttribute('data-created',   v.created_at || '');
+                card.setAttribute('data-priority',  v.priority || 0);
                 card.setAttribute('data-imgurl',    v.image_url  || '');
 
                 card.innerHTML =

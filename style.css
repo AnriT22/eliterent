@@ -2018,6 +2018,14 @@ body {
     list-style: none;
 }
 
+/* The "Rent by City & Type" column has many links — lay them out in two
+   columns so the footer doesn't stretch far taller than the other columns. */
+.footer-column:nth-child(2) ul {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 18px;
+}
+
 .footer-column ul li {
     margin-bottom: 4px;
 }
