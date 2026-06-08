@@ -1672,8 +1672,8 @@ html[lang="ru"] .hero-price-badge {
     }
 
     .footer-content {
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
+        grid-template-columns: 1fr;
+        gap: 18px;
     }
 
     .footer-column h4 {
