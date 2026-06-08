@@ -12,6 +12,11 @@ const MARKER_HOME = '<!-- SEO_PRERENDER_HOME_FLEET -->';
 // Source-of-truth data for crawlable fallbacks.
 // "from" prices and URLs MUST stay in sync with the type/city landing pages
 // (economy $25, sedan $30, suv $50, minivan $45, luxury $80). No invented numbers.
+//
+// IMPORTANT (anti-cloaking): every block produced here is rendered for ALL
+// visitors, never only for crawlers. Search engines and users must see the
+// same content. There is NO fabricated-review fallback — reviews come solely
+// from real database rows, rendered client-side identically for bots and users.
 // ---------------------------------------------------------------------------
 const CATEGORIES = [
     { name: 'Economy cars', url: '/economy-car-rental-georgia.html', from: 25, blurb: 'Fuel-efficient hatchbacks & compacts' },
@@ -29,16 +34,6 @@ const CITIES = [
     { name: 'No-deposit rentals', url: '/no-deposit-car-rental-georgia.html' }
 ];
 
-// Genuine customer testimonials displayed on the homepage. Used as a crawlable
-// fallback on /reviews.html until live reviews exist in the database.
-// NOTE: replace/extend with a verified review source (Google, Trustpilot) for
-// durable rich-result eligibility — see notes in the SEO changelog.
-const FEATURED_REVIEWS = [
-    { name: 'Sarah M.', rating: 5, trip: 'Kazbegi trip · April 2026', body: 'Amazing service! The 4x4 was perfect for our Kazbegi trip. Delivery was free and the car was spotless. Will definitely use again next summer!' },
-    { name: 'David L.', rating: 5, trip: 'Svaneti road trip · March 2026', body: 'Best car rental experience in Georgia. Professional partners, seamless booking, and the Hyundai Tucson handled Svaneti mountain roads perfectly.' },
-    { name: 'Elena K.', rating: 5, trip: 'Tbilisi & Batumi · May 2026', body: 'No deposit required made it so easy! Picked up at Tbilisi airport at midnight, no issues. Highly recommended for adventure travelers.' }
-];
-
 function escapeHtml(str) {
     if (!str) return '';
     return String(str)
@@ -48,7 +43,7 @@ function escapeHtml(str) {
         .replace(/"/g, '&quot;');
 }
 
-// On-brand styles for the injected blocks (rendered for ALL visitors, not just bots).
+// On-brand styles for the injected homepage browse block (rendered for ALL visitors).
 const SEO_STYLES = '<style>'
     + '.seo-crawlable{max-width:1200px;margin:0 auto;padding:0 16px;color:#EAEAEA;font-family:inherit}'
     + '.seo-crawlable-heading{font-size:20px;font-weight:800;margin:24px 0 4px;color:#EAEAEA}'
@@ -62,15 +57,6 @@ const SEO_STYLES = '<style>'
     + '.seo-city-links{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 24px;list-style:none;padding:0}'
     + '.seo-city-links a{display:inline-block;background:#262A35;border:1px solid #3A3F4B;border-radius:999px;padding:8px 16px;color:#EAEAEA;text-decoration:none;font-size:13.5px}'
     + '.seo-city-links a:hover{border-color:#D4AF37;color:#D4AF37}'
-    + '.seo-crawlable-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:16px}'
-    + '.seo-vehicle-card{background:#1C1E26;border:1px solid #3A3F4B;border-radius:14px;padding:14px;overflow:hidden}'
-    + '.seo-vehicle-card img{width:100%;height:auto;border-radius:10px;margin-bottom:10px}'
-    + '.seo-vehicle-card h3{font-size:15px;margin:0 0 4px}.seo-vehicle-card a{color:#EAEAEA;text-decoration:none}'
-    + '.seo-vehicle-card p{color:#A0A3B0;font-size:13px;margin:0}'
-    + '.seo-review-card{background:#1C1E26;border:1px solid #3A3F4B;border-radius:14px;padding:16px;margin-bottom:14px}'
-    + '.seo-review-card .seo-review-meta{margin:0 0 6px;font-size:14px}'
-    + '.seo-review-card .seo-stars{color:#f59e0b}'
-    + '.seo-review-card p{color:#C9CCD6;font-size:14px;line-height:1.6;margin:6px 0 0}'
     + '</style>';
 
 function categoryGridHtml() {
@@ -91,6 +77,7 @@ function cityLinksHtml() {
 }
 
 // A reusable, always-present crawlable block: intro + category cards + city links.
+// Used on the homepage and served to EVERY visitor (not cloaking).
 function browseBlockHtml(introText) {
     return SEO_STYLES
         + '<section class="seo-crawlable" aria-label="Browse rental cars in Georgia">'
@@ -99,66 +86,6 @@ function browseBlockHtml(introText) {
         + categoryGridHtml()
         + '<h2 class="seo-crawlable-heading">Rent a car by city</h2>'
         + cityLinksHtml()
-        + '</section>';
-}
-
-function buildVehicleSeoHtml(vehicles) {
-    var intro = 'Compare rental cars in Georgia from verified local partners — economy and compact cars, sedans, SUVs and 4x4s, 7-seater minivans and luxury vehicles. Free airport pickup in Tbilisi, Batumi and Kutaisi, insurance included, and no-deposit options available.';
-    var html = browseBlockHtml(intro);
-    if (vehicles && vehicles.length) {
-        var items = vehicles.map(function (v) {
-            var name = escapeHtml(v.name || 'Rental car');
-            var city = escapeHtml(v.location_city || 'Georgia');
-            var price = v.price_per_day ? '$' + v.price_per_day + '/day' : '';
-            var cat = escapeHtml((v.category || '').replace(/_/g, ' '));
-            var img = v.image_url ? escapeHtml(v.image_url) : '';
-            var imgTag = img
-                ? '<a href="/vehicle.html?id=' + v.id + '"><img src="' + img + '" alt="' + name + ' rental in ' + city + ', Georgia" width="400" height="240" loading="lazy"></a>'
-                : '';
-            return '<article class="seo-vehicle-card">'
-                + imgTag
-                + '<h3><a href="/vehicle.html?id=' + v.id + '">' + name + '</a></h3>'
-                + '<p>' + [cat, city, price].filter(Boolean).join(' · ') + '</p>'
-                + '</article>';
-        }).join('\n');
-        html += '<section class="seo-crawlable" aria-label="Available rental cars">'
-            + '<h2 class="seo-crawlable-heading">Featured rental cars</h2>'
-            + '<div class="seo-crawlable-grid">' + items + '</div>'
-            + '</section>';
-    }
-    return html;
-}
-
-function reviewCardHtml(name, rating, body, sub) {
-    var r = Math.max(0, Math.min(5, parseInt(rating, 10) || 0));
-    var stars = '★'.repeat(r) + '☆'.repeat(5 - r);
-    return '<article class="seo-review-card">'
-        + '<p class="seo-review-meta"><strong>' + escapeHtml(name || 'Guest') + '</strong> '
-        + '<span class="seo-stars">' + stars + '</span>'
-        + (sub ? ' · <span>' + escapeHtml(sub) + '</span>' : '') + '</p>'
-        + '<p>' + escapeHtml((body || '').substring(0, 600)) + '</p>'
-        + '</article>';
-}
-
-function buildReviewsSeoHtml(reviews) {
-    var items, note;
-    if (reviews && reviews.length) {
-        items = reviews.map(function (r) {
-            var vehicle = r.vehicle_name ? r.vehicle_name : '';
-            return reviewCardHtml(r.guest_name, r.rating, r.body, vehicle);
-        }).join('\n');
-        note = '';
-    } else {
-        // Honest fallback: the genuine testimonials shown on the homepage.
-        items = FEATURED_REVIEWS.map(function (r) {
-            return reviewCardHtml(r.name, r.rating, r.body, r.trip);
-        }).join('\n');
-        note = '<p class="seo-crawlable-sub">Recent experiences from travelers who rented through EliteAuto.rent. Completed a rental? Sign in to share yours.</p>';
-    }
-    return SEO_STYLES
-        + '<section class="seo-crawlable seo-crawlable-reviews" aria-label="Customer reviews">'
-        + '<h2 class="seo-crawlable-heading">What our customers say</h2>'
-        + note + items
         + '</section>';
 }
 
@@ -219,18 +146,10 @@ async function fetchActiveVehicles(limit) {
     );
 }
 
-async function fetchPublicReviews(limit) {
-    return queryAll(
-        `SELECT r.id, r.rating, r.title, r.body, r.created_at, u.full_name as guest_name, v.name as vehicle_name
-         FROM reviews r
-         JOIN users u ON r.guest_id = u.id
-         LEFT JOIN vehicles v ON r.vehicle_id = v.id
-         ORDER BY r.created_at DESC
-         LIMIT $1`,
-        [limit || 20]
-    );
-}
-
+// /vehicles.html — the live car grid renders client-side from /api/vehicles for
+// everyone. We do NOT inject a bot-only listing (no cloaking); we only strip the
+// marker and keep the ItemList schema accurate to real inventory when it exists.
+// (Full server-rendering of the grid for all visitors is tracked as S-01.)
 async function renderVehiclesPage() {
     var filePath = path.join(ROOT, 'vehicles.html');
     var html = fs.readFileSync(filePath, 'utf8');
@@ -240,31 +159,23 @@ async function renderVehiclesPage() {
     } catch (e) {
         console.error('[SEO] vehicles fetch:', e.message);
     }
-    if (html.includes(MARKER_VEHICLES)) {
-        html = html.replace(MARKER_VEHICLES, buildVehicleSeoHtml(vehicles));
-    }
+    html = html.replace(MARKER_VEHICLES, '');
     html = injectItemList(html, vehicles);
     return html;
 }
 
+// /reviews.html — reviews render client-side from real /api/reviews rows for
+// everyone (bots and users alike). There is NO fabricated fallback and no
+// bot-only content. Real server-rendered reviews are tracked as S-02.
 async function renderReviewsPage() {
     var filePath = path.join(ROOT, 'reviews.html');
     var html = fs.readFileSync(filePath, 'utf8');
-    var reviews = [];
-    try {
-        reviews = await fetchPublicReviews(20);
-    } catch (e) {
-        console.error('[SEO] reviews fetch:', e.message);
-    }
-    if (html.includes(MARKER_REVIEWS)) {
-        html = html.replace(MARKER_REVIEWS, buildReviewsSeoHtml(reviews));
-    }
-    return html;
+    return html.replace(MARKER_REVIEWS, '');
 }
 
 // Homepage: inject a crawlable category + city block where the JS-only fleet
-// carousel sits, so the top page exposes real internal links and intent text
-// to crawlers even before live inventory loads. No DB call needed.
+// carousel sits, so the top page exposes real internal links and intent text.
+// Served to ALL visitors (navigation, not duplicative) — not cloaking.
 async function renderHomePage() {
     var filePath = path.join(ROOT, 'index.html');
     var html = fs.readFileSync(filePath, 'utf8');
@@ -275,32 +186,14 @@ async function renderHomePage() {
     return html;
 }
 
-// Detect search-engine crawlers / social scrapers by User-Agent.
-function isCrawler(req) {
-    var ua = (req.headers['user-agent'] || '').toLowerCase();
-    return /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandex|sogou|exabot|facebookexternalhit|facebot|twitterbot|linkedinbot|embedly|quora link preview|pinterest|slackbot|vkshare|w3c_validator|whatsapp|telegrambot|applebot|petalbot|bytespider|ahrefsbot|semrushbot|crawler|spider|crawling/i.test(ua);
-}
-
+// Middleware: only the homepage block is served here, and it is identical for
+// every visitor. /vehicles.html and /reviews.html are intentionally NOT handled
+// (no User-Agent branching anywhere) so crawlers and users get the same static
+// pages. renderVehiclesPage/renderReviewsPage remain exported for i18n-render.
 async function middleware(req, res, next) {
     try {
-        var html;
-        var crawler = isCrawler(req);
-        if (req.path === '/vehicles.html') {
-            // Featured-cards block duplicates the JS grid for real users —
-            // only serve the injected SEO block to crawlers.
-            if (!crawler) return next();
-            html = await renderVehiclesPage();
-        } else if (req.path === '/reviews.html') {
-            // Reviews SEO block duplicates the JS reviews list for real users.
-            if (!crawler) return next();
-            html = await renderReviewsPage();
-        } else if (req.path === '/' || req.path === '/index.html') {
-            // Homepage block is navigation (categories + cities), not duplicative —
-            // keep it for all visitors.
-            html = await renderHomePage();
-        } else {
-            return next();
-        }
+        if (req.path !== '/' && req.path !== '/index.html') return next();
+        var html = await renderHomePage();
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('Cache-Control', 'public, max-age=300');
         res.send(html);
@@ -313,7 +206,6 @@ async function middleware(req, res, next) {
 module.exports = {
     middleware,
     fetchActiveVehicles,
-    fetchPublicReviews,
     renderVehiclesPage,
     renderReviewsPage,
     renderHomePage

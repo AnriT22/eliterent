@@ -10,5 +10,7 @@ Disallow: /reset-password.html
 Disallow: /payment.html
 Disallow: /google-auth-success.html
 Disallow: /uploads/
+Disallow: /data/
+Disallow: /RoyalCar_Guide_GEO.html
 
 Sitemap: https://eliteauto.rent/sitemap.xml
