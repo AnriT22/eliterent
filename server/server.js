@@ -209,13 +209,15 @@ app.use((req, res, next) => {
     next();
 });
 
-// SEO: inject the homepage browse block (categories + cities) for ALL visitors
-// (before static). Identical content for users and crawlers — no User-Agent
-// branching. /vehicles.html and /reviews.html are served as plain static pages
-// (their content renders client-side from real data for everyone).
+// SEO: inject server-rendered content for ALL visitors (before static), with NO
+// User-Agent branching — users and crawlers get identical HTML. Homepage gets the
+// categories+cities browse block; /vehicles.html gets the real cars rendered into
+// the grid (the page's JS rebuilds the interactive grid on load). /reviews.html is
+// left as a plain static page (real reviews render client-side; S-02).
 const seoPrerender = require('./seo-prerender');
 app.get('/', seoPrerender.middleware);
 app.get('/index.html', seoPrerender.middleware);
+app.get('/vehicles.html', seoPrerender.middleware);
 
 // SEO: server-render localized RU/KA pages for crawlers (before static).
 // Self-guards on path and falls through to next() for everything else.

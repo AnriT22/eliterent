@@ -135,15 +135,64 @@ function injectItemList(html, vehicles) {
 
 async function fetchActiveVehicles(limit) {
     return queryAll(
-        `SELECT v.id, v.name, v.price_per_day, v.location_city, v.category, v.image_url, v.year
+        `SELECT v.id, v.name, v.price_per_day, v.location_city, v.category, v.image_url,
+                v.year, v.seats, v.engine, v.gearbox, v.drive_type, v.interior_type,
+                v.steering_side, v.payment_method, v.priority, v.created_at,
+                pp.company_name
          FROM vehicles v
          JOIN users u ON v.partner_id = u.id
          LEFT JOIN partner_profiles pp ON u.id = pp.user_id
          WHERE v.status = 'active' AND pp.is_verified = 1
-         ORDER BY v.created_at DESC
+         ORDER BY COALESCE(v.priority, 0) DESC, v.created_at DESC
          LIMIT $1`,
         [limit || 24]
     );
+}
+
+// Server-rendered car cards injected INTO #vpGrid. The page's own inline JS does
+// `grid.innerHTML = ''` and rebuilds the interactive cards from /api/vehicles on
+// load, so these are cleanly replaced for JS users (no duplication, booking/filters
+// untouched). For crawlers and no-JS users they ARE the content: real car data +
+// real <a href="/vehicle.html?id=N"> links so each vehicle page is discoverable.
+// Markup mirrors the JS `.vc-card` (incl. data-* filter attributes) so the page's
+// applyFilters() treats them correctly if it runs before hydration.
+function buildVehicleCardsHtml(vehicles) {
+    if (!vehicles || !vehicles.length) return '';
+    return vehicles.map(function (v) {
+        var name = escapeHtml(v.name || 'Rental car');
+        var city = escapeHtml(v.location_city || 'Georgia');
+        var cat = escapeHtml(String(v.category || 'economy').toLowerCase());
+        var engine = String(v.engine || '').toLowerCase();
+        var gearbox = String(v.gearbox || '').toLowerCase();
+        var drive = String(v.drive_type || '').toLowerCase();
+        var price = v.price_per_day || 0;
+        var year = v.year || '';
+        var seats = v.seats || 5;
+        var partner = v.company_name ? escapeHtml(v.company_name) : '';
+        var href = '/vehicle.html?id=' + encodeURIComponent(v.id);
+        var img = v.image_url ? escapeHtml(v.image_url) : '';
+        var imgTag = img
+            ? '<img src="' + img + '" alt="' + name + ' rental in ' + city + ', Georgia" width="400" height="240" loading="lazy">'
+            : '';
+        function spec(s) { return s ? '<span class="vc-spec">' + escapeHtml(s.replace(/_/g, ' ')) + '</span>' : ''; }
+        return '<div class="vc-card" data-id="' + v.id + '"'
+            + ' data-category="' + cat + '" data-engine="' + escapeHtml(engine) + '"'
+            + ' data-gearbox="' + escapeHtml(gearbox) + '" data-drive="' + escapeHtml(drive) + '"'
+            + ' data-interior="' + escapeHtml(String(v.interior_type || 'fabric').toLowerCase()) + '"'
+            + ' data-steering="' + escapeHtml(String(v.steering_side || 'left').toLowerCase()) + '"'
+            + ' data-payment="' + escapeHtml(String(v.payment_method || 'cash').toLowerCase()) + '"'
+            + ' data-year="' + year + '" data-price="' + price + '" data-name="' + name + '"'
+            + ' data-priority="' + (v.priority || 0) + '" data-created="' + escapeHtml(String(v.created_at || '')) + '">'
+            + '<a class="vc-image-wrap" href="' + href + '">' + imgTag + (year ? '<span class="vc-year-badge">' + year + '</span>' : '') + '</a>'
+            + '<div class="vc-body">'
+            + '<div class="vc-title-row"><a class="vc-name" href="' + href + '">' + name + '</a><span class="vc-category-tag ' + cat + '">' + cat + '</span></div>'
+            + '<div class="vc-specs">' + spec(engine) + spec(gearbox) + '<span class="vc-spec">' + seats + ' Seats</span>' + spec(drive) + '</div>'
+            + '<div class="vc-price-section">'
+            + '<div class="vc-price-row"><span class="vc-price-label">Price per day:</span> <span class="vc-price-amount" data-price-usd="' + price + '">$' + price + '</span><span class="vc-price-unit">/day</span></div>'
+            + '<a class="vc-book-btn" href="' + href + '">Book Now</a>'
+            + (partner ? '<div class="vc-partner-name">by ' + partner + '</div>' : '')
+            + '</div></div>';
+    }).join('');
 }
 
 // /vehicles.html — the live car grid renders client-side from /api/vehicles for
@@ -159,7 +208,9 @@ async function renderVehiclesPage() {
     } catch (e) {
         console.error('[SEO] vehicles fetch:', e.message);
     }
-    html = html.replace(MARKER_VEHICLES, '');
+    // Inject real cars into #vpGrid (the marker sits inside it). The page's JS
+    // wipes + rebuilds the grid on load, so this is identical for bots and users.
+    html = html.replace(MARKER_VEHICLES, buildVehicleCardsHtml(vehicles));
     html = injectItemList(html, vehicles);
     return html;
 }
@@ -186,14 +237,23 @@ async function renderHomePage() {
     return html;
 }
 
-// Middleware: only the homepage block is served here, and it is identical for
-// every visitor. /vehicles.html and /reviews.html are intentionally NOT handled
-// (no User-Agent branching anywhere) so crawlers and users get the same static
-// pages. renderVehiclesPage/renderReviewsPage remain exported for i18n-render.
+// Middleware: serves the homepage browse block and the vehicles listing (with
+// real cars server-rendered into #vpGrid) — both IDENTICAL for every visitor,
+// no User-Agent branching anywhere (no cloaking). /reviews.html is intentionally
+// NOT handled (real reviews render client-side; S-02). renderReviewsPage remains
+// exported for i18n-render's /ru//ka/ path.
 async function middleware(req, res, next) {
     try {
-        if (req.path !== '/' && req.path !== '/index.html') return next();
-        var html = await renderHomePage();
+        var html;
+        if (req.path === '/' || req.path === '/index.html') {
+            html = await renderHomePage();
+        } else if (req.path === '/vehicles.html') {
+            // Real cars server-rendered into the grid for ALL visitors (not cloaking);
+            // the page's JS rebuilds the interactive grid on load.
+            html = await renderVehiclesPage();
+        } else {
+            return next();
+        }
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('Cache-Control', 'public, max-age=300');
         res.send(html);
