@@ -215,6 +215,164 @@ async function renderVehiclesPage() {
     return html;
 }
 
+// ---------------------------------------------------------------------------
+// Per-car pages (/vehicle.html?id=N) — unique title/meta/canonical + crawlable
+// content + Product/Breadcrumb schema, server-rendered for ALL visitors. The
+// page's vehicle.js hides #vdLoading on load, so the injected summary disappears
+// (no duplication, booking untouched). Fixes the shared-canonical bug that
+// previously collapsed every car into one URL.
+// ---------------------------------------------------------------------------
+const MARKER_VEHICLE = '<!-- SEO_PRERENDER_VEHICLE -->';
+
+function absUrl(u) {
+    if (!u) return SITE + '/images/og-preview.jpg';
+    if (/^https?:\/\//i.test(u)) return u;
+    return SITE + (String(u).charAt(0) === '/' ? '' : '/') + u;
+}
+
+async function fetchVehicleById(id) {
+    var rows = await queryAll(
+        `SELECT v.*, pp.company_name
+         FROM vehicles v
+         JOIN users u ON v.partner_id = u.id
+         LEFT JOIN partner_profiles pp ON u.id = pp.user_id
+         WHERE v.id = $1 AND v.status = 'active' AND pp.is_verified = 1
+         LIMIT 1`,
+        [id]
+    );
+    return (rows && rows[0]) || null;
+}
+
+function vehicleTitle(v) {
+    var city = v.location_city || 'Georgia';
+    return 'Rent ' + (v.name || 'a Car') + ' in ' + city + ' — $' + (v.price_per_day || 0) + '/day';
+}
+
+function vehicleDesc(v) {
+    var city = v.location_city || 'Georgia';
+    var bits = [];
+    if (v.seats) bits.push(v.seats + ' seats');
+    if (v.gearbox) bits.push(String(v.gearbox).replace(/_/g, ' '));
+    if (v.engine) bits.push(String(v.engine).replace(/_/g, ' '));
+    var specs = bits.length ? ' ' + bits.join(', ') + '.' : '';
+    var yearStr = (v.year && String(v.name || '').indexOf(String(v.year)) === -1) ? ' (' + v.year + ')' : '';
+    return (v.name || 'Rental car') + yearStr + ' for rent in ' + city
+        + ', Georgia — $' + (v.price_per_day || 0) + '/day.' + specs
+        + ' Book with a verified local partner' + (v.company_name ? ' (' + v.company_name + ')' : '')
+        + '. Insurance included, airport pickup and no-deposit options available.';
+}
+
+function buildVehicleContentHtml(v, url, img) {
+    var name = escapeHtml(v.name || 'Rental car');
+    var city = escapeHtml(v.location_city || 'Georgia');
+    var price = v.price_per_day || 0;
+    function spec(label, val) {
+        if (!val) return '';
+        return '<span class="seo-vd-spec"><strong>' + escapeHtml(label) + ':</strong> ' + escapeHtml(String(val).replace(/_/g, ' ')) + '</span>';
+    }
+    var imgTag = img ? '<img src="' + escapeHtml(img) + '" alt="' + name + ' rental in ' + city + ', Georgia" width="640" height="400" style="max-width:100%;height:auto;border-radius:14px;margin:0 0 16px">' : '';
+    var desc = v.description ? '<p style="color:#C9CCD6;line-height:1.6;margin:12px 0 0;max-width:760px">' + escapeHtml(String(v.description).substring(0, 600)) + '</p>' : '';
+    return '<section class="seo-crawlable" aria-label="Vehicle details" style="text-align:left">'
+        + '<style>.seo-vd-spec{display:inline-block;margin:0 16px 8px 0;color:#A0A3B0;font-size:14px}</style>'
+        + imgTag
+        + '<h1 style="font-size:26px;font-weight:800;margin:0 0 6px;color:#EAEAEA">Rent ' + name + ' in ' + city + '</h1>'
+        + '<p style="color:#D4AF37;font-weight:800;font-size:18px;margin:0 0 14px">$' + price + ' <span style="color:#A0A3B0;font-weight:500;font-size:14px">/ day</span></p>'
+        + '<div>'
+        + spec('Year', v.year) + spec('Category', v.category) + spec('Engine', v.engine)
+        + spec('Gearbox', v.gearbox) + spec('Drive', v.drive_type) + spec('Seats', v.seats)
+        + spec('Location', v.location_city) + (v.company_name ? spec('Partner', v.company_name) : '')
+        + '</div>' + desc
+        + '<p style="margin:18px 0 0"><a href="' + url + '" style="display:inline-block;background:#D4AF37;color:#0B0C10;font-weight:700;padding:10px 22px;border-radius:10px;text-decoration:none">Book this car</a> '
+        + '<a href="/vehicles.html" style="color:#A0A3B0;margin-left:12px">Browse all cars</a></p>'
+        + '</section>';
+}
+
+function buildVehicleSchema(v, url, img) {
+    var product = {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: v.name || 'Rental car',
+        image: img,
+        description: vehicleDesc(v),
+        category: 'Car rental',
+        brand: { '@type': 'Brand', name: v.company_name || 'EliteAuto.rent' },
+        offers: {
+            '@type': 'Offer',
+            priceCurrency: 'USD',
+            price: String(v.price_per_day || 0),
+            availability: 'https://schema.org/InStock',
+            url: url
+        }
+    };
+    var crumbs = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: SITE + '/' },
+            { '@type': 'ListItem', position: 2, name: 'Vehicles', item: SITE + '/vehicles.html' },
+            { '@type': 'ListItem', position: 3, name: v.name || 'Rental car', item: url }
+        ]
+    };
+    return '<script type="application/ld+json">' + JSON.stringify(product) + '</script>'
+        + '<script type="application/ld+json">' + JSON.stringify(crumbs) + '</script>';
+}
+
+async function renderVehiclePage(id) {
+    var v;
+    try { v = await fetchVehicleById(id); }
+    catch (e) { console.error('[SEO] vehicle fetch:', e.message); return null; }
+    if (!v) return null; // unknown/inactive car → fall through to static page (JS shows "not found")
+
+    var html = fs.readFileSync(path.join(ROOT, 'vehicle.html'), 'utf8');
+    var title = vehicleTitle(v);
+    var desc = vehicleDesc(v);
+    var url = SITE + '/vehicle.html?id=' + v.id;
+    var img = absUrl(v.image_url);
+
+    // Replacement VALUES contain "$" (prices) — use function replacements everywhere
+    // so "$25" is never treated as a regex backreference.
+    function full(re, value) { html = html.replace(re, function () { return value; }); }
+    function attr(re, value) { html = html.replace(re, function (m, a, b) { return a + value + b; }); }
+
+    full(/<title>[\s\S]*?<\/title>/, '<title>' + escapeHtml(title) + '</title>');
+    attr(/(<meta name="description" content=")[^"]*(">)/i, escapeHtml(desc));
+    attr(/(<link rel="canonical" href=")[^"]*(">)/i, url);
+    attr(/(<link rel="alternate" hreflang="en" href=")[^"]*(">)/i, url);
+    attr(/(<link rel="alternate" hreflang="x-default" href=")[^"]*(">)/i, url);
+    attr(/(<meta property="og:title" content=")[^"]*(">)/i, escapeHtml(title));
+    attr(/(<meta property="og:description" content=")[^"]*(">)/i, escapeHtml(desc));
+    attr(/(<meta property="og:url" content=")[^"]*(">)/i, url);
+    attr(/(<meta property="og:image" content=")[^"]*(">)/i, escapeHtml(img));
+    attr(/(<meta name="twitter:title" content=")[^"]*(">)/i, escapeHtml(title));
+    attr(/(<meta name="twitter:description" content=")[^"]*(">)/i, escapeHtml(desc));
+    attr(/(<meta name="twitter:image" content=")[^"]*(">)/i, escapeHtml(img));
+
+    if (html.includes(MARKER_VEHICLE)) {
+        html = html.replace(MARKER_VEHICLE, buildVehicleContentHtml(v, url, img));
+    }
+    html = html.replace(/<\/head>/i, function () { return buildVehicleSchema(v, url, img) + '</head>'; });
+    return html;
+}
+
+// Dynamic sitemap: the static sitemap.xml (marketing URLs + funnel hreflang) with
+// every active vehicle page auto-appended, so new inventory is submitted to Google
+// without editing a file. Scales to thousands of cars (well under the 50k cap).
+async function renderSitemap() {
+    var xml = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
+    var vehicles = [];
+    try { vehicles = await fetchActiveVehicles(5000); }
+    catch (e) { console.error('[SEO] sitemap vehicles:', e.message); }
+    if (vehicles && vehicles.length) {
+        var entries = vehicles.map(function (v) {
+            var lastmod = v.created_at ? '    <lastmod>' + escapeHtml(String(v.created_at).slice(0, 10)) + '</lastmod>\n' : '';
+            return '  <url>\n    <loc>' + SITE + '/vehicle.html?id=' + v.id + '</loc>\n'
+                + lastmod + '    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n';
+        }).join('');
+        xml = xml.replace('</urlset>', entries + '</urlset>');
+    }
+    return xml;
+}
+
 // /reviews.html — reviews render client-side from real /api/reviews rows for
 // everyone (bots and users alike). There is NO fabricated fallback and no
 // bot-only content. Real server-rendered reviews are tracked as S-02.
@@ -251,6 +409,14 @@ async function middleware(req, res, next) {
             // Real cars server-rendered into the grid for ALL visitors (not cloaking);
             // the page's JS rebuilds the interactive grid on load.
             html = await renderVehiclesPage();
+        } else if (req.path === '/vehicle.html') {
+            // Per-car unique title/meta/canonical + crawlable summary. Unknown or
+            // inactive id → next() (static page, JS shows "not found").
+            var vid = parseInt(req.query.id, 10);
+            if (!vid) return next();
+            var vhtml = await renderVehiclePage(vid);
+            if (!vhtml) return next();
+            html = vhtml;
         } else {
             return next();
         }
@@ -267,6 +433,8 @@ module.exports = {
     middleware,
     fetchActiveVehicles,
     renderVehiclesPage,
+    renderVehiclePage,
     renderReviewsPage,
-    renderHomePage
+    renderHomePage,
+    renderSitemap
 };
