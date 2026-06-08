@@ -218,6 +218,22 @@ const seoPrerender = require('./seo-prerender');
 app.get('/', seoPrerender.middleware);
 app.get('/index.html', seoPrerender.middleware);
 app.get('/vehicles.html', seoPrerender.middleware);
+app.get('/vehicle.html', seoPrerender.middleware);
+
+// SEO: dynamic sitemap — static marketing URLs + every active vehicle page,
+// generated from the DB so new inventory is auto-submitted (before static so it
+// wins over the sitemap.xml file, which remains a fallback if generation fails).
+app.get('/sitemap.xml', async (req, res, next) => {
+    try {
+        const xml = await seoPrerender.renderSitemap();
+        res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+        res.setHeader('Cache-Control', 'public, max-age=3600');
+        res.send(xml);
+    } catch (e) {
+        console.error('[SEO] sitemap:', e.message);
+        next();
+    }
+});
 
 // SEO: server-render localized RU/KA pages for crawlers (before static).
 // Self-guards on path and falls through to next() for everything else.
