@@ -209,12 +209,13 @@ app.use((req, res, next) => {
     next();
 });
 
-// SEO: server-render homepage fleet + vehicle/review listings for crawlers (before static)
+// SEO: inject the homepage browse block (categories + cities) for ALL visitors
+// (before static). Identical content for users and crawlers — no User-Agent
+// branching. /vehicles.html and /reviews.html are served as plain static pages
+// (their content renders client-side from real data for everyone).
 const seoPrerender = require('./seo-prerender');
 app.get('/', seoPrerender.middleware);
 app.get('/index.html', seoPrerender.middleware);
-app.get('/vehicles.html', seoPrerender.middleware);
-app.get('/reviews.html', seoPrerender.middleware);
 
 // SEO: server-render localized RU/KA pages for crawlers (before static).
 // Self-guards on path and falls through to next() for everything else.
@@ -243,6 +244,21 @@ app.use((req, res, next) => {
         if (PRETTY_REDIRECTS[p]) return res.redirect(301, PRETTY_REDIRECTS[p]);
         next();
     } catch (e) { next(); }
+});
+
+// Security: never serve dev/test artifacts, internal docs, or raw data files as
+// static assets. Blocks /_*.* dev files (e.g. _mock-data.js, _preview-vehicle.html),
+// the /data/ dir, database files, and markdown docs (README, SECURITY-AUDIT,
+// SEO-* planning notes). Returns 404 so they are neither fetchable nor indexable.
+// Marketing/app pages are unaffected (none start with "_" or end in these types).
+app.use((req, res, next) => {
+    const p = req.path;
+    if (/^\/_/.test(p) || p.startsWith('/data/') || /\.(db|sqlite|sqlite3|md)$/i.test(p)) {
+        return res.status(404).sendFile(path.join(__dirname, '..', '404.html'), (err) => {
+            if (err) res.status(404).end();
+        });
+    }
+    next();
 });
 
 // Serve static files with caching

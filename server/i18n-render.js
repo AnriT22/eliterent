@@ -28,19 +28,19 @@ const ROOT = path.join(__dirname, '..');
 const SITE = 'https://eliteauto.rent';
 const LANGS = ['ru', 'ka'];
 
-// Marketing pages we localize. Auth/app/dashboard pages are intentionally excluded.
+// Pages served under /ru/ and /ka/. A page belongs here ONLY when its on-page
+// BODY is genuinely translated (not just its <title>/<meta>) — otherwise we'd
+// publish a localized URL with English content (a duplicate/doorway risk) and
+// declare reciprocal hreflang to a page that isn't really localized.
+//
+// Gate scope (Wave 1): the funnel pages whose bodies are fully translated via
+// data-i18n. City, category and blog pages are intentionally EXCLUDED until
+// their bodies are translated (rolling rollout, tracked as S-03). When a page
+// is translated, add it here AND add its ru/ka <xhtml:link> alternates back to
+// sitemap.xml AND its hreflang to the English page — all three must stay in sync.
 const LOCALIZABLE = {
     '': 1, 'index.html': 1, 'vehicles.html': 1, 'reviews.html': 1, 'about.html': 1,
-    'contact.html': 1, 'rent-car-tbilisi.html': 1, 'rent-car-batumi.html': 1,
-    'rent-car-kutaisi.html': 1, 'tbilisi-airport-car-rental.html': 1,
-    'no-deposit-car-rental-georgia.html': 1, 'suv-rental-georgia.html': 1,
-    'economy-car-rental-georgia.html': 1, 'sedan-rental-georgia.html': 1,
-    'luxury-car-rental-tbilisi.html': 1, 'minivan-7-seater-rental-georgia.html': 1,
-    'blog.html': 1, 'blog-car-rental-georgia-guide.html': 1,
-    'blog-tbilisi-to-kazbegi.html': 1, 'georgia-road-trip-itinerary.html': 1,
-    'tbilisi-to-batumi-drive.html': 1, 'kakheti-wine-region-by-car.html': 1,
-    'svaneti-mestia-road-trip.html': 1, 'is-it-safe-to-drive-in-georgia.html': 1,
-    'tbilisi-to-gudauri-winter-drive.html': 1
+    'contact.html': 1
 };
 
 // Localized <title> / meta description for the core money pages.
