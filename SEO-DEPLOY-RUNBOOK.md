@@ -1,5 +1,21 @@
 # Deploy & Index Runbook — Wave 1 → Live (EliteAuto.rent)
 
+> ## ✅ STATUS UPDATE (2026-06-10)
+> | Step | Status |
+> |---|---|
+> | 0–2 · Commit, deploy, verify fixes live | ✅ Done (cloaking/fake reviews removed, hreflang fixed, artifacts sealed) |
+> | 3 · Google Search Console | ✅ Done — verified, sitemap submitted ("Success", 27 pages), key URLs indexing requested. 3 indexed, ~15 "Discovered" (normal queue for a new site) |
+> | 4 · Bing Webmaster Tools | ⬜ **STILL OPEN** — bing.com/webmasters → "Import from GSC" → submit sitemap (5 min, needs your login) |
+> | 5 · Baseline | ✅ Indexing report reviewed 2026-06-08 |
+> | Post-gate: S-01 inventory SEO | ✅ Done — 10 real cars server-rendered, per-car pages w/ unique titles, dynamic auto-sitemap |
+> | Post-gate: CSS/UX fixes | ✅ Done — footer mobile, 7 category pages, city-page nav button |
+> | Local SEO: brand + NAP | ✅ Done — "EliteAuto" in homepage title; real address (13 University St, Tbilisi) in schema + footer (matches Google Business listing) |
+> | Local SEO: Google reviews badge | ✅ Done — reviews page links to the real 5.0★ Google listing; `hasMap` in schema |
+> | ⚠️ Duplicate Google listing | ⬜ **OPEN — user action**: "ELITE RENTAL GEORGIA" (1 review, Kavtaradze st 53 / 15 University St, same phone) duplicates the main listing. In Google Business Profile: report/remove the duplicate so reviews consolidate |
+> | Google Business rename | ⬜ In progress (user) — renaming "Elite Rental Georgia" → match website brand; also rename Facebook to match |
+> | S-02 on-site review texts | ⬜ Waiting — display 3–4 real Google review quotes on reviews.html (need texts from the owner; do NOT invent) |
+> | S-03 RU/KA full translation | ⬜ Deferred (approved, rolling) |
+
 > Plain-language, step-by-step. Your host: **Hetzner VPS, Node app under PM2, PostgreSQL.**
 > Pre-flight passed 2026-06-08: all 24 key URLs indexable, no fake review schema, no cloaking, hreflang consistent.
 > ⚠️ Nothing here is auto-done — these steps need your server login and your Google account. Claude can commit the code and walk you through each step, but cannot SSH to your server or sign in to Google for you.

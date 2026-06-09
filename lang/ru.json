@@ -1131,6 +1131,8 @@
     "review_title_placeholder": "Заголовок отзыва (необязательно)",
     "review_body_placeholder": "Расскажите о вашем опыте...",
     "filter_all": "Все",
+    "google_badge_sub": "Оценка наших клиентов в Google Картах",
+    "google_badge_btn": "Читать отзывы в Google →",
     "filter_5star": "★★★★★ 5 звёзд",
     "filter_4star": "★★★★ 4 звезды",
     "filter_3star": "★★★ 3 звезды",
