@@ -1131,6 +1131,8 @@
     "review_title_placeholder": "Review title (optional)",
     "review_body_placeholder": "Tell us about your experience...",
     "filter_all": "All",
+    "google_badge_sub": "Rated by our customers on Google Maps",
+    "google_badge_btn": "Read our Google reviews →",
     "filter_5star": "★★★★★ 5 Stars",
     "filter_4star": "★★★★ 4 Stars",
     "filter_3star": "★★★ 3 Stars",
