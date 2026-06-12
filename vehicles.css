@@ -402,6 +402,22 @@
     box-shadow: 0 0 0 3px rgba(201, 168, 76,0.1);
 }
 
+.vp-clear-btn {
+    padding: 8px 14px;
+    border: 1px solid #3A3F4B;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #262A35;
+    color: #A0A3B0;
+}
+.vp-clear-btn:hover {
+    background: #3A3F4B;
+    color: #EAEAEA;
+}
+
 .vp-year-filter {
     display: flex;
     align-items: center;
