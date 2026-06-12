@@ -23,7 +23,24 @@
         return;
     }
 
-    var WEBSITE_FEE_PERCENT = 0.30;
+    // Reservation-fee matrix — mirrors server/services/reservation-fee.js.
+    // The server is authoritative; this drives the live estimate shown to the guest.
+    // Price tiers USD/day: Budget <50 | Economy 50-59.99 | Mid 60-69.99 | Premium 70-79.99 | Luxury 80+
+    // Duration tiers (days): short 1-4 | medium 5-9 | long 10+
+    var FEE_MATRIX = {
+        budget:  { short: 0.15, medium: 0.12, long: 0.10 },
+        economy: { short: 0.12, medium: 0.10, long: 0.08 },
+        mid:     { short: 0.10, medium: 0.08, long: 0.07 },
+        premium: { short: 0.09, medium: 0.07, long: 0.06 },
+        luxury:  { short: 0.08, medium: 0.06, long: 0.05 }
+    };
+    function getReservationFeePercent(dailyPrice, days) {
+        var p = parseFloat(dailyPrice) || 0;
+        var tier = p < 50 ? 'budget' : p < 60 ? 'economy' : p < 70 ? 'mid' : p < 80 ? 'premium' : 'luxury';
+        var d = Math.max(1, Math.floor(days || 0));
+        var dur = d <= 4 ? 'short' : d <= 9 ? 'medium' : 'long';
+        return FEE_MATRIX[tier][dur];
+    }
     var EXTRA_ICONS = {
         baby_seat: '🍼',
         additional_driver: '👤',
@@ -610,7 +627,7 @@
             return sum + (service.perDay ? price * days : price);
         }, 0) * 100) / 100;
         var locationFee = getLocationSurcharge('pickupLoc') + getLocationSurcharge('dropoffLoc');
-        var websiteFee = Math.round(dailyPrice * WEBSITE_FEE_PERCENT * 100) / 100;
+        var websiteFee = Math.round(rentalTotal * getReservationFeePercent(dailyPrice, days) * 100) / 100;
         var deposit = parseFloat(vehicleData.deposit_amount) || 0;
         var grandTotal = Math.round((rentalTotal + extrasTotal + locationFee + deposit) * 100) / 100;
         var payNow = websiteFee;

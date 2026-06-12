@@ -2,8 +2,7 @@
 const { authenticateToken, requireRole } = require("../middleware/auth");
 const { queryAll, queryOne, execute, getClient } = require("../db-helpers");
 const { escapeHtml } = require("../mailer");
-
-const WEBSITE_FEE_PERCENT = 0.3;
+const { getReservationFeePercent } = require("../services/reservation-fee");
 
 const router = express.Router();
 
@@ -345,7 +344,10 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
           return sum + (extra.perDay ? price * days : price);
         }, 0) * 100,
       ) / 100;
-    var serviceFee = Math.round(dailyPrice * WEBSITE_FEE_PERCENT * 100) / 100;
+    // Two-dimensional matrix fee: percentage depends on the effective daily
+    // price tier and the rental-duration tier (see services/reservation-fee.js).
+    var feePercent = getReservationFeePercent(dailyPrice, days);
+    var serviceFee = Math.round(rentalTotal * feePercent * 100) / 100;
     var total_price =
       Math.round((rentalTotal + extrasTotal + location_fee) * 100) / 100;
 
