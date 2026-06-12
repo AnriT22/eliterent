@@ -174,7 +174,7 @@
                     <p class="vf-location-label" data-i18n="vehicles_page.pickup_location">Pick-up location</p>
                     <div class="vf-location-input-wrap">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                        <input type="text" class="vf-location-input" id="pickupLocation" value="Tbilisi">
+                        <input type="text" class="vf-location-input" id="pickupLocation" placeholder="All locations">
                     </div>
                     <p class="vf-pickup-dropoff-label" data-i18n="vehicles_page.pickup_dropoff">Pick-up &amp; Drop-off</p>
                     <div class="vf-date-display clickable" id="vfDateDisplay" onclick="openVehiclesCalendar()">
@@ -359,6 +359,7 @@
                 <span class="vp-count-badge" id="vpCountBadge">Loading...</span>
                 <div class="vp-topbar-right">
                     <input type="text" class="vp-search-input" id="vpSearch" placeholder="Search cars..." data-i18n-placeholder="vehicles_page.search_placeholder">
+                    <button type="button" class="vp-clear-btn" id="vpClearBtn" onclick="window.clearAllVehicleFilters()" style="display:none;">Clear</button>
                     <div class="vp-year-filter">
                         <button class="vp-year-btn active" data-year="all" data-i18n="filters.all">All</button>
                         <button class="vp-year-btn" data-year="2024">2024+</button>
@@ -826,12 +827,13 @@
                 document.querySelectorAll('.vp-year-btn').forEach(function (b) { b.classList.remove('active'); });
                 this.classList.add('active');
                 applyFilters();
+                updateClearButtonVisibility();
             });
         });
 
         /* Sort & search */
-        document.getElementById('vpSort').addEventListener('change', applyFilters);
-        document.getElementById('vpSearch').addEventListener('input', applyFilters);
+        document.getElementById('vpSort').addEventListener('change', function() { applyFilters(); updateClearButtonVisibility(); });
+        document.getElementById('vpSearch').addEventListener('input', function() { applyFilters(); updateClearButtonVisibility(); });
 
         /* Search button — reload vehicles with location + date filters */
         var searchBtn = document.getElementById('vfSearchBtn');
@@ -861,34 +863,58 @@
         var resetBtn = document.getElementById('vpResetFilters');
         if (resetBtn) {
             resetBtn.addEventListener('click', function () {
-                document.querySelectorAll('.vf-panel input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
-                document.getElementById('vpSearch').value = '';
-                document.querySelectorAll('.vp-year-btn').forEach(function (b) { b.classList.remove('active'); });
-                var allBtn = document.querySelector('.vp-year-btn[data-year="all"]');
-                if (allBtn) allBtn.classList.add('active');
-                var rMin = document.getElementById('priceRangeMin');
-                var rMax = document.getElementById('priceRangeMax');
-                var iMin = document.getElementById('priceInputMin');
-                var iMax = document.getElementById('priceInputMax');
-                if (rMin) rMin.value = 0;
-                if (rMax) rMax.value = 500;
-                if (iMin) iMin.value = 0;
-                if (iMax) iMax.value = 500;
-                var fill = document.querySelector('.vf-range-fill');
-                if (fill) { fill.style.left = '0%'; fill.style.width = '100%'; }
-                document.getElementById('vpSort').value = 'default';
-                // Reset calendar dates
-                vcSelStart = null; vcSelEnd = null;
-                vcTempStart = null; vcTempEnd = null;
-                var dtText = document.getElementById('vfDateText');
-                if (dtText) dtText.textContent = 'Select dates';
-                applyFilters();
+                window.clearAllVehicleFilters();
             });
+        }
+
+        window.clearAllVehicleFilters = function () {
+            document.querySelectorAll('.vf-panel input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
+            document.getElementById('vpSearch').value = '';
+            var locInput = document.getElementById('pickupLocation');
+            if (locInput) locInput.value = '';
+            document.querySelectorAll('.vp-year-btn').forEach(function (b) { b.classList.remove('active'); });
+            var allBtn = document.querySelector('.vp-year-btn[data-year="all"]');
+            if (allBtn) allBtn.classList.add('active');
+            var rMin = document.getElementById('priceRangeMin');
+            var rMax = document.getElementById('priceRangeMax');
+            var iMin = document.getElementById('priceInputMin');
+            var iMax = document.getElementById('priceInputMax');
+            if (rMin) rMin.value = 0;
+            if (rMax) rMax.value = 500;
+            if (iMin) iMin.value = 0;
+            if (iMax) iMax.value = 500;
+            var fill = document.querySelector('.vf-range-fill');
+            if (fill) { fill.style.left = '0%'; fill.style.width = '100%'; }
+            document.getElementById('vpSort').value = 'default';
+            // Reset calendar dates
+            vcSelStart = null; vcSelEnd = null;
+            vcTempStart = null; vcTempEnd = null;
+            var dtText = document.getElementById('vfDateText');
+            if (dtText) dtText.textContent = 'Select dates';
+            // Reload from API with no filters
+            vcLoadVehicles();
+            // Hide clear button
+            var clearBtn = document.getElementById('vpClearBtn');
+            if (clearBtn) clearBtn.style.display = 'none';
+        };
+
+        function updateClearButtonVisibility() {
+            var hasFilters = false;
+            if (document.getElementById('vpSearch').value.trim()) hasFilters = true;
+            if (document.getElementById('pickupLocation').value.trim()) hasFilters = true;
+            document.querySelectorAll('.vf-panel input[type="checkbox"]').forEach(function (cb) { if (cb.checked) hasFilters = true; });
+            var activeYear = document.querySelector('.vp-year-btn.active');
+            if (activeYear && activeYear.dataset.year !== 'all') hasFilters = true;
+            var rMin = document.getElementById('priceRangeMin');
+            var rMax = document.getElementById('priceRangeMax');
+            if (rMin && rMax && (parseInt(rMin.value) > 0 || parseInt(rMax.value) < 500)) hasFilters = true;
+            var clearBtn = document.getElementById('vpClearBtn');
+            if (clearBtn) clearBtn.style.display = hasFilters ? 'inline-block' : 'none';
         }
 
         /* Sidebar checkboxes */
         document.querySelectorAll('.vf-panel input[type="checkbox"]').forEach(function (cb) {
-            cb.addEventListener('change', applyFilters);
+            cb.addEventListener('change', function() { applyFilters(); updateClearButtonVisibility(); });
         });
 
         /* Price range slider */
@@ -915,6 +941,7 @@
                     fill.style.width = ((hi - lo) / 500 * 100) + '%';
                 }
                 if (typeof window.applyFilters === 'function') window.applyFilters();
+                updateClearButtonVisibility();
             }
 
             rMin.addEventListener('input', updateSlider);
@@ -945,6 +972,7 @@
                 if (locInput) locInput.value = loc;
             }
             vcLoadVehicles();
+            if (typeof updateClearButtonVisibility === 'function') updateClearButtonVisibility();
         }
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', prefillAndLoad);
