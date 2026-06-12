@@ -252,6 +252,7 @@
         document.getElementById('pChoiceStep').style.display = 'none';
         enterPaymentStep();
     }
+    window.choosePayPath = choosePayPath;
 
     async function chooseInvitePath() {
         var code = document.getElementById('pChoiceInviteCode').value.trim().toUpperCase();
@@ -295,6 +296,8 @@
             errorEl.style.display = 'block';
         }
     }
+    window.chooseInvitePath = chooseInvitePath;
+    window.enterChoiceStep = enterChoiceStep;
 
     /* ---- INVITE PATH: pending approval message ---- */
     function showPendingApproval() {
