@@ -92,6 +92,11 @@
                         <span class="progress-number">2</span>
                         <span class="progress-label" data-i18n="partner_register.step_company">Company</span>
                     </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="3">
+                        <span class="progress-number">3</span>
+                        <span class="progress-label">Verify</span>
+                    </div>
                 </div>
 
                 <form class="auth-form registration-form" id="partnerRegisterForm">
@@ -213,29 +218,6 @@
                             </div>
                         </div>
 
-                        <!-- Invite Code -->
-                        <div class="form-group" style="margin-bottom:8px;">
-                            <button type="button" id="pInviteToggle" class="invite-toggle-btn">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                                Have a partner invite code? <span class="invite-highlight">Enter it here to register free →</span>
-                            </button>
-                            <div id="pInviteCodeGroup" style="display:none; margin-top:10px;">
-                                <div class="form-input-wrapper">
-                                    <span class="form-icon">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
-                                    </span>
-                                    <input type="text" id="pInviteCode" name="invite_code" class="form-input" placeholder="ELITE2024" autocomplete="off" maxlength="30" style="text-transform:uppercase;letter-spacing:2px;">
-                                </div>
-                                <p class="invite-code-hint">Invite code registers you free — your account will need admin approval before you can list vehicles.</p>
-                            </div>
-                        </div>
-
-                        <!-- Pricing note (visible when no invite code) -->
-                        <div id="pPricingNote" class="pricing-note-box" style="margin-bottom:12px;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:#D4AF37;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                            <span>Without an invite code, a <strong>$5 one-time verification fee</strong> applies — paid via PayPal. You'll be instantly verified.</span>
-                        </div>
-
                         <!-- Terms -->
                         <div class="form-checkbox">
                             <input type="checkbox" id="pTerms" name="terms" class="checkbox-input" required>
@@ -259,6 +241,56 @@
                         <button type="button" class="btn btn-primary btn-full" id="pNextStep"><span data-i18n="partner_register.next">Next →</span></button>
                     </div>
                 </form>
+
+                <!-- CHOICE STEP: Pay $5 OR Enter Invite Code -->
+                <div id="pChoiceStep" style="display:none; padding:8px 0;">
+                    <div class="choice-step-badge">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        Choose Verification
+                    </div>
+                    <div class="choice-step-title">How would you like to verify?</div>
+
+                    <!-- Email status check -->
+                    <div class="choice-email-status" id="choiceEmailStatus">
+                        <span class="ces-label">Account email</span>
+                        <span class="ces-value" id="choiceEmailValue">—</span>
+                        <span class="ces-badge" id="choiceEmailBadge">Checking…</span>
+                    </div>
+
+                    <div class="choice-cards">
+                        <!-- Pay $5 Card -->
+                        <div class="choice-card choice-card-primary" id="choicePayCard">
+                            <div class="choice-card-header">
+                                <div class="choice-card-icon">⚡</div>
+                                <h3>Instant Verification</h3>
+                            </div>
+                            <div class="choice-card-price">$5</div>
+                            <p class="choice-card-desc">One-time fee. Get verified immediately and start listing vehicles right away. No admin wait.</p>
+                            <ul class="choice-card-list">
+                                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Instant verified badge</li>
+                                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Add vehicles immediately</li>
+                                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Receive bookings today</li>
+                            </ul>
+                            <button type="button" class="btn btn-primary btn-full" onclick="choosePayPath()">Pay &amp; Verify Now</button>
+                        </div>
+
+                        <!-- Invite Code Card -->
+                        <div class="choice-card choice-card-secondary" id="choiceInviteCard">
+                            <div class="choice-card-header">
+                                <div class="choice-card-icon">🎁</div>
+                                <h3>Free with Invite Code</h3>
+                            </div>
+                            <div class="choice-card-price">$0</div>
+                            <p class="choice-card-desc">Have an invite code from our team? Enter it below for free registration. Admin approval required before listing.</p>
+                            <div class="choice-code-wrap">
+                                <input type="text" id="pChoiceInviteCode" class="form-input" placeholder="ELITE2024" autocomplete="off" maxlength="30" style="text-transform:uppercase;letter-spacing:2px;text-align:center;">
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-full" id="choiceApplyBtn" onclick="chooseInvitePath()">Apply Code</button>
+                            <div id="choiceInviteError" class="form-error" style="text-align:center;margin-top:8px;display:none;"></div>
+                            <p class="choice-card-note">No code? Contact us at <a href="mailto:support@eliteauto.rent">support@eliteauto.rent</a></p>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- PAYMENT STEP (shown after registration for paid partners) -->
                 <div id="pPaymentStep" style="display:none; padding:8px 0;">

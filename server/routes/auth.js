@@ -710,12 +710,66 @@ router.post("/register/partner", async (req, res) => {
       signup_method: signupMethod,
       // Paid partners must pay the $5 fee to get auto-verified; invite partners wait for admin approval.
       requiresPayment: signupMethod === "paid",
+      needsPathSelection: signupMethod === "paid",
       signup_fee: signupMethod === "paid" ? PARTNER_SIGNUP_FEE : 0,
       pending_approval: signupMethod === "invite",
     });
   } catch (err) {
     console.error("Partner registration error:", err);
     res.status(500).json({ error: "Registration failed" });
+  }
+});
+
+// POST /api/register/partner/apply-invite — apply an invite code after account creation
+router.post("/register/partner/apply-invite", authenticateToken, async (req, res) => {
+  try {
+    var code = (req.body.invite_code || "").trim().toUpperCase();
+    if (!code) {
+      return res.status(400).json({ error: "Invite code is required" });
+    }
+    if (code.length > 30 || !/^[A-Z0-9_-]+$/.test(code)) {
+      return res.status(400).json({ error: "Invalid invite code format" });
+    }
+
+    var inviteRow = await queryOne(
+      "SELECT * FROM partner_invite_codes WHERE UPPER(code) = $1",
+      [code],
+    );
+    if (!inviteRow || !inviteRow.is_active) {
+      return res.status(400).json({ error: "Invalid or inactive invite code" });
+    }
+    if (
+      inviteRow.max_uses &&
+      inviteRow.max_uses > 0 &&
+      inviteRow.used_count >= inviteRow.max_uses
+    ) {
+      return res.status(400).json({ error: "This invite code has reached its usage limit" });
+    }
+
+    var profile = await queryOne(
+      "SELECT * FROM partner_profiles WHERE user_id = $1",
+      [req.user.id],
+    );
+    if (!profile) {
+      return res.status(404).json({ error: "Partner profile not found" });
+    }
+    if (profile.signup_method === "invite" && profile.invite_code_used) {
+      return res.status(409).json({ error: "You have already applied an invite code" });
+    }
+
+    await execute(
+      "UPDATE partner_profiles SET signup_method = $1, invite_code_used = $2 WHERE user_id = $3",
+      ["invite", code, req.user.id],
+    );
+    await execute(
+      "UPDATE partner_invite_codes SET used_count = used_count + 1 WHERE id = $1",
+      [inviteRow.id],
+    );
+
+    res.json({ message: "Invite code applied successfully", pending_approval: true });
+  } catch (err) {
+    console.error("Apply invite code error:", err);
+    res.status(500).json({ error: "Failed to apply invite code" });
   }
 });
 
