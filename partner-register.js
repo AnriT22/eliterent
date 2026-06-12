@@ -11,6 +11,16 @@
     var nextBtn = document.getElementById('pNextStep');
     var prevBtn = document.getElementById('pPrevStep');
 
+    // ---- GOOGLE OAUTH: skip straight to choice step ----
+    var urlParams = new URLSearchParams(window.location.search);
+    var isGoogleChoice = urlParams.get('step') === 'choice';
+    if (isGoogleChoice) {
+        // User already registered via Google OAuth — just show the choice step
+        var storedUser = null;
+        try { storedUser = JSON.parse(localStorage.getItem('user')); } catch (e) {}
+        enterChoiceStep({ user: storedUser || {} });
+    }
+
     nextBtn.addEventListener('click', function () {
         if (!validatePartnerStep(currentStep)) return;
         if (currentStep < totalSteps) {

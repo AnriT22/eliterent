@@ -925,17 +925,30 @@ router.post("/auth/google", async (req, res) => {
     }
 
     // New user — create account (no password, no OTP needed for Google)
+    // Partners start unverified (is_verified=0) so they go through the choice step
     const userRole = role === "partner" ? "partner" : "guest";
+    const isPartner = userRole === "partner";
 
     await execute(
-      "INSERT INTO users (email, full_name, role, google_id, avatar_url, is_approved, is_verified, phone_verified, email_verified) VALUES ($1, $2, $3, $4, $5, 1, 1, 0, 1)",
-      [googleEmail, googleName, userRole, googleSub, googlePicture],
+      "INSERT INTO users (email, full_name, role, google_id, avatar_url, is_approved, is_verified, phone_verified, email_verified) VALUES ($1, $2, $3, $4, $5, 1, $6, 0, 1)",
+      [googleEmail, googleName, userRole, googleSub, googlePicture, isPartner ? 0 : 1],
     );
 
     const newUser = await queryOne(
       "SELECT id, email, full_name, role, is_approved, is_verified, avatar_url FROM users WHERE email = $1",
       [googleEmail],
     );
+
+    // If partner, create partner_profiles entry
+    if (isPartner) {
+      const existingProfile = await queryOne("SELECT id FROM partner_profiles WHERE user_id = $1", [newUser.id]);
+      if (!existingProfile) {
+        await execute(
+          "INSERT INTO partner_profiles (user_id, company_name, signup_method, signup_paid, is_verified) VALUES ($1, $2, $3, 0, 0)",
+          [newUser.id, googleName, "paid"]
+        );
+      }
+    }
 
     const token = generateToken(newUser);
 
@@ -948,12 +961,16 @@ router.post("/auth/google", async (req, res) => {
       avatar_url: newUser.avatar_url,
     };
 
-    res.status(201).json({
+    var response = {
       message: "Account created with Google!",
       token,
       user: responseUser,
       isNewUser: true,
-    });
+    };
+    if (isPartner) {
+      response.needsPathSelection = true;
+    }
+    res.status(201).json(response);
   } catch (err) {
     console.error("Google auth error:", err);
     res.status(500).json({ error: "Google authentication failed" });
@@ -1106,11 +1123,13 @@ router.get("/auth/google/callback", async (req, res) => {
     }
 
     // New user — create account
-    // Google-verified email, so email_verified = 1, is_verified = 1, is_approved = 1
+    // Google-verified email, so email_verified = 1, is_approved = 1
+    // Partners start unverified (is_verified=0) so they go through the choice step (pay $5 or invite code)
     const userRole = role === "partner" ? "partner" : "guest";
+    const isPartner = userRole === "partner";
     await execute(
-      "INSERT INTO users (email, full_name, role, google_id, avatar_url, is_approved, is_verified, phone_verified, email_verified) VALUES ($1, $2, $3, $4, $5, 1, 1, 0, 1)",
-      [googleEmail, googleName, userRole, googleSub, googlePicture]
+      "INSERT INTO users (email, full_name, role, google_id, avatar_url, is_approved, is_verified, phone_verified, email_verified) VALUES ($1, $2, $3, $4, $5, 1, $6, 0, 1)",
+      [googleEmail, googleName, userRole, googleSub, googlePicture, isPartner ? 0 : 1]
     );
 
     const newUser = await queryOne(
@@ -1119,12 +1138,12 @@ router.get("/auth/google/callback", async (req, res) => {
     );
 
     // If partner, also create partner_profiles entry
-    if (userRole === "partner") {
+    if (isPartner) {
       const existingProfile = await queryOne("SELECT id FROM partner_profiles WHERE user_id = $1", [newUser.id]);
       if (!existingProfile) {
         await execute(
-          "INSERT INTO partner_profiles (user_id, company_name, is_verified) VALUES ($1, $2, 0)",
-          [newUser.id, googleName]
+          "INSERT INTO partner_profiles (user_id, company_name, signup_method, signup_paid, is_verified) VALUES ($1, $2, $3, 0, 0)",
+          [newUser.id, googleName, "paid"]
         );
       }
     }
@@ -1137,7 +1156,11 @@ router.get("/auth/google/callback", async (req, res) => {
     }));
 
     console.log("[Google Callback] Created new user:", googleEmail, "role:", userRole);
-    return res.redirect("/google-auth-success.html?token=" + token + "&user=" + userData + "&new=1");
+    var redirectUrl = "/google-auth-success.html?token=" + token + "&user=" + userData + "&new=1";
+    if (isPartner) {
+      redirectUrl += "&needsPathSelection=1";
+    }
+    return res.redirect(redirectUrl);
 
   } catch (err) {
     console.error("[Google Callback] Error:", err);
