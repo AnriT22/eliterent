@@ -36,7 +36,7 @@ function escHtml(s) {
 
             if (tabName === 'dashboard') loadAnalytics();
             if (tabName === 'users') loadUsers();
-            if (tabName === 'partners') loadPartners();
+            if (tabName === 'partners') { loadPartners(); loadInviteCodes(); }
             if (tabName === 'vehicles') loadVehicles();
             if (tabName === 'bookings') loadBookings();
             if (tabName === 'financial') loadFinancial();
@@ -387,6 +387,12 @@ function escHtml(s) {
                 var verifyBtn = p.is_verified
                     ? '<button class="admin-action-btn" onclick="adminUnverifyPartner(' + p.id + ')">Unverify</button>'
                     : '<button class="admin-action-btn success" onclick="adminVerifyPartner(' + p.id + ')">Verify</button>';
+                var signupMethod = p.signup_method || 'paid';
+                var typeBadge = signupMethod === 'invite'
+                    ? '<span class="admin-status" style="background:rgba(212,175,55,0.15);color:#D4AF37;font-size:10px;" title="Registered with invite code">Invite</span>'
+                    : (p.signup_paid
+                        ? '<span class="admin-status" style="background:rgba(34,197,94,0.12);color:#22c55e;font-size:10px;" title="Paid $5 verification fee">Paid $5</span>'
+                        : '<span class="admin-status" style="background:rgba(148,163,184,0.12);color:#94a3b8;font-size:10px;">Paid</span>');
                 return '<tr>'
                     + '<td>' + p.id + '</td>'
                     + '<td><strong><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:#C9A84C;text-decoration:none;">' + escHtml(p.full_name || '-') + '</a></strong></td>'
@@ -394,6 +400,7 @@ function escHtml(s) {
                     + '<td class="hide-mobile">' + escHtml(p.email || '-') + '</td>'
                     + '<td class="hide-mobile">' + escHtml(p.phone || '-') + pPhoneBadge + '</td>'
                     + '<td><span class="admin-status ' + verified + '">' + verified + '</span></td>'
+                    + '<td class="hide-mobile">' + typeBadge + '</td>'
                     + '<td class="hide-mobile">' + date + '</td>'
                     + '<td>'
                     + verifyBtn
@@ -417,6 +424,90 @@ function escHtml(s) {
             r.style.display = r.textContent.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
         });
     });
+
+    // ========================================
+    // PARTNER INVITE CODES
+    // ========================================
+    function loadInviteCodes() {
+        var tbody = document.getElementById('inviteCodesTableBody');
+        if (!tbody) return;
+        apiGet('/api/admin/partner-invite-codes').then(function (data) {
+            var codes = data.codes || [];
+            if (codes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#A0A3B0;padding:20px;">No invite codes yet. Create one above.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = codes.map(function (c) {
+                var date = c.created_at ? new Date(c.created_at).toLocaleDateString() : '-';
+                var usesText = (c.max_uses && c.max_uses > 0) ? (c.used_count + ' / ' + c.max_uses) : (c.used_count + ' / ∞');
+                var statusBadge = c.is_active
+                    ? '<span class="admin-status verified" style="font-size:11px;">Active</span>'
+                    : '<span class="admin-status unverified" style="font-size:11px;">Inactive</span>';
+                var toggleLabel = c.is_active ? 'Disable' : 'Enable';
+                return '<tr>'
+                    + '<td><strong style="font-family:monospace;letter-spacing:1px;color:#D4AF37;">' + escHtml(c.code) + '</strong></td>'
+                    + '<td class="hide-mobile">' + escHtml(c.note || '—') + '</td>'
+                    + '<td>' + usesText + '</td>'
+                    + '<td>' + statusBadge + '</td>'
+                    + '<td class="hide-mobile">' + date + '</td>'
+                    + '<td>'
+                    + '<button class="admin-action-btn" onclick="toggleInviteCode(' + c.id + ',' + (c.is_active ? 0 : 1) + ')">' + toggleLabel + '</button>'
+                    + '<button class="admin-action-btn danger" onclick="deleteInviteCode(' + c.id + ',\'' + escHtml(c.code) + '\')">Delete</button>'
+                    + '</td></tr>';
+            }).join('');
+        }).catch(function () {
+            if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:20px;">Failed to load invite codes</td></tr>';
+        });
+    }
+
+    window.showInviteCodeForm = function () {
+        var el = document.getElementById('inviteCodeCreateForm');
+        if (el) { el.style.display = 'block'; document.getElementById('newInviteCode').focus(); }
+    };
+
+    window.hideInviteCodeForm = function () {
+        var el = document.getElementById('inviteCodeCreateForm');
+        if (el) el.style.display = 'none';
+        var errEl = document.getElementById('inviteCodeFormError');
+        if (errEl) errEl.style.display = 'none';
+    };
+
+    window.createInviteCode = function () {
+        var code = (document.getElementById('newInviteCode').value || '').trim().toUpperCase();
+        var note = (document.getElementById('newInviteNote').value || '').trim();
+        var maxUses = parseInt(document.getElementById('newInviteMaxUses').value) || 0;
+        var errEl = document.getElementById('inviteCodeFormError');
+        if (!code || !/^[A-Z0-9_-]+$/.test(code)) {
+            errEl.textContent = 'Code must be A-Z, 0-9, hyphens or underscores.';
+            errEl.style.display = 'block';
+            return;
+        }
+        errEl.style.display = 'none';
+        fetch('/api/admin/partner-invite-codes', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: code, note: note || null, max_uses: maxUses })
+        }).then(function (r) { return r.json(); }).then(function (data) {
+            if (data.error) { errEl.textContent = data.error; errEl.style.display = 'block'; return; }
+            document.getElementById('newInviteCode').value = '';
+            document.getElementById('newInviteNote').value = '';
+            document.getElementById('newInviteMaxUses').value = '1';
+            window.hideInviteCodeForm();
+            loadInviteCodes();
+        }).catch(function (err) {
+            errEl.textContent = err.message || 'Failed to create code';
+            errEl.style.display = 'block';
+        });
+    };
+
+    window.toggleInviteCode = function (id, newActive) {
+        apiPut('/api/admin/partner-invite-codes/' + id, { is_active: newActive }).then(loadInviteCodes);
+    };
+
+    window.deleteInviteCode = function (id, code) {
+        if (!confirm('Delete invite code "' + code + '"? This cannot be undone.')) return;
+        apiDelete('/api/admin/partner-invite-codes/' + id).then(loadInviteCodes);
+    };
 
     // ========================================
     // VEHICLES

@@ -152,10 +152,52 @@
                 <div class="admin-table-wrap">
                     <table class="admin-table" id="partnersTable">
                         <thead>
-                            <tr><th>ID</th><th>Name</th><th class="hide-mobile">Company</th><th class="hide-mobile">Email</th><th class="hide-mobile">Phone</th><th>Verified</th><th class="hide-mobile">Joined</th><th>Actions</th></tr>
+                            <tr><th>ID</th><th>Name</th><th class="hide-mobile">Company</th><th class="hide-mobile">Email</th><th class="hide-mobile">Phone</th><th>Verified</th><th class="hide-mobile">Type</th><th class="hide-mobile">Joined</th><th>Actions</th></tr>
                         </thead>
                         <tbody id="partnersTableBody"></tbody>
                     </table>
+                </div>
+
+                <!-- PARTNER INVITE CODES -->
+                <div style="margin-top:36px;">
+                    <div class="admin-toolbar" style="margin-bottom:12px;">
+                        <h3 style="margin:0;color:#EAEAEA;font-size:15px;font-weight:700;">Partner Invite Codes</h3>
+                        <button class="admin-action-btn success" onclick="showInviteCodeForm()" style="margin-left:auto;">+ Create Code</button>
+                    </div>
+                    <p style="font-size:13px;color:#A0A3B0;margin:0 0 14px;">Give these codes to trusted partners so they can register free (no $5 fee). Their accounts still need your approval before listing vehicles.</p>
+
+                    <div id="inviteCodeCreateForm" style="display:none;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:20px;margin-bottom:16px;">
+                        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
+                            <div style="flex:1;min-width:130px;">
+                                <label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Code (A-Z 0-9 - _)</label>
+                                <input type="text" id="newInviteCode" maxlength="30" placeholder="ELITE2024" style="width:100%;padding:9px 12px;background:#1C1E26;border:1px solid #3A3F4B;border-radius:8px;color:#EAEAEA;font-size:13px;text-transform:uppercase;letter-spacing:1px;box-sizing:border-box;" oninput="this.value=this.value.toUpperCase()">
+                            </div>
+                            <div style="flex:2;min-width:160px;">
+                                <label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Note (optional)</label>
+                                <input type="text" id="newInviteNote" maxlength="200" placeholder="For John's fleet" style="width:100%;padding:9px 12px;background:#1C1E26;border:1px solid #3A3F4B;border-radius:8px;color:#EAEAEA;font-size:13px;box-sizing:border-box;">
+                            </div>
+                            <div style="min-width:100px;">
+                                <label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Max uses (0=∞)</label>
+                                <input type="number" id="newInviteMaxUses" min="0" value="1" style="width:100%;padding:9px 12px;background:#1C1E26;border:1px solid #3A3F4B;border-radius:8px;color:#EAEAEA;font-size:13px;box-sizing:border-box;">
+                            </div>
+                            <div style="display:flex;gap:8px;flex-shrink:0;">
+                                <button class="admin-action-btn success" onclick="createInviteCode()">Create</button>
+                                <button class="admin-action-btn" onclick="hideInviteCodeForm()">Cancel</button>
+                            </div>
+                        </div>
+                        <div id="inviteCodeFormError" style="display:none;color:#ef4444;font-size:12px;margin-top:8px;"></div>
+                    </div>
+
+                    <div class="admin-table-wrap">
+                        <table class="admin-table" id="inviteCodesTable">
+                            <thead>
+                                <tr><th>Code</th><th class="hide-mobile">Note</th><th>Uses</th><th>Status</th><th class="hide-mobile">Created</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody id="inviteCodesTableBody">
+                                <tr><td colspan="6" style="text-align:center;color:#A0A3B0;padding:20px;">Loading…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
 

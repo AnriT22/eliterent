@@ -88,3 +88,213 @@
         font-size: 12px;
     }
 }
+
+/* ========================================
+   INVITE CODE TOGGLE
+   ======================================== */
+.invite-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: 1px dashed rgba(212,175,55,0.35);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: #A0A3B0;
+    font-size: 13px;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    transition: border-color 0.2s, color 0.2s;
+}
+.invite-toggle-btn:hover {
+    border-color: rgba(212,175,55,0.7);
+    color: #D4AF37;
+}
+.invite-toggle-btn span.invite-highlight {
+    color: #D4AF37;
+    font-weight: 700;
+}
+.invite-code-hint {
+    font-size: 12px;
+    color: #A0A3B0;
+    margin: 6px 0 0;
+    line-height: 1.5;
+}
+
+/* ========================================
+   PRICING NOTE
+   ======================================== */
+.pricing-note-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(212,175,55,0.07);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #C0C0C0;
+    margin-bottom: 4px;
+}
+.pricing-note-box strong {
+    color: #D4AF37;
+}
+
+/* ========================================
+   PAYMENT STEP
+   ======================================== */
+#pPaymentStep {
+    text-align: center;
+}
+.payment-step-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(212,175,55,0.1);
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 100px;
+    padding: 5px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #D4AF37;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 16px;
+}
+.payment-step-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #EAEAEA;
+    margin: 0 0 8px;
+}
+.payment-step-sub {
+    font-size: 14px;
+    color: #A0A3B0;
+    margin: 0 0 20px;
+    line-height: 1.5;
+}
+.payment-price-tag {
+    font-size: 52px;
+    font-weight: 900;
+    color: #D4AF37;
+    line-height: 1;
+    display: block;
+    margin-bottom: 2px;
+}
+.payment-price-note {
+    font-size: 12px;
+    color: #A0A3B0;
+    margin-bottom: 20px;
+    display: block;
+}
+.payment-benefits {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.payment-benefit-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #C0C0C0;
+}
+.payment-benefit-item svg {
+    flex-shrink: 0;
+    color: #22c55e;
+}
+#paypalButtonContainer {
+    margin-bottom: 10px;
+    min-height: 48px;
+}
+.payment-loading {
+    padding: 20px;
+    color: #A0A3B0;
+    font-size: 13px;
+}
+.payment-cancel-link {
+    background: none;
+    border: none;
+    color: #A0A3B0;
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 0;
+    margin-top: 4px;
+}
+.payment-cancel-link:hover { color: #EAEAEA; }
+.payment-error-box {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #ef4444;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+.payment-success-box {
+    background: rgba(34,197,94,0.1);
+    border: 1px solid rgba(34,197,94,0.3);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 12px;
+}
+.payment-success-box .ps-icon {
+    font-size: 40px;
+    display: block;
+    margin-bottom: 10px;
+}
+.payment-success-box h3 {
+    color: #22c55e;
+    margin: 0 0 6px;
+    font-size: 18px;
+}
+.payment-success-box p {
+    color: #A0A3B0;
+    font-size: 13px;
+    margin: 0;
+}
+
+/* ========================================
+   PENDING APPROVAL BOX
+   ======================================== */
+.pending-approval-box {
+    background: rgba(212,175,55,0.08);
+    border: 1px solid rgba(212,175,55,0.25);
+    border-radius: 14px;
+    padding: 24px 20px;
+    text-align: center;
+    margin-bottom: 16px;
+}
+.pending-approval-box .pab-icon {
+    font-size: 36px;
+    display: block;
+    margin-bottom: 10px;
+}
+.pending-approval-box h3 {
+    color: #D4AF37;
+    margin: 0 0 8px;
+    font-size: 17px;
+}
+.pending-approval-box p {
+    color: #A0A3B0;
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* ========================================
+   ADMIN INVITE CODES TABLE (inline styles overridden here for responsiveness)
+   ======================================== */
+@media (max-width: 600px) {
+    .payment-price-tag { font-size: 40px; }
+    .payment-step-title { font-size: 18px; }
+}

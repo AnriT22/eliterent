@@ -11,6 +11,9 @@ const crypto = require("crypto");
 
 const router = express.Router();
 
+// One-time partner signup verification fee (USD) for partners without an invite code
+const PARTNER_SIGNUP_FEE = 5;
+
 // CSRF state for Google OAuth — sign with HMAC to prevent forged state params
 function signOAuthState(role) {
   const JWT_SECRET = require("../middleware/auth").JWT_SECRET;
@@ -521,6 +524,7 @@ router.post("/register/partner", async (req, res) => {
       description,
       location,
       telegram,
+      invite_code,
     } = req.body;
 
     if (!email || !password || !full_name) {
@@ -585,6 +589,28 @@ router.post("/register/partner", async (req, res) => {
         .json({ error: "Phone number is required for account verification" });
     }
 
+    // Determine signup path: invite code (free, needs admin approval) vs paid ($5, auto-verified after payment)
+    var signupMethod = "paid";
+    var inviteCodeRow = null;
+    var normalizedInvite = (invite_code || "").trim().toUpperCase();
+    if (normalizedInvite) {
+      inviteCodeRow = await queryOne(
+        "SELECT * FROM partner_invite_codes WHERE UPPER(code) = $1",
+        [normalizedInvite],
+      );
+      if (!inviteCodeRow || !inviteCodeRow.is_active) {
+        return res.status(400).json({ error: "Invalid or inactive invite code" });
+      }
+      if (
+        inviteCodeRow.max_uses &&
+        inviteCodeRow.max_uses > 0 &&
+        inviteCodeRow.used_count >= inviteCodeRow.max_uses
+      ) {
+        return res.status(400).json({ error: "This invite code has reached its usage limit" });
+      }
+      signupMethod = "invite";
+    }
+
     // Auto-approve login (is_approved=1), but partner actions need is_verified via admin Partners section
     await execute(
       "INSERT INTO users (email, password_hash, full_name, phone, role, is_approved, is_verified) VALUES ($1, $2, $3, $4, $5, 1, 0)",
@@ -597,12 +623,12 @@ router.post("/register/partner", async (req, res) => {
     );
     const userId = newUser.id;
 
-    // Insert partner profile (is_verified=0, needs admin approval in Partners section)
+    // Insert partner profile. Invite signups need admin approval; paid signups get verified after $5 payment.
     await execute(
       `
             INSERT INTO partner_profiles
-            (user_id, company_name, description, location, whatsapp, telegram)
-            VALUES ($1, $2, $3, $4, $5, $6)`,
+            (user_id, company_name, description, location, whatsapp, telegram, signup_method, signup_paid, invite_code_used)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, 0, $8)`,
       [
         userId,
         company_name,
@@ -610,8 +636,20 @@ router.post("/register/partner", async (req, res) => {
         location || null,
         phone || null,
         telegram || null,
+        signupMethod,
+        signupMethod === "invite" ? normalizedInvite : null,
       ],
     );
+
+    // Count invite code usage
+    if (signupMethod === "invite" && inviteCodeRow) {
+      try {
+        await execute(
+          "UPDATE partner_invite_codes SET used_count = used_count + 1 WHERE id = $1",
+          [inviteCodeRow.id],
+        );
+      } catch (e) { /* non-fatal */ }
+    }
 
     // Don't auto-send SMS — save Twilio costs. User will click "Send Code" on verify-phone page.
 
@@ -669,7 +707,11 @@ router.post("/register/partner", async (req, res) => {
       partnerData: {
         company_name: company_name,
       },
-      pending_approval: true,
+      signup_method: signupMethod,
+      // Paid partners must pay the $5 fee to get auto-verified; invite partners wait for admin approval.
+      requiresPayment: signupMethod === "paid",
+      signup_fee: signupMethod === "paid" ? PARTNER_SIGNUP_FEE : 0,
+      pending_approval: signupMethod === "invite",
     });
   } catch (err) {
     console.error("Partner registration error:", err);

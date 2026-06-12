@@ -213,6 +213,29 @@
                             </div>
                         </div>
 
+                        <!-- Invite Code -->
+                        <div class="form-group" style="margin-bottom:8px;">
+                            <button type="button" id="pInviteToggle" class="invite-toggle-btn">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                                Have a partner invite code? <span class="invite-highlight">Enter it here to register free →</span>
+                            </button>
+                            <div id="pInviteCodeGroup" style="display:none; margin-top:10px;">
+                                <div class="form-input-wrapper">
+                                    <span class="form-icon">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+                                    </span>
+                                    <input type="text" id="pInviteCode" name="invite_code" class="form-input" placeholder="ELITE2024" autocomplete="off" maxlength="30" style="text-transform:uppercase;letter-spacing:2px;">
+                                </div>
+                                <p class="invite-code-hint">Invite code registers you free — your account will need admin approval before you can list vehicles.</p>
+                            </div>
+                        </div>
+
+                        <!-- Pricing note (visible when no invite code) -->
+                        <div id="pPricingNote" class="pricing-note-box" style="margin-bottom:12px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:#D4AF37;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <span>Without an invite code, a <strong>$5 one-time verification fee</strong> applies — paid via PayPal. You'll be instantly verified.</span>
+                        </div>
+
                         <!-- Terms -->
                         <div class="form-checkbox">
                             <input type="checkbox" id="pTerms" name="terms" class="checkbox-input" required>
@@ -237,8 +260,44 @@
                     </div>
                 </form>
 
+                <!-- PAYMENT STEP (shown after registration for paid partners) -->
+                <div id="pPaymentStep" style="display:none; padding:8px 0;">
+                    <div class="payment-step-badge">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        One-Time Verification
+                    </div>
+                    <div class="payment-step-title">Verify Your Partner Account</div>
+                    <p class="payment-step-sub">A one-time fee gives you instant verified status — no waiting for admin approval.</p>
+                    <span class="payment-price-tag">$5</span>
+                    <span class="payment-price-note">one-time · non-refundable · instant verification</span>
+                    <div class="payment-benefits">
+                        <div class="payment-benefit-item">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            Instant verified badge — no admin wait
+                        </div>
+                        <div class="payment-benefit-item">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            Add vehicles and start receiving bookings
+                        </div>
+                        <div class="payment-benefit-item">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            Reach international travelers across Georgia
+                        </div>
+                    </div>
+                    <div id="pPaymentError" class="payment-error-box" style="display:none;"></div>
+                    <div id="pPaymentSuccess" class="payment-success-box" style="display:none;">
+                        <span class="ps-icon">✓</span>
+                        <h3>Payment Successful!</h3>
+                        <p>Your partner account is now verified. Redirecting…</p>
+                    </div>
+                    <div id="paypalButtonContainer">
+                        <div class="payment-loading">Loading payment options…</div>
+                    </div>
+                    <button type="button" class="payment-cancel-link" onclick="window.location.reload()">Cancel — I have an invite code</button>
+                </div>
+
                 <!-- Divider -->
-                <div class="auth-divider">
+                <div class="auth-divider" id="pAuthDivider">
                     <span data-i18n="partner_register.or">or</span>
                 </div>
 
