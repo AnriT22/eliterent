@@ -53,25 +53,10 @@
         initPhoneFormat(phoneInput, 'pPhoneCode');
     }
 
-    // Invite code toggle
-    var inviteToggle = document.getElementById('pInviteToggle');
-    var inviteGroup = document.getElementById('pInviteCodeGroup');
-    var pricingNote = document.getElementById('pPricingNote');
-    var inviteCodeInput = document.getElementById('pInviteCode');
-    var inviteVisible = false;
-
-    if (inviteToggle && inviteGroup) {
-        inviteToggle.addEventListener('click', function () {
-            inviteVisible = !inviteVisible;
-            inviteGroup.style.display = inviteVisible ? 'block' : 'none';
-            if (pricingNote) pricingNote.style.display = inviteVisible ? 'none' : 'flex';
-            if (!inviteVisible && inviteCodeInput) inviteCodeInput.value = '';
-        });
-    }
-
-    // Force uppercase on invite code input
-    if (inviteCodeInput) {
-        inviteCodeInput.addEventListener('input', function () {
+    // Force uppercase on choice-step invite code input
+    var choiceInviteInput = document.getElementById('pChoiceInviteCode');
+    if (choiceInviteInput) {
+        choiceInviteInput.addEventListener('input', function () {
             var pos = this.selectionStart;
             this.value = this.value.toUpperCase();
             this.setSelectionRange(pos, pos);
@@ -149,7 +134,6 @@
         var pCodeEl = document.getElementById('pPhoneCode');
         var pLocalPhone = document.getElementById('pPhone').value.trim();
         var pFullPhone = pCodeEl ? (pCodeEl.value + ' ' + pLocalPhone) : pLocalPhone;
-        var inviteCode = inviteCodeInput ? inviteCodeInput.value.trim() : '';
 
         var payload = {
             full_name: document.getElementById('pFullName').value.trim(),
@@ -160,7 +144,6 @@
             location: document.getElementById('pLocation').value.trim(),
             description: document.getElementById('pDescription').value.trim(),
             telegram: document.getElementById('pTelegram').value.trim(),
-            invite_code: inviteCode || undefined,
         };
 
         nextBtn.disabled = true;
@@ -186,13 +169,13 @@
                 localStorage.setItem('isLoggedIn', 'true');
             }
 
-            if (data.requiresPayment) {
-                // Paid path: show PayPal payment step
-                enterPaymentStep();
+            // New flow: show choice step (Pay $5 vs Invite Code)
+            if (data.needsPathSelection) {
+                enterChoiceStep(data);
                 return;
             }
 
-            // Invite code path: pending admin approval
+            // Legacy invite code path (if invite_code was sent directly)
             if (data.pending_approval) {
                 showPendingApproval();
                 setTimeout(function () { window.location.href = 'verify-phone.html'; }, 4000);
@@ -209,10 +192,106 @@
         }
     }
 
+    /* ---- CHOICE STEP: Pay $5 vs Invite Code ---- */
+    function enterChoiceStep(data) {
+        // Hide form and related UI
+        form.style.display = 'none';
+        document.getElementById('pFormActions').style.display = 'none';
+        var authDivider = document.getElementById('pAuthDivider');
+        var googleBtn = document.getElementById('googlePartnerBtn');
+        var authFooter = document.querySelector('.auth-footer');
+        if (authDivider) authDivider.style.display = 'none';
+        if (googleBtn) googleBtn.style.display = 'none';
+        if (authFooter) authFooter.style.display = 'none';
+
+        // Mark step 3 as active in progress bar
+        document.querySelectorAll('.registration-progress .progress-step').forEach(function (step, i) {
+            step.classList.remove('active', 'completed');
+            if (i < 2) step.classList.add('completed');
+            else step.classList.add('active');
+        });
+
+        // Show email and run availability check
+        var email = (data.user && data.user.email) || '';
+        document.getElementById('choiceEmailValue').textContent = email;
+        document.getElementById('choiceEmailBadge').textContent = 'New account created';
+        document.getElementById('choiceEmailBadge').style.background = 'rgba(34,197,94,0.15)';
+        document.getElementById('choiceEmailBadge').style.color = '#22c55e';
+
+        // Also do a live check in case user refreshed
+        if (email) {
+            fetch('/api/check-availability?field=email&value=' + encodeURIComponent(email))
+                .then(function (r) { return r.json(); })
+                .then(function (result) {
+                    var badge = document.getElementById('choiceEmailBadge');
+                    if (!result.available) {
+                        badge.textContent = 'Already registered';
+                        badge.style.background = 'rgba(239,68,68,0.15)';
+                        badge.style.color = '#ef4444';
+                    }
+                })
+                .catch(function () { /* ignore */ });
+        }
+
+        // Show choice step
+        document.getElementById('pChoiceStep').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function choosePayPath() {
+        document.getElementById('pChoiceStep').style.display = 'none';
+        enterPaymentStep();
+    }
+
+    async function chooseInvitePath() {
+        var code = document.getElementById('pChoiceInviteCode').value.trim().toUpperCase();
+        var errorEl = document.getElementById('choiceInviteError');
+        var btn = document.getElementById('choiceApplyBtn');
+
+        if (!code) {
+            errorEl.textContent = 'Please enter an invite code';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Checking…';
+        errorEl.style.display = 'none';
+
+        try {
+            var res = await fetch('/api/register/partner/apply-invite', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + (localStorage.getItem('token') || ''),
+                },
+                body: JSON.stringify({ invite_code: code }),
+            });
+            var data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || 'Invalid invite code');
+            }
+
+            // Success — hide choice, show pending approval, then go to phone verify
+            document.getElementById('pChoiceStep').style.display = 'none';
+            showPendingApproval();
+            setTimeout(function () { window.location.href = 'verify-phone.html'; }, 4000);
+
+        } catch (err) {
+            btn.disabled = false;
+            btn.textContent = 'Apply Code';
+            errorEl.textContent = err.message;
+            errorEl.style.display = 'block';
+        }
+    }
+
     /* ---- INVITE PATH: pending approval message ---- */
     function showPendingApproval() {
         form.style.display = 'none';
         document.getElementById('pFormActions').style.display = 'none';
+        var choiceStep = document.getElementById('pChoiceStep');
+        if (choiceStep) choiceStep.style.display = 'none';
         var authDivider = document.getElementById('pAuthDivider');
         var googleBtn = document.getElementById('googlePartnerBtn');
         var authFooter = document.querySelector('.auth-footer');

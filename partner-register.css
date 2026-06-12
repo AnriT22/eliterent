@@ -292,6 +292,135 @@
 }
 
 /* ========================================
+   CHOICE STEP: Pay $5 vs Invite Code
+   ======================================== */
+.choice-step-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(212,175,55,0.1);
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 100px;
+    padding: 5px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #D4AF37;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 16px;
+}
+.choice-step-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #EAEAEA;
+    margin: 0 0 16px;
+}
+.choice-email-status {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 20px;
+    font-size: 13px;
+}
+.choice-email-status .ces-label { color: #A0A3B0; }
+.choice-email-status .ces-value { color: #EAEAEA; font-weight: 600; }
+.choice-email-status .ces-badge {
+    margin-left: auto;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(160,163,176,0.15);
+    color: #A0A3B0;
+}
+.choice-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+.choice-card {
+    background: #15171F;
+    border: 1px solid #2A2D38;
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.2s, transform 0.2s;
+}
+.choice-card:hover { border-color: #3A3F4B; }
+.choice-card-primary:hover { border-color: rgba(212,175,55,0.4); }
+.choice-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.choice-card-icon { font-size: 22px; line-height: 1; }
+.choice-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #EAEAEA;
+    margin: 0;
+}
+.choice-card-price {
+    font-size: 36px;
+    font-weight: 900;
+    color: #D4AF37;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+.choice-card-desc {
+    font-size: 13px;
+    color: #A0A3B0;
+    line-height: 1.5;
+    margin: 0 0 14px;
+    flex: 1;
+}
+.choice-card-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.choice-card-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #C0C0C0;
+}
+.choice-card-list li svg {
+    flex-shrink: 0;
+    color: #22c55e;
+}
+.choice-card-note {
+    font-size: 11px;
+    color: #6b7280;
+    text-align: center;
+    margin: 10px 0 0;
+}
+.choice-card-note a { color: #D4AF37; text-decoration: none; }
+.choice-card-note a:hover { text-decoration: underline; }
+.choice-code-wrap { margin-bottom: 12px; }
+.choice-code-wrap .form-input {
+    background: #1C1E26;
+    border-color: #3A3F4B;
+    color: #EAEAEA;
+}
+@media (max-width: 600px) {
+    .choice-cards { grid-template-columns: 1fr; }
+    .choice-step-title { font-size: 18px; }
+    .choice-card-price { font-size: 30px; }
+}
+
+/* ========================================
    ADMIN INVITE CODES TABLE (inline styles overridden here for responsiveness)
    ======================================== */
 @media (max-width: 600px) {
