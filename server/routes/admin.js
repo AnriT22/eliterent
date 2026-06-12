@@ -453,7 +453,8 @@ router.get('/partners', async (req, res) => {
     try {
         const partners = await queryAll(
             `SELECT u.id, u.email, u.full_name, u.phone, u.google_id, u.phone_verified, u.email_verified, u.is_verified as user_verified, u.created_at,
-                    pp.company_name, pp.location, pp.is_verified, pp.description, pp.whatsapp, pp.telegram
+                    pp.company_name, pp.location, pp.is_verified, pp.description, pp.whatsapp, pp.telegram,
+                    pp.signup_method, pp.signup_paid, pp.invite_code_used
              FROM users u
              LEFT JOIN partner_profiles pp ON u.id = pp.user_id
              WHERE u.role = 'partner'
@@ -896,6 +897,72 @@ router.delete('/promo-codes/:id', async (req, res) => {
     } catch (err) {
         console.error('Delete promo code error:', err);
         res.status(500).json({ error: 'Failed to delete promo code' });
+    }
+});
+
+// ========================================
+// PARTNER INVITE CODES (free signup, admin-approved)
+// ========================================
+router.get('/partner-invite-codes', async (req, res) => {
+    try {
+        const codes = await queryAll('SELECT * FROM partner_invite_codes ORDER BY created_at DESC');
+        res.json({ codes });
+    } catch (err) {
+        console.error('Get invite codes error:', err);
+        res.status(500).json({ error: 'Failed to get invite codes' });
+    }
+});
+
+router.post('/partner-invite-codes', async (req, res) => {
+    try {
+        var code = (req.body.code || '').trim().toUpperCase();
+        var note = req.body.note || null;
+        var maxUses = parseInt(req.body.max_uses);
+        if (isNaN(maxUses) || maxUses < 0) maxUses = 0;
+        if (!code || code.length > 30 || !/^[A-Z0-9_-]+$/.test(code)) {
+            return res.status(400).json({ error: 'Code must be alphanumeric (A-Z, 0-9, -, _), max 30 characters' });
+        }
+        if (note && String(note).length > 200) {
+            return res.status(400).json({ error: 'Note too long (max 200 characters)' });
+        }
+        var existing = await queryOne('SELECT id FROM partner_invite_codes WHERE UPPER(code) = $1', [code]);
+        if (existing) return res.status(409).json({ error: 'Code already exists' });
+        await execute(
+            'INSERT INTO partner_invite_codes (code, note, max_uses) VALUES ($1, $2, $3)',
+            [code, note, maxUses]
+        );
+        res.status(201).json({ message: 'Invite code created' });
+    } catch (err) {
+        console.error('Create invite code error:', err);
+        res.status(500).json({ error: 'Failed to create invite code' });
+    }
+});
+
+router.put('/partner-invite-codes/:id', async (req, res) => {
+    try {
+        var id = parseInt(req.params.id);
+        if (req.body.is_active !== undefined) {
+            await execute('UPDATE partner_invite_codes SET is_active = $1 WHERE id = $2', [req.body.is_active ? 1 : 0, id]);
+        }
+        if (req.body.max_uses !== undefined) {
+            var mu = parseInt(req.body.max_uses);
+            if (isNaN(mu) || mu < 0) mu = 0;
+            await execute('UPDATE partner_invite_codes SET max_uses = $1 WHERE id = $2', [mu, id]);
+        }
+        res.json({ message: 'Invite code updated' });
+    } catch (err) {
+        console.error('Update invite code error:', err);
+        res.status(500).json({ error: 'Failed to update invite code' });
+    }
+});
+
+router.delete('/partner-invite-codes/:id', async (req, res) => {
+    try {
+        await execute('DELETE FROM partner_invite_codes WHERE id = $1', [parseInt(req.params.id)]);
+        res.json({ message: 'Invite code deleted' });
+    } catch (err) {
+        console.error('Delete invite code error:', err);
+        res.status(500).json({ error: 'Failed to delete invite code' });
     }
 });
 

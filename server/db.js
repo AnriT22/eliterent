@@ -71,6 +71,11 @@ async function initDB() {
             steering_sides TEXT,
             payment_methods TEXT,
             is_verified INTEGER DEFAULT 0,
+            signup_method TEXT DEFAULT 'invite',
+            signup_paid INTEGER DEFAULT 0,
+            signup_paypal_order_id TEXT,
+            signup_paypal_capture_id TEXT,
+            invite_code_used TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -287,6 +292,15 @@ async function initDB() {
         await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS priority INTEGER DEFAULT 0`);
     } catch (e) { /* column may already exist or table not yet created */ }
 
+    // Add partner signup method / paid columns (existing DBs)
+    try {
+        await pool.query(`ALTER TABLE partner_profiles ADD COLUMN IF NOT EXISTS signup_method TEXT DEFAULT 'invite'`);
+        await pool.query(`ALTER TABLE partner_profiles ADD COLUMN IF NOT EXISTS signup_paid INTEGER DEFAULT 0`);
+        await pool.query(`ALTER TABLE partner_profiles ADD COLUMN IF NOT EXISTS signup_paypal_order_id TEXT`);
+        await pool.query(`ALTER TABLE partner_profiles ADD COLUMN IF NOT EXISTS signup_paypal_capture_id TEXT`);
+        await pool.query(`ALTER TABLE partner_profiles ADD COLUMN IF NOT EXISTS invite_code_used TEXT`);
+    } catch (e) { /* columns may already exist or table not yet created */ }
+
     // Create indexes for OTP lookups
     try {
         await pool.query('CREATE INDEX IF NOT EXISTS idx_otp_phone ON otp_codes(phone)');
@@ -306,6 +320,19 @@ async function initDB() {
             used_count INTEGER DEFAULT 0,
             valid_from TIMESTAMP,
             valid_until TIMESTAMP,
+            is_active INTEGER DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // Partner invite codes — admin hands these to trusted partners for free (admin-approved) signup
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS partner_invite_codes (
+            id SERIAL PRIMARY KEY,
+            code TEXT UNIQUE NOT NULL,
+            note TEXT,
+            max_uses INTEGER DEFAULT 0,
+            used_count INTEGER DEFAULT 0,
             is_active INTEGER DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )

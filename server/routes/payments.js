@@ -176,4 +176,97 @@ router.get('/status/:bookingId', authenticateToken, async (req, res) => {
     }
 });
 
+// ============================================================
+// PARTNER SIGNUP FEE ($5) — auto-verifies a partner after payment
+// ============================================================
+var PARTNER_SIGNUP_FEE = 5;
+
+// POST /api/payments/partner/create-order — create PayPal order for the $5 partner verification fee
+router.post('/partner/create-order', authenticateToken, requireRole('partner'), async (req, res) => {
+    try {
+        var profile = await queryOne('SELECT * FROM partner_profiles WHERE user_id = $1', [req.user.id]);
+        if (!profile) return res.status(404).json({ error: 'Partner profile not found' });
+        if (profile.is_verified || profile.signup_paid) {
+            return res.status(400).json({ error: 'Your account is already verified.' });
+        }
+        if (!paypal.isConfigured()) {
+            return res.status(503).json({ error: 'Payment system not configured. Contact admin.' });
+        }
+
+        var order = await paypal.createOrder(req.user.id, PARTNER_SIGNUP_FEE, 'USD', 'EliteAuto.rent — Partner verification fee');
+
+        await execute('UPDATE partner_profiles SET signup_paypal_order_id = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2',
+            [order.id, req.user.id]);
+
+        res.json({ orderId: order.id });
+    } catch (err) {
+        console.error('Partner create-order error:', err);
+        res.status(500).json({ error: 'Failed to create payment order' });
+    }
+});
+
+// POST /api/payments/partner/capture-order — capture $5 and auto-verify the partner
+router.post('/partner/capture-order', authenticateToken, requireRole('partner'), async (req, res) => {
+    try {
+        var orderId = req.body.order_id;
+        if (!orderId) return res.status(400).json({ error: 'order_id required' });
+
+        var profile = await queryOne('SELECT * FROM partner_profiles WHERE user_id = $1', [req.user.id]);
+        if (!profile) return res.status(404).json({ error: 'Partner profile not found' });
+        if (profile.is_verified || profile.signup_paid) {
+            return res.json({ status: 'COMPLETED', message: 'Already verified' });
+        }
+        if (!paypal.isConfigured()) {
+            return res.status(503).json({ error: 'Payment system not configured' });
+        }
+
+        var capture = await paypal.captureOrder(orderId);
+
+        if (capture.status === 'COMPLETED') {
+            var captureId = '';
+            var capturedAmount = 0;
+            try {
+                var capData = capture.purchase_units[0].payments.captures[0];
+                captureId = capData.id;
+                capturedAmount = parseFloat(capData.amount.value) || 0;
+            } catch (e) {}
+
+            if (Math.abs(capturedAmount - PARTNER_SIGNUP_FEE) > 0.01) {
+                console.error('PARTNER PAYMENT MISMATCH: user #' + req.user.id + ' expected $' + PARTNER_SIGNUP_FEE.toFixed(2) + ' but PayPal captured $' + capturedAmount.toFixed(2));
+                return res.status(400).json({
+                    error: 'Payment amount mismatch. Please contact support.',
+                    status: 'MISMATCH'
+                });
+            }
+
+            // Payment good — auto-verify the partner (no admin approval needed)
+            await execute(
+                `UPDATE partner_profiles SET
+                    is_verified = 1,
+                    signup_paid = 1,
+                    signup_paypal_order_id = $1,
+                    signup_paypal_capture_id = $2,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = $3`,
+                [orderId, captureId, req.user.id]
+            );
+            await execute('UPDATE users SET is_verified = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [req.user.id]);
+
+            res.json({
+                status: 'COMPLETED',
+                message: 'Payment successful! Your partner account is now verified.',
+                captureId: captureId
+            });
+        } else {
+            res.status(400).json({
+                status: capture.status,
+                error: 'Payment not completed. Status: ' + capture.status
+            });
+        }
+    } catch (err) {
+        console.error('Partner capture-order error:', err);
+        res.status(500).json({ error: 'Failed to capture payment' });
+    }
+});
+
 module.exports = router;
