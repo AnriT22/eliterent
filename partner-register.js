@@ -73,6 +73,22 @@
         });
     }
 
+    // Bind choice-step buttons via event listeners (reliable across all browsers)
+    var choicePayBtn = document.getElementById('choicePayBtn');
+    if (choicePayBtn) {
+        choicePayBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            choosePayPath();
+        });
+    }
+    var choiceApplyBtnEl = document.getElementById('choiceApplyBtn');
+    if (choiceApplyBtnEl) {
+        choiceApplyBtnEl.addEventListener('click', function (e) {
+            e.preventDefault();
+            chooseInvitePath();
+        });
+    }
+
     function updatePartnerUI() {
         document.querySelectorAll('#partnerRegisterForm .registration-step').forEach(function (s) {
             s.classList.remove('active');
