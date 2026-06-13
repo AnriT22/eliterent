@@ -528,11 +528,16 @@ function escHtml(s) {
                 var imgSrc = v.image_url || '';
                 var imgTag = imgSrc ? '<img src="' + imgSrc + '" class="vehicle-thumb">' : '<div class="vehicle-thumb" style="display:inline-flex;align-items:center;justify-content:center;background:#262A35;font-size:14px;">-</div>';
                 var status = v.status || 'active';
+                var locParts = [];
+                if (v.location_city) locParts.push(v.location_city);
+                if (v.region && v.region !== v.location_city) locParts.push(v.region);
+                var locLabel = locParts.length ? locParts.join(', ') : '-';
                 return '<tr draggable="true" data-id="' + v.id + '" class="vehicle-row">'
                     + '<td>' + v.id + '</td>'
                     + '<td class="hide-mobile">' + imgTag + '</td>'
                     + '<td><strong>' + escHtml(v.name || '-') + '</strong></td>'
                     + '<td class="hide-mobile">' + escHtml(v.company_name || v.partner_name || '-') + '</td>'
+                    + '<td class="hide-mobile"><span style="font-size:12px;color:#A0A3B0;">' + escHtml(locLabel) + '</span></td>'
                     + '<td>$' + (v.price_per_day || 0) + '</td>'
                     + '<td><span class="admin-status ' + status + '">' + status + '</span></td>'
                     + '<td class="drag-handle" style="text-align:center;color:#A0A3B0;cursor:grab;font-size:20px;user-select:none;" title="Drag to reorder">\u2059</td>'

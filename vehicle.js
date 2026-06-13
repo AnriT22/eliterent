@@ -133,8 +133,21 @@
         var engine = v.engine || '';
         var gearbox = v.gearbox || '';
         var year = v.year || '';
+        var locParts = [];
+        if (v.location_city) locParts.push(v.location_city);
+        if (v.region && v.region !== v.location_city) locParts.push(v.region);
+        var locLabel = locParts.length ? locParts.join(', ') : 'Tbilisi';
         document.getElementById('vdVehicleMeta').textContent =
             [vtVal(cat), year, vtVal(engine), vtVal(gearbox)].filter(Boolean).join(' · ');
+
+        // Location (update or create — avoid duplicates on re-render)
+        var locEl = document.querySelector('.vd-location');
+        if (locEl) {
+            locEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + esc(locLabel);
+        } else {
+            document.getElementById('vdVehicleMeta').insertAdjacentHTML('afterend',
+                '<div class="vd-location" style="font-size:13px;color:#A0A3B0;margin-top:4px;display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + esc(locLabel) + '</div>');
+        }
 
         // Price
         var priceEl = document.getElementById('vdPrice');
