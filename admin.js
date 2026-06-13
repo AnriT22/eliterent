@@ -391,7 +391,7 @@ function escHtml(s) {
                 var typeBadge = signupMethod === 'invite'
                     ? '<span class="admin-status" style="background:rgba(212,175,55,0.15);color:#D4AF37;font-size:10px;" title="Registered with invite code">Invite</span>'
                     : (p.signup_paid
-                        ? '<span class="admin-status" style="background:rgba(34,197,94,0.12);color:#22c55e;font-size:10px;" title="Paid $5 verification fee">Paid $5</span>'
+                        ? '<span class="admin-status" style="background:rgba(34,197,94,0.12);color:#22c55e;font-size:10px;" title="Paid $4.99 verification fee">Paid $4.99</span>'
                         : '<span class="admin-status" style="background:rgba(148,163,184,0.12);color:#94a3b8;font-size:10px;">Paid</span>');
                 return '<tr>'
                     + '<td>' + p.id + '</td>'
