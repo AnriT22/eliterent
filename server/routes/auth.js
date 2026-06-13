@@ -12,7 +12,7 @@ const crypto = require("crypto");
 const router = express.Router();
 
 // One-time partner signup verification fee (USD) for partners without an invite code
-const PARTNER_SIGNUP_FEE = 5;
+const PARTNER_SIGNUP_FEE = 4.99;
 
 // CSRF state for Google OAuth — sign with HMAC to prevent forged state params
 function signOAuthState(role) {
@@ -589,7 +589,7 @@ router.post("/register/partner", async (req, res) => {
         .json({ error: "Phone number is required for account verification" });
     }
 
-    // Determine signup path: invite code (free, needs admin approval) vs paid ($5, auto-verified after payment)
+    // Determine signup path: invite code (free, needs admin approval) vs paid ($4.99, auto-verified after payment)
     var signupMethod = "paid";
     var inviteCodeRow = null;
     var normalizedInvite = (invite_code || "").trim().toUpperCase();
@@ -623,7 +623,7 @@ router.post("/register/partner", async (req, res) => {
     );
     const userId = newUser.id;
 
-    // Insert partner profile. Invite signups need admin approval; paid signups get verified after $5 payment.
+    // Insert partner profile. Invite signups need admin approval; paid signups get verified after $4.99 payment.
     await execute(
       `
             INSERT INTO partner_profiles
@@ -708,7 +708,7 @@ router.post("/register/partner", async (req, res) => {
         company_name: company_name,
       },
       signup_method: signupMethod,
-      // Paid partners must pay the $5 fee to get auto-verified; invite partners wait for admin approval.
+      // Paid partners must pay the $4.99 fee to get auto-verified; invite partners wait for admin approval.
       requiresPayment: signupMethod === "paid",
       needsPathSelection: signupMethod === "paid",
       signup_fee: signupMethod === "paid" ? PARTNER_SIGNUP_FEE : 0,
@@ -1125,7 +1125,7 @@ router.get("/auth/google/callback", async (req, res) => {
 
     // New user — create account
     // Google-verified email, so email_verified = 1, is_approved = 1
-    // Partners start unverified (is_verified=0) so they go through the choice step (pay $5 or invite code)
+    // Partners start unverified (is_verified=0) so they go through the choice step (pay $4.99 or invite code)
     const userRole = role === "partner" ? "partner" : "guest";
     const isPartner = userRole === "partner";
     await execute(

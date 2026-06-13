@@ -195,7 +195,7 @@
                 localStorage.setItem('isLoggedIn', 'true');
             }
 
-            // New flow: show choice step (Pay $5 vs Invite Code)
+            // New flow: show choice step (Pay $4.99 vs Invite Code)
             if (data.needsPathSelection) {
                 enterChoiceStep(data);
                 return;
@@ -218,7 +218,7 @@
         }
     }
 
-    /* ---- CHOICE STEP: Pay $5 vs Invite Code ---- */
+    /* ---- CHOICE STEP: Pay $4.99 vs Invite Code ---- */
     function enterChoiceStep(data) {
         // Hide form and related UI
         form.style.display = 'none';
