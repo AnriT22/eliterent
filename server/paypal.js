@@ -40,8 +40,34 @@ async function getAccessToken() {
 }
 
 // Create a PayPal order for the website service fee
-async function createOrder(bookingId, amount, currency, description) {
+async function createOrder(bookingId, amount, currency, description, countryCode) {
     var token = await getAccessToken();
+
+    var payload = {
+        intent: 'CAPTURE',
+        purchase_units: [{
+            reference_id: 'BOOKING-' + bookingId,
+            description: description || 'EliteAuto.rent — Booking #' + bookingId + ' Service Fee',
+            amount: {
+                currency_code: currency || 'USD',
+                value: parseFloat(amount).toFixed(2)
+            }
+        }],
+        application_context: {
+            shipping_preference: 'NO_SHIPPING',
+            brand_name: 'EliteAuto.rent',
+            landing_page: 'BILLING'
+        }
+    };
+
+    // Pre-fill country if provided (e.g., 'GE' for Georgia)
+    if (countryCode) {
+        payload.payer = {
+            address: {
+                country_code: countryCode
+            }
+        };
+    }
 
     var res = await fetch(BASE_URL + '/v2/checkout/orders', {
         method: 'POST',
@@ -49,20 +75,7 @@ async function createOrder(bookingId, amount, currency, description) {
             'Authorization': 'Bearer ' + token,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-            intent: 'CAPTURE',
-            purchase_units: [{
-                reference_id: 'BOOKING-' + bookingId,
-                description: description || 'EliteAuto.rent — Booking #' + bookingId + ' Service Fee',
-                amount: {
-                    currency_code: currency || 'USD',
-                    value: parseFloat(amount).toFixed(2)
-                }
-            }],
-            application_context: {
-                shipping_preference: 'NO_SHIPPING'
-            }
-        })
+        body: JSON.stringify(payload)
     });
 
     if (!res.ok) {

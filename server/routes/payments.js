@@ -193,7 +193,15 @@ router.post('/partner/create-order', authenticateToken, requireRole('partner'), 
             return res.status(503).json({ error: 'Payment system not configured. Contact admin.' });
         }
 
-        var order = await paypal.createOrder(req.user.id, PARTNER_SIGNUP_FEE, 'USD', 'EliteAuto.rent — Partner verification fee');
+        // Default to Georgia ('GE') since most partners are based there
+        var countryCode = 'GE';
+        if (profile.location) {
+            var loc = profile.location.toLowerCase();
+            if (loc.includes('georgia') || loc.includes('tbilisi') || loc.includes('batumi') || loc.includes('kutaisi')) {
+                countryCode = 'GE';
+            }
+        }
+        var order = await paypal.createOrder(req.user.id, PARTNER_SIGNUP_FEE, 'USD', 'EliteAuto.rent — Partner verification fee', countryCode);
 
         await execute('UPDATE partner_profiles SET signup_paypal_order_id = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2',
             [order.id, req.user.id]);
