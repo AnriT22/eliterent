@@ -177,11 +177,11 @@ router.get('/status/:bookingId', authenticateToken, async (req, res) => {
 });
 
 // ============================================================
-// PARTNER SIGNUP FEE ($5) — auto-verifies a partner after payment
+// PARTNER SIGNUP FEE ($4.99) — auto-verifies a partner after payment
 // ============================================================
-var PARTNER_SIGNUP_FEE = 5;
+var PARTNER_SIGNUP_FEE = 4.99;
 
-// POST /api/payments/partner/create-order — create PayPal order for the $5 partner verification fee
+// POST /api/payments/partner/create-order — create PayPal order for the $4.99 partner verification fee
 router.post('/partner/create-order', authenticateToken, requireRole('partner'), async (req, res) => {
     try {
         var profile = await queryOne('SELECT * FROM partner_profiles WHERE user_id = $1', [req.user.id]);
