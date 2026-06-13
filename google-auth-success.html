@@ -66,19 +66,20 @@
                     window.history.replaceState({}, '', '/google-auth-success.html');
                 }
 
-                // Redirect: new users go to phone verification, existing users go to home
-                // NEW partners from Google OAuth need to choose pay $5 vs invite code first
+                // Redirect logic
                 var role = user.role;
+                var isVerified = user.is_verified;
                 setTimeout(function() {
-                    if (isNew && needsPathSelection && role === 'partner') {
-                        // New Google partner → choice step (pay $5 or invite code)
+                    // Unverified partner (new or returning) → MUST go through choice step first
+                    if (role === 'partner' && !isVerified) {
                         window.location.href = '/register-partner.html?step=choice';
-                    } else if (isNew) {
-                        // New Google user (guest) → phone verification
+                    } else if (isNew && role === 'guest') {
+                        // New Google guest → phone verification
                         window.location.href = '/verify-phone.html';
                     } else if (role === 'admin') {
                         window.location.href = '/admin.html';
                     } else if (role === 'partner') {
+                        // Verified partner → dashboard
                         window.location.href = '/partner-dashboard.html';
                     } else {
                         window.location.href = '/index.html';
