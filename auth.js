@@ -212,6 +212,10 @@ async function handleLoginSubmit(e) {
 
                 window.location.href = 'admin.html';
 
+            } else if (role === 'partner' && !data.user.is_verified) {
+
+                window.location.href = 'register-partner.html?step=choice';
+
             } else if (role === 'partner') {
 
                 window.location.href = 'partner-dashboard.html';

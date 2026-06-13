@@ -958,6 +958,7 @@ router.post("/auth/google", async (req, res) => {
       full_name: newUser.full_name,
       role: newUser.role,
       is_approved: newUser.is_approved,
+      is_verified: newUser.is_verified,
       avatar_url: newUser.avatar_url,
     };
 
@@ -1115,7 +1116,7 @@ router.get("/auth/google/callback", async (req, res) => {
       const token = generateToken(user);
       const userData = encodeURIComponent(JSON.stringify({
         id: user.id, email: user.email, full_name: user.full_name,
-        role: user.role, is_approved: user.is_approved,
+        role: user.role, is_approved: user.is_approved, is_verified: user.is_verified,
         avatar_url: user.avatar_url || googlePicture
       }));
 
