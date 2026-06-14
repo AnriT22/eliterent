@@ -504,12 +504,23 @@ function loadCarouselWithAvailability() {
                 return;
             }
             
-            renderCarousel(vehicles);
+            // Home page shows only 6 random cars as a teaser; "Show all vehicles" → vehicles.html
+            renderCarousel(pickRandom(vehicles, 6));
         })
         .catch(function (err) {
             console.error('Fleet load error:', err);
             carouselTrack.innerHTML = '<div style="padding:40px;text-align:center;color:#ef4444;grid-column:1/-1;">Could not load vehicles. Please refresh the page.</div>';
         });
+}
+
+// Pick up to n random items from an array (non-destructive Fisher–Yates shuffle).
+function pickRandom(arr, n) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a.slice(0, n);
 }
 
 function renderCarousel(vehicles) {
