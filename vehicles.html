@@ -678,6 +678,52 @@
             return vals;
         }
 
+        // ---- Pagination state + controls (12 cars per page) ----
+        var VP_PER_PAGE = 12;
+        var vpCurrentPage = 1;
+        var vpLastSig = null;
+
+        window.vpGoToPage = function (p) {
+            vpCurrentPage = p;
+            applyFilters();
+            var g = document.getElementById('vpGrid');
+            if (g) window.scrollTo({ top: Math.max(0, g.getBoundingClientRect().top + window.pageYOffset - 90), behavior: 'smooth' });
+        };
+
+        function renderVpPagination(totalItems) {
+            var el = document.getElementById('vpPagination');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'vpPagination';
+                el.style.cssText = 'display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:6px;margin:28px 0 8px;';
+                var g = document.getElementById('vpGrid');
+                if (g && g.parentNode) g.parentNode.insertBefore(el, g.nextSibling);
+            }
+            var totalPages = Math.max(1, Math.ceil(totalItems / VP_PER_PAGE));
+            if (totalPages <= 1) { el.innerHTML = ''; return; }
+            function btn(label, page, active, disabled) {
+                var s = 'min-width:42px;height:42px;padding:0 12px;border-radius:10px;font-size:15px;font-weight:700;transition:all .15s;'
+                    + (active
+                        ? 'background:#1C1E26;color:#fff;border:1px solid #1C1E26;cursor:default;'
+                        : disabled
+                            ? 'background:transparent;color:#454a55;border:1px solid #2A2D38;cursor:default;'
+                            : 'background:transparent;color:#EAEAEA;border:1px solid #2A2D38;cursor:pointer;');
+                return '<button class="vp-page-btn" style="' + s + '"'
+                    + (active || disabled ? ' disabled' : ' onclick="window.vpGoToPage(' + page + ')"')
+                    + '>' + label + '</button>';
+            }
+            var html = '';
+            var maxBtns = 5;
+            var start = Math.max(1, vpCurrentPage - 2);
+            var end = Math.min(totalPages, start + maxBtns - 1);
+            start = Math.max(1, end - maxBtns + 1);
+            for (var p = start; p <= end; p++) html += btn(String(p), p, p === vpCurrentPage, false);
+            var atEnd = vpCurrentPage >= totalPages;
+            html += btn('&#8250;', vpCurrentPage + 1, false, atEnd);   // next
+            html += btn('&#8250;|', totalPages, false, atEnd);         // last
+            el.innerHTML = html;
+        }
+
         function applyFilters() {
             var cards = Array.from(document.querySelectorAll('.vc-card'));
             var search = document.getElementById('vpSearch').value.toLowerCase().trim();
@@ -736,8 +782,23 @@
                 return (b.dataset.created || '').localeCompare(a.dataset.created || '');
             });
 
+            // Reset to page 1 whenever the filter/sort/search set changes (not on page clicks)
+            var sig = [search, yearFilter, sortVal, cats.join(','), engines.join(','), gearboxes.join(','),
+                drives.join(','), interiors.join(','), steerings.join(','), payments.join(','), priceMin, priceMax].join('|');
+            if (sig !== vpLastSig) { vpCurrentPage = 1; vpLastSig = sig; }
+
+            var totalPages = Math.max(1, Math.ceil(visible.length / VP_PER_PAGE));
+            if (vpCurrentPage > totalPages) vpCurrentPage = totalPages;
+            var pStart = (vpCurrentPage - 1) * VP_PER_PAGE;
+
+            // Re-append ALL visible cards in sorted order (keeps DOM order stable
+            // across page changes), but only display the current page's slice.
             cards.forEach(function (c) { c.style.display = 'none'; });
-            visible.forEach(function (c) { c.style.display = ''; grid.appendChild(c); });
+            visible.forEach(function (c, idx) {
+                grid.appendChild(c);
+                if (idx >= pStart && idx < pStart + VP_PER_PAGE) c.style.display = '';
+            });
+            renderVpPagination(visible.length);
 
             var badge = document.getElementById('vpCountBadge');
             if (badge) badge.textContent = window.carsAvailableText(visible.length);
@@ -757,13 +818,9 @@
         // language file finishes loading (initial race) or the user switches
         // language. Refresh it from the currently visible cards.
         document.addEventListener('languageChanged', function () {
-            var badge = document.getElementById('vpCountBadge');
-            if (!badge) return;
-            var shown = 0;
-            document.querySelectorAll('.vc-card').forEach(function (c) {
-                if (c.style.display !== 'none') shown++;
-            });
-            badge.textContent = window.carsAvailableText(shown);
+            // Recompute via the filter pipeline so the badge shows the real total
+            // (not just the 12 cards on the current page) and re-translates.
+            if (typeof window.applyFilters === 'function') window.applyFilters();
         });
 
         /* Panel collapse */
