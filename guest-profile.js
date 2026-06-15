@@ -282,7 +282,7 @@
                     + '<div class="gp-booking-price">Total: <strong>$' + (b.total_price || 0) + '</strong>' + payBadge
                     + (b.partner_company ? ' &middot; <span style="color:#A0A3B0;">' + b.partner_company + '</span>' : '') + '</div>'
                     + '</div>'
-                    + '<div class="gp-booking-actions">' + payBtn + actionBtn + '</div>'
+                    + '<div class="gp-booking-actions"><a class="gp-booking-detail-link" href="booking.html?id=' + b.id + '" style="color:#D4AF37;text-decoration:none;font-size:13px;font-weight:600;align-self:center;">View details &rarr;</a>' + payBtn + actionBtn + '</div>'
                     + '</div>';
             });
             html += '</div>';

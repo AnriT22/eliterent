@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,follow">
+    <title>Your Booking — EliteAuto.rent</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="style.css?v=5">
+    <link rel="stylesheet" href="premium.css?v=5">
+    <link rel="stylesheet" href="navbar-auth.css?v=4">
+    <style>
+      :root{ --bk-bg:#0B0C10; --bk-card:#15171F; --bk-line:#242730; --bk-gold:#D4AF37; --bk-ink:#EAEAEA; --bk-mut:#A0A3B0; }
+      body{ background:var(--bk-bg); }
+      .bk-wrap{ max-width:1040px; margin:0 auto; padding:28px 20px 80px; }
+      .bk-topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin:8px 0 20px; flex-wrap:wrap; }
+      .bk-ref{ display:flex; align-items:center; gap:12px; }
+      .bk-ref h1{ font-size:22px; font-weight:900; color:var(--bk-ink); margin:0; letter-spacing:.01em; }
+      .bk-back{ color:var(--bk-mut); text-decoration:none; font-size:14px; }
+      .bk-back:hover{ color:var(--bk-gold); }
+      .bk-chip{ display:inline-block; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:800; letter-spacing:.02em; }
+      /* Summary card */
+      .bk-summary{ background:linear-gradient(120deg,#6366f1,#8b5cf6); border-radius:18px; padding:22px 26px; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; color:#fff; box-shadow:0 18px 40px rgba(99,102,241,.25); }
+      .bk-summary .lbl{ font-size:12px; opacity:.85; margin:0 0 4px; text-transform:uppercase; letter-spacing:.06em; }
+      .bk-summary .val{ font-size:22px; font-weight:900; margin:0; }
+      .bk-summary .val.sm{ font-size:18px; }
+      .bk-summary .accent{ color:#d6ffe6; }
+      /* Cards grid */
+      .bk-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px; }
+      .bk-card{ background:var(--bk-card); border:1px solid var(--bk-line); border-radius:16px; padding:20px 22px; }
+      .bk-card h3{ font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--bk-mut); margin:0 0 14px; font-weight:800; }
+      .bk-row{ display:flex; justify-content:space-between; gap:14px; padding:7px 0; font-size:14px; color:var(--bk-ink); }
+      .bk-row .k{ color:var(--bk-mut); }
+      .bk-leg{ display:flex; gap:12px; padding:10px 0; }
+      .bk-leg .dot{ width:10px; height:10px; border-radius:50%; margin-top:5px; flex:0 0 auto; }
+      .bk-leg .when{ font-weight:700; color:var(--bk-ink); font-size:14px; }
+      .bk-leg .where{ color:var(--bk-mut); font-size:13px; margin-top:2px; }
+      /* Vehicle */
+      .bk-veh-img{ width:100%; height:170px; object-fit:cover; border-radius:12px; background:#0e0f14; margin-bottom:14px; }
+      .bk-veh-name{ font-size:18px; font-weight:800; color:var(--bk-ink); margin:0 0 10px; }
+      .bk-specs{ display:flex; flex-wrap:wrap; gap:8px; }
+      .bk-spec{ display:inline-flex; align-items:center; gap:6px; background:#0e0f14; border:1px solid var(--bk-line); border-radius:10px; padding:6px 10px; font-size:13px; color:var(--bk-ink); }
+      .bk-pay{ display:inline-block; margin-top:6px; padding:13px 26px; background:var(--bk-gold); color:#0B0C10; border-radius:30px; font-weight:800; text-decoration:none; }
+      .bk-pay:hover{ background:#c9a227; }
+      /* Travel essentials */
+      .bk-aff{ margin-top:34px; }
+      .bk-aff-head{ display:flex; align-items:baseline; gap:10px; margin:0 0 4px; }
+      .bk-aff-head h2{ font-size:18px; font-weight:900; color:var(--bk-ink); margin:0; }
+      .bk-aff-head span{ font-size:12px; color:var(--bk-mut); }
+      .bk-aff-sub{ color:var(--bk-mut); font-size:13.5px; margin:0 0 16px; }
+      .bk-aff-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+      .bk-aff-card{ display:block; background:var(--bk-card); border:1px solid var(--bk-line); border-radius:14px; padding:18px; text-decoration:none; transition:transform .15s, border-color .15s; }
+      .bk-aff-card:hover{ transform:translateY(-3px); border-color:var(--bk-gold); }
+      .bk-aff-emoji{ font-size:26px; }
+      .bk-aff-card h4{ color:var(--bk-ink); font-size:15px; margin:10px 0 4px; }
+      .bk-aff-card p{ color:var(--bk-mut); font-size:12.5px; margin:0; line-height:1.5; }
+      .bk-aff-tag{ font-size:10px; color:var(--bk-mut); border:1px solid var(--bk-line); border-radius:20px; padding:1px 7px; }
+      .bk-state{ text-align:center; padding:70px 20px; color:var(--bk-mut); }
+      @media(max-width:760px){ .bk-summary{ grid-template-columns:repeat(2,1fr);} .bk-grid{ grid-template-columns:1fr;} .bk-aff-grid{ grid-template-columns:1fr 1fr;} }
+    </style>
+</head>
+<body>
+    <header class="header sticky-header">
+        <div class="container header-content">
+            <div class="header-left">
+                <a href="/" class="logo"><img src="images/logo3.png" alt="EliteAuto.rent" class="logo-img"><span class="logo-text">EliteAuto.rent</span></a>
+            </div>
+            <div class="header-right">
+                <a href="guest-profile.html#bookings" class="partner-btn">My Bookings</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="bk-wrap">
+        <div id="bkContent">
+            <div class="bk-state">Loading your booking…</div>
+        </div>
+
+        <!-- ===================================================================
+             TRAVEL ESSENTIALS (affiliate). PASSIVE INCOME — owner setup:
+             Replace each href="#" with your affiliate/referral link so you earn
+             a commission when a traveler books through it. Suggested programs:
+               eSIM:      Airalo partner program
+               Insurance: SafetyWing / EKTA / Visitors Coverage affiliate
+               Tours:     GetYourGuide partner
+               Hotels:    Booking.com affiliate
+             These are complementary (not competitors) and genuinely useful, so
+             they read as helpful tips, not ads. Keep it to 4 cards, never popups.
+             =================================================================== -->
+        <section class="bk-aff">
+            <div class="bk-aff-head"><h2>Make the most of your trip</h2><span class="bk-aff-tag">Recommended</span></div>
+            <p class="bk-aff-sub">Handy extras for driving around Georgia — curated by EliteAuto.</p>
+            <div class="bk-aff-grid">
+                <a class="bk-aff-card" href="https://www.airalo.com/georgia-esim" target="_blank" rel="noopener sponsored">
+                    <div class="bk-aff-emoji">📶</div><h4>eSIM &amp; mobile data</h4><p>Stay online for maps &amp; bookings the moment you land.</p></a>
+                <a class="bk-aff-card" href="https://safetywing.com/nomad-insurance" target="_blank" rel="noopener sponsored">
+                    <div class="bk-aff-emoji">🛡️</div><h4>Travel insurance</h4><p>Cover yourself for the road trip — quick online quotes.</p></a>
+                <a class="bk-aff-card" href="https://www.getyourguide.com/georgia-l30/" target="_blank" rel="noopener sponsored">
+                    <div class="bk-aff-emoji">🎟️</div><h4>Tours &amp; experiences</h4><p>Kazbegi, Kakheti wine &amp; more — book skip-the-line.</p></a>
+                <a class="bk-aff-card" href="https://www.booking.com/country/ge.html" target="_blank" rel="noopener sponsored">
+                    <div class="bk-aff-emoji">🏨</div><h4>Hotels &amp; stays</h4><p>Find a place near your pickup or along your route.</p></a>
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-column"><h4>EliteAuto.rent</h4><p>Premium car rental marketplace for Georgia.</p></div>
+            <div class="footer-column"><h4>Contact</h4><p>&#x1F4E7; elite.rental25@gmail.com</p><p>&#x1F4DE; +995 591 522 299</p></div>
+        </div>
+        <div class="footer-bottom"><p>&copy; 2026 EliteAuto.rent. All rights reserved.</p></div>
+    </footer>
+
+    <script src="api-helper.js"></script>
+    <script src="booking.js?v=1"></script>
+    <script src="navbar-auth.js?v=2"></script>
+</body>
+</html>
