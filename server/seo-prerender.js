@@ -350,6 +350,10 @@ async function renderVehiclePage(id) {
     if (html.includes(MARKER_VEHICLE)) {
         html = html.replace(MARKER_VEHICLE, buildVehicleContentHtml(v, url, img));
     }
+    // Crawler-visible page: drop the "Loading…" spinner/text so the real car summary
+    // is the lead content (otherwise an active car can still be judged a Soft 404).
+    html = html.replace('<div class="vd-loading-spinner"></div>', '');
+    html = html.replace(/<p data-i18n="vehicle_page\.loading">[^<]*<\/p>/, '');
     html = html.replace(/<\/head>/i, function () { return buildVehicleSchema(v, url, img) + '</head>'; });
     return html;
 }
