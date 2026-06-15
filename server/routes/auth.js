@@ -1180,6 +1180,15 @@ router.get("/auth/google/callback", async (req, res) => {
       avatar_url: newUser.avatar_url
     }));
 
+    // Owner alert: new Google user via redirect flow (fire-and-forget)
+    (async () => {
+      try {
+        var notifyText = '👤 New user signup (Google)\n' + (newUser.full_name || newUser.email) + '\nRole: ' + newUser.role;
+        if (isPartner) notifyText += '\nNeeds choice step (pay $4.99 or invite code)';
+        await require("../services/notify").notifyOwner(notifyText);
+      } catch (e) { console.error("[notify] google callback:", e.message); }
+    })();
+
     console.log("[Google Callback] Created new user:", googleEmail, "role:", userRole);
     var redirectUrl = "/google-auth-success.html?token=" + token + "&user=" + userData + "&new=1";
     if (isPartner) {
