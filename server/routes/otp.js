@@ -265,10 +265,19 @@ router.post("/verify", async (req, res) => {
       otpRecord.user_id &&
       (type === "registration" || type === "phone_verify")
     ) {
-      await execute(
-        "UPDATE users SET phone_verified = 1, is_verified = 1, is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
-        [otpRecord.user_id],
-      );
+      const otpUser = await queryOne("SELECT role FROM users WHERE id = $1", [otpRecord.user_id]);
+      const isGuest = otpUser && otpUser.role === "guest";
+      if (isGuest) {
+        await execute(
+          "UPDATE users SET phone_verified = 1, is_verified = 1, is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+          [otpRecord.user_id],
+        );
+      } else {
+        await execute(
+          "UPDATE users SET phone_verified = 1, is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+          [otpRecord.user_id],
+        );
+      }
     }
 
     if (otpRecord.user_id && type === "email_verify") {
@@ -719,11 +728,19 @@ router.post("/phone-verify/verify", authenticateToken, async (req, res) => {
       await execute("UPDATE otp_codes SET verified = 1 WHERE id = $1", [otpRecord.id]);
     }
 
-    // Update user as phone verified + auto-approved
-    await execute(
-      "UPDATE users SET phone_verified = 1, is_verified = 1, is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
-      [userId]
-    );
+    // Update user as phone verified + auto-approved (guests get is_verified too; partners keep is_verified=0 until payment/admin)
+    var pvUser = await queryOne("SELECT role FROM users WHERE id = $1", [userId]);
+    if (pvUser && pvUser.role === "guest") {
+      await execute(
+        "UPDATE users SET phone_verified = 1, is_verified = 1, is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+        [userId]
+      );
+    } else {
+      await execute(
+        "UPDATE users SET phone_verified = 1, is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+        [userId]
+      );
+    }
 
     res.json({
       success: true,
