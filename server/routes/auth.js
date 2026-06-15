@@ -279,9 +279,9 @@ router.post("/register/guest", async (req, res) => {
 
     const password_hash = await bcrypt.hash(password, 12);
 
-    // Create user — account active (is_verified=1) but phone not yet verified (phone_verified=0)
+    // Create user — phone verification required before approval (is_approved=0)
     await execute(
-      "INSERT INTO users (email, password_hash, full_name, phone, role, is_approved, is_verified, phone_verified) VALUES ($1, $2, $3, $4, $5, 1, 1, 0)",
+      "INSERT INTO users (email, password_hash, full_name, phone, role, is_approved, is_verified, phone_verified) VALUES ($1, $2, $3, $4, $5, 0, 1, 0)",
       [email.trim(), password_hash, full_name.trim(), phone, "guest"],
     );
 
@@ -307,7 +307,7 @@ router.post("/register/guest", async (req, res) => {
       canSkip: true,
       userId: newUser.id,
       token: regToken,
-      user: { id: newUser.id, email: newUser.email, full_name: newUser.full_name, phone: newUser.phone, role: newUser.role, is_approved: 1, is_verified: 1, phone_verified: 0 },
+      user: { id: newUser.id, email: newUser.email, full_name: newUser.full_name, phone: newUser.phone, role: newUser.role, is_approved: 0, is_verified: 1, phone_verified: 0 },
     });
   } catch (err) {
     console.error("Guest registration error:", err);
@@ -619,9 +619,9 @@ router.post("/register/partner", async (req, res) => {
       signupMethod = "invite";
     }
 
-    // Auto-approve login (is_approved=1), but partner actions need is_verified via admin Partners section
+    // Phone verification required before approval (is_approved=0)
     await execute(
-      "INSERT INTO users (email, password_hash, full_name, phone, role, is_approved, is_verified) VALUES ($1, $2, $3, $4, $5, 1, 0)",
+      "INSERT INTO users (email, password_hash, full_name, phone, role, is_approved, is_verified) VALUES ($1, $2, $3, $4, $5, 0, 0)",
       [email.trim(), password_hash, full_name.trim(), phone, "partner"],
     );
 
@@ -945,7 +945,7 @@ router.post("/auth/google", async (req, res) => {
     const isPartner = userRole === "partner";
 
     await execute(
-      "INSERT INTO users (email, full_name, role, google_id, avatar_url, is_approved, is_verified, phone_verified, email_verified) VALUES ($1, $2, $3, $4, $5, 1, $6, 0, 1)",
+      "INSERT INTO users (email, full_name, role, google_id, avatar_url, is_approved, is_verified, phone_verified, email_verified) VALUES ($1, $2, $3, $4, $5, 0, $6, 0, 1)",
       [googleEmail, googleName, userRole, googleSub, googlePicture, isPartner ? 0 : 1],
     );
 
@@ -1148,12 +1148,12 @@ router.get("/auth/google/callback", async (req, res) => {
     }
 
     // New user — create account
-    // Google-verified email, so email_verified = 1, is_approved = 1
-    // Partners start unverified (is_verified=0) so they go through the choice step (pay $4.99 or invite code)
+    // Google-verified email, so email_verified = 1
+    // Phone verification required before approval (is_approved=0)
     const userRole = role === "partner" ? "partner" : "guest";
     const isPartner = userRole === "partner";
     await execute(
-      "INSERT INTO users (email, full_name, role, google_id, avatar_url, is_approved, is_verified, phone_verified, email_verified) VALUES ($1, $2, $3, $4, $5, 1, $6, 0, 1)",
+      "INSERT INTO users (email, full_name, role, google_id, avatar_url, is_approved, is_verified, phone_verified, email_verified) VALUES ($1, $2, $3, $4, $5, 0, $6, 0, 1)",
       [googleEmail, googleName, userRole, googleSub, googlePicture, isPartner ? 0 : 1]
     );
 
