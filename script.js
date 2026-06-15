@@ -559,7 +559,33 @@ function renderCarousel(vehicles) {
         `;
     });
     
-    carouselTrack.innerHTML = html;
+    // Inject native in-feed ad card after position 2 (0-indexed) if we have enough cars
+    if (vehicles.length >= 3) {
+        var adCardHtml = `
+            <a class="fleet-ad-card" href="vehicles.html" rel="noopener sponsored">
+                <div class="fleet-ad-card__img">
+                    <img src="images/svaneti.jpg" alt="Georgia road trip essentials" loading="lazy">
+                    <span class="fleet-ad-card__badge">Recommended</span>
+                </div>
+                <div class="fleet-ad-card__body">
+                    <h3 class="fleet-ad-card__title">Plan your Georgia road trip</h3>
+                    <p class="fleet-ad-card__desc">eSIMs, travel insurance, hotels & tours — everything you need for the drive.</p>
+                    <span class="fleet-ad-card__cta">
+                        Explore essentials
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </span>
+                </div>
+            </a>
+        `;
+        // Insert after the 3rd real card (index 2)
+        var cards = carouselTrack.querySelectorAll('.fleet-card');
+        if (cards[2]) {
+            cards[2].insertAdjacentHTML('afterend', adCardHtml);
+        } else {
+            carouselTrack.insertAdjacentHTML('beforeend', adCardHtml);
+        }
+    }
+
     if (typeof I18n !== 'undefined' && I18n.translatePage) I18n.translatePage(carouselTrack);
 
     // Home page: show first 4 cards, reveal the rest via the "Browse more" button.
