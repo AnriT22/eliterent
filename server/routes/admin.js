@@ -319,7 +319,12 @@ router.put('/users/:id/approve', async (req, res) => {
         const userId = parseInt(req.params.id);
         const user = await queryOne('SELECT * FROM users WHERE id = $1 AND role != $2', [userId, 'admin']);
         if (!user) return res.status(404).json({ error: 'User not found' });
-        await execute('UPDATE users SET is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
+        if (user.role === 'partner') {
+            await execute('UPDATE users SET is_approved = 1, is_verified = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
+            await execute('UPDATE partner_profiles SET is_verified = 1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $1', [userId]);
+        } else {
+            await execute('UPDATE users SET is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
+        }
         res.json({ message: 'User approved' });
     } catch (err) {
         console.error('Approve user error:', err);
