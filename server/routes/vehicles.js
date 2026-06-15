@@ -232,6 +232,14 @@ router.post('/', authenticateToken, requireRole('partner'), async (req, res) => 
             [req.user.id]
         );
 
+        // Owner alert: a car was added and needs approval (fire-and-forget, never blocks).
+        (async () => {
+            try {
+                var pp = await queryOne('SELECT company_name FROM partner_profiles WHERE user_id = $1', [req.user.id]);
+                await require('../services/notify').notifyOwner('🚗 New car pending approval\n' + (b.name || 'Vehicle') + (pp && pp.company_name ? ' — ' + pp.company_name : '') + '\nApprove it in the admin panel.');
+            } catch (e) { console.error('[notify] vehicle:', e.message); }
+        })();
+
         res.status(201).json({ message: 'Vehicle added successfully! It will appear on the site after admin approval.', vehicle: newVehicle });
     } catch (err) {
         console.error('Add vehicle error:', err);

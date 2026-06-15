@@ -641,6 +641,13 @@ router.post("/register/partner", async (req, res) => {
       ],
     );
 
+    // Owner alert: a new partner signed up and needs approval (fire-and-forget, never blocks).
+    (async () => {
+      try {
+        await require("../services/notify").notifyOwner('👤 New partner signup\n' + (newUser.full_name || newUser.email) + (company_name ? ' (' + company_name + ')' : '') + '\nMethod: ' + signupMethod + (signupMethod === 'invite' ? ' — needs admin approval' : ' — pending $4.99 payment') + '\nReview in the admin panel.');
+      } catch (e) { console.error("[notify] partner:", e.message); }
+    })();
+
     // Count invite code usage
     if (signupMethod === "invite" && inviteCodeRow) {
       try {
