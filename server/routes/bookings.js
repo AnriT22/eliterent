@@ -726,6 +726,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
     var bookingId = parseInt(req.params.id, 10);
     var booking = await queryOne(
       `SELECT b.*, v.name as vehicle_name, v.image_url, v.price_per_day, v.category, v.year,
+                    v.engine, v.gearbox, v.seats, v.doors, v.drive_type, v.deposit_amount,
                     u.full_name as guest_name, u.email as guest_email, u.phone as guest_phone,
                     pp.company_name as partner_company
              FROM bookings b
