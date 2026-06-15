@@ -266,7 +266,7 @@ router.post("/verify", async (req, res) => {
       (type === "registration" || type === "phone_verify")
     ) {
       await execute(
-        "UPDATE users SET phone_verified = 1, is_verified = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+        "UPDATE users SET phone_verified = 1, is_verified = 1, is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
         [otpRecord.user_id],
       );
     }
@@ -719,9 +719,9 @@ router.post("/phone-verify/verify", authenticateToken, async (req, res) => {
       await execute("UPDATE otp_codes SET verified = 1 WHERE id = $1", [otpRecord.id]);
     }
 
-    // Update user as phone verified
+    // Update user as phone verified + auto-approved
     await execute(
-      "UPDATE users SET phone_verified = 1, is_verified = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+      "UPDATE users SET phone_verified = 1, is_verified = 1, is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
       [userId]
     );
 
