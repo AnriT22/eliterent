@@ -57,8 +57,8 @@ function initDropdowns() {
 
     function updateLanguageButton(lang) {
         if (!languageBtn) return;
-        const iconMap = { 'en': 'EN', 'ru': '🇷🇺', 'ka': '🇬🇪' };
-        const textMap = { 'en': 'English', 'ru': 'Русский', 'ka': 'ქართული' };
+        const iconMap = { 'en': 'EN', 'ru': '🇷🇺', 'ka': '🇬🇪', 'he': '🇮🇱' };
+        const textMap = { 'en': 'English', 'ru': 'Русский', 'ka': 'ქართული', 'he': 'עברית' };
         languageBtn.innerHTML = `
             <span class="selector-icon">${iconMap[lang] || 'EN'}</span>
             <span class="selector-text">${textMap[lang] || 'English'}</span>

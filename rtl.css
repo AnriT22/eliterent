@@ -1,0 +1,75 @@
+/* ============================================================================
+   RTL overrides — Hebrew (he)
+   ----------------------------------------------------------------------------
+   Every rule is scoped to html[dir="rtl"], so this file is completely inert
+   for LTR languages (en / ru / ka). Direction is set by i18n.js (live switch)
+   and by server/i18n-render.js (server-rendered /he/ pages).
+
+   Philosophy: lean on native dir="rtl" (browsers mirror flex/grid order and
+   flip text-align:start automatically). We only add the high-impact fixes that
+   native RTL does NOT handle: a Hebrew-capable font fallback, text alignment of
+   prose blocks, form fields, and the prerendered SEO browse block.
+   ========================================================================== */
+
+/* Hebrew glyph coverage — the brand display font may lack Hebrew letters, so
+   provide a clean Hebrew-capable system stack for RTL only. */
+html[dir="rtl"] body,
+html[dir="rtl"] input,
+html[dir="rtl"] textarea,
+html[dir="rtl"] select,
+html[dir="rtl"] button {
+    font-family: "Segoe UI", "Arial Hebrew", "Noto Sans Hebrew", Arial, Helvetica, sans-serif;
+}
+
+/* Prose / content blocks read right-to-left. (text-align:start already flips,
+   but some components hard-code text-align:left — neutralise those.) */
+html[dir="rtl"] .seo-crawlable,
+html[dir="rtl"] .seo-crawlable-heading,
+html[dir="rtl"] .seo-crawlable-sub,
+html[dir="rtl"] .seo-cat-card,
+html[dir="rtl"] p,
+html[dir="rtl"] h1,
+html[dir="rtl"] h2,
+html[dir="rtl"] h3,
+html[dir="rtl"] li {
+    text-align: right;
+}
+
+/* Keep deliberately-centred sections centred (hero, CTA, section titles). */
+html[dir="rtl"] [style*="text-align:center"],
+html[dir="rtl"] [style*="text-align: center"],
+html[dir="rtl"] .hero-content,
+html[dir="rtl"] .section-title,
+html[dir="rtl"] .section-header {
+    text-align: center;
+}
+
+/* Form fields: type Hebrew from the right. */
+html[dir="rtl"] input,
+html[dir="rtl"] textarea,
+html[dir="rtl"] select {
+    text-align: right;
+    direction: rtl;
+}
+/* …but keep inherently-LTR data left-to-right so it isn't reversed. */
+html[dir="rtl"] input[type="email"],
+html[dir="rtl"] input[type="tel"],
+html[dir="rtl"] input[type="number"],
+html[dir="rtl"] input[type="url"],
+html[dir="rtl"] input[type="password"] {
+    direction: ltr;
+    text-align: right;
+}
+
+/* Reset list paddings that assumed a left edge. */
+html[dir="rtl"] .seo-city-links {
+    padding-right: 0;
+}
+
+/* Prices like "$25/day" contain Latin + digits; isolate them so the bidi
+   algorithm doesn't shuffle the symbol order inside an RTL line. */
+html[dir="rtl"] .discount,
+html[dir="rtl"] .vc-price-amount,
+html[dir="rtl"] .seo-cat-card .p {
+    unicode-bidi: isolate;
+}

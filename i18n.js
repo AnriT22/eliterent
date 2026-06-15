@@ -8,9 +8,31 @@
 (function () {
     'use strict';
 
-    var SUPPORTED_LANGS = ['en', 'ka', 'ru'];
+    var SUPPORTED_LANGS = ['en', 'ka', 'ru', 'he'];
+    var RTL_LANGS = ['he'];
     var DEFAULT_LANG = 'en';
     var STORAGE_KEY = 'EliteAuto_lang';
+
+    // Apply text direction for the active language (Hebrew = RTL). Centralised here
+    // so both initial load and the live language switcher stay in sync. rtl.css
+    // rules are scoped to html[dir="rtl"], so this single attribute flips layout.
+    function applyDirection(lang) {
+        var rtl = (RTL_LANGS.indexOf(lang) !== -1);
+        document.documentElement.setAttribute('dir', rtl ? 'rtl' : 'ltr');
+        // Load rtl.css on demand (server already injects it for /he/ first paint;
+        // this covers live switching from an LTR page). Guarded by id so it's
+        // injected once and removed when switching back to an LTR language.
+        var existing = document.getElementById('eliteauto-rtl-css');
+        if (rtl && !existing) {
+            var link = document.createElement('link');
+            link.id = 'eliteauto-rtl-css';
+            link.rel = 'stylesheet';
+            link.href = '/rtl.css';
+            document.head.appendChild(link);
+        } else if (!rtl && existing) {
+            existing.parentNode.removeChild(existing);
+        }
+    }
     var translations = {};
     var currentLang = DEFAULT_LANG;
     var loadedLangs = {};
@@ -36,8 +58,9 @@
         if (saved && SUPPORTED_LANGS.indexOf(saved) !== -1) {
             currentLang = saved;
         }
-        // Set html lang attribute immediately
+        // Set html lang + direction immediately
         document.documentElement.lang = currentLang;
+        applyDirection(currentLang);
 
         loadLanguage(currentLang, function () {
             // Also preload English as fallback
@@ -125,6 +148,7 @@
         currentLang = lang;
         localStorage.setItem(STORAGE_KEY, lang);
         document.documentElement.lang = lang;
+        applyDirection(lang);
 
         loadLanguage(lang, function () {
             translatePage();
