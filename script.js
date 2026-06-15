@@ -505,7 +505,7 @@ function loadCarouselWithAvailability() {
             }
             
             // Home page shows only 6 random cars as a teaser; "Show all vehicles" → vehicles.html
-            renderCarousel(pickRandom(vehicles, 6));
+            renderCarousel(pickRandom(vehicles, 8));
         })
         .catch(function (err) {
             console.error('Fleet load error:', err);
@@ -529,12 +529,12 @@ function renderCarousel(vehicles) {
     
     let html = '';
     
-    vehicles.forEach(function (v) {
+    vehicles.forEach(function (v, idx) {
         const imgSrc = v.image_url || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240'%3E%3Crect fill='%23e2e8f0' width='400' height='240'/%3E%3Ctext x='200' y='125' text-anchor='middle' fill='%2394a3b8' font-size='16' font-family='sans-serif'%3ENo Image%3C/text%3E%3C/svg%3E";
         const isNew = v.created_at && (Date.now() - new Date(v.created_at).getTime()) < 24 * 60 * 60 * 1000;
         
         html += `
-            <div class="fleet-card" data-category="${(v.category||'').toLowerCase()}" data-engine="${(v.engine||'').toLowerCase()}" data-gearbox="${(v.gearbox||'').toLowerCase()}" data-drivetype="${(v.drive_type||'').toLowerCase()}" data-interior="${(v.interior_type||'').toLowerCase()}" data-steering="${(v.steering_side||'').toLowerCase()}" data-payment="${(v.payment_method||'').toLowerCase()}" onclick="if(!event.target.closest('button'))window.location.href='vehicle.html?id=${v.id}'">
+            <div class="fleet-card${idx >= 4 ? ' fleet-card--extra' : ''}" data-category="${(v.category||'').toLowerCase()}" data-engine="${(v.engine||'').toLowerCase()}" data-gearbox="${(v.gearbox||'').toLowerCase()}" data-drivetype="${(v.drive_type||'').toLowerCase()}" data-interior="${(v.interior_type||'').toLowerCase()}" data-steering="${(v.steering_side||'').toLowerCase()}" data-payment="${(v.payment_method||'').toLowerCase()}" onclick="if(!event.target.closest('button'))window.location.href='vehicle.html?id=${v.id}'">
                 <div class="fleet-card-img">
                     <img src="${imgSrc}" alt="${v.name}">
                     ${isNew ? '<span class="fleet-card-badge">NEW</span>' : ''}
@@ -561,6 +561,22 @@ function renderCarousel(vehicles) {
     
     carouselTrack.innerHTML = html;
     if (typeof I18n !== 'undefined' && I18n.translatePage) I18n.translatePage(carouselTrack);
+
+    // Home page: show first 4 cards, reveal the rest via the "Browse more" button.
+    var moreBtn = document.getElementById('browseMoreBtn');
+    if (moreBtn) {
+        if (vehicles.length > 4) {
+            moreBtn.style.display = '';
+            moreBtn.onclick = function () {
+                carouselTrack.querySelectorAll('.fleet-card--extra').forEach(function (c) {
+                    c.classList.remove('fleet-card--extra');
+                });
+                moreBtn.style.display = 'none';
+            };
+        } else {
+            moreBtn.style.display = 'none';
+        }
+    }
 }
 
 function clearDatesAndReload() {
