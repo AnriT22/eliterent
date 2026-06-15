@@ -273,8 +273,9 @@ router.post("/verify", async (req, res) => {
           [otpRecord.user_id],
         );
       } else {
+        // Partner: only phone verified here; is_approved set after payment or admin approval
         await execute(
-          "UPDATE users SET phone_verified = 1, is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+          "UPDATE users SET phone_verified = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
           [otpRecord.user_id],
         );
       }
@@ -728,7 +729,7 @@ router.post("/phone-verify/verify", authenticateToken, async (req, res) => {
       await execute("UPDATE otp_codes SET verified = 1 WHERE id = $1", [otpRecord.id]);
     }
 
-    // Update user as phone verified + auto-approved (guests get is_verified too; partners keep is_verified=0 until payment/admin)
+    // Update user as phone verified. Guests get full approval; partners stay gated until payment or admin.
     var pvUser = await queryOne("SELECT role FROM users WHERE id = $1", [userId]);
     if (pvUser && pvUser.role === "guest") {
       await execute(
@@ -737,7 +738,7 @@ router.post("/phone-verify/verify", authenticateToken, async (req, res) => {
       );
     } else {
       await execute(
-        "UPDATE users SET phone_verified = 1, is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+        "UPDATE users SET phone_verified = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
         [userId]
       );
     }

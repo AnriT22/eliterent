@@ -1274,14 +1274,28 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    // Admins always pass. Others need is_approved=1 OR phone_verified=1.
-    // (Unapproved + unverified = still in registration flow; approved but phone_unverified = needs verify)
+    // Admins always pass. Others need is_approved=1.
     if (user.role !== "admin" && !user.is_approved) {
       if (!user.phone_verified) {
         return res.status(403).json({
           error: "Please verify your phone number to activate your account.",
           requiresPhoneVerification: true,
           redirectTo: "verify-phone.html",
+        });
+      }
+      // Phone verified but still not approved — partner-specific messages
+      if (user.role === "partner") {
+        var pp = await queryOne("SELECT signup_method FROM partner_profiles WHERE user_id = $1", [user.id]);
+        if (pp && pp.signup_method === "invite") {
+          return res.status(403).json({
+            error: "Your partner account is pending admin approval. You'll be notified once approved.",
+            pendingApproval: true,
+          });
+        }
+        return res.status(403).json({
+          error: "Please complete the partner verification payment to activate your account.",
+          requiresPayment: true,
+          redirectTo: "register-partner.html?step=choice",
         });
       }
       return res.status(403).json({

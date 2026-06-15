@@ -258,7 +258,7 @@ router.post('/partner/capture-order', authenticateToken, requireRole('partner'),
                 WHERE user_id = $3`,
                 [orderId, captureId, req.user.id]
             );
-            await execute('UPDATE users SET is_verified = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [req.user.id]);
+            await execute('UPDATE users SET is_verified = 1, is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [req.user.id]);
 
             res.json({
                 status: 'COMPLETED',
