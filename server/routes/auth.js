@@ -911,6 +911,8 @@ router.post("/auth/google", async (req, res) => {
         full_name: user.full_name,
         role: user.role,
         is_approved: user.is_approved,
+        is_verified: user.is_verified,
+        phone_verified: user.phone_verified,
         avatar_url: user.avatar_url || googlePicture,
       };
 
