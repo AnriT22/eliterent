@@ -436,6 +436,14 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
     // Block dates and confirm booking
     await blockDatesForBooking(vehicle_id, pickup_date, dropoff_date);
 
+    // Owner alert: a new reservation came in (fire-and-forget, never blocks).
+    (async () => {
+      try {
+        var g = await queryOne("SELECT full_name FROM users WHERE id = $1", [req.user.id]);
+        await require("../services/notify").notifyOwner('📅 New reservation #' + booking.id + '\n' + (vehicle && vehicle.name ? vehicle.name : 'Vehicle') + ' · ' + days + ' day(s)\n' + pickup_date + ' → ' + dropoff_date + '\nTotal $' + total_price + (g && g.full_name ? '\nGuest: ' + g.full_name : ''));
+      } catch (e) { console.error("[notify] booking:", e.message); }
+    })();
+
     var paypalConfigured = false;
     try {
       paypalConfigured = require("../paypal").isConfigured();
