@@ -319,6 +319,13 @@
                 successEl.style.display = 'block';
                 clearInterval(_timerInterval);
 
+                // Update cached user object so downstream pages know phone is verified
+                try {
+                    var u = JSON.parse(localStorage.getItem('user') || '{}');
+                    u.phone_verified = 1;
+                    localStorage.setItem('user', JSON.stringify(u));
+                } catch (e) {}
+
                 setTimeout(function() {
                     redirectToHome();
                 }, 1500);
@@ -352,8 +359,12 @@
 
         function redirectToHome() {
             var role = user.role;
+            var isVerified = user.is_verified;
             if (role === 'admin') {
                 window.location.href = '/admin.html';
+            } else if (role === 'partner' && !isVerified) {
+                // Partner phone verified but not fully verified (invite waiting admin, or paid path not complete)
+                window.location.href = '/register-partner.html?step=choice';
             } else if (role === 'partner') {
                 window.location.href = '/partner-dashboard.html';
             } else {
