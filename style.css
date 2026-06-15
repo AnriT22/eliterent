@@ -1595,6 +1595,33 @@ body {
     gap: 12px;
 }
 
+/* Home fleet: hide cards 5-8 until "Browse more" is pressed */
+.fleet-card--extra { display: none; }
+.carousel-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+}
+.browse-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: #D4AF37;
+    color: #0B0C10;
+    border: none;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.browse-more-btn:hover {
+    background: #c9a227;
+    transform: translateY(-2px);
+}
+
 @media (max-width: 1200px) {
     .fleet-grid {
         grid-template-columns: repeat(3, 1fr);
