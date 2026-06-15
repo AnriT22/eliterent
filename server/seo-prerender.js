@@ -320,8 +320,8 @@ function buildVehicleSchema(v, url, img) {
 async function renderVehiclePage(id) {
     var v;
     try { v = await fetchVehicleById(id); }
-    catch (e) { console.error('[SEO] vehicle fetch:', e.message); return null; }
-    if (!v) return null; // unknown/inactive car → fall through to static page (JS shows "not found")
+    catch (e) { console.error('[SEO] vehicle fetch:', e.message); return undefined; } // DB error → caller falls through to static page (avoid a false 404)
+    if (!v) return null; // unknown/inactive car → caller returns a real 404
 
     var html = fs.readFileSync(path.join(ROOT, 'vehicle.html'), 'utf8');
     var title = vehicleTitle(v);
@@ -400,6 +400,18 @@ async function renderHomePage() {
 // no User-Agent branching anywhere (no cloaking). /reviews.html is intentionally
 // NOT handled (real reviews render client-side; S-02). renderReviewsPage remains
 // exported for i18n-render's /ru//ka/ path.
+// Serve a real 404 (status + branded page) for missing/deleted vehicles so Google
+// treats them as "Not found" instead of "Soft 404".
+function send404(res) {
+    try {
+        var notFound = fs.readFileSync(path.join(ROOT, '404.html'), 'utf8');
+        res.status(404).setHeader('Content-Type', 'text/html; charset=utf-8');
+        return res.send(notFound);
+    } catch (e) {
+        return res.status(404).send('Not found');
+    }
+}
+
 async function middleware(req, res, next) {
     try {
         var html;
@@ -410,11 +422,13 @@ async function middleware(req, res, next) {
             // the page's JS rebuilds the interactive grid on load.
             html = await renderVehiclesPage();
         } else if (req.path === '/vehicle.html') {
-            // Per-car unique title/meta/canonical + crawlable summary. Unknown or
-            // inactive id → next() (static page, JS shows "not found").
+            // Per-car unique title/meta/canonical + crawlable summary. A missing or
+            // inactive id returns a real 404 (not a 200 soft-404); a DB error falls
+            // through to the static page.
             var vid = parseInt(req.query.id, 10);
-            if (!vid) return next();
+            if (!vid) return send404(res);
             var vhtml = await renderVehiclePage(vid);
+            if (vhtml === null) return send404(res);
             if (!vhtml) return next();
             html = vhtml;
         } else {
