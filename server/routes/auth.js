@@ -292,6 +292,14 @@ router.post("/register/guest", async (req, res) => {
 
     // Don't auto-send SMS — save Twilio costs. User will click "Send Code" on verify-phone page.
     var regToken = generateToken({ id: newUser.id, email: newUser.email, role: newUser.role });
+
+    // Owner alert: new guest signed up (fire-and-forget)
+    (async () => {
+      try {
+        await require("../services/notify").notifyOwner('👤 New user signup\n' + (newUser.full_name || newUser.email) + '\nRole: Guest\nPhone: ' + (newUser.phone || '—'));
+      } catch (e) { console.error("[notify] guest:", e.message); }
+    })();
+
     res.status(201).json({
       message: "Account created! Please verify your phone number.",
       requiresVerification: true,
@@ -958,6 +966,15 @@ router.post("/auth/google", async (req, res) => {
     }
 
     const token = generateToken(newUser);
+
+    // Owner alert: new Google user signed up (fire-and-forget)
+    (async () => {
+      try {
+        var notifyText = '👤 New user signup (Google)\n' + (newUser.full_name || newUser.email) + '\nRole: ' + newUser.role;
+        if (isPartner) notifyText += '\nNeeds choice step (pay $4.99 or invite code)';
+        await require("../services/notify").notifyOwner(notifyText);
+      } catch (e) { console.error("[notify] google:", e.message); }
+    })();
 
     const responseUser = {
       id: newUser.id,
