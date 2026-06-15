@@ -26,7 +26,8 @@ const seoPrerender = require('./seo-prerender');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://eliteauto.rent';
-const LANGS = ['ru', 'ka'];
+const LANGS = ['ru', 'ka', 'he'];
+const RTL_LANGS = ['he'];
 
 // Pages served under /ru/ and /ka/. A page belongs here ONLY when its on-page
 // BODY is genuinely translated (not just its <title>/<meta>) — otherwise we'd
@@ -80,6 +81,13 @@ const SEO = {
         'sedan-rental-georgia.html': { title: 'სედანის ქირაობა საქართველოში | $30/დღე', desc: 'იქირავეთ კომფორტული სედანი საქართველოში დღეში $30-დან. Toyota Camry, Hyundai Sonata თბილისში, ბათუმსა და ქუთაისში. ბიზნესის, ტრანსფერებისა და მაგისტრალებისთვის.' },
         'luxury-car-rental-tbilisi.html': { title: 'ლუქს კლასის მანქანის ქირაობა თბილისში | პრემიუმ', desc: 'ლუქს და წარმომადგენლობითი კლასის მანქანების ქირაობა თბილისში. Mercedes S-Class, BMW 7 Series და Range Rover. ქორწილების, ბიზნესისა და VIP-ისთვის. დღეში $80-დან.' },
         'minivan-7-seater-rental-georgia.html': { title: 'მინივენისა და 7-ადგილიანის ქირაობა საქართველოში', desc: 'იქირავეთ 7-ადგილიანი ავტომობილი ან მინივენი საქართველოში დღეში $45-დან. Toyota Alphard, Kia Carnival ოჯახებისა და ჯგუფებისთვის თბილისში, ბათუმსა და ქუთაისში.' }
+    },
+    he: {
+        'index.html': { title: 'השכרת רכב בגאורגיה — טביליסי, בטומי וקוטאיסי', desc: 'השכרת רכב בגאורגיה מ-$25 ליום. איסוף משדות התעופה טביליסי, בטומי וקוטאיסי. רכבי שטח, סדאן ויוקרה משותפים מקומיים מאומתים. ללא פיקדון, ביטול חינם, ביטוח כלול.' },
+        'vehicles.html': { title: 'השכרת רכב בגאורגיה — מ-$25 ליום | EliteAuto', desc: 'בחרו רכב להשכרה בגאורגיה — רכבי שטח, סדאן, אקונומי ויוקרה. ללא פיקדון, איסוף משדה התעופה, ביטוח כלול. מ-$25 ליום.' },
+        'reviews.html': { title: 'ביקורות על השכרת רכב בגאורגיה | EliteAuto.rent', desc: 'ביקורות אמיתיות וסיפורים ממטיילים ששכרו רכב בגאורגיה דרך EliteAuto.rent — טביליסי, בטומי וקוטאיסי.' },
+        'about.html': { title: 'אודות — EliteAuto.rent | השכרת רכב בגאורגיה', desc: 'הכירו את EliteAuto.rent — פלטפורמת השכרת רכב בגאורגיה המחברת מטיילים עם שותפים מקומיים מאומתים.' },
+        'contact.html': { title: 'צור קשר — EliteAuto.rent', desc: 'צרו קשר עם EliteAuto.rent — תמיכה בהשכרת רכב בגאורגיה. וואטסאפ, אימייל וטלפון. סיוע בטביליסי, בטומי וקוטאיסי.' }
     }
 };
 
@@ -139,8 +147,16 @@ function localize(html, lang, page, t) {
         }
     );
 
-    // 2) <html lang="en"> → localized
+    // 2) <html lang="en"> → localized, plus text direction (Hebrew = RTL).
     html = html.replace(/(<html\b[^>]*\blang=")[^"]*(")/i, '$1' + lang + '$2');
+    var dir = (RTL_LANGS.indexOf(lang) !== -1) ? 'rtl' : 'ltr';
+    html = html.replace(/(<html\b[^>]*?)\s+dir="[^"]*"/i, '$1');      // strip any existing dir
+    html = html.replace(/<html\b([^>]*)>/i, '<html$1 dir="' + dir + '">');
+    if (dir === 'rtl') {
+        // RTL stylesheet for first paint (no-JS/crawlers). Same id i18n.js uses,
+        // so the client never double-injects it.
+        html = html.replace(/<\/head>/i, '    <link id="eliteauto-rtl-css" rel="stylesheet" href="/rtl.css">\n</head>');
+    }
 
     // 3) Localized <title> / meta description (RU map; KA optional).
     // NOTE: replacement VALUES can contain "$" (e.g. "$25/день"), so we use
@@ -164,6 +180,7 @@ function localize(html, lang, page, t) {
     var enUrl = SITE + '/' + urlPage;
     var ruUrl = SITE + '/ru/' + urlPage;
     var kaUrl = SITE + '/ka/' + urlPage;
+    var heUrl = SITE + '/he/' + urlPage;
     var selfUrl = SITE + '/' + lang + '/' + urlPage;
     html = html.replace(/(<link rel="canonical" href=")[^"]*(">)/i, function (mm, a, b) { return a + selfUrl + b; });
     html = html.replace(/(<meta property="og:url" content=")[^"]*(">)/i, function (mm, a, b) { return a + selfUrl + b; });
@@ -173,6 +190,7 @@ function localize(html, lang, page, t) {
         '<link rel="alternate" hreflang="en" href="' + enUrl + '">',
         '<link rel="alternate" hreflang="ru" href="' + ruUrl + '">',
         '<link rel="alternate" hreflang="ka" href="' + kaUrl + '">',
+        '<link rel="alternate" hreflang="he" href="' + heUrl + '">',
         '<link rel="alternate" hreflang="x-default" href="' + enUrl + '">'
     ].join('\n    ');
     html = html.replace(/(<link rel="canonical" href="[^"]*">)/i, function (mm, a) { return a + '\n    ' + alts; });
@@ -209,7 +227,7 @@ async function renderSourceHtml(fileName) {
 
 async function middleware(req, res, next) {
     try {
-        var m = /^\/(ru|ka)(?:\/(.*))?$/.exec(req.path);
+        var m = /^\/(ru|ka|he)(?:\/(.*))?$/.exec(req.path);
         if (!m) return next();
         var lang = m[1];
         var page = (m[2] || '').replace(/\/+$/, ''); // trim trailing slash
