@@ -718,7 +718,7 @@ router.post("/register/partner", async (req, res) => {
       canSkip: true,
       userId: newUser.id,
       token: partnerToken,
-      user: { id: newUser.id, email: newUser.email, full_name: newUser.full_name, phone: newUser.phone, role: newUser.role, is_approved: 1, is_verified: 0, phone_verified: 0 },
+      user: { id: newUser.id, email: newUser.email, full_name: newUser.full_name, phone: newUser.phone, role: newUser.role, is_approved: 0, is_verified: 0, phone_verified: 0 },
       partnerData: {
         company_name: company_name,
       },
@@ -894,13 +894,7 @@ router.post("/auth/google", async (req, res) => {
     let user = await queryOne("SELECT * FROM users WHERE email = $1", [googleEmail]);
 
     if (user) {
-      // Existing user — log them in
-      if (!user.is_approved) {
-        return res.status(403).json({
-          error: "Your account has been suspended. Please contact support.",
-        });
-      }
-
+      // Existing user — log them in (unapproved = still in registration flow, not suspended)
       // Update google_id and avatar if not set
       if (!user.google_id || !user.avatar_url) {
         await execute(
@@ -1124,11 +1118,7 @@ router.get("/auth/google/callback", async (req, res) => {
     let user = await queryOne("SELECT * FROM users WHERE email = $1", [googleEmail]);
 
     if (user) {
-      // Existing user — log them in
-      if (!user.is_approved) {
-        return res.redirect("/login.html?error=" + encodeURIComponent("Your account has been suspended"));
-      }
-
+      // Existing user — log them in (unapproved = still in registration flow, not suspended)
       // Update google_id and avatar if not set
       if (!user.google_id || !user.avatar_url) {
         await execute(
@@ -1141,6 +1131,7 @@ router.get("/auth/google/callback", async (req, res) => {
       const userData = encodeURIComponent(JSON.stringify({
         id: user.id, email: user.email, full_name: user.full_name,
         role: user.role, is_approved: user.is_approved, is_verified: user.is_verified,
+        phone_verified: user.phone_verified,
         avatar_url: user.avatar_url || googlePicture
       }));
 
@@ -1176,7 +1167,7 @@ router.get("/auth/google/callback", async (req, res) => {
     const token = generateToken(newUser);
     const userData = encodeURIComponent(JSON.stringify({
       id: newUser.id, email: newUser.email, full_name: newUser.full_name,
-      role: newUser.role, is_approved: newUser.is_approved,
+      role: newUser.role, is_approved: newUser.is_approved, is_verified: newUser.is_verified,
       avatar_url: newUser.avatar_url
     }));
 
@@ -1283,14 +1274,19 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    // Admins always pass. For others, is_approved must be 1 to log in.
-    // (New registrations auto-set is_approved=1, so this only blocks manually revoked accounts)
+    // Admins always pass. Others need is_approved=1 OR phone_verified=1.
+    // (Unapproved + unverified = still in registration flow; approved but phone_unverified = needs verify)
     if (user.role !== "admin" && !user.is_approved) {
-      return res
-        .status(403)
-        .json({
-          error: "Your account has been suspended. Please contact support.",
+      if (!user.phone_verified) {
+        return res.status(403).json({
+          error: "Please verify your phone number to activate your account.",
+          requiresPhoneVerification: true,
+          redirectTo: "verify-phone.html",
         });
+      }
+      return res.status(403).json({
+        error: "Your account has been suspended. Please contact support.",
+      });
     }
 
     // Enforce role separation: guest cannot login as partner and vice versa

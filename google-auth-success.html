@@ -69,12 +69,14 @@
                 // Redirect logic
                 var role = user.role;
                 var isVerified = user.is_verified;
+                var isApproved = user.is_approved;
+                var phoneVerified = user.phone_verified;
                 setTimeout(function() {
                     // Unverified partner (new or returning) → MUST go through choice step first
                     if (role === 'partner' && !isVerified) {
                         window.location.href = '/register-partner.html?step=choice';
-                    } else if (isNew && role === 'guest') {
-                        // New Google guest → phone verification
+                    } else if ((isNew || !isApproved) && role === 'guest' && !phoneVerified) {
+                        // New or unapproved Google guest without phone verified → phone verification
                         window.location.href = '/verify-phone.html';
                     } else if (role === 'admin') {
                         window.location.href = '/admin.html';
