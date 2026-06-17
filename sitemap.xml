@@ -86,9 +86,12 @@
   </url>
   <url>
     <loc>https://eliteauto.rent/kutaisi-airport-car-rental.html</loc>
-    <lastmod>2026-06-12</lastmod>
+    <lastmod>2026-06-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/kutaisi-airport-car-rental.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/kutaisi-airport-car-rental.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/kutaisi-airport-car-rental.html"/>
   </url>
   <url>
     <loc>https://eliteauto.rent/batumi-airport-car-rental.html</loc>
@@ -107,9 +110,12 @@
   </url>
   <url>
     <loc>https://eliteauto.rent/cheap-car-rental-georgia.html</loc>
-    <lastmod>2026-06-12</lastmod>
+    <lastmod>2026-06-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/cheap-car-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/cheap-car-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/cheap-car-rental-georgia.html"/>
   </url>
   <url>
     <loc>https://eliteauto.rent/monthly-long-term-car-rental-tbilisi.html</loc>
@@ -128,9 +134,12 @@
   </url>
   <url>
     <loc>https://eliteauto.rent/suv-rental-georgia.html</loc>
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/suv-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/suv-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/suv-rental-georgia.html"/>
   </url>
   <url>
     <loc>https://eliteauto.rent/economy-car-rental-georgia.html</loc>
