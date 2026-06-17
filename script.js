@@ -504,8 +504,8 @@ function loadCarouselWithAvailability() {
                 return;
             }
             
-            // Home page shows only 6 random cars as a teaser; "Show all vehicles" → vehicles.html
-            renderCarousel(pickRandom(vehicles, 8));
+            // Home page teaser: 6 random cars + 2 native ad cards = a clean 2×4 grid.
+            renderCarousel(pickRandom(vehicles, 6));
         })
         .catch(function (err) {
             console.error('Fleet load error:', err);
@@ -534,7 +534,7 @@ function renderCarousel(vehicles) {
         const isNew = v.created_at && (Date.now() - new Date(v.created_at).getTime()) < 24 * 60 * 60 * 1000;
         
         html += `
-            <div class="fleet-card${idx >= 4 ? ' fleet-card--extra' : ''}" data-category="${(v.category||'').toLowerCase()}" data-engine="${(v.engine||'').toLowerCase()}" data-gearbox="${(v.gearbox||'').toLowerCase()}" data-drivetype="${(v.drive_type||'').toLowerCase()}" data-interior="${(v.interior_type||'').toLowerCase()}" data-steering="${(v.steering_side||'').toLowerCase()}" data-payment="${(v.payment_method||'').toLowerCase()}" onclick="if(!event.target.closest('button'))window.location.href='vehicle.html?id=${v.id}'">
+            <div class="fleet-card" data-category="${(v.category||'').toLowerCase()}" data-engine="${(v.engine||'').toLowerCase()}" data-gearbox="${(v.gearbox||'').toLowerCase()}" data-drivetype="${(v.drive_type||'').toLowerCase()}" data-interior="${(v.interior_type||'').toLowerCase()}" data-steering="${(v.steering_side||'').toLowerCase()}" data-payment="${(v.payment_method||'').toLowerCase()}" onclick="if(!event.target.closest('button'))window.location.href='vehicle.html?id=${v.id}'">
                 <div class="fleet-card-img">
                     <img src="${imgSrc}" alt="${v.name}">
                     ${isNew ? '<span class="fleet-card-badge">NEW</span>' : ''}
@@ -561,49 +561,36 @@ function renderCarousel(vehicles) {
 
     carouselTrack.innerHTML = html;
 
-    // Inject native in-feed ad card after position 2 (0-indexed) if we have enough cars
-    if (vehicles.length >= 3) {
-        var adCardHtml = `
-            <a class="fleet-ad-card" href="vehicles.html" rel="noopener sponsored">
-                <div class="fleet-ad-card__img">
-                    <img src="images/svaneti.jpg" alt="Georgia road trip essentials" loading="lazy">
-                    <span class="fleet-ad-card__badge">Recommended</span>
-                </div>
-                <div class="fleet-ad-card__body">
-                    <h3 class="fleet-ad-card__title">Plan your Georgia road trip</h3>
-                    <p class="fleet-ad-card__desc">eSIMs, travel insurance, hotels & tours — everything you need for the drive.</p>
-                    <span class="fleet-ad-card__cta">
-                        Explore essentials
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    </span>
-                </div>
-            </a>
-        `;
-        // Insert after the 3rd real card (index 2)
-        var cards = carouselTrack.querySelectorAll('.fleet-card');
-        if (cards[2]) {
-            cards[2].insertAdjacentHTML('afterend', adCardHtml);
-        } else {
-            carouselTrack.insertAdjacentHTML('beforeend', adCardHtml);
-        }
+    // Two native in-feed ad cards placed in slots 4 and 8, so the teaser is a
+    // clean 2-row × 4-column grid (6 cars + 2 ads = 8 tiles).
+    var adCreatives = [
+        { img: 'images/svaneti.jpg', badge: 'Recommended', title: 'Plan your Georgia road trip',
+          desc: 'eSIMs, travel insurance, hotels & tours — everything you need for the drive.',
+          cta: 'Explore essentials', href: 'vehicles.html' },
+        { img: 'images/2.png', badge: 'Sponsored', title: 'Stay connected in Georgia',
+          desc: 'Grab a travel eSIM before you land — mobile data the moment you arrive.',
+          cta: 'Get connected', href: 'vehicles.html' }
+    ];
+    function buildAdCard(ad) {
+        return '<a class="fleet-ad-card" href="' + ad.href + '" rel="noopener sponsored">'
+            + '<div class="fleet-ad-card__img"><img src="' + ad.img + '" alt="' + ad.title + '" loading="lazy"><span class="fleet-ad-card__badge">' + ad.badge + '</span></div>'
+            + '<div class="fleet-ad-card__body"><h3 class="fleet-ad-card__title">' + ad.title + '</h3>'
+            + '<p class="fleet-ad-card__desc">' + ad.desc + '</p>'
+            + '<span class="fleet-ad-card__cta">' + ad.cta + ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></span>'
+            + '</div></a>';
     }
+    var cards = carouselTrack.querySelectorAll('.fleet-card');
+    if (cards[2]) { cards[2].insertAdjacentHTML('afterend', buildAdCard(adCreatives[0])); }
+    else { carouselTrack.insertAdjacentHTML('beforeend', buildAdCard(adCreatives[0])); }
+    carouselTrack.insertAdjacentHTML('beforeend', buildAdCard(adCreatives[1]));
 
     if (typeof I18n !== 'undefined' && I18n.translatePage) I18n.translatePage(carouselTrack);
 
-    // Home page: show first 4 cards, reveal the rest via the "Browse more" button.
+    // Teaser shows a fixed 8 tiles; "Browse More" goes to the full fleet page.
     var moreBtn = document.getElementById('browseMoreBtn');
     if (moreBtn) {
-        if (vehicles.length > 4) {
-            moreBtn.style.display = '';
-            moreBtn.onclick = function () {
-                carouselTrack.querySelectorAll('.fleet-card--extra').forEach(function (c) {
-                    c.classList.remove('fleet-card--extra');
-                });
-                moreBtn.style.display = 'none';
-            };
-        } else {
-            moreBtn.style.display = 'none';
-        }
+        moreBtn.style.display = '';
+        moreBtn.onclick = function () { window.location.href = 'vehicles.html'; };
     }
 }
 
