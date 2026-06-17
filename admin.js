@@ -71,7 +71,12 @@ function escHtml(s) {
             method: method,
             headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
             body: JSON.stringify(body || {})
-        }).then(function (r) { return r.json(); });
+        }).then(function (r) {
+            return r.json().then(function (data) {
+                if (!r.ok) throw new Error(data.error || 'Request failed (' + r.status + ')');
+                return data;
+            });
+        });
     }
     function esc(s) {
         var d = document.createElement('div');
@@ -1537,6 +1542,8 @@ function escHtml(s) {
         apiRequest(url, method, payload).then(function () {
             adFormWrap.style.display = 'none';
             loadAdminAds();
+        }).catch(function (err) {
+            alert('Error saving ad card: ' + (err.message || 'Unknown error'));
         });
     });
 
