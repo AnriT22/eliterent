@@ -108,7 +108,7 @@
                 pvDesc.textContent = 'Verify your phone number to make reservations on EliteAuto.rent.';
                 pvBtn.style.display = 'inline-block';
                 pvBtn.addEventListener('click', function () {
-                    window.location.href = '/verify-phone.html';
+                    window.location.href = '/verify-phone.html?v=2';
                 });
             }
         }

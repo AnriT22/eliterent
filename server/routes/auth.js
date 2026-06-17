@@ -1282,7 +1282,7 @@ router.post("/login", async (req, res) => {
         return res.status(403).json({
           error: "Please verify your phone number to activate your account.",
           requiresPhoneVerification: true,
-          redirectTo: "verify-phone.html",
+          redirectTo: "verify-phone.html?v=2",
         });
       }
       // Phone verified but still not approved — partner-specific messages

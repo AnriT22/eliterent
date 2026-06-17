@@ -204,12 +204,12 @@
             // Legacy invite code path (if invite_code was sent directly)
             if (data.pending_approval) {
                 showPendingApproval();
-                setTimeout(function () { window.location.href = 'verify-phone.html'; }, 4000);
+                setTimeout(function () { window.location.href = 'verify-phone.html?v=2'; }, 4000);
                 return;
             }
 
             // Fallback: redirect to verify-phone
-            window.location.href = 'verify-phone.html';
+            window.location.href = 'verify-phone.html?v=2';
 
         } catch (err) {
             nextBtn.disabled = false;
@@ -303,7 +303,7 @@
             // Success — hide choice, show pending approval, then go to phone verify
             document.getElementById('pChoiceStep').style.display = 'none';
             showPendingApproval();
-            setTimeout(function () { window.location.href = 'verify-phone.html'; }, 4000);
+            setTimeout(function () { window.location.href = 'verify-phone.html?v=2'; }, 4000);
 
         } catch (err) {
             btn.disabled = false;
@@ -427,7 +427,7 @@
                     document.getElementById('pPaymentSuccess').style.display = 'block';
                     document.querySelector('.payment-cancel-link') && (document.querySelector('.payment-cancel-link').style.display = 'none');
 
-                    setTimeout(function () { window.location.href = 'verify-phone.html'; }, 3000);
+                    setTimeout(function () { window.location.href = 'verify-phone.html?v=2'; }, 3000);
                 },
                 onError: function (err) {
                     console.error('PayPal error:', err);
