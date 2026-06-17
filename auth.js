@@ -1272,7 +1272,7 @@ async function submitRegistration() {
 
             // Redirect to verify-phone page (SMS sent only when user clicks "Send Code")
 
-            window.location.href = 'verify-phone.html';
+            window.location.href = 'verify-phone.html?v=2';
 
             return;
 

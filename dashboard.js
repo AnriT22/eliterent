@@ -1299,6 +1299,7 @@
             min_age: getInt('vMinAge') || 21,
             location_city: getVal('vLocationCity'),
             country: getVal('vCountry') || 'georgia',
+            rent_with_driver_only: getChecked('vRentWithDriverOnly'),
             category: getVal('vCategory'),
             year: getInt('vYear'),
             engine: getVal('vEngine'),
@@ -1500,6 +1501,8 @@
         // Restore default toggles
         var visEl = document.getElementById('vVisibleInSearch');
         if (visEl) visEl.checked = true;
+        var rwdEl = document.getElementById('vRentWithDriverOnly');
+        if (rwdEl) rwdEl.checked = false;
         var blockEl = document.getElementById('vReturnFormatted');
         if (blockEl) blockEl.checked = true;
         // Clear brand search
@@ -1616,6 +1619,7 @@
             setVal('vFuelPolicy', v.fuel_policy || 'full_to_full');
             setVal('vLuggage', v.luggage || '');
             setVal('vRegion', v.region || '');
+            setCheck('vRentWithDriverOnly', v.rent_with_driver_only === 1 || v.rent_with_driver_only === true);
             setVal('vPrice', v.price_per_day || '');
             setVal('vDeposit', v.deposit_amount || 0);
             setVal('vImageUrl', v.image_url || '');
@@ -1857,7 +1861,7 @@
                     ppvTitle.textContent = 'Phone Not Verified';
                     ppvDesc.textContent = 'Verify your phone so customers and our team can reach you about bookings.';
                     ppvBtn.style.display = 'inline-block';
-                    ppvBtn.onclick = function () { window.location.href = '/verify-phone.html'; };
+                    ppvBtn.onclick = function () { window.location.href = '/verify-phone.html?v=2'; };
                 }
             }
         });
@@ -2260,6 +2264,320 @@
             var match = cityList().filter(function (c) { return c.name.toLowerCase() === (city || '').toLowerCase(); })[0];
             setRegion(match ? match.region : (region || ''));
         };
+    })();
+
+    // ========================================
+    // DRIVER MANAGEMENT
+    // ========================================
+    (function initDrivers() {
+        var driverForm = document.getElementById('driverForm');
+        var driversGrid = document.getElementById('driversGrid');
+        var emptyDrivers = document.getElementById('emptyDrivers');
+        if (!driverForm || !driversGrid) return;
+
+        // --- helpers ---
+        function dVal(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+        function dCheck(id) { var el = document.getElementById(id); return el ? !!el.checked : false; }
+        function dInt(id) { return parseInt(dVal(id)) || 0; }
+        function dFloat(id) { return parseFloat(dVal(id)) || 0; }
+        function setDVal(id, v) { var el = document.getElementById(id); if (el) el.value = v !== undefined && v !== null ? v : ''; }
+        function setDCheck(id, v) { var el = document.getElementById(id); if (el) el.checked = !!v; }
+
+        function resetDriverForm() {
+            driverForm.reset();
+            document.getElementById('dEditId').value = '';
+            document.getElementById('addDriverTitle').textContent = 'Add a Driver';
+            document.getElementById('submitDriverBtn').textContent = 'Add Driver';
+            setDVal('dPhotoUrl', '');
+            setDVal('dLicenseFront', '');
+            setDVal('dLicenseBack', '');
+            setDVal('dIdDocument', '');
+            document.getElementById('dPhotoPreview').innerHTML = '';
+            document.getElementById('dLicenseFrontPreview').innerHTML = '';
+            document.getElementById('dLicenseBackPreview').innerHTML = '';
+            document.getElementById('dIdDocPreview').innerHTML = '';
+            setDVal('dLocationCity', '');
+            setDVal('dCountry', 'georgia');
+            setDCheck('dHasOwnVehicle', false);
+            document.getElementById('dVehicleInfo').disabled = true;
+        }
+
+        function uploadDriverFile(fileInput, hiddenInputId, previewId) {
+            return new Promise(function (resolve) {
+                var file = fileInput.files ? fileInput.files[0] : null;
+                if (!file) { resolve(null); return; }
+                var fd = new FormData();
+                fd.append('image', file);
+                fetch('/api/upload/driver-image', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: fd })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (data.url) {
+                            document.getElementById(hiddenInputId).value = data.url;
+                            var preview = document.getElementById(previewId);
+                            if (preview) preview.innerHTML = '<img src="' + data.url + '" style="max-width:120px;max-height:120px;border-radius:8px;margin-top:8px;">';
+                        }
+                        resolve(data.url || null);
+                    })
+                    .catch(function () { resolve(null); });
+            });
+        }
+
+        // Wire file inputs
+        document.getElementById('dPhotoFile').addEventListener('change', function () {
+            uploadDriverFile(this, 'dPhotoUrl', 'dPhotoPreview');
+        });
+        document.getElementById('dLicenseFrontFile').addEventListener('change', function () {
+            uploadDriverFile(this, 'dLicenseFront', 'dLicenseFrontPreview');
+        });
+        document.getElementById('dLicenseBackFile').addEventListener('change', function () {
+            uploadDriverFile(this, 'dLicenseBack', 'dLicenseBackPreview');
+        });
+        document.getElementById('dIdDocFile').addEventListener('change', function () {
+            uploadDriverFile(this, 'dIdDocument', 'dIdDocPreview');
+        });
+
+        // Has own vehicle toggle
+        var hasVehicleCb = document.getElementById('dHasOwnVehicle');
+        var vehicleInfoInp = document.getElementById('dVehicleInfo');
+        if (hasVehicleCb && vehicleInfoInp) {
+            hasVehicleCb.addEventListener('change', function () {
+                vehicleInfoInp.disabled = !hasVehicleCb.checked;
+                if (!hasVehicleCb.checked) vehicleInfoInp.value = '';
+            });
+        }
+
+        // --- City autocomplete for driver form ---
+        (function initDriverCity() {
+            var countrySel = document.getElementById('dCountry');
+            var cityInput = document.getElementById('dLocationCity');
+            var results = document.getElementById('dCityResults');
+            if (!countrySel || !cityInput || !results) return;
+
+            var DATA = window.LOCATION_DATA || {};
+            var activeIndex = -1;
+            var current = [];
+
+            function cityList() {
+                var c = countrySel.value || 'georgia';
+                return (DATA[c] && DATA[c].cities) ? DATA[c].cities : [];
+            }
+
+            function hideResults() { results.classList.remove('open'); results.innerHTML = ''; activeIndex = -1; }
+
+            function render(matches) {
+                current = matches;
+                if (!matches.length) { hideResults(); return; }
+                results.innerHTML = matches.map(function (m, i) {
+                    return '<div class="vf-city-item' + (i === activeIndex ? ' active' : '') + '" data-i="' + i + '">'
+                        + '<span class="vf-city-name">' + m.name + '</span>'
+                        + '<span class="vf-city-region">' + m.region + '</span>'
+                        + '</div>';
+                }).join('');
+                results.classList.add('open');
+            }
+
+            function search(q) {
+                var list = cityList();
+                q = (q || '').toLowerCase().trim();
+                var matches = q ? list.filter(function (c) {
+                    return c.name.toLowerCase().indexOf(q) !== -1 || c.region.toLowerCase().indexOf(q) !== -1;
+                }).slice(0, 30) : list.slice(0, 30);
+                activeIndex = -1;
+                render(matches);
+            }
+
+            cityInput.addEventListener('focus', function () { search(cityInput.value); });
+            cityInput.addEventListener('input', function () { search(cityInput.value); });
+            cityInput.addEventListener('keydown', function (e) {
+                if (!results.classList.contains('open')) return;
+                if (e.key === 'ArrowDown') { e.preventDefault(); activeIndex = Math.min(activeIndex + 1, current.length - 1); render(current); }
+                else if (e.key === 'ArrowUp') { e.preventDefault(); activeIndex = Math.max(activeIndex - 1, 0); render(current); }
+                else if (e.key === 'Enter') { if (activeIndex >= 0 && current[activeIndex]) { e.preventDefault(); cityInput.value = current[activeIndex].name; hideResults(); } }
+                else if (e.key === 'Escape') { hideResults(); }
+            });
+            results.addEventListener('mousedown', function (e) {
+                var item = e.target.closest('.vf-city-item');
+                if (!item) return;
+                e.preventDefault();
+                var idx = parseInt(item.getAttribute('data-i'), 10);
+                if (current[idx]) { cityInput.value = current[idx].name; hideResults(); }
+            });
+            document.addEventListener('click', function (e) { if (!e.target.closest('#tab-add-driver')) hideResults(); });
+            countrySel.addEventListener('change', function () { cityInput.value = ''; hideResults(); });
+        })();
+
+        // --- Form submit ---
+        driverForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (!isVerified) { showNotVerifiedAlert(); return; }
+
+            var editId = document.getElementById('dEditId').value;
+            var payload = {
+                full_name: dVal('dName').trim(),
+                photo_url: dVal('dPhotoUrl') || null,
+                experience_years: dInt('dExperience'),
+                languages: dVal('dLanguages').split(',').map(function (s) { return s.trim(); }).filter(Boolean),
+                has_own_vehicle: dCheck('dHasOwnVehicle'),
+                vehicle_info: dCheck('dHasOwnVehicle') ? dVal('dVehicleInfo').trim() : null,
+                price_amount: dFloat('dPrice'),
+                price_unit: dVal('dPriceUnit') || 'day',
+                phone: dVal('dPhone').trim() || null,
+                whatsapp: dVal('dWhatsapp').trim() || null,
+                bio: dVal('dBio').trim() || null,
+                location_city: dVal('dLocationCity').trim() || null,
+                country: dVal('dCountry') || 'georgia',
+                license_front: dVal('dLicenseFront') || null,
+                license_back: dVal('dLicenseBack') || null,
+                id_document: dVal('dIdDocument') || null
+            };
+
+            if (!payload.full_name) { showFormMessage('Driver name is required'); return; }
+            if (!payload.location_city) { showFormMessage('City is required'); return; }
+
+            var url = editId ? '/api/drivers/' + editId : '/api/drivers';
+            var method = editId ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify(payload)
+            })
+            .then(function (r) { return r.json().then(function (data) { return { ok: r.ok, data: data }; }); })
+            .then(function (res) {
+                if (!res.ok) {
+                    showFormMessage(res.data.error || 'Failed to save driver');
+                    return;
+                }
+                showFormMessage(res.data.message, 'success');
+                setTimeout(function () {
+                    resetDriverForm();
+                    switchTab('drivers');
+                    loadDrivers();
+                }, 1000);
+            })
+            .catch(function () { showFormMessage('Network error. Please try again.'); });
+        });
+
+        // --- Load drivers ---
+        function loadDrivers() {
+            if (!driversGrid) return;
+            driversGrid.innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8;">Loading...</div>';
+            fetch('/api/drivers/mine', { headers: { 'Authorization': 'Bearer ' + token } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    var list = data.drivers || [];
+                    if (list.length === 0) {
+                        driversGrid.innerHTML = '';
+                        if (emptyDrivers) emptyDrivers.style.display = '';
+                        driversGrid.appendChild(emptyDrivers);
+                        return;
+                    }
+                    if (emptyDrivers) emptyDrivers.style.display = 'none';
+                    var html = '';
+                    list.forEach(function (d) {
+                        var statusBadge = d.status === 'approved' ? '<span style="background:#22c55e;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px;">Approved</span>' :
+                            d.status === 'pending' ? '<span style="background:#f59e0b;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px;">Pending</span>' :
+                            '<span style="background:#ef4444;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px;">Rejected</span>';
+                        var photo = d.photo_url || 'images/default-driver.png';
+                        var langs = (typeof d.languages === 'string') ? JSON.parse(d.languages || '[]') : (d.languages || []);
+                        var langTags = langs.slice(0, 4).map(function (l) { return '<span style="font-size:11px;background:rgba(201,168,76,0.15);color:#C9A84C;padding:2px 6px;border-radius:6px;">' + l + '</span>'; }).join(' ');
+                        html += '<div class="db-driver-card" data-id="' + d.id + '">'
+                            + '<div class="db-driver-photo" style="background-image:url(' + photo + ')"></div>'
+                            + '<div class="db-driver-info">'
+                            + '<h4>' + escapeHtml(d.full_name) + '</h4>'
+                            + '<div style="margin:4px 0;">' + statusBadge + (d.is_verified ? ' <span style="font-size:11px;color:#22c55e;">&#10003; Verified</span>' : '') + '</div>'
+                            + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0;">' + langTags + '</div>'
+                            + '<p style="font-size:13px;color:#A0A3B0;margin:4px 0;">' + (d.experience_years || 0) + ' years experience</p>'
+                            + '<p style="font-size:14px;color:#C9A84C;font-weight:600;">' + (d.price_amount || 0) + '$ / ' + (d.price_unit || 'day') + '</p>'
+                            + '</div>'
+                            + '<div class="db-driver-actions">'
+                            + '<button class="btn btn-small btn-text edit-driver" data-id="' + d.id + '">Edit</button>'
+                            + '<button class="btn btn-small btn-danger delete-driver" data-id="' + d.id + '">Delete</button>'
+                            + '</div>'
+                            + '</div>';
+                    });
+                    driversGrid.innerHTML = html;
+                    wireDriverCardActions();
+                })
+                .catch(function () {
+                    driversGrid.innerHTML = '<div style="padding:40px;text-align:center;color:#ef4444;">Failed to load drivers.</div>';
+                });
+        }
+
+        function wireDriverCardActions() {
+            driversGrid.querySelectorAll('.edit-driver').forEach(function (btn) {
+                btn.addEventListener('click', function () { editDriver(parseInt(btn.dataset.id)); });
+            });
+            driversGrid.querySelectorAll('.delete-driver').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    if (!confirm('Delete this driver?')) return;
+                    fetch('/api/drivers/' + btn.dataset.id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } })
+                        .then(function () { loadDrivers(); });
+                });
+            });
+        }
+
+        function editDriver(id) {
+            fetch('/api/drivers/mine', { headers: { 'Authorization': 'Bearer ' + token } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    var d = (data.drivers || []).filter(function (x) { return x.id === id; })[0];
+                    if (!d) return;
+                    resetDriverForm();
+                    document.getElementById('dEditId').value = d.id;
+                    document.getElementById('addDriverTitle').textContent = 'Edit Driver';
+                    document.getElementById('submitDriverBtn').textContent = 'Save Changes';
+                    setDVal('dName', d.full_name);
+                    setDVal('dPhotoUrl', d.photo_url || '');
+                    if (d.photo_url) document.getElementById('dPhotoPreview').innerHTML = '<img src="' + d.photo_url + '" style="max-width:120px;max-height:120px;border-radius:8px;margin-top:8px;">';
+                    setDVal('dExperience', d.experience_years);
+                    var langs = (typeof d.languages === 'string') ? JSON.parse(d.languages || '[]') : (d.languages || []);
+                    setDVal('dLanguages', langs.join(', '));
+                    setDCheck('dHasOwnVehicle', d.has_own_vehicle === 1 || d.has_own_vehicle === true);
+                    document.getElementById('dVehicleInfo').disabled = !d.has_own_vehicle;
+                    setDVal('dVehicleInfo', d.vehicle_info || '');
+                    setDVal('dPrice', d.price_amount);
+                    setDVal('dPriceUnit', d.price_unit || 'day');
+                    setDVal('dPhone', d.phone || '');
+                    setDVal('dWhatsapp', d.whatsapp || '');
+                    setDVal('dBio', d.bio || '');
+                    setDVal('dCountry', d.country || 'georgia');
+                    setDVal('dLocationCity', d.location_city || '');
+                    setDVal('dLicenseFront', d.license_front || '');
+                    setDVal('dLicenseBack', d.license_back || '');
+                    setDVal('dIdDocument', d.id_document || '');
+                    if (d.license_front) document.getElementById('dLicenseFrontPreview').innerHTML = '<img src="' + d.license_front + '" style="max-width:120px;max-height:120px;border-radius:8px;margin-top:8px;">';
+                    if (d.license_back) document.getElementById('dLicenseBackPreview').innerHTML = '<img src="' + d.license_back + '" style="max-width:120px;max-height:120px;border-radius:8px;margin-top:8px;">';
+                    if (d.id_document) document.getElementById('dIdDocPreview').innerHTML = '<img src="' + d.id_document + '" style="max-width:120px;max-height:120px;border-radius:8px;margin-top:8px;">';
+                    switchTab('add-driver');
+                });
+        }
+
+        // --- Tab button wiring ---
+        var addFromList = document.getElementById('addDriverFromList');
+        var addFirst = document.getElementById('addFirstDriver');
+        var backBtn = document.getElementById('backToDrivers');
+        var cancelBtn = document.getElementById('cancelDriverForm');
+        var driversNavItem = document.querySelector('.db-nav-item[data-tab="drivers"]');
+
+        if (addFromList) addFromList.addEventListener('click', function () {
+            if (!isVerified) { showNotVerifiedAlert(); return; }
+            resetDriverForm(); switchTab('add-driver');
+        });
+        if (addFirst) addFirst.addEventListener('click', function () {
+            if (!isVerified) { showNotVerifiedAlert(); return; }
+            resetDriverForm(); switchTab('add-driver');
+        });
+        if (backBtn) backBtn.addEventListener('click', function () { switchTab('drivers'); });
+        if (cancelBtn) cancelBtn.addEventListener('click', function () { resetDriverForm(); switchTab('drivers'); });
+        if (driversNavItem) driversNavItem.addEventListener('click', loadDrivers);
+
+        // Escape HTML helper
+        function escapeHtml(str) {
+            var div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
     })();
 
     console.log('✓ Partner dashboard initialized');

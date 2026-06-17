@@ -77,7 +77,7 @@
                         window.location.href = '/register-partner.html?step=choice';
                     // Partner without phone verified → verify phone (after choice step redirects here)
                     } else if (role === 'partner' && !phoneVerified) {
-                        window.location.href = '/verify-phone.html';
+                        window.location.href = '/verify-phone.html?v=2';
                     // Partner phone verified but still not verified (invite waiting admin approval)
                     } else if (role === 'partner' && !isVerified) {
                         window.location.href = '/register-partner.html?step=choice';
@@ -88,7 +88,7 @@
                         window.location.href = '/partner-dashboard.html';
                     } else if ((isNew || !isApproved) && role === 'guest' && !phoneVerified) {
                         // New or unapproved Google guest without phone verified → phone verification
-                        window.location.href = '/verify-phone.html';
+                        window.location.href = '/verify-phone.html?v=2';
                     } else {
                         window.location.href = '/index.html';
                     }
