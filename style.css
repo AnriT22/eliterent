@@ -1621,8 +1621,8 @@ body {
     flex-direction: column;
     position: relative;
     text-decoration: none;
-    /* Spans full row on desktop, single cell on mobile */
-    grid-column: span 2;
+    /* Single grid cell so it sits flush in the fleet grid like a car card */
+    grid-column: span 1;
 }
 
 .fleet-ad-card:hover {
