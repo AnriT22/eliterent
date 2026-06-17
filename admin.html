@@ -44,6 +44,14 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     Vehicles
                 </button>
+                <button class="admin-nav-item" data-tab="drivers">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Drivers
+                </button>
+                <button class="admin-nav-item" data-tab="reviews">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    Reviews
+                </button>
                 <button class="admin-nav-item" data-tab="bookings">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     Bookings
@@ -55,6 +63,10 @@
                 <button class="admin-nav-item" data-tab="promos">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
                     Promo Codes
+                </button>
+                <button class="admin-nav-item" data-tab="ads">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    Ad Cards
                 </button>
                 <button class="admin-nav-item" data-tab="activity">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -347,6 +359,86 @@
                             <tr><th>ID</th><th>Code</th><th>Discount</th><th class="hide-mobile">Min Order</th><th class="hide-mobile">Uses</th><th class="hide-mobile">Valid Until</th><th>Active</th><th>Actions</th></tr>
                         </thead>
                         <tbody id="promosTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- DRIVERS TAB -->
+            <section class="admin-tab" id="tabDrivers">
+                <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;align-items:center;">
+                    <select id="driverStatusFilter" style="padding:8px 12px;border-radius:8px;border:1px solid #3A3F4B;background:#262A35;color:#EAEAEA;font-size:13px;">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                    <input type="text" id="driverSearch" placeholder="Search drivers..." style="padding:8px 12px;border-radius:8px;border:1px solid #3A3F4B;background:#262A35;color:#EAEAEA;font-size:13px;min-width:200px;">
+                </div>
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead><tr><th>ID</th><th>Photo</th><th>Name</th><th>Partner</th><th>City</th><th>Status</th><th>Verified</th><th>Price</th><th>Actions</th></tr></thead>
+                        <tbody id="driversTableBody"><tr><td colspan="9" style="text-align:center;color:#A0A3B0;padding:40px;">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- REVIEWS TAB -->
+            <section class="admin-tab" id="tabReviews">
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead><tr><th>ID</th><th>Driver</th><th>Customer</th><th>Rating</th><th>Review</th><th>Date</th><th>Hidden</th><th>Actions</th></tr></thead>
+                        <tbody id="driverReviewsTableBody"><tr><td colspan="8" style="text-align:center;color:#A0A3B0;padding:40px;">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- AD CARDS TAB -->
+            <section class="admin-tab" id="tabAds">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+                    <h3 style="margin:0;font-size:16px;color:#EAEAEA;">Promotional Ad Cards</h3>
+                    <button class="admin-action-btn success" id="addAdCardBtn">+ Add Ad Card</button>
+                </div>
+                <div id="adCardFormWrap" style="display:none;background:#1C1E26;border:1px solid #3A3F4B;border-radius:14px;padding:20px;margin-bottom:20px;max-width:600px;">
+                    <h4 id="adCardFormTitle" style="margin:0 0 16px;font-size:15px;color:#EAEAEA;">New Ad Card</h4>
+                    <input type="hidden" id="adCardEditId">
+                    <div style="display:flex;flex-direction:column;gap:12px;">
+                        <div><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Title</label><input type="text" id="adTitle" class="db-input" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
+                        <div><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Description</label><textarea id="adDescription" rows="2" class="db-input" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></textarea></div>
+                        <div>
+                            <label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Cover Image</label>
+                            <input type="file" id="adCoverFile" accept="image/*" style="display:none;">
+                            <input type="hidden" id="adCoverUrl">
+                            <div id="adCoverPreviewWrap" style="display:none;margin-bottom:8px;">
+                                <img id="adCoverPreview" src="" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid #3A3F4B;">
+                            </div>
+                            <button type="button" id="adCoverUploadBtn" style="padding:10px 14px;border:1px dashed #3A3F4B;border-radius:8px;background:#262A35;color:#A0A3B0;cursor:pointer;width:100%;box-sizing:border-box;font-size:13px;">
+                                + Upload Cover Image
+                            </button>
+                            <div id="adCoverUploadStatus" style="font-size:12px;color:#A0A3B0;margin-top:4px;"></div>
+                        </div>
+                        <div><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Target Link *</label><input type="text" id="adTargetLink" class="db-input" placeholder="https://..." style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
+                        <div><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">CTA Text</label><input type="text" id="adCtaText" class="db-input" placeholder="Learn More" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
+                        <div style="display:flex;gap:12px;">
+                            <div style="flex:1;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Placement</label>
+                                <select id="adPlacement" class="db-input" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;">
+                                    <option value="cars">Cars</option>
+                                    <option value="drivers">Drivers</option>
+                                    <option value="both">Both</option>
+                                </select>
+                            </div>
+                            <div style="flex:1;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Position</label><input type="number" id="adPosition" class="db-input" value="4" min="1" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
+                        </div>
+                        <label style="display:flex;align-items:center;gap:8px;color:#A0A3B0;font-size:13px;"><input type="checkbox" id="adIsActive" checked style="width:16px;height:16px;"> Active</label>
+                        <div style="display:flex;gap:8px;margin-top:4px;">
+                            <button class="admin-action-btn" id="cancelAdCardBtn">Cancel</button>
+                            <button class="admin-action-btn success" id="saveAdCardBtn">Save</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead><tr><th>ID</th><th>Title</th><th>Placement</th><th>Position</th><th>Active</th><th>Actions</th></tr></thead>
+                        <tbody id="adsTableBody"><tr><td colspan="6" style="text-align:center;color:#A0A3B0;padding:40px;">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </section>

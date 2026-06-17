@@ -7,10 +7,14 @@ const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Ensure uploads directory exists
+// Ensure uploads directories exist
 const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'vehicles');
+const driverUploadDir = path.join(__dirname, '..', '..', 'uploads', 'drivers');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
+}
+if (!fs.existsSync(driverUploadDir)) {
+    fs.mkdirSync(driverUploadDir, { recursive: true });
 }
 
 // Multer config
@@ -41,6 +45,24 @@ const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
     limits: { fileSize: 20 * 1024 * 1024 } // 20MB
+});
+
+// Multer config for driver uploads
+const driverStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, driverUploadDir);
+    },
+    filename: function (req, file, cb) {
+        var ext = path.extname(file.originalname).toLowerCase();
+        var uniqueName = 'driver_' + req.user.id + '_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8) + ext;
+        cb(null, uniqueName);
+    }
+});
+
+const uploadDriver = multer({
+    storage: driverStorage,
+    fileFilter: fileFilter,
+    limits: { fileSize: 20 * 1024 * 1024 }
 });
 
 // Re-encode uploaded image: strip EXIF, resize, compress to JPEG
@@ -99,6 +121,38 @@ router.post('/vehicle-images', authenticateToken, upload.array('images', 10), as
         }
     }
     res.json({ message: 'Images uploaded', urls: urls });
+});
+
+// POST /api/upload/driver-image — upload driver photo or document
+router.post('/driver-image', authenticateToken, uploadDriver.single('image'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No image file provided' });
+    }
+    try {
+        var processedName = await processImage(req.file.path);
+        var imageUrl = '/uploads/drivers/' + processedName;
+        res.json({ message: 'Image uploaded', url: imageUrl });
+    } catch (err) {
+        console.error('Driver image processing error:', err.message);
+        var imageUrl = '/uploads/drivers/' + req.file.filename;
+        res.json({ message: 'Image uploaded', url: imageUrl });
+    }
+});
+
+// POST /api/upload/ad-cover — upload ad card cover image
+router.post('/ad-cover', authenticateToken, upload.single('image'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No image file provided' });
+    }
+    try {
+        var processedName = await processImage(req.file.path);
+        var imageUrl = '/uploads/vehicles/' + processedName;
+        res.json({ message: 'Image uploaded', url: imageUrl });
+    } catch (err) {
+        console.error('Ad cover processing error:', err.message);
+        var imageUrl = '/uploads/vehicles/' + req.file.filename;
+        res.json({ message: 'Image uploaded', url: imageUrl });
+    }
 });
 
 // Error handler for multer errors (file too large, invalid type)
