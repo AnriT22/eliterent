@@ -15,7 +15,7 @@
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
-    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="stylesheet" href="style.css?v=7">
 
     <link rel="stylesheet" href="premium.css?v=5">
 
@@ -55,6 +55,8 @@
                     <a href="index.html" class="nav-link" data-i18n="nav.home">Home</a>
 
                     <a href="vehicles.html" class="nav-link" data-i18n="nav.vehicles">Vehicles</a>
+
+                    <a href="drivers.html" class="nav-link" data-i18n="nav.drivers">Drivers</a>
 
                     <a href="partner-dashboard.html" class="nav-link active" data-i18n="nav.dashboard">Dashboard</a>
 
@@ -104,6 +106,14 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
 
                     <span data-i18n="partner_dashboard.vehicles">My Vehicles</span>
+
+                </a>
+
+                <a href="#" class="db-nav-item" data-tab="drivers">
+
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+
+                    <span data-i18n="partner_dashboard.drivers">My Drivers</span>
 
                 </a>
 
@@ -1070,6 +1080,20 @@
 
                             </div>
 
+                            <div class="db-form-group" style="margin-top:14px;">
+
+                                <label class="db-label" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+
+                                    <input type="checkbox" id="vRentWithDriverOnly" style="width:18px;height:18px;">
+
+                                    <span data-i18n="partner_dashboard.rent_with_driver_only">Rent with driver only</span>
+
+                                </label>
+
+                                <p class="db-field-hint" data-i18n="partner_dashboard.rent_with_driver_only_hint">Check this if this car can only be rented together with a driver (not for self-drive).</p>
+
+                            </div>
+
                         </div>
 
 
@@ -1305,6 +1329,290 @@
                     </div>
 
 
+
+                </form>
+
+            </div>
+
+
+
+            <!-- TAB: MY DRIVERS -->
+
+            <div class="db-tab" id="tab-drivers">
+
+                <div class="db-tab-header">
+
+                    <h2 data-i18n="partner_dashboard.drivers">My Drivers</h2>
+
+                    <button class="btn btn-primary btn-small" id="addDriverFromList" data-i18n="partner_dashboard.add_driver_btn">+ Add Driver</button>
+
+                </div>
+
+                <div class="db-drivers-grid" id="driversGrid">
+
+                    <div class="db-empty-state" id="emptyDrivers">
+
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#A0A3B0" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+
+                        <h3 data-i18n="partner_dashboard.no_drivers">No drivers yet</h3>
+
+                        <p data-i18n="partner_dashboard.no_drivers_desc">Add your first driver to offer chauffeur services</p>
+
+                        <button class="btn btn-primary" id="addFirstDriver" data-i18n="partner_dashboard.add_first_driver">+ Add Your First Driver</button>
+
+                    </div>
+
+                </div>
+
+                <!-- DRIVER REVIEWS (read-only) -->
+                <div style="margin-top:32px;">
+                    <h3 style="font-size:16px;color:#EAEAEA;margin:0 0 12px;">Driver Reviews</h3>
+                    <div id="partnerDriverReviews" style="color:#A0A3B0;font-size:13px;">Loading reviews...</div>
+                </div>
+
+            </div>
+
+
+
+            <!-- TAB: ADD/EDIT DRIVER -->
+
+            <div class="db-tab" id="tab-add-driver">
+
+                <div class="db-tab-header">
+
+                    <button class="btn btn-text" id="backToDrivers" data-i18n="partner_dashboard.back">&larr; Back to My Drivers</button>
+
+                    <h2 id="addDriverTitle" data-i18n="partner_dashboard.add_driver">Add a Driver</h2>
+
+                </div>
+
+                <form class="db-form" id="driverForm">
+
+                    <input type="hidden" id="dEditId">
+
+
+
+                    <div class="vf-section">
+
+                        <div class="vf-section-title" data-i18n="partner_dashboard.driver_basic">Basic Information</div>
+
+                        <div class="db-form-grid">
+
+                            <div class="db-form-group">
+
+                                <label class="db-label" data-i18n="partner_dashboard.driver_name">Full Name *</label>
+
+                                <input type="text" class="db-input" id="dName" placeholder="e.g. Giorgi Mamulashvili" required>
+
+                            </div>
+
+                            <div class="db-form-group">
+
+                                <label class="db-label" data-i18n="partner_dashboard.driver_photo">Driver Photo</label>
+
+                                <input type="file" class="db-input" id="dPhotoFile" accept="image/*">
+
+                                <input type="hidden" id="dPhotoUrl">
+
+                                <div class="db-image-preview" id="dPhotoPreview"></div>
+
+                            </div>
+
+                            <div class="db-form-group">
+
+                                <label class="db-label" data-i18n="partner_dashboard.experience">Experience (years)</label>
+
+                                <input type="number" class="db-input" id="dExperience" min="0" max="60" placeholder="5">
+
+                            </div>
+
+                            <div class="db-form-group">
+
+                                <label class="db-label" data-i18n="partner_dashboard.languages">Languages</label>
+
+                                <input type="text" class="db-input" id="dLanguages" placeholder="e.g. Georgian, English, Russian">
+
+                                <p class="db-field-hint" data-i18n="partner_dashboard.languages_hint">Comma-separated language names</p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="vf-section">
+
+                        <div class="vf-section-title" data-i18n="partner_dashboard.driver_vehicle">Vehicle & Pricing</div>
+
+                        <div class="db-form-grid">
+
+                            <div class="db-form-group">
+
+                                <label class="db-label" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+
+                                    <input type="checkbox" id="dHasOwnVehicle" style="width:18px;height:18px;">
+
+                                    <span data-i18n="partner_dashboard.has_own_vehicle">Driver has their own vehicle</span>
+
+                                </label>
+
+                                <p class="db-field-hint" data-i18n="partner_dashboard.has_own_vehicle_hint">Check if this driver brings their own car</p>
+
+                            </div>
+
+                            <div class="db-form-group">
+
+                                <label class="db-label" data-i18n="partner_dashboard.vehicle_info">Vehicle Info</label>
+
+                                <input type="text" class="db-input" id="dVehicleInfo" placeholder="e.g. Mercedes E-Class 2023, black" disabled>
+
+                            </div>
+
+                            <div class="db-form-group">
+
+                                <label class="db-label" data-i18n="partner_dashboard.price">Price</label>
+
+                                <div style="display:flex;gap:8px;">
+
+                                    <input type="number" class="db-input" id="dPrice" placeholder="100" min="0" step="0.01" style="flex:1;">
+
+                                    <select class="db-input" id="dPriceUnit" style="width:100px;">
+
+                                        <option value="day" data-i18n="partner_dashboard.per_day">/ day</option>
+
+                                        <option value="hour" data-i18n="partner_dashboard.per_hour">/ hour</option>
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="vf-section">
+
+                        <div class="vf-section-title" data-i18n="partner_dashboard.driver_contact">Contact & Location</div>
+
+                        <div class="db-form-grid">
+
+                            <div class="db-form-group">
+
+                                <label class="db-label" data-i18n="partner_dashboard.phone">Phone</label>
+
+                                <input type="tel" class="db-input" id="dPhone" placeholder="+995 599 12 34 56">
+
+                            </div>
+
+                            <div class="db-form-group">
+
+                                <label class="db-label" data-i18n="partner_dashboard.whatsapp">WhatsApp</label>
+
+                                <input type="tel" class="db-input" id="dWhatsapp" placeholder="+995 599 12 34 56">
+
+                            </div>
+
+                            <div class="db-form-group vf-city-group">
+
+                                <label class="db-label" data-i18n="partner_dashboard.country">Country *</label>
+
+                                <select class="db-input" id="dCountry" required>
+
+                                    <option value="georgia">Georgia</option>
+
+                                    <option value="armenia">Armenia</option>
+
+                                    <option value="usa">United States</option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="db-form-group vf-city-group">
+
+                                <label class="db-label" data-i18n="partner_dashboard.city">City *</label>
+
+                                <input type="text" class="db-input" id="dLocationCity" autocomplete="off" required data-i18n-placeholder="partner_dashboard.search_city" placeholder="Type to search city...">
+
+                                <div class="vf-city-results" id="dCityResults"></div>
+
+                            </div>
+
+                            <div class="db-form-group" style="grid-column:span 2;">
+
+                                <label class="db-label" data-i18n="partner_dashboard.bio">Bio / Description</label>
+
+                                <textarea class="db-input" id="dBio" rows="3" placeholder="Brief description of the driver's experience and services..."></textarea>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="vf-section">
+
+                        <div class="vf-section-title" data-i18n="partner_dashboard.driver_documents">Verification Documents</div>
+
+                        <div class="db-form-grid">
+
+                            <div class="db-form-group">
+
+                                <label class="db-label" data-i18n="partner_dashboard.license_front">Driver's License (Front)</label>
+
+                                <input type="file" class="db-input" id="dLicenseFrontFile" accept="image/*">
+
+                                <input type="hidden" id="dLicenseFront">
+
+                                <div class="db-image-preview" id="dLicenseFrontPreview"></div>
+
+                            </div>
+
+                            <div class="db-form-group">
+
+                                <label class="db-label" data-i18n="partner_dashboard.license_back">Driver's License (Back)</label>
+
+                                <input type="file" class="db-input" id="dLicenseBackFile" accept="image/*">
+
+                                <input type="hidden" id="dLicenseBack">
+
+                                <div class="db-image-preview" id="dLicenseBackPreview"></div>
+
+                            </div>
+
+                            <div class="db-form-group">
+
+                                <label class="db-label" data-i18n="partner_dashboard.id_document">ID Document / Passport</label>
+
+                                <input type="file" class="db-input" id="dIdDocFile" accept="image/*">
+
+                                <input type="hidden" id="dIdDocument">
+
+                                <div class="db-image-preview" id="dIdDocPreview"></div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="db-form-actions">
+
+                        <button type="button" class="btn btn-text" id="cancelDriverForm" data-i18n="partner_dashboard.cancel">Cancel</button>
+
+                        <button type="submit" class="btn btn-primary" id="submitDriverBtn" data-i18n="partner_dashboard.add_driver_btn">Add Driver</button>
+
+                    </div>
 
                 </form>
 
