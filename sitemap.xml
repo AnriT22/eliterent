@@ -98,9 +98,12 @@
   </url>
   <url>
     <loc>https://eliteauto.rent/automatic-car-rental-georgia.html</loc>
-    <lastmod>2026-06-12</lastmod>
+    <lastmod>2026-06-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/automatic-car-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/automatic-car-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/automatic-car-rental-georgia.html"/>
   </url>
   <url>
     <loc>https://eliteauto.rent/cheap-car-rental-georgia.html</loc>
@@ -116,9 +119,12 @@
   </url>
   <url>
     <loc>https://eliteauto.rent/no-deposit-car-rental-georgia.html</loc>
-    <lastmod>2026-05-29</lastmod>
+    <lastmod>2026-06-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/no-deposit-car-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/no-deposit-car-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/no-deposit-car-rental-georgia.html"/>
   </url>
   <url>
     <loc>https://eliteauto.rent/suv-rental-georgia.html</loc>
