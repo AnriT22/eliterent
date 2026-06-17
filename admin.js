@@ -1441,15 +1441,18 @@ function escHtml(s) {
     function renderAdminAds() {
         var tbody = document.getElementById('adsTableBody');
         if (_adminAds.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#A0A3B0;padding:40px;">No ad cards yet</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#A0A3B0;padding:40px;">No ad cards yet</td></tr>';
             return;
         }
         tbody.innerHTML = _adminAds.map(function (a) {
+            var clicks = a.clicks || 0;
+            var clickBadge = clicks > 0 ? '<span style="background:rgba(34,197,94,0.15);color:#22c55e;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;">' + clicks + '</span>' : '<span style="color:#A0A3B0;font-size:11px;">0</span>';
             return '<tr>'
                 + '<td>' + a.id + '</td>'
                 + '<td><b>' + esc(a.title || 'Untitled') + '</b><br><span style="font-size:11px;color:#A0A3B0;">' + esc(a.target_link || '') + '</span></td>'
                 + '<td>' + esc(a.placement || 'cars') + '</td>'
                 + '<td>' + a.position + '</td>'
+                + '<td>' + clickBadge + '</td>'
                 + '<td>' + (a.is_active ? '<span style="color:#22c55e;font-size:12px;">Yes</span>' : '<span style="color:#ef4444;font-size:12px;">No</span>') + '</td>'
                 + '<td style="white-space:nowrap;">'
                 + '<button class="admin-action-btn small" onclick="adminEditAd(' + a.id + ')">Edit</button>'

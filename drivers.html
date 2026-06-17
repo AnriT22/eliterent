@@ -77,7 +77,7 @@
         }
         .ad-card-cover { height: 180px; background-size: cover; background-position: center; background-color: #2A2D3A; }
         .ad-card-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
-        .ad-card-body h4 { margin: 0 0 6px; font-size: 16px; color: #EAEAEA; }
+        .ad-card-body h4 { margin: 0 0 6px; font-size: 16px; color: #EAEAEA; text-align: center; }
         .ad-card-body p { margin: 0 0 12px; font-size: 13px; color: #A0A3B0; flex: 1; }
         .ad-card-cta {
             display: inline-block; background: #C9A84C; color: #0F1117; text-decoration: none;
@@ -338,6 +338,11 @@
             var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML;
         }
 
+        function trackAdClick(adId) {
+            if (!adId) return;
+            fetch('/api/ads/' + adId + '/click', { method: 'POST' }).catch(function () {});
+        }
+
         function renderStars(rating) {
             var html = '<span class="star-rating">';
             for (var i = 1; i <= 5; i++) {
@@ -350,12 +355,13 @@
         }
 
         function renderAdCard(ad) {
+            var trackClick = ad.id ? ' onclick="trackAdClick(' + ad.id + ')"' : '';
             return '<div class="ad-card">'
                 + (ad.cover_url ? '<div class="ad-card-cover" style="background-image:url(' + ad.cover_url + ')"></div>' : '')
                 + '<div class="ad-card-body">'
                 + '<h4>' + esc(ad.title) + '</h4>'
                 + '<p>' + esc(ad.description) + '</p>'
-                + '<a href="' + esc(ad.target_link) + '" class="ad-card-cta" target="_blank" rel="noopener">' + esc(ad.cta_text || 'Learn More') + '</a>'
+                + '<a href="' + esc(ad.target_link) + '" class="ad-card-cta" target="_blank" rel="noopener"' + trackClick + '>' + esc(ad.cta_text || 'Learn More') + '</a>'
                 + '</div></div>';
         }
 

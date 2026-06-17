@@ -118,6 +118,7 @@ async function initDB() {
             min_age INTEGER DEFAULT 21,
             location_city TEXT,
             country TEXT DEFAULT 'georgia',
+            rent_with_driver_only INTEGER DEFAULT 0,
             fuel_policy TEXT DEFAULT 'full_to_full',
             luggage TEXT,
             region TEXT,
@@ -287,9 +288,19 @@ async function initDB() {
         await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS country TEXT DEFAULT 'georgia'`);
     } catch (e) { /* column may already exist or table not yet created */ }
 
+    // Add rent_with_driver_only flag to vehicles (existing DBs)
+    try {
+        await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS rent_with_driver_only INTEGER DEFAULT 0`);
+    } catch (e) { /* column may already exist or table not yet created */ }
+
     // Add priority column to vehicles so admin can pin/order vehicles on the page (existing DBs)
     try {
         await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS priority INTEGER DEFAULT 0`);
+    } catch (e) { /* column may already exist or table not yet created */ }
+
+    // Add clicks column to ad_cards for tracking ad engagement (existing DBs)
+    try {
+        await pool.query(`ALTER TABLE ad_cards ADD COLUMN IF NOT EXISTS clicks INTEGER DEFAULT 0`);
     } catch (e) { /* column may already exist or table not yet created */ }
 
     // Add partner signup method / paid columns (existing DBs)
@@ -351,6 +362,74 @@ async function initDB() {
         )
     `);
 
+    // Drivers registry — partner-added driver profiles, admin-moderated.
+    // Directory/contact model (no online booking). Hidden until approved.
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS drivers (
+            id SERIAL PRIMARY KEY,
+            partner_id INTEGER NOT NULL,
+            full_name TEXT NOT NULL,
+            photo_url TEXT,
+            experience_years INTEGER DEFAULT 0,
+            languages TEXT,
+            has_own_vehicle INTEGER DEFAULT 0,
+            vehicle_info TEXT,
+            price_amount NUMERIC(10,2) DEFAULT 0,
+            price_unit TEXT DEFAULT 'day' CHECK(price_unit IN ('day', 'hour')),
+            phone TEXT,
+            whatsapp TEXT,
+            bio TEXT,
+            location_city TEXT,
+            country TEXT DEFAULT 'georgia',
+            license_front TEXT,
+            license_back TEXT,
+            id_document TEXT,
+            status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'approved', 'rejected')),
+            is_verified INTEGER DEFAULT 0,
+            rating NUMERIC(3,2) DEFAULT 0,
+            reviews_count INTEGER DEFAULT 0,
+            priority INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (partner_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    `);
+
+    // Promotional ad cards — admin-built banners injected into listing grids.
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS ad_cards (
+            id SERIAL PRIMARY KEY,
+            title TEXT,
+            description TEXT,
+            cover_url TEXT,
+            target_link TEXT NOT NULL,
+            cta_text TEXT,
+            placement TEXT DEFAULT 'cars' CHECK(placement IN ('cars', 'drivers', 'both')),
+            position INTEGER DEFAULT 4,
+            clicks INTEGER DEFAULT 0,
+            is_active INTEGER DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // Driver reviews — customer ratings for driver profiles.
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS driver_reviews (
+            id SERIAL PRIMARY KEY,
+            driver_id INTEGER NOT NULL,
+            customer_id INTEGER NOT NULL,
+            rating_score INTEGER NOT NULL CHECK(rating_score BETWEEN 1 AND 5),
+            review_text TEXT,
+            is_hidden INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (driver_id) REFERENCES drivers(id) ON DELETE CASCADE,
+            FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE(driver_id, customer_id)
+        )
+    `);
+
     // Create indexes
     const indexes = [
         'CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)',
@@ -367,7 +446,13 @@ async function initDB() {
         'CREATE INDEX IF NOT EXISTS idx_availability_vehicle ON vehicle_availability(vehicle_id)',
         'CREATE INDEX IF NOT EXISTS idx_availability_date ON vehicle_availability(date)',
         'CREATE INDEX IF NOT EXISTS idx_page_visits_created ON page_visits(created_at)',
-        'CREATE INDEX IF NOT EXISTS idx_page_visits_visitor ON page_visits(visitor_id)'
+        'CREATE INDEX IF NOT EXISTS idx_page_visits_visitor ON page_visits(visitor_id)',
+        'CREATE INDEX IF NOT EXISTS idx_drivers_partner ON drivers(partner_id)',
+        'CREATE INDEX IF NOT EXISTS idx_drivers_status ON drivers(status)',
+        'CREATE INDEX IF NOT EXISTS idx_ad_cards_placement ON ad_cards(placement)',
+        'CREATE INDEX IF NOT EXISTS idx_ad_cards_active ON ad_cards(is_active)',
+        'CREATE INDEX IF NOT EXISTS idx_driver_reviews_driver ON driver_reviews(driver_id)',
+        'CREATE INDEX IF NOT EXISTS idx_driver_reviews_customer ON driver_reviews(customer_id)'
     ];
     for (const sql of indexes) {
         await pool.query(sql);
