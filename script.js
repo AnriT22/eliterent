@@ -576,7 +576,8 @@ function renderCarousel(vehicles, adminAds) {
     function buildAdCard(ad) {
         var img = ad.cover_url || 'images/svaneti.jpg';
         var badge = ad.placement === 'both' ? 'Sponsored' : 'Recommended';
-        return '<a class="fleet-ad-card" href="' + (ad.target_link || 'vehicles.html') + '" rel="noopener sponsored" target="_blank">'
+        var trackClick = ad.id ? ' onclick="trackAdClick(' + ad.id + ')"' : '';
+        return '<a class="fleet-ad-card" href="' + (ad.target_link || 'vehicles.html') + '" rel="noopener sponsored" target="_blank"' + trackClick + '>'
             + '<div class="fleet-ad-card__img"><img src="' + img + '" alt="' + (ad.title || '') + '" loading="lazy"><span class="fleet-ad-card__badge">' + badge + '</span></div>'
             + '<div class="fleet-ad-card__body"><h3 class="fleet-ad-card__title">' + (ad.title || '') + '</h3>'
             + '<p class="fleet-ad-card__desc">' + (ad.description || '') + '</p>'
@@ -614,6 +615,11 @@ function clearDatesAndReload() {
 
 function selectVehicle(vehicleId) {
     window.location.href = 'vehicle.html?id=' + vehicleId;
+}
+
+function trackAdClick(adId) {
+    if (!adId) return;
+    fetch('/api/ads/' + adId + '/click', { method: 'POST' }).catch(function () {});
 }
 
 function initCarousel() {
