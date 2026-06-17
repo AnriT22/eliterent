@@ -2137,55 +2137,6 @@ body {
 }
 
 /* ========================================
-   PARTNERS SECTION
-   ======================================== */
-
-.partners-section {
-    padding: 60px 0;
-    background: #262A35;
-}
-
-.partners-slider {
-    display: flex;
-    overflow: hidden;
-    padding: 20px 0;
-    gap: 0;
-    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-}
-
-.partners-slider-track {
-    display: flex;
-    gap: 0;
-    animation: partnersScroll 22s linear infinite;
-    will-change: transform;
-}
-
-.partners-slider:hover .partners-slider-track { animation-play-state: paused; }
-
-@keyframes partnersScroll {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-}
-
-.partner-logo {
-    background: #1C1E26;
-    padding: 22px 36px;
-    border-radius: var(--radius-md);
-    text-align: center;
-    font-weight: 600;
-    color: #EAEAEA;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-    cursor: pointer;
-}
-
-.partner-logo:hover {
-    transform: scale(1.05);
-    box-shadow: var(--shadow-md);
-}
-
-/* ========================================
    TESTIMONIALS
    ======================================== */
 
@@ -2743,11 +2694,6 @@ body {
         margin: 0;
     }
 
-    .partners-slider {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-    }
-
     .testimonials-grid {
         grid-template-columns: 1fr;
         gap: 20px;
@@ -2843,11 +2789,6 @@ body {
     .step-card {
         padding: 20px 15px;
         min-width: auto;
-    }
-
-    .partner-logo {
-        padding: 20px;
-        font-size: 12px;
     }
 
     .testimonial-card {
