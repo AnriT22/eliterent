@@ -77,9 +77,12 @@
   </url>
   <url>
     <loc>https://eliteauto.rent/tbilisi-airport-car-rental.html</loc>
-    <lastmod>2026-05-29</lastmod>
+    <lastmod>2026-06-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/tbilisi-airport-car-rental.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/tbilisi-airport-car-rental.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/tbilisi-airport-car-rental.html"/>
   </url>
   <url>
     <loc>https://eliteauto.rent/kutaisi-airport-car-rental.html</loc>
