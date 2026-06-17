@@ -488,11 +488,19 @@ function loadCarouselWithAvailability() {
         apiUrl += '&pickup_date=' + fmt(new Date(window.selectedStartDate)) + '&dropoff_date=' + fmt(new Date(window.selectedEndDate));
     }
     
-    fetch(apiUrl)
-        .then(function (res) { return res.json(); })
-        .then(function (data) {
+    // Fetch vehicles AND admin ads in parallel
+    Promise.all([
+        fetch(apiUrl).then(function (r) { return r.json(); }),
+        fetch('/api/ads?placement=cars').then(function (r) { return r.json(); }).catch(function () { return { ads: [] }; })
+    ])
+        .then(function (results) {
+            var data = results[0];
+            var adData = results[1];
             const vehicles = data.vehicles || [];
             window._allCarouselVehicles = vehicles;
+            
+            // Admin-created ads for homepage: placement='cars' or 'both', active only
+            var homeAds = (adData.ads || []).slice(0, 2);
             
             if (vehicles.length === 0 && hasDates) {
                 carouselTrack.innerHTML = '<div style="padding:40px;text-align:center;color:#EAEAEA;grid-column:1/-1;"><p style="font-size:18px;margin-bottom:8px;">No vehicles available for the selected dates.</p><button onclick="clearDatesAndReload()" style="padding:8px 20px;background:#D4AF37;color:#0B0C10;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;">Clear Dates</button></div>';
@@ -504,8 +512,8 @@ function loadCarouselWithAvailability() {
                 return;
             }
             
-            // Home page teaser: 6 random cars + 2 native ad cards = a clean 2×4 grid.
-            renderCarousel(pickRandom(vehicles, 6));
+            // Home page teaser: 6 random cars + up to 2 admin ads = max 8 tiles.
+            renderCarousel(pickRandom(vehicles, 6), homeAds);
         })
         .catch(function (err) {
             console.error('Fleet load error:', err);
@@ -523,16 +531,17 @@ function pickRandom(arr, n) {
     return a.slice(0, n);
 }
 
-function renderCarousel(vehicles) {
+function renderCarousel(vehicles, adminAds) {
+    adminAds = adminAds || [];
     const carouselTrack = document.getElementById('carouselTrack');
     if (!carouselTrack) return;
-    
+
     let html = '';
-    
+
     vehicles.forEach(function (v, idx) {
         const imgSrc = v.image_url || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240'%3E%3Crect fill='%23e2e8f0' width='400' height='240'/%3E%3Ctext x='200' y='125' text-anchor='middle' fill='%2394a3b8' font-size='16' font-family='sans-serif'%3ENo Image%3C/text%3E%3C/svg%3E";
         const isNew = v.created_at && (Date.now() - new Date(v.created_at).getTime()) < 24 * 60 * 60 * 1000;
-        
+
         html += `
             <div class="fleet-card" data-category="${(v.category||'').toLowerCase()}" data-engine="${(v.engine||'').toLowerCase()}" data-gearbox="${(v.gearbox||'').toLowerCase()}" data-drivetype="${(v.drive_type||'').toLowerCase()}" data-interior="${(v.interior_type||'').toLowerCase()}" data-steering="${(v.steering_side||'').toLowerCase()}" data-payment="${(v.payment_method||'').toLowerCase()}" onclick="if(!event.target.closest('button'))window.location.href='vehicle.html?id=${v.id}'">
                 <div class="fleet-card-img">
@@ -561,28 +570,29 @@ function renderCarousel(vehicles) {
 
     carouselTrack.innerHTML = html;
 
-    // Two native in-feed ad cards placed in slots 4 and 8, so the teaser is a
-    // clean 2-row × 4-column grid (6 cars + 2 ads = 8 tiles).
-    var adCreatives = [
-        { img: 'images/svaneti.jpg', badge: 'Recommended', title: 'Plan your Georgia road trip',
-          desc: 'eSIMs, travel insurance, hotels & tours — everything you need for the drive.',
-          cta: 'Explore essentials', href: 'vehicles.html' },
-        { img: 'images/2.png', badge: 'Sponsored', title: 'Stay connected in Georgia',
-          desc: 'Grab a travel eSIM before you land — mobile data the moment you arrive.',
-          cta: 'Get connected', href: 'vehicles.html' }
-    ];
+    // Inject up to 2 admin-created ads into the fleet grid.
+    // Admin controls which ads show by setting placement='cars' or 'both', and Active=true.
+    // Only the first 2 ads (by lowest position number) are shown.
     function buildAdCard(ad) {
-        return '<a class="fleet-ad-card" href="' + ad.href + '" rel="noopener sponsored">'
-            + '<div class="fleet-ad-card__img"><img src="' + ad.img + '" alt="' + ad.title + '" loading="lazy"><span class="fleet-ad-card__badge">' + ad.badge + '</span></div>'
-            + '<div class="fleet-ad-card__body"><h3 class="fleet-ad-card__title">' + ad.title + '</h3>'
-            + '<p class="fleet-ad-card__desc">' + ad.desc + '</p>'
-            + '<span class="fleet-ad-card__cta">' + ad.cta + ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></span>'
+        var img = ad.cover_url || 'images/svaneti.jpg';
+        var badge = ad.placement === 'both' ? 'Sponsored' : 'Recommended';
+        return '<a class="fleet-ad-card" href="' + (ad.target_link || 'vehicles.html') + '" rel="noopener sponsored" target="_blank">'
+            + '<div class="fleet-ad-card__img"><img src="' + img + '" alt="' + (ad.title || '') + '" loading="lazy"><span class="fleet-ad-card__badge">' + badge + '</span></div>'
+            + '<div class="fleet-ad-card__body"><h3 class="fleet-ad-card__title">' + (ad.title || '') + '</h3>'
+            + '<p class="fleet-ad-card__desc">' + (ad.description || '') + '</p>'
+            + '<span class="fleet-ad-card__cta">' + (ad.cta_text || 'Learn More') + ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></span>'
             + '</div></a>';
     }
     var cards = carouselTrack.querySelectorAll('.fleet-card');
-    if (cards[2]) { cards[2].insertAdjacentHTML('afterend', buildAdCard(adCreatives[0])); }
-    else { carouselTrack.insertAdjacentHTML('beforeend', buildAdCard(adCreatives[0])); }
-    carouselTrack.insertAdjacentHTML('beforeend', buildAdCard(adCreatives[1]));
+    // Place first ad after 3rd car (position 4 in a 4-col grid)
+    if (adminAds[0]) {
+        if (cards[2]) { cards[2].insertAdjacentHTML('afterend', buildAdCard(adminAds[0])); }
+        else { carouselTrack.insertAdjacentHTML('beforeend', buildAdCard(adminAds[0])); }
+    }
+    // Place second ad at the end (position 8 in a 4-col grid)
+    if (adminAds[1]) {
+        carouselTrack.insertAdjacentHTML('beforeend', buildAdCard(adminAds[1]));
+    }
 
     if (typeof I18n !== 'undefined' && I18n.translatePage) I18n.translatePage(carouselTrack);
 
