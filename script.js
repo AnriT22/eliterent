@@ -536,6 +536,16 @@ function renderCarousel(vehicles, adminAds) {
     const carouselTrack = document.getElementById('carouselTrack');
     if (!carouselTrack) return;
 
+    // Remember what's shown so we can re-render (e.g. localized ad text) when the
+    // visitor switches language. i18n.js dispatches 'languageChanged' on switch.
+    window._lastRender = { vehicles: vehicles, adminAds: adminAds };
+    if (!window._carouselLangBound) {
+        window._carouselLangBound = true;
+        document.addEventListener('languageChanged', function () {
+            if (window._lastRender) renderCarousel(window._lastRender.vehicles, window._lastRender.adminAds);
+        });
+    }
+
     let html = '';
 
     vehicles.forEach(function (v, idx) {
@@ -573,15 +583,24 @@ function renderCarousel(vehicles, adminAds) {
     // Inject up to 2 admin-created ads into the fleet grid.
     // Admin controls which ads show by setting placement='cars' or 'both', and Active=true.
     // Only the first 2 ads (by lowest position number) are shown.
+    // Pick the ad's text for the active language, falling back to the default (EN) field.
+    function adLocalized(ad, base) {
+        var lang = (window.I18n && I18n.lang && I18n.lang()) || localStorage.getItem('EliteAuto_lang') || 'en';
+        if (lang && lang !== 'en' && ad[base + '_' + lang]) return ad[base + '_' + lang];
+        return ad[base] || '';
+    }
     function buildAdCard(ad) {
         var img = ad.cover_url || 'images/svaneti.jpg';
         var badge = ad.placement === 'both' ? 'Sponsored' : 'Recommended';
         var trackClick = ad.id ? ' onclick="trackAdClick(' + ad.id + ')"' : '';
+        var title = adLocalized(ad, 'title');
+        var desc = adLocalized(ad, 'description');
+        var cta = adLocalized(ad, 'cta_text') || 'Learn More';
         return '<a class="fleet-ad-card" href="' + (ad.target_link || 'vehicles.html') + '" rel="noopener sponsored" target="_blank"' + trackClick + '>'
-            + '<div class="fleet-ad-card__img"><img src="' + img + '" alt="' + (ad.title || '') + '" loading="lazy"><span class="fleet-ad-card__badge">' + badge + '</span></div>'
-            + '<div class="fleet-ad-card__body"><h3 class="fleet-ad-card__title">' + (ad.title || '') + '</h3>'
-            + '<p class="fleet-ad-card__desc">' + (ad.description || '') + '</p>'
-            + '<span class="fleet-ad-card__cta">' + (ad.cta_text || 'Learn More') + ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></span>'
+            + '<div class="fleet-ad-card__img"><img src="' + img + '" alt="' + title + '" loading="lazy"><span class="fleet-ad-card__badge">' + badge + '</span></div>'
+            + '<div class="fleet-ad-card__body"><h3 class="fleet-ad-card__title">' + title + '</h3>'
+            + '<p class="fleet-ad-card__desc">' + desc + '</p>'
+            + '<span class="fleet-ad-card__cta">' + cta + ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></span>'
             + '</div></a>';
     }
     var cards = carouselTrack.querySelectorAll('.fleet-card');
