@@ -354,7 +354,15 @@
                     'Authorization': 'Bearer ' + token
                 }
             }).catch(function() {});
-            redirectToHome();
+            // Skip = go to dashboard directly (don't loop back to choice step)
+            var role = user.role;
+            if (role === 'admin') {
+                window.location.href = '/admin.html';
+            } else if (role === 'partner') {
+                window.location.href = '/partner-dashboard.html';
+            } else {
+                window.location.href = '/index.html';
+            }
         };
 
         function redirectToHome() {
