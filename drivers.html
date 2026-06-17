@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4XTKG24HN6"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-4XTKG24HN6');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Drivers in Georgia — EliteAuto</title>
+    <meta name="description" content="Hire verified professional drivers in Georgia, Armenia and USA. Experienced chauffeurs with own vehicles or fleet partners.">
+    <link rel="canonical" href="https://eliteauto.rent/drivers.html">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="stylesheet" href="premium.css?v=5">
+    <link rel="stylesheet" href="navbar-auth.css?v=4">
+    <script src="api-helper.js"></script>
+    <script src="i18n.js?v=5"></script>
+    <style>
+        .drivers-page { min-height: 100vh; background: #12141D; padding: 24px 0 60px; }
+        .drivers-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .drivers-header { text-align: center; padding: 32px 0 24px; }
+        .drivers-header h1 { font-size: 28px; font-weight: 700; color: #EAEAEA; margin: 0 0 8px; }
+        .drivers-header p { font-size: 15px; color: #A0A3B0; margin: 0; }
+        .drivers-filter-bar {
+            display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+            background: #1C1E26; border: 1px solid #3A3F4B; border-radius: 14px;
+            padding: 16px; margin-bottom: 24px;
+        }
+        .drivers-filter-bar select, .drivers-filter-bar input[type="text"], .drivers-filter-bar input[type="number"] {
+            background: #262A35; border: 1px solid #3A3F4B; border-radius: 10px;
+            color: #EAEAEA; padding: 10px 14px; font-size: 14px; min-width: 140px;
+        }
+        .drivers-filter-bar select:focus, .drivers-filter-bar input:focus { outline: none; border-color: #C9A84C; }
+        .drivers-filter-bar label { display: flex; align-items: center; gap: 8px; color: #A0A3B0; font-size: 14px; cursor: pointer; }
+        .drivers-filter-bar button {
+            background: #C9A84C; color: #0F1117; border: none; border-radius: 10px;
+            padding: 10px 22px; font-weight: 600; font-size: 14px; cursor: pointer; transition: opacity 0.2s;
+        }
+        .drivers-filter-bar button:hover { opacity: 0.9; }
+        .drivers-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;
+        }
+        .driver-card {
+            background: #1C1E26; border: 1px solid #3A3F4B; border-radius: 16px; overflow: hidden;
+            display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .driver-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+        .driver-photo {
+            height: 180px; background-size: cover; background-position: center; background-color: #2A2D3A;
+            position: relative;
+        }
+        .driver-photo .verified-badge {
+            position: absolute; top: 10px; right: 10px;
+            background: rgba(34,197,94,0.9); color: #fff; font-size: 11px; font-weight: 600;
+            padding: 3px 8px; border-radius: 8px;
+        }
+        .driver-info { padding: 16px; flex: 1; }
+        .driver-info h3 { margin: 0 0 6px; font-size: 17px; color: #EAEAEA; }
+        .driver-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+        .driver-meta span {
+            font-size: 12px; background: rgba(201,168,76,0.12); color: #C9A84C;
+            padding: 3px 8px; border-radius: 8px;
+        }
+        .driver-price { font-size: 18px; font-weight: 700; color: #C9A84C; margin: 8px 0 0; }
+        .driver-contact {
+            display: flex; gap: 8px; padding: 0 16px 16px;
+        }
+        .driver-contact a {
+            flex: 1; text-align: center; background: #262A35; border: 1px solid #3A3F4B;
+            color: #EAEAEA; text-decoration: none; border-radius: 10px; padding: 10px 0;
+            font-size: 13px; font-weight: 600; transition: all 0.2s;
+        }
+        .driver-contact a:hover { background: #C9A84C; color: #0F1117; border-color: #C9A84C; }
+        .ad-card {
+            background: linear-gradient(135deg, #1C1E26 0%, #262A35 100%);
+            border: 1px solid #C9A84C; border-radius: 16px; overflow: hidden;
+            display: flex; flex-direction: column; grid-column: span 1;
+        }
+        .ad-card-cover { height: 140px; background-size: cover; background-position: center; background-color: #2A2D3A; }
+        .ad-card-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
+        .ad-card-body h4 { margin: 0 0 6px; font-size: 16px; color: #EAEAEA; }
+        .ad-card-body p { margin: 0 0 12px; font-size: 13px; color: #A0A3B0; flex: 1; }
+        .ad-card-cta {
+            display: inline-block; background: #C9A84C; color: #0F1117; text-decoration: none;
+            border-radius: 10px; padding: 10px 16px; font-size: 13px; font-weight: 600;
+            text-align: center; transition: opacity 0.2s;
+        }
+        .ad-card-cta:hover { opacity: 0.9; }
+        .drivers-load-more {
+            text-align: center; margin-top: 32px;
+        }
+        .drivers-load-more button {
+            background: transparent; border: 1px solid #3A3F4B; color: #A0A3B0;
+            border-radius: 10px; padding: 12px 32px; font-size: 14px; cursor: pointer; transition: all 0.2s;
+        }
+        .drivers-load-more button:hover { border-color: #C9A84C; color: #C9A84C; }
+        .star-rating { display: inline-flex; align-items: center; gap: 2px; font-size: 13px; color: #C9A84C; }
+        .star-rating .star { color: #3A3F4B; }
+        .star-rating .star.filled { color: #C9A84C; }
+        .star-rating .star.half { background: linear-gradient(90deg, #C9A84C 50%, #3A3F4B 50%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .star-rating .count { color: #A0A3B0; font-size: 12px; margin-left: 4px; }
+        .driver-card .driver-stars { margin: 4px 0 0; }
+        .drivers-empty {
+            grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #A0A3B0;
+        }
+        .driver-detail-modal {
+            display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.6);
+            overflow-y: auto; -webkit-overflow-scrolling: touch; backdrop-filter: blur(4px);
+        }
+        .driver-detail-modal .modal-box {
+            max-width: 720px; margin: 40px auto; background: #1C1E26; border: 1px solid #3A3F4B;
+            border-radius: 16px; box-shadow: 0 24px 48px rgba(0,0,0,0.3); width: calc(100% - 32px); margin-bottom: 40px;
+        }
+        .driver-detail-modal .modal-header {
+            display: flex; justify-content: space-between; align-items: center; padding: 20px 24px;
+            border-bottom: 1px solid #3A3F4B; background: #262A35; position: sticky; top: 0; z-index: 10;
+            border-radius: 16px 16px 0 0;
+        }
+        .driver-detail-modal .modal-header h3 { margin: 0; font-size: 18px; font-weight: 700; color: #EAEAEA; }
+        .driver-detail-modal .modal-header button { background: none; border: none; font-size: 24px; cursor: pointer; color: #A0A3B0; padding: 8px; }
+        .driver-detail-modal .modal-body { padding: 24px; }
+        .driver-detail-photo { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #3A3F4B; }
+        .review-item { padding: 14px 0; border-bottom: 1px solid #3A3F4B; }
+        .review-item:last-child { border-bottom: none; }
+        .review-item .reviewer-name { font-size: 13px; font-weight: 600; color: #EAEAEA; }
+        .review-item .review-date { font-size: 11px; color: #A0A3B0; margin-left: 8px; }
+        .review-item .review-text { font-size: 13px; color: #A0A3B0; margin-top: 4px; }
+        .review-modal {
+            display: none; position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.6);
+            overflow-y: auto; -webkit-overflow-scrolling: touch; backdrop-filter: blur(4px);
+        }
+        .review-modal .modal-box {
+            max-width: 480px; margin: 80px auto; background: #1C1E26; border: 1px solid #3A3F4B;
+            border-radius: 16px; padding: 24px; width: calc(100% - 32px);
+        }
+        .star-selector { display: flex; gap: 6px; font-size: 28px; cursor: pointer; }
+        .star-selector .star { color: #3A3F4B; transition: color 0.15s; }
+        .star-selector .star:hover, .star-selector .star.active { color: #C9A84C; }
+        .review-modal textarea {
+            width: 100%; min-height: 80px; padding: 12px; border: 1px solid #3A3F4B;
+            border-radius: 10px; background: #262A35; color: #EAEAEA; font-size: 14px; resize: vertical; box-sizing: border-box;
+        }
+        .review-modal textarea:focus { outline: none; border-color: #C9A84C; }
+        @media (max-width: 640px) {
+            .drivers-grid { grid-template-columns: 1fr; }
+            .drivers-filter-bar { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header sticky-header">
+        <div class="container header-content">
+            <div class="header-left">
+                <a href="/" class="logo">
+                    <img src="images/logo3.png" alt="EliteAuto.rent" class="logo-img">
+                    <span class="logo-text">EliteAuto.rent</span>
+                </a>
+            </div>
+            <div class="header-center">
+                <nav class="nav-menu">
+                    <a href="index.html" class="nav-link" data-i18n="nav.home">Home</a>
+                    <a href="vehicles.html" class="nav-link" data-i18n="nav.vehicles">Vehicles</a>
+                    <a href="drivers.html" class="nav-link active" data-i18n="nav.drivers">Drivers</a>
+                    <a href="reviews.html" class="nav-link" data-i18n="nav.reviews">Reviews</a>
+                    <a href="about.html" class="nav-link" data-i18n="nav.about">About</a>
+                    <a href="contact.html" class="nav-link" data-i18n="nav.contact">Contact</a>
+                </nav>
+            </div>
+            <div class="header-right">
+                <div class="selector-group">
+                    <button class="selector-btn currency-btn" id="currencyBtn"><span class="selector-icon">💵</span><span class="selector-text">USD</span></button>
+                    <div class="dropdown-menu currency-dropdown" id="currencyDropdown" style="display:none;">
+                        <a href="#" class="dropdown-item" data-currency="USD">$ USD</a>
+                        <a href="#" class="dropdown-item" data-currency="EUR">€ EUR</a>
+                        <a href="#" class="dropdown-item" data-currency="GEL">₾ GEL</a>
+                        <a href="#" class="dropdown-item" data-currency="ILS">₪ ILS</a>
+                        <a href="#" class="dropdown-item" data-currency="RUB">₽ RUB</a>
+                        <a href="#" class="dropdown-item" data-currency="TRY">₺ TRY</a>
+                        <a href="#" class="dropdown-item" data-currency="AED">د.إ AED</a>
+                    </div>
+                </div>
+                <div class="selector-group">
+                    <button class="selector-btn language-btn" id="languageBtn"><span class="selector-icon">EN</span><span class="selector-text">English</span></button>
+                    <div class="dropdown-menu language-dropdown" id="languageDropdown" style="display:none;">
+                        <div class="dropdown-header">SELECT LANGUAGE</div>
+                        <a href="#" class="dropdown-item" data-language="en"><span class="language-flag">en</span><span>English</span><span class="checkmark">✓</span></a>
+                        <a href="#" class="dropdown-item" data-language="ru"><span class="language-flag"></span><span>Русский</span></a>
+                        <a href="#" class="dropdown-item" data-language="ka"><span class="language-flag">🇬🇪</span><span>ქართული</span></a>
+                        <a href="#" class="dropdown-item" data-language="he"><span class="language-flag">🇮🇱</span><span>עברית</span></a>
+                    </div>
+                </div>
+                <a href="register-partner.html" class="partner-btn" data-i18n="nav.become_partner">Become Partner</a>
+                <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </header>
+
+    <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+    <div class="mobile-nav-panel" id="mobileNavPanel">
+        <div class="mobile-nav-header">
+            <a href="/" class="logo"><img src="images/logo3.png" alt="EliteAuto.rent"><span>EliteAuto.rent</span></a>
+            <button class="mobile-nav-close" id="mobileNavClose">&#10005;</button>
+        </div>
+        <nav class="mobile-nav-links">
+            <a href="index.html" data-i18n="nav.home">Home</a>
+            <a href="vehicles.html" data-i18n="nav.vehicles">Vehicles</a>
+            <a href="drivers.html" class="active" data-i18n="nav.drivers">Drivers</a>
+            <a href="reviews.html" data-i18n="nav.reviews">Reviews</a>
+            <a href="about.html" data-i18n="nav.about">About</a>
+            <a href="contact.html" data-i18n="nav.contact">Contact</a>
+        </nav>
+        <div class="mobile-nav-footer"><a href="register-partner.html" class="partner-btn" data-i18n="nav.become_partner">Become Partner</a></div>
+    </div>
+
+    <div class="drivers-page">
+        <div class="drivers-container">
+            <div class="drivers-header">
+                <h1 data-i18n="drivers_page.title">Professional Drivers</h1>
+                <p data-i18n="drivers_page.subtitle">Hire experienced, verified chauffeurs for your journey</p>
+            </div>
+
+            <div class="drivers-filter-bar" id="driversFilterBar">
+                <select id="dfCountry">
+                    <option value="">All Countries</option>
+                    <option value="georgia">Georgia</option>
+                    <option value="armenia">Armenia</option>
+                    <option value="usa">United States</option>
+                </select>
+                <input type="text" id="dfCity" placeholder="City" data-i18n-placeholder="drivers_page.city_placeholder">
+                <input type="text" id="dfLanguages" placeholder="Languages" data-i18n-placeholder="drivers_page.languages_placeholder">
+                <input type="number" id="dfMinRating" min="0" max="5" step="0.1" placeholder="Min rating" data-i18n-placeholder="drivers_page.rating_placeholder">
+                <label><input type="checkbox" id="dfOwnVehicle"> <span data-i18n="drivers_page.has_vehicle">Has own vehicle</span></label>
+                <button id="dfSearchBtn" data-i18n="drivers_page.search">Search</button>
+            </div>
+
+            <div class="drivers-grid" id="driversGrid">
+                <div class="drivers-empty" id="driversEmpty">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#A0A3B0" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <h3 data-i18n="drivers_page.no_drivers">No drivers found</h3>
+                    <p data-i18n="drivers_page.no_drivers_desc">Try adjusting your filters</p>
+                </div>
+            </div>
+
+            <div class="drivers-load-more" id="driversLoadMore" style="display:none;">
+                <button id="driversLoadMoreBtn" data-i18n="drivers_page.load_more">Load More</button>
+            </div>
+        </div>
+    </div>
+
+    <a href="https://wa.me/995591522299?text=Hi!%20I%27m%20interested%20in%20hiring%20a%20driver" target="_blank" class="floating-whatsapp" style="text-decoration:none;color:inherit;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        <span data-i18n="quick_chat">Quick Chat</span>
+    </a>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-column">
+                <h4>EliteAuto.rent</h4>
+                <p data-i18n="footer.tagline">Premium car rental marketplace for Georgia adventures.</p>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com/profile.php?id=61583448788067" target="_blank" class="social-icon" title="Facebook"><img src="images/Facebook_Logo.png" alt="Facebook" width="18" height="18" style="object-fit:contain;"></a>
+                    <a href="https://www.instagram.com/eliterentalgeorgia/" target="_blank" class="social-icon" title="Instagram"><img src="images/Instagram.png" alt="Instagram" width="18" height="18" style="object-fit:contain;"></a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h4>Rent by City</h4>
+                <ul>
+                    <li><a href="rent-car-tbilisi.html">Rent a Car in Tbilisi</a></li>
+                    <li><a href="rent-car-batumi.html">Rent a Car in Batumi</a></li>
+                    <li><a href="rent-car-kutaisi.html">Rent a Car in Kutaisi</a></li>
+                    <li><a href="blog.html">Travel Blog</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4 data-i18n="footer.legal">Legal</h4>
+                <ul>
+                    <li><a href="tos.html" data-i18n="footer.terms">Terms & Conditions</a></li>
+                    <li><a href="privacy.html" data-i18n="footer.privacy">Privacy Policy</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4 data-i18n="footer.contact_title">Contact</h4>
+                <p data-i18n="footer.contact_email">info@eliteauto.rent</p>
+                <p data-i18n="footer.contact_phone">+995 591 52 22 99</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p data-i18n="footer.copyright">© 2025 EliteAuto.rent — All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- DRIVER DETAIL MODAL -->
+    <div class="driver-detail-modal" id="driverDetailModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="ddTitle">Driver Details</h3>
+                <button onclick="closeDriverDetail()">&times;</button>
+            </div>
+            <div class="modal-body" id="ddContent"><p style="color:#A0A3B0;text-align:center;padding:40px;">Loading...</p></div>
+        </div>
+    </div>
+
+    <!-- LEAVE REVIEW MODAL -->
+    <div class="review-modal" id="reviewModal">
+        <div class="modal-box">
+            <h3 style="margin:0 0 16px;font-size:16px;color:#EAEAEA;">Leave a Review</h3>
+            <input type="hidden" id="reviewDriverId">
+            <div style="margin-bottom:12px;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:8px;">Rating</label>
+                <div class="star-selector" id="starSelector">
+                    <span data-val="1" class="star">&#9733;</span>
+                    <span data-val="2" class="star">&#9733;</span>
+                    <span data-val="3" class="star">&#9733;</span>
+                    <span data-val="4" class="star">&#9733;</span>
+                    <span data-val="5" class="star">&#9733;</span>
+                </div>
+            </div>
+            <div style="margin-bottom:16px;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:8px;">Your Review (optional)</label>
+                <textarea id="reviewText" placeholder="Share your experience..."></textarea>
+            </div>
+            <div id="reviewMsg" style="display:none;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px;"></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button class="admin-action-btn" onclick="closeReviewModal()">Cancel</button>
+                <button class="admin-action-btn success" onclick="submitReview()">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="navbar-auth.js?v=3"></script>
+    <script>
+    (function() {
+        var page = 1, limit = 12, hasMore = false, ads = [], currentFilters = {};
+        var grid = document.getElementById('driversGrid');
+        var empty = document.getElementById('driversEmpty');
+        var loadMoreWrap = document.getElementById('driversLoadMore');
+        var loadMoreBtn = document.getElementById('driversLoadMoreBtn');
+
+        function esc(s) {
+            var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML;
+        }
+
+        function renderStars(rating) {
+            var html = '<span class="star-rating">';
+            for (var i = 1; i <= 5; i++) {
+                if (rating >= i) html += '<span class="star filled">&#9733;</span>';
+                else if (rating >= i - 0.5) html += '<span class="star half">&#9733;</span>';
+                else html += '<span class="star">&#9733;</span>';
+            }
+            html += '</span>';
+            return html;
+        }
+
+        function renderAdCard(ad) {
+            return '<div class="ad-card">'
+                + (ad.cover_url ? '<div class="ad-card-cover" style="background-image:url(' + ad.cover_url + ')"></div>' : '')
+                + '<div class="ad-card-body">'
+                + '<h4>' + esc(ad.title) + '</h4>'
+                + '<p>' + esc(ad.description) + '</p>'
+                + '<a href="' + esc(ad.target_link) + '" class="ad-card-cta" target="_blank" rel="noopener">' + esc(ad.cta_text || 'Learn More') + '</a>'
+                + '</div></div>';
+        }
+
+        function renderDriverCard(d) {
+            var photo = d.photo_url || 'images/default-driver.png';
+            var langs = (typeof d.languages === 'string') ? JSON.parse(d.languages || '[]') : (d.languages || []);
+            var langTags = langs.slice(0, 3).map(function(l) { return '<span>' + esc(l) + '</span>'; }).join('');
+            var vehicleInfo = d.has_own_vehicle && d.vehicle_info ? '<p style="font-size:12px;color:#A0A3B0;margin:4px 0;">' + esc(d.vehicle_info) + '</p>' : '';
+            var rating = parseFloat(d.rating) || 0;
+            var rc = d.reviews_count || 0;
+            var starsHtml = renderStars(rating) + (rc > 0 ? '<span class="count">' + rating + ' (' + rc + ')</span>' : '<span class="count">No reviews</span>');
+            return '<div class="driver-card" style="cursor:pointer;" onclick="openDriverDetail(' + d.id + ')">'
+                + '<div class="driver-photo" style="background-image:url(' + photo + ')">'
+                + (d.is_verified ? '<span class="verified-badge">&#10003; Verified</span>' : '')
+                + '</div>'
+                + '<div class="driver-info">'
+                + '<h3>' + esc(d.full_name) + '</h3>'
+                + '<div class="driver-stars">' + starsHtml + '</div>'
+                + '<div class="driver-meta">' + langTags + (d.experience_years ? '<span>' + d.experience_years + ' yrs exp</span>' : '') + '<span>' + esc(d.location_city || '') + '</span></div>'
+                + vehicleInfo
+                + '<div class="driver-price">$' + (d.price_amount || 0) + ' / ' + (d.price_unit || 'day') + '</div>'
+                + '</div>'
+                + '<div class="driver-contact">'
+                + (d.phone ? '<a href="tel:' + esc(d.phone) + '" onclick="event.stopPropagation();">Call</a>' : '')
+                + (d.whatsapp ? '<a href="https://wa.me/' + esc(d.whatsapp.replace(/[^0-9+]/g, '')) + '" target="_blank" onclick="event.stopPropagation();">WhatsApp</a>' : '')
+                + '</div></div>';
+        }
+
+        function fmtDate(d) {
+            if (!d) return '';
+            var x = new Date(d);
+            return x.toLocaleDateString();
+        }
+
+        window.openDriverDetail = function(id) {
+            var modal = document.getElementById('driverDetailModal');
+            var content = document.getElementById('ddContent');
+            var title = document.getElementById('ddTitle');
+            modal.style.display = 'block';
+            content.innerHTML = '<p style="color:#A0A3B0;text-align:center;padding:40px;">Loading...</p>';
+            fetch('/api/drivers/' + id)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var d = data.driver;
+                    var reviews = data.reviews || [];
+                    var photo = d.photo_url || 'images/default-driver.png';
+                    var rating = parseFloat(d.rating) || 0;
+                    var rc = d.reviews_count || 0;
+                    var langs = (typeof d.languages === 'string') ? JSON.parse(d.languages || '[]') : (d.languages || []);
+                    var langStr = langs.join(', ');
+                    title.textContent = esc(d.full_name || 'Driver Details');
+
+                    var reviewsHtml = '';
+                    if (reviews.length) {
+                        reviewsHtml = '<h4 style="margin:20px 0 12px;font-size:15px;color:#EAEAEA;">Reviews (' + rc + ')</h4>'
+                            + reviews.map(function(r) {
+                                return '<div class="review-item">'
+                                    + '<div>' + renderStars(r.rating_score) + '</div>'
+                                    + '<div><span class="reviewer-name">' + esc(r.customer_name || 'Guest') + '</span><span class="review-date">' + fmtDate(r.created_at) + '</span></div>'
+                                    + (r.review_text ? '<p class="review-text">' + esc(r.review_text) + '</p>' : '')
+                                    + '</div>';
+                            }).join('');
+                    } else {
+                        reviewsHtml = '<p style="color:#A0A3B0;text-align:center;padding:20px;">No reviews yet</p>';
+                    }
+
+                    content.innerHTML = '<div style="display:flex;gap:16px;flex-wrap:wrap;">'
+                        + '<img src="' + photo + '" class="driver-detail-photo" alt="">'
+                        + '<div style="flex:1;min-width:200px;">'
+                        + '<div style="font-size:20px;font-weight:700;color:#EAEAEA;margin-bottom:4px;">' + esc(d.full_name) + '</div>'
+                        + '<div style="margin-bottom:8px;">' + renderStars(rating) + (rc > 0 ? '<span class="count">' + rating + ' (' + rc + ')</span>' : '') + '</div>'
+                        + (d.is_verified ? '<span style="display:inline-block;background:rgba(34,197,94,0.15);color:#22c55e;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600;">&#10003; Verified</span>' : '')
+                        + '</div></div>'
+                        + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:16px;">'
+                        + (d.experience_years ? '<div><span style="font-size:11px;color:#A0A3B0;">Experience</span><br><b style="color:#EAEAEA;">' + d.experience_years + ' years</b></div>' : '')
+                        + (langStr ? '<div><span style="font-size:11px;color:#A0A3B0;">Languages</span><br><b style="color:#EAEAEA;">' + esc(langStr) + '</b></div>' : '')
+                        + (d.location_city ? '<div><span style="font-size:11px;color:#A0A3B0;">Location</span><br><b style="color:#EAEAEA;">' + esc(d.location_city) + '</b></div>' : '')
+                        + (d.vehicle_info ? '<div><span style="font-size:11px;color:#A0A3B0;">Vehicle</span><br><b style="color:#EAEAEA;">' + esc(d.vehicle_info) + '</b></div>' : '')
+                        + '</div>'
+                        + (d.bio ? '<p style="color:#A0A3B0;font-size:14px;margin-top:16px;line-height:1.5;">' + esc(d.bio) + '</p>' : '')
+                        + '<div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;">'
+                        + (d.phone ? '<a href="tel:' + esc(d.phone) + '" style="flex:1;text-align:center;background:#C9A84C;color:#0F1117;text-decoration:none;border-radius:10px;padding:10px 0;font-size:13px;font-weight:600;">Call</a>' : '')
+                        + (d.whatsapp ? '<a href="https://wa.me/' + esc(d.whatsapp.replace(/[^0-9+]/g, '')) + '" target="_blank" style="flex:1;text-align:center;background:#22c55e;color:#fff;text-decoration:none;border-radius:10px;padding:10px 0;font-size:13px;font-weight:600;">WhatsApp</a>' : '')
+                        + '<button onclick="openReviewModal(' + d.id + ')" style="flex:1;text-align:center;background:#262A35;border:1px solid #3A3F4B;color:#EAEAEA;border-radius:10px;padding:10px 0;font-size:13px;font-weight:600;cursor:pointer;">Leave a Review</button>'
+                        + '</div>'
+                        + reviewsHtml;
+                })
+                .catch(function() {
+                    content.innerHTML = '<p style="color:#ef4444;text-align:center;padding:40px;">Failed to load driver details</p>';
+                });
+        };
+
+        window.closeDriverDetail = function() {
+            document.getElementById('driverDetailModal').style.display = 'none';
+        };
+
+        // Close modals on backdrop click
+        document.getElementById('driverDetailModal').addEventListener('click', function(e) {
+            if (e.target === this) closeDriverDetail();
+        });
+        document.getElementById('reviewModal').addEventListener('click', function(e) {
+            if (e.target === this) closeReviewModal();
+        });
+
+        // Star selector
+        var selectedRating = 0;
+        var starEls = document.querySelectorAll('#starSelector .star');
+        starEls.forEach(function(el) {
+            el.addEventListener('click', function() {
+                selectedRating = parseInt(this.dataset.val);
+                starEls.forEach(function(s) {
+                    s.classList.toggle('active', parseInt(s.dataset.val) <= selectedRating);
+                });
+            });
+        });
+
+        window.openReviewModal = function(driverId) {
+            var token = localStorage.getItem('token');
+            if (!token) { alert('Please log in to leave a review'); return; }
+            document.getElementById('reviewDriverId').value = driverId;
+            document.getElementById('reviewText').value = '';
+            document.getElementById('reviewMsg').style.display = 'none';
+            selectedRating = 0;
+            starEls.forEach(function(s) { s.classList.remove('active'); });
+            document.getElementById('reviewModal').style.display = 'block';
+        };
+
+        window.closeReviewModal = function() {
+            document.getElementById('reviewModal').style.display = 'none';
+        };
+
+        window.submitReview = function() {
+            var driverId = document.getElementById('reviewDriverId').value;
+            var text = document.getElementById('reviewText').value;
+            var msg = document.getElementById('reviewMsg');
+            var token = localStorage.getItem('token');
+            if (!selectedRating) { showReviewMsg('Please select a star rating', true); return; }
+            fetch('/api/driver-reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ driver_id: driverId, rating_score: selectedRating, review_text: text || null })
+            }).then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.error) { showReviewMsg(data.error, true); return; }
+                showReviewMsg('Review submitted! Thank you.', false);
+                setTimeout(function() { closeReviewModal(); openDriverDetail(parseInt(driverId)); loadDrivers(false); }, 800);
+            }).catch(function() { showReviewMsg('Failed to submit review', true); });
+        };
+
+        function showReviewMsg(text, isError) {
+            var msg = document.getElementById('reviewMsg');
+            msg.textContent = text;
+            msg.style.display = 'block';
+            msg.style.background = isError ? '#fef2f2' : '#dcfce7';
+            msg.style.color = isError ? '#dc2626' : '#16a34a';
+        }
+
+        function buildUrl() {
+            var params = new URLSearchParams();
+            params.set('page', page); params.set('limit', limit);
+            var country = document.getElementById('dfCountry').value;
+            var city = document.getElementById('dfCity').value.trim();
+            var langs = document.getElementById('dfLanguages').value.trim();
+            var minRating = document.getElementById('dfMinRating').value;
+            var ownVehicle = document.getElementById('dfOwnVehicle').checked;
+            if (country) params.set('country', country);
+            if (city) params.set('location', city);
+            if (langs) params.set('languages', langs);
+            if (minRating) params.set('min_rating', minRating);
+            if (ownVehicle) params.set('has_own_vehicle', '1');
+            currentFilters = { country: country, city: city, langs: langs, minRating: minRating, ownVehicle: ownVehicle };
+            return '/api/drivers?' + params.toString();
+        }
+
+        function loadDrivers(append) {
+            if (!append) { grid.innerHTML = '<div class="drivers-empty"><p>Loading...</p></div>'; page = 1; }
+            var url = buildUrl();
+            fetch(url)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var drivers = data.drivers || [];
+                    hasMore = data.hasMore;
+                    if (!append) grid.innerHTML = '';
+                    if (drivers.length === 0 && !append) {
+                        grid.appendChild(empty);
+                        empty.style.display = '';
+                        loadMoreWrap.style.display = 'none';
+                        return;
+                    }
+                    empty.style.display = 'none';
+                    // Render drivers + ads using admin Position field
+                    // Position 1 = after 1st driver, Position 2 = after 2nd, etc.
+                    drivers.forEach(function(d, i) {
+                        grid.insertAdjacentHTML('beforeend', renderDriverCard(d));
+                        // Insert any ads whose position matches after this driver
+                        ads.forEach(function(ad) {
+                            if (ad.position === (i + 1)) {
+                                grid.insertAdjacentHTML('beforeend', renderAdCard(ad));
+                            }
+                        });
+                    });
+                    // If fewer drivers than ad position, append remaining ads at the end
+                    ads.forEach(function(ad) {
+                        if (ad.position > drivers.length) {
+                            grid.insertAdjacentHTML('beforeend', renderAdCard(ad));
+                        }
+                    });
+                    // If no drivers at all but we have ads, show them
+                    if (drivers.length === 0 && ads.length) {
+                        ads.forEach(function(ad) {
+                            grid.insertAdjacentHTML('beforeend', renderAdCard(ad));
+                        });
+                    }
+                    loadMoreWrap.style.display = hasMore ? '' : 'none';
+                })
+                .catch(function() {
+                    if (!append) grid.innerHTML = '<div class="drivers-empty"><p style="color:#ef4444;">Failed to load drivers.</p></div>';
+                });
+        }
+
+        function loadAds() {
+            fetch('/api/ads?placement=drivers')
+                .then(function(r) { return r.json(); })
+                .then(function(data) { ads = data.ads || []; })
+                .catch(function() { ads = []; });
+        }
+
+        document.getElementById('dfSearchBtn').addEventListener('click', function() { loadDrivers(false); });
+        loadMoreBtn.addEventListener('click', function() { page++; loadDrivers(true); });
+
+        // Initial load
+        loadAds();
+        loadDrivers(false);
+    })();
+    </script>
+</body>
+</html>
