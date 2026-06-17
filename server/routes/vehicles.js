@@ -125,6 +125,12 @@ router.get('/:id', async (req, res) => {
 // POST /api/vehicles — add a new vehicle (partner only, must be verified)
 router.post('/', authenticateToken, requireRole('partner'), async (req, res) => {
     try {
+        // Phone verification is required before adding vehicles (even if partner is approved)
+        var user = await queryOne('SELECT phone_verified FROM users WHERE id = $1', [req.user.id]);
+        if (!user || !user.phone_verified) {
+            return res.status(403).json({ error: 'Please verify your phone number before adding vehicles.', requiresPhoneVerification: true });
+        }
+
         var partnerProfile = await queryOne('SELECT is_verified FROM partner_profiles WHERE user_id = $1', [req.user.id]);
         if (!partnerProfile || !partnerProfile.is_verified) {
             return res.status(403).json({ error: 'Your partner account must be verified by admin before you can add vehicles. Please wait for verification.' });
@@ -177,8 +183,8 @@ router.post('/', authenticateToken, requireRole('partner'), async (req, res) => 
              visible_in_search, block_after_payment,
              custom_pricing_enabled, custom_pricing_ranges, registration_number,
              deposit_amount,
-             tech_passport_front, tech_passport_back, status)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,'pending')`,
+             tech_passport_front, tech_passport_back, rent_with_driver_only, status)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,'pending')`,
             [
                 req.user.id,
                 b.name,
@@ -223,7 +229,8 @@ router.post('/', authenticateToken, requireRole('partner'), async (req, res) => 
                 b.registration_number || null,
                 parseFloat(b.deposit_amount) || 0,
                 b.tech_passport_front,
-                b.tech_passport_back || null
+                b.tech_passport_back || null,
+                b.rent_with_driver_only ? 1 : 0
             ]
         );
 
@@ -276,8 +283,8 @@ router.put('/:id', authenticateToken, requireRole('partner'), async (req, res) =
                 custom_pricing_enabled = $37, custom_pricing_ranges = $38, registration_number = $39,
                 deposit_amount = $40,
                 tech_passport_front = $41, tech_passport_back = $42,
-                status = $43, country = $44, updated_at = CURRENT_TIMESTAMP
-            WHERE id = $45 AND partner_id = $46`,
+                status = $43, country = $44, rent_with_driver_only = $45, updated_at = CURRENT_TIMESTAMP
+            WHERE id = $46 AND partner_id = $47`,
             [
                 b.name || existing.name,
                 b.brand !== undefined ? b.brand : existing.brand,
@@ -323,6 +330,7 @@ router.put('/:id', authenticateToken, requireRole('partner'), async (req, res) =
                 b.tech_passport_back !== undefined ? b.tech_passport_back : existing.tech_passport_back,
                 existing.status, // Partners cannot change their own vehicle status — admin only
                 b.country !== undefined ? b.country : (existing.country || 'georgia'),
+                b.rent_with_driver_only !== undefined ? (b.rent_with_driver_only ? 1 : 0) : (existing.rent_with_driver_only || 0),
                 vehicleId,
                 req.user.id
             ]
