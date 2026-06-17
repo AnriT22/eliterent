@@ -420,6 +420,9 @@
     "svaneti_roads": "Mestia / Mountain Svaneti Roads",
     "shatili_roads": "Shatili Mountain Roads",
     "driver_service": "Driver Service",
+    "rent_with_driver_only": "Rent with driver only",
+    "driver_only_note": "This vehicle is only available with a driver — price included in rental.",
+    "driver_only_no_price": "This vehicle requires a driver, but no driver price is set. Please contact the partner.",
     "svaneti_accepted": "Mestia / Svaneti roads accepted",
     "shatili_accepted": "Shatili roads accepted"
   },
@@ -1077,6 +1080,7 @@
     "booking_details": "Your booking details",
     "days": "days",
     "car_rental": "Car Rental",
+    "car_rental_driver": "Car + Driver",
     "car": "Car",
     "pickup_datetime": "Pick-up date & time",
     "dropoff_datetime": "Drop-off date & time",

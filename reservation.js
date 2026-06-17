@@ -403,7 +403,11 @@
         if (typeof ext === 'string') { try { ext = JSON.parse(ext); } catch(e) { ext = {}; } }
         ext = ext || {};
 
+        var rentWithDriverOnly = vehicleData && (vehicleData.rent_with_driver_only === 1 || vehicleData.rent_with_driver_only === true);
+        var driverServicePrice = parseFloat(ext.driver_service) || 0;
+
         var EXTRA_DEFS = [
+            { code: 'driver_service', key: 'driver_service', availKey: 'driver_service_available', name: rvt('reservation_extras.driver_service', 'Driver Service'), icon: '👤', perDay: true },
             { code: 'child_seat', key: 'child_seat', availKey: 'child_seat_available', name: rvt('reservation_extras.child_seat', 'Child Seat (up to 5 years)'), icon: '🍼', perDay: true },
             { code: 'snow_chains', key: 'snow_chains', availKey: 'snow_chains_available', name: rvt('reservation_extras.snow_chains', 'Snow Chains'), icon: '⛓️', perDay: false },
             { code: 'roof_rack', key: 'roof_rack', availKey: 'roof_rack_available', name: rvt('reservation_extras.roof_rack', 'Roof Luggage Carrier'), icon: '🧳', perDay: true },
@@ -455,23 +459,50 @@
         var addonHtml = '';
         var gridHtml = '';
 
+        var ext = vehicleData && vehicleData.extras;
+        if (typeof ext === 'string') { try { ext = JSON.parse(ext); } catch(e) { ext = {}; } }
+        ext = ext || {};
+        var rentWithDriverOnly = vehicleData && (vehicleData.rent_with_driver_only === 1 || vehicleData.rent_with_driver_only === true);
+        var driverServicePrice = parseFloat(ext.driver_service) || 0;
+
         services.forEach(function (service) {
             var priceLabel = service.perDay ? fmtMoney(service.price) + rvt('reservation_extras.per_day', '/day') : fmtMoney(service.price) + ' ' + rvt('reservation_extras.once', 'once');
+            var isDriver = service.code === 'driver_service';
+            var checked = '';
+            var disabled = '';
+            var label = service.name;
+            var note = '';
+
+            if (isDriver && rentWithDriverOnly) {
+                checked = ' checked';
+                disabled = ' disabled';
+                label = rvt('reservation_extras.rent_with_driver_only', 'Rent with driver only');
+                note = '<div style="font-size:12px;color:#f97316;margin-top:4px;">' + rvt('reservation_extras.driver_only_note', 'This vehicle is only available with a driver — price included in rental.') + '</div>';
+            }
+
             gridHtml += '<label class="rv-service-item">'
-                + '<input type="checkbox" name="extras" value="' + service.code + '" data-price="' + service.price + '"' + (service.perDay ? ' data-perday="1"' : '') + '>'
+                + '<input type="checkbox" name="extras" value="' + service.code + '" data-price="' + service.price + '"' + (service.perDay ? ' data-perday="1"' : '') + checked + disabled + '>'
                 + '<div class="rv-service-info">'
                 + '<span class="rv-service-icon">' + service.icon + '</span>'
                 + '<div>'
-                + '<div class="rv-service-name">' + service.name + '</div>'
+                + '<div class="rv-service-name">' + label + '</div>'
                 + '<div class="rv-service-price">' + priceLabel + (service.description ? ' · ' + service.description : '') + '</div>'
+                + note
                 + '</div>'
                 + '</div>'
                 + '</label>';
         });
 
+        // If rent_with_driver_only but driver_service not in extras list (no price set), show a warning
+        if (rentWithDriverOnly && driverServicePrice <= 0) {
+            gridHtml += '<div style="padding:12px;background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.3);border-radius:10px;font-size:13px;color:#f97316;margin-top:8px;">'
+                + rvt('reservation_extras.driver_only_no_price', 'This vehicle requires a driver, but no driver price is set. Please contact the partner.')
+                + '</div>';
+        }
+
         addonWrap.innerHTML = addonHtml;
         servicesGrid.innerHTML = gridHtml;
-        emptyEl.style.display = services.length === 0 ? 'block' : 'none';
+        emptyEl.style.display = services.length === 0 && !rentWithDriverOnly ? 'block' : 'none';
 
         addonWrap.querySelectorAll('input[name="extras"]').forEach(function (cb) {
             cb.addEventListener('change', updatePriceSummary);
@@ -487,7 +518,10 @@
         document.querySelectorAll('input[name="extras"]:checked').forEach(function (cb) {
             selectedCodes.push(cb.value);
         });
+        var rentWithDriverOnly = vehicleData && (vehicleData.rent_with_driver_only === 1 || vehicleData.rent_with_driver_only === true);
         return services.filter(function (service) {
+            // When rent_with_driver_only, driver_service is bundled into rental — don't count as extra
+            if (rentWithDriverOnly && service.code === 'driver_service') return false;
             return selectedCodes.indexOf(service.code) !== -1;
         });
     }
@@ -621,7 +655,16 @@
 
         var days = getRentalDays();
         var dailyPrice = getDailyRateByTier(days);
-        var rentalTotal = Math.round(days * dailyPrice * 100) / 100;
+
+        // Handle rent_with_driver_only: add driver price to rental total
+        var ext = vehicleData.extras;
+        if (typeof ext === 'string') { try { ext = JSON.parse(ext); } catch(e) { ext = {}; } }
+        ext = ext || {};
+        var rentWithDriverOnly = vehicleData && (vehicleData.rent_with_driver_only === 1 || vehicleData.rent_with_driver_only === true);
+        var driverPrice = rentWithDriverOnly ? (parseFloat(ext.driver_service) || 0) : 0;
+        var effectiveDaily = dailyPrice + driverPrice;
+        var rentalTotal = Math.round(days * effectiveDaily * 100) / 100;
+
         var extrasTotal = Math.round(getSelectedExtras().reduce(function (sum, service) {
             var price = parseFloat(service.price) || 0;
             return sum + (service.perDay ? price * days : price);
@@ -641,6 +684,26 @@
         document.getElementById('rvSumPayPickup').textContent = fmtMoney(payOnPickup);
         document.getElementById('rvSumRentalTotal').textContent = fmtMoney(rentalTotal);
         document.getElementById('rvSumDeposit').textContent = deposit > 0 ? fmtMoney(deposit) : rvt('vehicle_page.val_none', 'None');
+
+        // Update car price label to show combined price when driver is mandatory
+        var carPriceLabel = document.getElementById('rvSumCarPrice');
+        if (carPriceLabel) {
+            if (rentWithDriverOnly && driverPrice > 0) {
+                carPriceLabel.textContent = fmtMoney(effectiveDaily) + rvt('reservation_extras.per_day', '/day') + ' (' + fmtMoney(dailyPrice) + ' car + ' + fmtMoney(driverPrice) + ' driver)';
+            } else {
+                carPriceLabel.textContent = fmtMoney(dailyPrice) + rvt('reservation_extras.per_day', '/day');
+            }
+        }
+
+        // Update rental label to note driver inclusion
+        var rentalLabel = document.getElementById('rvSumRentalLabel');
+        if (rentalLabel) {
+            if (rentWithDriverOnly && driverPrice > 0) {
+                rentalLabel.textContent = rvt('reservation.car_rental_driver', 'Car + Driver') + ' (' + days + ' ' + rvt('reservation.days', 'days') + ')';
+            } else {
+                rentalLabel.textContent = rvt('reservation.car_rental', 'Car Rental') + ' (' + days + ' ' + rvt('reservation.days', 'days') + ')';
+            }
+        }
 
         var extrasRow = document.getElementById('rvSumExtrasRow');
         if (extrasTotal > 0) {
@@ -849,13 +912,20 @@
         var v = vehicleData;
         var days = getRentalDays();
         var dailyRate = getDailyRateByTier(days);
+        var ext = v.extras;
+        if (typeof ext === 'string') { try { ext = JSON.parse(ext); } catch(e) { ext = {}; } }
+        ext = ext || {};
+        var rentWithDriverOnly = v && (v.rent_with_driver_only === 1 || v.rent_with_driver_only === true);
+        var driverPrice = rentWithDriverOnly ? (parseFloat(ext.driver_service) || 0) : 0;
+        var effectiveRate = dailyRate + driverPrice;
         var extrasTotal = getSelectedExtras().reduce(function (sum, service) {
             return sum + (parseFloat(service.price) || 0);
         }, 0);
+        var driverNote = rentWithDriverOnly ? ' (includes driver)' : '';
         var text = 'Hello! I would like to book:\n'
-            + '\ud83d\ude97 ' + v.name + '\n'
+            + '\ud83d\ude97 ' + v.name + driverNote + '\n'
             + '\ud83d\udcc5 ' + fmtDate(pickupDate) + ' ' + pickupTime + ' \u2192 ' + fmtDate(dropoffDate) + ' ' + dropoffTime + ' (' + days + ' days)\n'
-            + '\ud83d\udcb0 ' + fmtMoney((days * dailyRate) + extrasTotal) + ' + website fee\n'
+            + '\ud83d\udcb0 ' + fmtMoney((days * effectiveRate) + extrasTotal) + ' + website fee\n'
             + 'Please confirm availability!';
         var phone = (v.whatsapp || '').replace(/[^0-9]/g, '') || '995';
         window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(text), '_blank');
