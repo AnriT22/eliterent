@@ -1171,23 +1171,6 @@ html[lang="ru"] .hero-price-badge {
 }
 
 /* ========================================
-   PARTNER LOGO GRID
-   ======================================== */
-.partner-logo {
-    border-radius: var(--radius-lg);
-    border: 1px solid #3A3F4B;
-    background: #1C1E26;
-    box-shadow: var(--card-shadow);
-    transition: all 0.3s var(--ease);
-}
-
-.partner-logo:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-4px);
-    border-color: #D4AF37;
-}
-
-/* ========================================
    RESPONSIVE PREMIUM OVERRIDES
    Perfect for S24 Ultra (412px), iPhone 15 (393px),
    Pixel 8 (412px), iPhone SE (375px), and all phones
@@ -1637,20 +1620,6 @@ html[lang="ru"] .hero-price-badge {
 
     .partner-cta-card p {
         font-size: 14px;
-    }
-
-    /* === PARTNERS SLIDER === */
-    .partners-slider {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-    }
-
-    .partner-logo {
-        padding: 16px;
-    }
-
-    .partner-logo:hover {
-        transform: none;
     }
 
     /* === CTA SECTION === */
@@ -2148,10 +2117,6 @@ html[lang="ru"] .hero-price-badge {
 
     .step-card {
         padding: 16px 12px;
-    }
-
-    .partner-logo {
-        padding: 14px;
     }
 
     .modal-content {
