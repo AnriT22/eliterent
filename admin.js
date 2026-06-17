@@ -1464,6 +1464,16 @@ function escHtml(s) {
     var adFormWrap = document.getElementById('adCardFormWrap');
     var adEditId = document.getElementById('adCardEditId');
 
+    // Iterate the 9 per-language ad fields: cb(payloadKey, elementId)
+    var AD_TR_ID = { title: 'adTitle', description: 'adDescription', cta_text: 'adCtaText' };
+    function adTrFields(cb) {
+        ['title', 'description', 'cta_text'].forEach(function (base) {
+            ['ru', 'ka', 'he'].forEach(function (lng) {
+                cb(base + '_' + lng, AD_TR_ID[base] + '_' + lng);
+            });
+        });
+    }
+
     function resetAdForm() {
         adEditId.value = '';
         document.getElementById('adCardFormTitle').textContent = 'New Ad Card';
@@ -1482,6 +1492,7 @@ function escHtml(s) {
         document.getElementById('adPlacement').value = 'cars';
         document.getElementById('adPosition').value = '4';
         document.getElementById('adIsActive').checked = true;
+        adTrFields(function (key, id) { var el = document.getElementById(id); if (el) el.value = ''; });
     }
 
     // Ad cover image upload
@@ -1538,6 +1549,7 @@ function escHtml(s) {
             position: parseInt(document.getElementById('adPosition').value) || 4,
             is_active: document.getElementById('adIsActive').checked
         };
+        adTrFields(function (key, id) { var el = document.getElementById(id); payload[key] = (el && el.value) ? el.value : null; });
         if (!payload.target_link) { alert('Target link is required'); return; }
         var editId = adEditId.value;
         var url = editId ? '/api/ads/admin/' + editId : '/api/ads/admin';
@@ -1571,6 +1583,7 @@ function escHtml(s) {
         document.getElementById('adPlacement').value = a.placement || 'cars';
         document.getElementById('adPosition').value = a.position || '4';
         document.getElementById('adIsActive').checked = !!a.is_active;
+        adTrFields(function (key, id) { var el = document.getElementById(id); if (el) el.value = a[key] || ''; });
         var statusEl = document.getElementById('adCoverUploadStatus');
         if (statusEl) statusEl.textContent = '';
         adFormWrap.style.display = 'block';

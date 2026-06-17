@@ -418,6 +418,30 @@
                         </div>
                         <div><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Target Link *</label><input type="text" id="adTargetLink" class="db-input" placeholder="https://..." style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
                         <div><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">CTA Text</label><input type="text" id="adCtaText" class="db-input" placeholder="Learn More" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
+                        <details style="border:1px solid #3A3F4B;border-radius:8px;padding:10px 12px;background:#222530;">
+                            <summary style="cursor:pointer;font-size:13px;color:#D4AF37;font-weight:600;">&#127760; Translations (optional) &mdash; shown when a visitor switches language</summary>
+                            <p style="font-size:11px;color:#A0A3B0;margin:8px 0 12px;">Leave blank to fall back to the English text above.</p>
+                            <div style="display:flex;flex-direction:column;gap:14px;">
+                                <div style="display:flex;flex-direction:column;gap:8px;">
+                                    <div style="font-size:11px;color:#A0A3B0;font-weight:700;letter-spacing:.5px;">&#127479;&#127482; RUSSIAN</div>
+                                    <input type="text" id="adTitle_ru" class="db-input" placeholder="Заголовок (RU)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
+                                    <textarea id="adDescription_ru" rows="2" class="db-input" placeholder="Описание (RU)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;"></textarea>
+                                    <input type="text" id="adCtaText_ru" class="db-input" placeholder="Текст кнопки (RU)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
+                                </div>
+                                <div style="display:flex;flex-direction:column;gap:8px;">
+                                    <div style="font-size:11px;color:#A0A3B0;font-weight:700;letter-spacing:.5px;">&#127468;&#127466; GEORGIAN</div>
+                                    <input type="text" id="adTitle_ka" class="db-input" placeholder="სათაური (KA)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
+                                    <textarea id="adDescription_ka" rows="2" class="db-input" placeholder="აღწერა (KA)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;"></textarea>
+                                    <input type="text" id="adCtaText_ka" class="db-input" placeholder="ღილაკის ტექსტი (KA)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
+                                </div>
+                                <div style="display:flex;flex-direction:column;gap:8px;" dir="rtl">
+                                    <div style="font-size:11px;color:#A0A3B0;font-weight:700;letter-spacing:.5px;">&#127470;&#127473; HEBREW</div>
+                                    <input type="text" id="adTitle_he" class="db-input" placeholder="כותרת (HE)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
+                                    <textarea id="adDescription_he" rows="2" class="db-input" placeholder="תיאור (HE)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;"></textarea>
+                                    <input type="text" id="adCtaText_he" class="db-input" placeholder="טקסט הכפתור (HE)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
+                                </div>
+                            </div>
+                        </details>
                         <div style="display:flex;gap:12px;">
                             <div style="flex:1;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Placement</label>
                                 <select id="adPlacement" class="db-input" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;">
@@ -521,7 +545,7 @@
         }
     })();
     </script>
-    <script src="admin.js"></script>
+    <script src="admin.js?v=2"></script>
 <script src="premium-animations.js"></script>
 </body>
 </html>

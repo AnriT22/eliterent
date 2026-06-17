@@ -303,6 +303,17 @@ async function initDB() {
         await pool.query(`ALTER TABLE ad_cards ADD COLUMN IF NOT EXISTS clicks INTEGER DEFAULT 0`);
     } catch (e) { /* column may already exist or table not yet created */ }
 
+    // Per-language ad card text (existing DBs): RU / KA / HE for title/description/cta
+    try {
+        var _adBases = ['title', 'description', 'cta_text'];
+        var _adLangs = ['ru', 'ka', 'he'];
+        for (var _bi = 0; _bi < _adBases.length; _bi++) {
+            for (var _li = 0; _li < _adLangs.length; _li++) {
+                await pool.query('ALTER TABLE ad_cards ADD COLUMN IF NOT EXISTS ' + _adBases[_bi] + '_' + _adLangs[_li] + ' TEXT');
+            }
+        }
+    } catch (e) { /* columns may already exist or table not yet created */ }
+
     // Add partner signup method / paid columns (existing DBs)
     try {
         await pool.query(`ALTER TABLE partner_profiles ADD COLUMN IF NOT EXISTS signup_method TEXT DEFAULT 'invite'`);
@@ -404,6 +415,9 @@ async function initDB() {
             cover_url TEXT,
             target_link TEXT NOT NULL,
             cta_text TEXT,
+            title_ru TEXT, title_ka TEXT, title_he TEXT,
+            description_ru TEXT, description_ka TEXT, description_he TEXT,
+            cta_text_ru TEXT, cta_text_ka TEXT, cta_text_he TEXT,
             placement TEXT DEFAULT 'cars' CHECK(placement IN ('cars', 'drivers', 'both')),
             position INTEGER DEFAULT 4,
             clicks INTEGER DEFAULT 0,
