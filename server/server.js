@@ -20,6 +20,9 @@ const paymentsRoutes = require('./routes/payments');
 const financialsRoutes = require('./routes/financials');
 const contactRoutes = require('./routes/contact');
 const otpRoutes = require('./routes/otp');
+const driversRoutes = require('./routes/drivers');
+const adsRoutes = require('./routes/ads');
+const driverReviewsRoutes = require('./routes/driver-reviews');
 const { initSMS } = require('./services/sms');
 const { initRedis } = require('./services/otp');
 
@@ -375,6 +378,9 @@ app.use('/api/financials', financialsRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/otp', otpLimiter);
 app.use('/api/otp', otpRoutes);
+app.use('/api/drivers', driversRoutes);
+app.use('/api/ads', adsRoutes);
+app.use('/api/driver-reviews', driverReviewsRoutes);
 
 // Fallback: serve index.html for root
 app.get('/', (req, res) => {
