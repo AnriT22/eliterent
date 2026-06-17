@@ -558,7 +558,9 @@ function renderCarousel(vehicles) {
             </div>
         `;
     });
-    
+
+    carouselTrack.innerHTML = html;
+
     // Inject native in-feed ad card after position 2 (0-indexed) if we have enough cars
     if (vehicles.length >= 3) {
         var adCardHtml = `
