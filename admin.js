@@ -66,6 +66,18 @@ function escHtml(s) {
     function apiDelete(url) {
         return fetch(url, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } }).then(function (r) { return r.json(); });
     }
+    function apiRequest(url, method, body) {
+        return fetch(url, {
+            method: method,
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            body: JSON.stringify(body || {})
+        }).then(function (r) { return r.json(); });
+    }
+    function esc(s) {
+        var d = document.createElement('div');
+        d.textContent = s || '';
+        return d.innerHTML;
+    }
 
     // ========================================
     // DASHBOARD / ANALYTICS
@@ -1336,6 +1348,283 @@ function escHtml(s) {
             document.getElementById('settingsConfirmPw').value = '';
         }).catch(function () { showMsg('Failed to change password', true); });
     };
+
+    // ========================================
+    // DRIVERS MODERATION
+    // ========================================
+    var _adminDrivers = [];
+
+    function loadAdminDrivers() {
+        var status = document.getElementById('driverStatusFilter').value;
+        var url = '/api/drivers/admin/all' + (status ? '?status=' + encodeURIComponent(status) : '');
+        apiGet(url).then(function (data) {
+            _adminDrivers = data.drivers || [];
+            renderAdminDrivers();
+        }).catch(function () {
+            document.getElementById('driversTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:#ef4444;padding:40px;">Failed to load drivers</td></tr>';
+        });
+    }
+
+    function renderAdminDrivers() {
+        var tbody = document.getElementById('driversTableBody');
+        var search = (document.getElementById('driverSearch').value || '').toLowerCase();
+        var rows = _adminDrivers;
+        if (search) {
+            rows = rows.filter(function (d) {
+                return (d.full_name || '').toLowerCase().indexOf(search) !== -1 ||
+                       (d.partner_name || '').toLowerCase().indexOf(search) !== -1 ||
+                       (d.location_city || '').toLowerCase().indexOf(search) !== -1;
+            });
+        }
+        if (rows.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#A0A3B0;padding:40px;">No drivers found</td></tr>';
+            return;
+        }
+        tbody.innerHTML = rows.map(function (d) {
+            var statusClass = d.status === 'approved' ? 'success' : d.status === 'pending' ? 'warning' : 'danger';
+            var photo = d.photo_url ? '<img src="' + d.photo_url + '" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">' : '<div style="width:40px;height:40px;border-radius:50%;background:#3A3F4B;"></div>';
+            return '<tr>'
+                + '<td>' + d.id + '</td>'
+                + '<td>' + photo + '</td>'
+                + '<td><b>' + esc(d.full_name || '') + '</b><br><span style="font-size:11px;color:#A0A3B0;">' + (d.partner_name || '') + '</span></td>'
+                + '<td>' + esc(d.company_name || d.partner_email || '') + '</td>'
+                + '<td>' + esc(d.location_city || '') + '</td>'
+                + '<td><span class="admin-status ' + statusClass + '">' + d.status + '</span></td>'
+                + '<td>' + (d.is_verified ? '<span style="color:#22c55e;font-size:12px;">&#10003; Yes</span>' : '<span style="color:#A0A3B0;font-size:12px;">No</span>') + '</td>'
+                + '<td>$' + (d.price_amount || 0) + ' / ' + (d.price_unit || 'day') + '</td>'
+                + '<td style="white-space:nowrap;">'
+                + '<button class="admin-action-btn small" onclick="adminDriverStatus(' + d.id + ',\'approved\')">Approve</button>'
+                + '<button class="admin-action-btn small" onclick="adminDriverStatus(' + d.id + ',\'rejected\')">Reject</button>'
+                + '<button class="admin-action-btn small" onclick="adminDriverVerify(' + d.id + ')">' + (d.is_verified ? 'Unverify' : 'Verify') + '</button>'
+                + '<button class="admin-action-btn small danger" onclick="adminDriverDelete(' + d.id + ')">Delete</button>'
+                + '</td></tr>';
+        }).join('');
+    }
+
+    window.adminDriverStatus = function (id, status) {
+        apiPut('/api/drivers/admin/' + id + '/status', { status: status }).then(function () { loadAdminDrivers(); });
+    };
+    window.adminDriverVerify = function (id) {
+        var d = _adminDrivers.filter(function (x) { return x.id === id; })[0];
+        var next = d && d.is_verified ? 0 : 1;
+        apiPut('/api/drivers/admin/' + id + '/verify', { is_verified: next }).then(function () { loadAdminDrivers(); });
+    };
+    window.adminDriverDelete = function (id) {
+        if (!confirm('Delete this driver?')) return;
+        apiDelete('/api/drivers/admin/' + id).then(function () { loadAdminDrivers(); });
+    };
+
+    var driverStatusFilter = document.getElementById('driverStatusFilter');
+    var driverSearch = document.getElementById('driverSearch');
+    if (driverStatusFilter) driverStatusFilter.addEventListener('change', loadAdminDrivers);
+    if (driverSearch) driverSearch.addEventListener('input', renderAdminDrivers);
+
+    // ========================================
+    // AD CARDS MANAGEMENT
+    // ========================================
+    var _adminAds = [];
+
+    function loadAdminAds() {
+        apiGet('/api/ads/admin/all').then(function (data) {
+            _adminAds = data.ads || [];
+            renderAdminAds();
+        }).catch(function () {
+            document.getElementById('adsTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:40px;">Failed to load ad cards</td></tr>';
+        });
+    }
+
+    function renderAdminAds() {
+        var tbody = document.getElementById('adsTableBody');
+        if (_adminAds.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#A0A3B0;padding:40px;">No ad cards yet</td></tr>';
+            return;
+        }
+        tbody.innerHTML = _adminAds.map(function (a) {
+            return '<tr>'
+                + '<td>' + a.id + '</td>'
+                + '<td><b>' + esc(a.title || 'Untitled') + '</b><br><span style="font-size:11px;color:#A0A3B0;">' + esc(a.target_link || '') + '</span></td>'
+                + '<td>' + esc(a.placement || 'cars') + '</td>'
+                + '<td>' + a.position + '</td>'
+                + '<td>' + (a.is_active ? '<span style="color:#22c55e;font-size:12px;">Yes</span>' : '<span style="color:#ef4444;font-size:12px;">No</span>') + '</td>'
+                + '<td style="white-space:nowrap;">'
+                + '<button class="admin-action-btn small" onclick="adminEditAd(' + a.id + ')">Edit</button>'
+                + '<button class="admin-action-btn small danger" onclick="adminDeleteAd(' + a.id + ')">Delete</button>'
+                + '</td></tr>';
+        }).join('');
+    }
+
+    var adFormWrap = document.getElementById('adCardFormWrap');
+    var adEditId = document.getElementById('adCardEditId');
+
+    function resetAdForm() {
+        adEditId.value = '';
+        document.getElementById('adCardFormTitle').textContent = 'New Ad Card';
+        document.getElementById('adTitle').value = '';
+        document.getElementById('adDescription').value = '';
+        document.getElementById('adCoverUrl').value = '';
+        document.getElementById('adCoverFile').value = '';
+        var previewWrap = document.getElementById('adCoverPreviewWrap');
+        if (previewWrap) previewWrap.style.display = 'none';
+        var preview = document.getElementById('adCoverPreview');
+        if (preview) preview.src = '';
+        var status = document.getElementById('adCoverUploadStatus');
+        if (status) status.textContent = '';
+        document.getElementById('adTargetLink').value = '';
+        document.getElementById('adCtaText').value = '';
+        document.getElementById('adPlacement').value = 'cars';
+        document.getElementById('adPosition').value = '4';
+        document.getElementById('adIsActive').checked = true;
+    }
+
+    // Ad cover image upload
+    var adCoverFile = document.getElementById('adCoverFile');
+    var adCoverUploadBtn = document.getElementById('adCoverUploadBtn');
+    if (adCoverUploadBtn && adCoverFile) {
+        adCoverUploadBtn.addEventListener('click', function () { adCoverFile.click(); });
+        adCoverFile.addEventListener('change', function () {
+            var file = adCoverFile.files[0];
+            if (!file) return;
+            var statusEl = document.getElementById('adCoverUploadStatus');
+            if (statusEl) statusEl.textContent = 'Uploading...';
+            var fd = new FormData();
+            fd.append('image', file);
+            fetch('/api/upload/ad-cover', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '') },
+                body: fd
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.url) {
+                    document.getElementById('adCoverUrl').value = data.url;
+                    var preview = document.getElementById('adCoverPreview');
+                    var previewWrap = document.getElementById('adCoverPreviewWrap');
+                    if (preview) preview.src = data.url;
+                    if (previewWrap) previewWrap.style.display = '';
+                    if (statusEl) statusEl.textContent = 'Uploaded!';
+                } else {
+                    if (statusEl) statusEl.textContent = data.error || 'Upload failed';
+                }
+            })
+            .catch(function () {
+                if (statusEl) statusEl.textContent = 'Upload failed. Try again.';
+            });
+        });
+    }
+
+    document.getElementById('addAdCardBtn').addEventListener('click', function () {
+        resetAdForm();
+        adFormWrap.style.display = 'block';
+    });
+    document.getElementById('cancelAdCardBtn').addEventListener('click', function () {
+        adFormWrap.style.display = 'none';
+    });
+    document.getElementById('saveAdCardBtn').addEventListener('click', function () {
+        var payload = {
+            title: document.getElementById('adTitle').value || null,
+            description: document.getElementById('adDescription').value || null,
+            cover_url: document.getElementById('adCoverUrl').value || null,
+            target_link: document.getElementById('adTargetLink').value,
+            cta_text: document.getElementById('adCtaText').value || null,
+            placement: document.getElementById('adPlacement').value,
+            position: parseInt(document.getElementById('adPosition').value) || 4,
+            is_active: document.getElementById('adIsActive').checked
+        };
+        if (!payload.target_link) { alert('Target link is required'); return; }
+        var editId = adEditId.value;
+        var url = editId ? '/api/ads/admin/' + editId : '/api/ads/admin';
+        var method = editId ? 'PUT' : 'POST';
+        apiRequest(url, method, payload).then(function () {
+            adFormWrap.style.display = 'none';
+            loadAdminAds();
+        });
+    });
+
+    window.adminEditAd = function (id) {
+        var a = _adminAds.filter(function (x) { return x.id === id; })[0];
+        if (!a) return;
+        adEditId.value = a.id;
+        document.getElementById('adCardFormTitle').textContent = 'Edit Ad Card';
+        document.getElementById('adTitle').value = a.title || '';
+        document.getElementById('adDescription').value = a.description || '';
+        document.getElementById('adCoverUrl').value = a.cover_url || '';
+        var preview = document.getElementById('adCoverPreview');
+        var previewWrap = document.getElementById('adCoverPreviewWrap');
+        if (a.cover_url && preview && previewWrap) {
+            preview.src = a.cover_url;
+            previewWrap.style.display = '';
+        } else if (previewWrap) {
+            previewWrap.style.display = 'none';
+        }
+        document.getElementById('adTargetLink').value = a.target_link || '';
+        document.getElementById('adCtaText').value = a.cta_text || '';
+        document.getElementById('adPlacement').value = a.placement || 'cars';
+        document.getElementById('adPosition').value = a.position || '4';
+        document.getElementById('adIsActive').checked = !!a.is_active;
+        var statusEl = document.getElementById('adCoverUploadStatus');
+        if (statusEl) statusEl.textContent = '';
+        adFormWrap.style.display = 'block';
+    };
+    window.adminDeleteAd = function (id) {
+        if (!confirm('Delete this ad card?')) return;
+        apiDelete('/api/ads/admin/' + id).then(function () { loadAdminAds(); });
+    };
+
+    // ========================================
+    // DRIVER REVIEWS MODERATION
+    // ========================================
+    var _adminDriverReviews = [];
+
+    function loadAdminDriverReviews() {
+        apiGet('/api/driver-reviews/admin/all').then(function (data) {
+            _adminDriverReviews = data.reviews || [];
+            renderAdminDriverReviews();
+        }).catch(function () {
+            document.getElementById('driverReviewsTableBody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:#ef4444;padding:40px;">Failed to load reviews</td></tr>';
+        });
+    }
+
+    function renderAdminDriverReviews() {
+        var tbody = document.getElementById('driverReviewsTableBody');
+        if (_adminDriverReviews.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#A0A3B0;padding:40px;">No driver reviews yet</td></tr>';
+            return;
+        }
+        tbody.innerHTML = _adminDriverReviews.map(function (r) {
+            var stars = '';
+            for (var i = 1; i <= 5; i++) {
+                stars += '<span style="color:' + (i <= r.rating_score ? '#C9A84C' : '#3A3F4B') + ';">&#9733;</span>';
+            }
+            return '<tr>'
+                + '<td>' + r.id + '</td>'
+                + '<td>' + esc(r.driver_name || '') + '</td>'
+                + '<td>' + esc(r.customer_name || '') + '<br><span style="font-size:11px;color:#A0A3B0;">' + esc(r.customer_email || '') + '</span></td>'
+                + '<td>' + stars + '</td>'
+                + '<td style="max-width:300px;font-size:13px;">' + esc((r.review_text || '').slice(0, 200)) + '</td>'
+                + '<td>' + (r.created_at ? new Date(r.created_at).toLocaleDateString() : '') + '</td>'
+                + '<td>' + (r.is_hidden ? '<span style="color:#ef4444;font-size:12px;">Hidden</span>' : '<span style="color:#22c55e;font-size:12px;">Visible</span>') + '</td>'
+                + '<td style="white-space:nowrap;">'
+                + '<button class="admin-action-btn small" onclick="adminToggleReviewHide(' + r.id + ')">' + (r.is_hidden ? 'Show' : 'Hide') + '</button>'
+                + '<button class="admin-action-btn small danger" onclick="adminDeleteDriverReview(' + r.id + ')">Delete</button>'
+                + '</td></tr>';
+        }).join('');
+    }
+
+    window.adminToggleReviewHide = function (id) {
+        apiPut('/api/driver-reviews/admin/' + id + '/hide', {}).then(function () { loadAdminDriverReviews(); });
+    };
+    window.adminDeleteDriverReview = function (id) {
+        if (!confirm('Delete this review?')) return;
+        apiDelete('/api/driver-reviews/' + id).then(function () { loadAdminDriverReviews(); });
+    };
+
+    // Wire tab clicks for new tabs
+    var driversNavItem = document.querySelector('.admin-nav-item[data-tab="drivers"]');
+    var adsNavItem = document.querySelector('.admin-nav-item[data-tab="ads"]');
+    var reviewsNavItem = document.querySelector('.admin-nav-item[data-tab="reviews"]');
+    if (driversNavItem) driversNavItem.addEventListener('click', loadAdminDrivers);
+    if (adsNavItem) adsNavItem.addEventListener('click', loadAdminAds);
+    if (reviewsNavItem) reviewsNavItem.addEventListener('click', loadAdminDriverReviews);
 
     // Initial load
     loadAnalytics();
