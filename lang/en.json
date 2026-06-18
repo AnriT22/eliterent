@@ -17,7 +17,8 @@
     "not_approved": "Not Yet Approved",
     "select_language": "Select Language",
     "login": "Sign In",
-    "register": "Register"
+    "register": "Register",
+    "drivers": "Drivers"
   },
   "hero": {
     "headline": "Rent a Car in Georgia<br>— Tbilisi, Batumi &<br>Kutaisi Airport Pickup",
@@ -1164,5 +1165,23 @@
     "a6": "We accept cash (USD, EUR, GEL), credit/debit cards, and bank transfers. Payment method availability varies by partner.",
     "q7": "Can I cancel my booking for free?",
     "a7": "Yes! Free cancellation is available up to 24 hours before your pickup time on most vehicles."
+  },
+  "drivers_page": {
+    "title": "Professional Drivers",
+    "subtitle": "Hire experienced, verified chauffeurs for your journey",
+    "city_placeholder": "City",
+    "languages_placeholder": "Languages",
+    "rating_placeholder": "Min rating",
+    "has_vehicle": "Has own vehicle",
+    "search": "Search",
+    "no_drivers": "No drivers found",
+    "no_drivers_desc": "Try adjusting your filters",
+    "load_more": "Load More",
+    "verified": "Verified",
+    "years_exp": "yrs exp",
+    "no_reviews": "No reviews",
+    "call": "Call",
+    "unit_day": "day",
+    "unit_hour": "hour"
   }
 }
