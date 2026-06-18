@@ -565,6 +565,7 @@ function renderCarousel(vehicles, adminAds) {
                         <span class="fleet-tag">${v.engine || 'N/A'}</span>
                         <span class="fleet-tag">${v.gearbox || 'N/A'}</span>
                     </div>
+                    ${(v.rent_with_driver_only === 1 || v.rent_with_driver_only === true) ? '<div class="driver-only-badge"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M5 11l1.5-4.5A2 2 0 018.4 5h7.2a2 2 0 011.9 1.5L19 11m-14 0h14m-14 0a2 2 0 00-2 2v3h2m12-5a2 2 0 012 2v3h-2m-12 0h12m-12 0v1a1 1 0 001 1h1a1 1 0 001-1v-1m8 0v1a1 1 0 001 1h1a1 1 0 001-1v-1M7 14h.01M17 14h.01"/></svg><span data-i18n="fleet.driver_only">Only rent out with driver</span></div>' : ''}
                     <div class="fleet-card-price-row">
                         <div class="fleet-card-price">
                             <span class="fleet-price-amount">$${v.price_per_day || 0}</span>

@@ -71,7 +71,8 @@
     "no_results": "Нет автомобилей по вашим фильтрам",
     "seats": "мест",
     "auto": "Авто",
-    "manual": "Механика"
+    "manual": "Механика",
+    "driver_only": "Только с водителем"
   },
   "features": {
     "title": "Почему EliteAuto?",

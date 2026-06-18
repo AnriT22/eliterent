@@ -67,7 +67,7 @@
       ]
     }
     </script>
-    <link rel="stylesheet" href="style.css?v=7">
+    <link rel="stylesheet" href="style.css?v=8">
     <link rel="stylesheet" href="premium.css?v=5">
     <link rel="stylesheet" href="vehicles.css?v=6">
     <link rel="stylesheet" href="navbar-auth.css?v=5">
@@ -682,7 +682,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=8"></script>
+    <script src="script.js?v=9"></script>
     <script>
     (function () {
         var grid = document.getElementById('vpGrid');
@@ -1296,6 +1296,7 @@
                     + '</div>'
                     + '<div class="vc-body">'
                     + '<div class="vc-title-row"><span class="vc-name">' + name + '</span><span class="vc-category-tag ' + cat + '">' + vtVal(cat) + '</span></div>'
+                    + ((v.rent_with_driver_only === 1 || v.rent_with_driver_only === true) ? '<div class="driver-only-badge"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M5 11l1.5-4.5A2 2 0 018.4 5h7.2a2 2 0 011.9 1.5L19 11m-14 0h14m-14 0a2 2 0 00-2 2v3h2m12-5a2 2 0 012 2v3h-2m-12 0h12m-12 0v1a1 1 0 001 1h1a1 1 0 001-1v-1m8 0v1a1 1 0 001 1h1a1 1 0 001-1v-1M7 14h.01M17 14h.01"/></svg><span data-i18n="fleet.driver_only">Only rent out with driver</span></div>' : '')
                     + '<div class="vc-specs">'
                     + '<span class="vc-spec">' + vtVal(engine) + '</span>'
                     + '<span class="vc-spec">' + vtVal(gearbox) + '</span>'
