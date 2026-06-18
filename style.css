@@ -1521,6 +1521,24 @@ body {
     font-weight: 600;
 }
 
+/* "Rent only with driver" badge — shown on cars flagged rent_with_driver_only.
+   Shared across home cards, the vehicles grid (.vc-card) and the detail page. */
+.driver-only-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0 0 12px;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #ff3b3b;
+    text-shadow: 0 0 8px rgba(255,59,59,0.75), 0 0 2px rgba(255,59,59,0.9);
+}
+.driver-only-badge svg {
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 4px rgba(255,59,59,0.7));
+}
+
 .fleet-card-price-row {
     display: flex;
     justify-content: space-between;

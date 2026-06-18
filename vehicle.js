@@ -277,6 +277,7 @@
         if (v.free_cancellation) badges.innerHTML += '<span class="vd-badge green">' + esc(vt('vehicle_page.badge_free_cancel','Free Cancel')) + ' \u2713</span>';
         if (v.deposit_amount && v.deposit_amount > 0) badges.innerHTML += '<span class="vd-badge">' + esc(vt('vehicle_page.badge_deposit','Deposit')) + ' ' + ((typeof Currency !== 'undefined') ? Currency.formatPrice(v.deposit_amount) : ('$' + v.deposit_amount)) + '</span>';
         if (vdExtras.svaneti_roads) badges.innerHTML += '<span class="vd-badge green">' + esc(vt('vehicle_page.badge_svaneti','Svaneti Roads')) + ' \u2713</span>';
+        if (v.rent_with_driver_only === 1 || v.rent_with_driver_only === true) badges.innerHTML += '<span class="vd-badge" style="color:#ff3b3b;border-color:rgba(255,59,59,0.5);font-weight:800;text-shadow:0 0 8px rgba(255,59,59,0.7);">&#128663; ' + esc(vt('fleet.driver_only','Only rent out with driver')) + '</span>';
 
         // Fav button
         var favBtn = document.getElementById('vdFavBtn');

@@ -71,7 +71,8 @@
     "no_results": "אין רכבים שתואמים את הסינון",
     "seats": "מקומות",
     "auto": "אוטומט",
-    "manual": "ידני"
+    "manual": "ידני",
+    "driver_only": "השכרה רק עם נהג"
   },
   "features": {
     "title": "למה לבחור ב-EliteAuto?",

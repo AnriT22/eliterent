@@ -71,7 +71,8 @@
     "no_results": "No vehicles match your filters",
     "seats": "seats",
     "auto": "Auto",
-    "manual": "Manual"
+    "manual": "Manual",
+    "driver_only": "Only rent out with driver"
   },
   "features": {
     "title": "Why Choose EliteAuto?",
