@@ -1502,7 +1502,7 @@
         var visEl = document.getElementById('vVisibleInSearch');
         if (visEl) visEl.checked = true;
         var rwdEl = document.getElementById('vRentWithDriverOnly');
-        if (rwdEl) rwdEl.checked = false;
+        if (rwdEl) { rwdEl.checked = false; rwdEl.dispatchEvent(new Event('change')); }
         var blockEl = document.getElementById('vReturnFormatted');
         if (blockEl) blockEl.checked = true;
         // Clear brand search
@@ -1697,6 +1697,9 @@
                 var inp = document.getElementById(pair[1]);
                 if (cb && inp) inp.disabled = !cb.checked;
             });
+            // Re-apply "rent with driver only" forcing for the loaded car
+            var rwdEdit = document.getElementById('vRentWithDriverOnly');
+            if (rwdEdit) rwdEdit.dispatchEvent(new Event('change'));
 
             // Insurance
             var ins = (typeof v.insurance === 'string') ? JSON.parse(v.insurance || '{}') : (v.insurance || {});
@@ -2154,6 +2157,29 @@
             });
         }
     });
+
+    // "Rent with driver only": when on, Driver Service is mandatory (bundled into the
+    // rental), so force its checkbox on + disabled and keep the price input open —
+    // that price is the driver price added to the daily car rate at booking.
+    (function () {
+        var rwd = document.getElementById('vRentWithDriverOnly');
+        if (!rwd) return;
+        function applyRwd() {
+            var ds = document.getElementById('vDriverServiceAvail');
+            var dsP = document.getElementById('vDriverServicePrice');
+            if (!ds || !dsP) return;
+            if (rwd.checked) {
+                ds.checked = true;
+                ds.disabled = true;
+                dsP.disabled = false;
+            } else {
+                ds.disabled = false;
+                dsP.disabled = !ds.checked;
+            }
+        }
+        rwd.addEventListener('change', applyRwd);
+        applyRwd();
+    })();
 
     // ========================================
     // LOCATION: country -> searchable city -> auto region
