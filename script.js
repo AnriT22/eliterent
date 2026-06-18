@@ -603,16 +603,20 @@ function renderCarousel(vehicles, adminAds) {
             + '<span class="fleet-ad-card__cta">' + cta + ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></span>'
             + '</div></a>';
     }
-    var cards = carouselTrack.querySelectorAll('.fleet-card');
-    // Place first ad after 3rd car (position 4 in a 4-col grid)
-    if (adminAds[0]) {
-        if (cards[2]) { cards[2].insertAdjacentHTML('afterend', buildAdCard(adminAds[0])); }
-        else { carouselTrack.insertAdjacentHTML('beforeend', buildAdCard(adminAds[0])); }
-    }
-    // Place second ad at the end (position 8 in a 4-col grid)
-    if (adminAds[1]) {
-        carouselTrack.insertAdjacentHTML('beforeend', buildAdCard(adminAds[1]));
-    }
+    // Place each ad at its admin "Position" (1-indexed tile slot). Insert in
+    // ascending position order so earlier inserts shift later ones correctly;
+    // a position beyond the current tile count appends at the end.
+    adminAds.slice().sort(function (a, b) {
+        return (parseInt(a.position) || 999) - (parseInt(b.position) || 999);
+    }).forEach(function (ad) {
+        var idx = Math.max(1, parseInt(ad.position) || 1) - 1;
+        var children = carouselTrack.children;
+        if (idx >= children.length) {
+            carouselTrack.insertAdjacentHTML('beforeend', buildAdCard(ad));
+        } else {
+            children[idx].insertAdjacentHTML('beforebegin', buildAdCard(ad));
+        }
+    });
 
     if (typeof I18n !== 'undefined' && I18n.translatePage) I18n.translatePage(carouselTrack);
 

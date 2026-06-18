@@ -11,7 +11,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="style.css?v=7">
     <link rel="stylesheet" href="premium.css?v=5">
-    <link rel="stylesheet" href="navbar-auth.css?v=4">
+    <link rel="stylesheet" href="navbar-auth.css?v=5">
     <script src="api-helper.js"></script>
     <script src="i18n.js?v=5"></script>
     <style>
@@ -354,14 +354,22 @@
             return html;
         }
 
+        // Translate a UI string via i18n.js (falls back to the given English text).
+        function dt(k, f) { var v = (window.I18n && I18n.t) ? I18n.t(k) : null; return (v && v !== k) ? v : f; }
+        // Pick an admin ad's text for the active language (title_ru / title_he …), else default.
+        function adLoc(ad, base) {
+            var lang = (window.I18n && I18n.lang && I18n.lang()) || localStorage.getItem('EliteAuto_lang') || 'en';
+            if (lang && lang !== 'en' && ad[base + '_' + lang]) return ad[base + '_' + lang];
+            return ad[base] || '';
+        }
         function renderAdCard(ad) {
             var trackClick = ad.id ? ' onclick="trackAdClick(' + ad.id + ')"' : '';
             return '<div class="ad-card">'
                 + (ad.cover_url ? '<div class="ad-card-cover" style="background-image:url(' + ad.cover_url + ')"></div>' : '')
                 + '<div class="ad-card-body">'
-                + '<h4>' + esc(ad.title) + '</h4>'
-                + '<p>' + esc(ad.description) + '</p>'
-                + '<a href="' + esc(ad.target_link) + '" class="ad-card-cta" target="_blank" rel="noopener"' + trackClick + '>' + esc(ad.cta_text || 'Learn More') + '</a>'
+                + '<h4>' + esc(adLoc(ad, 'title')) + '</h4>'
+                + '<p>' + esc(adLoc(ad, 'description')) + '</p>'
+                + '<a href="' + esc(ad.target_link) + '" class="ad-card-cta" target="_blank" rel="noopener"' + trackClick + '>' + esc(adLoc(ad, 'cta_text') || dt('common.view_more','Learn More')) + '</a>'
                 + '</div></div>';
         }
 
@@ -372,20 +380,20 @@
             var vehicleInfo = d.has_own_vehicle && d.vehicle_info ? '<p style="font-size:12px;color:#A0A3B0;margin:4px 0;">' + esc(d.vehicle_info) + '</p>' : '';
             var rating = parseFloat(d.rating) || 0;
             var rc = d.reviews_count || 0;
-            var starsHtml = renderStars(rating) + (rc > 0 ? '<span class="count">' + rating + ' (' + rc + ')</span>' : '<span class="count">No reviews</span>');
+            var starsHtml = renderStars(rating) + (rc > 0 ? '<span class="count">' + rating + ' (' + rc + ')</span>' : '<span class="count">' + dt('drivers_page.no_reviews','No reviews') + '</span>');
             return '<div class="driver-card" style="cursor:pointer;" onclick="openDriverDetail(' + d.id + ')">'
                 + '<div class="driver-photo" style="background-image:url(' + photo + ')">'
-                + (d.is_verified ? '<span class="verified-badge">&#10003; Verified</span>' : '')
+                + (d.is_verified ? '<span class="verified-badge">&#10003; ' + dt('drivers_page.verified','Verified') + '</span>' : '')
                 + '</div>'
                 + '<div class="driver-info">'
                 + '<h3>' + esc(d.full_name) + '</h3>'
                 + '<div class="driver-stars">' + starsHtml + '</div>'
-                + '<div class="driver-meta">' + langTags + (d.experience_years ? '<span>' + d.experience_years + ' yrs exp</span>' : '') + '<span>' + esc(d.location_city || '') + '</span></div>'
+                + '<div class="driver-meta">' + langTags + (d.experience_years ? '<span>' + d.experience_years + ' ' + dt('drivers_page.years_exp','yrs exp') + '</span>' : '') + '<span>' + esc(d.location_city || '') + '</span></div>'
                 + vehicleInfo
-                + '<div class="driver-price">$' + (d.price_amount || 0) + ' / ' + (d.price_unit || 'day') + '</div>'
+                + '<div class="driver-price">$' + (d.price_amount || 0) + ' / ' + dt('drivers_page.unit_' + (d.price_unit || 'day'), (d.price_unit || 'day')) + '</div>'
                 + '</div>'
                 + '<div class="driver-contact">'
-                + (d.phone ? '<a href="tel:' + esc(d.phone) + '" onclick="event.stopPropagation();">Call</a>' : '')
+                + (d.phone ? '<a href="tel:' + esc(d.phone) + '" onclick="event.stopPropagation();">' + dt('drivers_page.call','Call') + '</a>' : '')
                 + (d.whatsapp ? '<a href="https://wa.me/' + esc(d.whatsapp.replace(/[^0-9+]/g, '')) + '" target="_blank" onclick="event.stopPropagation();">WhatsApp</a>' : '')
                 + '</div></div>';
         }
@@ -545,35 +553,30 @@
                     var drivers = data.drivers || [];
                     hasMore = data.hasMore;
                     if (!append) grid.innerHTML = '';
-                    if (drivers.length === 0 && !append) {
-                        grid.appendChild(empty);
-                        empty.style.display = '';
-                        loadMoreWrap.style.display = 'none';
-                        return;
-                    }
                     empty.style.display = 'none';
-                    // Render drivers + ads using admin Position field
-                    // Position 1 = after 1st driver, Position 2 = after 2nd, etc.
+                    // Render drivers; on the first page interleave admin ads by Position
+                    // (Position 1 = after 1st driver, etc.). Ads whose position is beyond
+                    // the driver count — including when there are 0 drivers — append at the end.
                     drivers.forEach(function(d, i) {
                         grid.insertAdjacentHTML('beforeend', renderDriverCard(d));
-                        // Insert any ads whose position matches after this driver
+                        if (!append) {
+                            ads.forEach(function(ad) {
+                                if ((parseInt(ad.position) || 0) === (i + 1)) {
+                                    grid.insertAdjacentHTML('beforeend', renderAdCard(ad));
+                                }
+                            });
+                        }
+                    });
+                    if (!append) {
                         ads.forEach(function(ad) {
-                            if (ad.position === (i + 1)) {
+                            if ((parseInt(ad.position) || 1) > drivers.length) {
                                 grid.insertAdjacentHTML('beforeend', renderAdCard(ad));
                             }
                         });
-                    });
-                    // If fewer drivers than ad position, append remaining ads at the end
-                    ads.forEach(function(ad) {
-                        if (ad.position > drivers.length) {
-                            grid.insertAdjacentHTML('beforeend', renderAdCard(ad));
-                        }
-                    });
-                    // If no drivers at all but we have ads, show them
-                    if (drivers.length === 0 && ads.length) {
-                        ads.forEach(function(ad) {
-                            grid.insertAdjacentHTML('beforeend', renderAdCard(ad));
-                        });
+                    }
+                    if (drivers.length === 0 && ads.length === 0 && !append) {
+                        grid.appendChild(empty);
+                        empty.style.display = '';
                     }
                     loadMoreWrap.style.display = hasMore ? '' : 'none';
                 })
@@ -583,7 +586,7 @@
         }
 
         function loadAds() {
-            fetch('/api/ads?placement=drivers')
+            return fetch('/api/ads?placement=drivers')
                 .then(function(r) { return r.json(); })
                 .then(function(data) { ads = data.ads || []; })
                 .catch(function() { ads = []; });
@@ -592,9 +595,11 @@
         document.getElementById('dfSearchBtn').addEventListener('click', function() { loadDrivers(false); });
         loadMoreBtn.addEventListener('click', function() { page++; loadDrivers(true); });
 
-        // Initial load
-        loadAds();
-        loadDrivers(false);
+        // Re-render in the new language when the visitor switches language
+        document.addEventListener('languageChanged', function() { loadDrivers(false); });
+
+        // Initial load — wait for ads to load first so they render with the drivers
+        loadAds().then(function() { loadDrivers(false); });
     })();
     </script>
 </body>

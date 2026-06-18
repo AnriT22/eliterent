@@ -192,6 +192,7 @@
 .nav-login-btn {
     display: inline-flex;
     align-items: center;
+    white-space: nowrap;
     padding: 8px 20px;
     background: rgba(255, 255, 255, 0.12);
     border: 1.5px solid rgba(255, 255, 255, 0.25);
