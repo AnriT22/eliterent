@@ -922,6 +922,20 @@
 
                                 <div class="db-form-group">
 
+                                    <label class="db-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+
+                                        <input type="checkbox" id="vRentWithDriverOnly" style="width:18px;height:18px;">
+
+                                        <span data-i18n="partner_dashboard.rent_with_driver_only">Rent with driver only</span>
+
+                                    </label>
+
+                                    <p class="db-field-hint" style="margin-top:4px;" data-i18n="partner_dashboard.rent_with_driver_only_hint">Only rentable with a driver — the Driver Service price becomes the driver price added to the rental.</p>
+
+                                </div>
+
+                                <div class="db-form-group">
+
                                     <label class="db-label" style="display:flex;align-items:center;gap:8px;">
 
                                         <input type="checkbox" id="vPicnicHouseAvail" style="width:18px;height:18px;">
@@ -1080,19 +1094,8 @@
 
                             </div>
 
-                            <div class="db-form-group" style="margin-top:14px;">
+                            <!-- "Rent with driver only" moved into Extras & Add-ons (next to Driver Service) -->
 
-                                <label class="db-label" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
-
-                                    <input type="checkbox" id="vRentWithDriverOnly" style="width:18px;height:18px;">
-
-                                    <span data-i18n="partner_dashboard.rent_with_driver_only">Rent with driver only</span>
-
-                                </label>
-
-                                <p class="db-field-hint" data-i18n="partner_dashboard.rent_with_driver_only_hint">Check this if this car can only be rented together with a driver (not for self-drive).</p>
-
-                            </div>
 
                         </div>
 
@@ -1792,7 +1795,7 @@
 
     <script src="location-data.js?v=1"></script>
 
-    <script src="dashboard.js?v=4"></script>
+    <script src="dashboard.js?v=5"></script>
 
 <script src="premium-animations.js"></script>
 
