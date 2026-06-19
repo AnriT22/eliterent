@@ -72,7 +72,9 @@
     "seats": "мест",
     "auto": "Авто",
     "manual": "Механика",
-    "driver_only": "Только с водителем"
+    "driver_only": "Только с водителем",
+    "rent": "аренда",
+    "driver": "водитель"
   },
   "features": {
     "title": "Почему EliteAuto?",

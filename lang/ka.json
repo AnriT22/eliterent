@@ -72,7 +72,9 @@
     "seats": "ადგილი",
     "auto": "ავტო",
     "manual": "მექანიკური",
-    "driver_only": "მხოლოდ მძღოლით"
+    "driver_only": "მხოლოდ მძღოლით",
+    "rent": "ქირა",
+    "driver": "მძღოლი"
   },
   "features": {
     "title": "რატომ EliteAuto?",

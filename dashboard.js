@@ -1476,11 +1476,22 @@
 
             showFormMessage(editId ? 'Vehicle updated!' : 'Vehicle added!', 'success');
 
-            setTimeout(function () {
-                resetVehicleForm();
-                switchTab('vehicles');
-                loadVehicles();
-            }, 1000);
+            var vehicleForVip = (result.data && result.data.vehicle && result.data.vehicle.id) ? result.data.vehicle : null;
+            if (!vehicleForVip && editId) {
+                vehicleForVip = { id: editId, name: document.getElementById('vName').value };
+            }
+
+            if (vehicleForVip) {
+                setTimeout(function () {
+                    openVipUpgradeModal(vehicleForVip);
+                }, 800);
+            } else {
+                setTimeout(function () {
+                    resetVehicleForm();
+                    switchTab('vehicles');
+                    loadVehicles();
+                }, 1000);
+            }
         })
         .catch(function (err) {
             submitBtn.disabled = false;
@@ -2604,6 +2615,124 @@
             div.textContent = str;
             return div.innerHTML;
         }
+    // ========================================
+    // VIP UPGRADE MODAL (after adding a vehicle)
+    // ========================================
+    var _vipVehicleId = null;
+
+    window.openVipUpgradeModal = function (vehicle) {
+        _vipVehicleId = vehicle && vehicle.id ? vehicle.id : null;
+        if (!_vipVehicleId) return;
+
+        var modal = document.getElementById('vipUpgradeModal');
+        var img = document.getElementById('vipPreviewImg');
+        var name = document.getElementById('vipPreviewName');
+        var paypalContainer = document.getElementById('vipPayPalContainer');
+        var errorEl = document.getElementById('vipPaymentError');
+        var successEl = document.getElementById('vipPaymentSuccess');
+
+        paypalContainer.innerHTML = '';
+        errorEl.style.display = 'none';
+        errorEl.textContent = '';
+        successEl.style.display = 'none';
+
+        if (img) {
+            img.src = vehicle.image_url || (vehicle.gallery && vehicle.gallery[0]) || 'images/placeholder-car.png';
+            img.alt = vehicle.name || 'Vehicle';
+        }
+        if (name) name.textContent = vehicle.name || 'Your Vehicle';
+
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        renderVipPayPalButton();
+    };
+
+    window.closeVipUpgradeModal = function () {
+        var modal = document.getElementById('vipUpgradeModal');
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        _vipVehicleId = null;
+        resetVehicleForm();
+        switchTab('vehicles');
+        loadVehicles();
+    };
+
+    function renderVipPayPalButton() {
+        var container = document.getElementById('vipPayPalContainer');
+        var errorEl = document.getElementById('vipPaymentError');
+        if (!container || !_vipVehicleId) return;
+
+        function showErr(msg) {
+            errorEl.textContent = msg;
+            errorEl.style.display = 'block';
+        }
+
+        fetch('/api/payments/config')
+            .then(function (r) { return r.json(); })
+            .then(function (cfg) {
+                if (!cfg.configured || !cfg.clientId) {
+                    showErr('Payment is not configured yet. Please contact support.');
+                    return;
+                }
+
+                var base = cfg.mode === 'live' ? 'https://www.paypal.com' : 'https://www.sandbox.paypal.com';
+                var script = document.createElement('script');
+                script.src = base + '/sdk/js?client-id=' + encodeURIComponent(cfg.clientId) + '&currency=USD&intent=capture';
+                script.onload = function () {
+                    container.innerHTML = '';
+                    window.paypal.Buttons({
+                        style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'pay' },
+                        createOrder: async function () {
+                            var r = await fetch('/api/payments/vehicle/' + _vipVehicleId + '/vip/create-order', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+                                }
+                            });
+                            var d = await r.json();
+                            if (!r.ok) throw new Error(d.error || 'Failed to create order');
+                            return d.orderId;
+                        },
+                        onApprove: async function (approveData) {
+                            container.innerHTML = '<div class="payment-loading">Processing payment…</div>';
+                            var r = await fetch('/api/payments/vehicle/' + _vipVehicleId + '/vip/capture-order', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+                                },
+                                body: JSON.stringify({ order_id: approveData.orderID })
+                            });
+                            var d = await r.json();
+                            if (!r.ok) {
+                                showErr(d.error || 'Payment capture failed. Contact support.');
+                                container.innerHTML = '';
+                                return;
+                            }
+                            container.innerHTML = '';
+                            document.getElementById('vipPaymentSuccess').style.display = 'block';
+                            setTimeout(function () {
+                                closeVipUpgradeModal();
+                            }, 2500);
+                        },
+                        onError: function (err) {
+                            console.error('PayPal VIP error:', err);
+                            showErr('Payment failed. Please try again or contact support.');
+                        }
+                    }).render('#vipPayPalContainer');
+                };
+                script.onerror = function () {
+                    showErr('Failed to load PayPal. Please try again.');
+                };
+                document.head.appendChild(script);
+            })
+            .catch(function (err) {
+                showErr(err.message || 'Failed to load payment options.');
+            });
+    }
+
     })();
 
     console.log('✓ Partner dashboard initialized');

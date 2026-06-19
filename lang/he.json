@@ -72,7 +72,9 @@
     "seats": "מקומות",
     "auto": "אוטומט",
     "manual": "ידני",
-    "driver_only": "השכרה רק עם נהג"
+    "driver_only": "השכרה רק עם נהג",
+    "rent": "השכרה",
+    "driver": "נהג"
   },
   "features": {
     "title": "למה לבחור ב-EliteAuto?",

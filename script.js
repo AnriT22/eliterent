@@ -480,40 +480,32 @@ function loadCarouselWithAvailability() {
     
     carouselTrack.innerHTML = '<div style="padding:40px;text-align:center;color:#A0A3B0;grid-column:1/-1;">Loading vehicles...</div>';
     
-    let apiUrl = '/api/vehicles?sort=newest';
-    const hasDates = window.selectedStartDate && window.selectedEndDate;
+    // Note: date filtering is not applied to the homepage structured endpoint;
+    // VIP featured cars are fixed by admin. Visitor can use the full fleet page for date filtering.
     
-    if (hasDates) {
-        const fmt = (d) => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-        apiUrl += '&pickup_date=' + fmt(new Date(window.selectedStartDate)) + '&dropoff_date=' + fmt(new Date(window.selectedEndDate));
-    }
-    
-    // Fetch vehicles AND admin ads in parallel
+    // Fetch homepage structured vehicles AND admin ads in parallel
     Promise.all([
-        fetch(apiUrl).then(function (r) { return r.json(); }),
+        fetch('/api/vehicles/homepage').then(function (r) { return r.json(); }),
         fetch('/api/ads?placement=cars').then(function (r) { return r.json(); }).catch(function () { return { ads: [] }; })
     ])
         .then(function (results) {
             var data = results[0];
             var adData = results[1];
-            const vehicles = data.vehicles || [];
-            window._allCarouselVehicles = vehicles;
+            var vipFeatured = data.vipFeatured || [];
+            var randomCars = data.randomCars || [];
+            window._allCarouselVehicles = vipFeatured.concat(randomCars);
             
             // Admin-created ads for homepage: placement='cars' or 'both', active only
             var homeAds = (adData.ads || []).slice(0, 2);
             
-            if (vehicles.length === 0 && hasDates) {
-                carouselTrack.innerHTML = '<div style="padding:40px;text-align:center;color:#EAEAEA;grid-column:1/-1;"><p style="font-size:18px;margin-bottom:8px;">No vehicles available for the selected dates.</p><button onclick="clearDatesAndReload()" style="padding:8px 20px;background:#D4AF37;color:#0B0C10;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;">Clear Dates</button></div>';
-                return;
-            }
-            
-            if (vehicles.length === 0) {
+            if (vipFeatured.length === 0 && randomCars.length === 0) {
                 carouselTrack.innerHTML = '<div style="padding:40px;text-align:center;color:#EAEAEA;grid-column:1/-1;"><p style="font-size:18px;">No vehicles available yet.</p></div>';
                 return;
             }
             
-            // Home page teaser: 6 random cars + up to 2 admin ads = max 8 tiles.
-            renderCarousel(pickRandom(vehicles, 6), homeAds);
+            // Home page fleet section: exactly 8 tiles = 3 VIP cars + 2 ads + 3 random non-VIP cars.
+            // Insert ads after the VIP block so the layout is 3 VIP cards, 2 ads, 3 random cards.
+            renderCarousel(vipFeatured.concat(randomCars), homeAds, vipFeatured.length);
         })
         .catch(function (err) {
             console.error('Fleet load error:', err);
@@ -531,18 +523,19 @@ function pickRandom(arr, n) {
     return a.slice(0, n);
 }
 
-function renderCarousel(vehicles, adminAds) {
+function renderCarousel(vehicles, adminAds, firstBlockLength) {
     adminAds = adminAds || [];
+    firstBlockLength = firstBlockLength || 8;
     const carouselTrack = document.getElementById('carouselTrack');
     if (!carouselTrack) return;
 
     // Remember what's shown so we can re-render (e.g. localized ad text) when the
     // visitor switches language. i18n.js dispatches 'languageChanged' on switch.
-    window._lastRender = { vehicles: vehicles, adminAds: adminAds };
+    window._lastRender = { vehicles: vehicles, adminAds: adminAds, firstBlockLength: firstBlockLength };
     if (!window._carouselLangBound) {
         window._carouselLangBound = true;
         document.addEventListener('languageChanged', function () {
-            if (window._lastRender) renderCarousel(window._lastRender.vehicles, window._lastRender.adminAds);
+            if (window._lastRender) renderCarousel(window._lastRender.vehicles, window._lastRender.adminAds, window._lastRender.firstBlockLength);
         });
     }
 
@@ -552,8 +545,20 @@ function renderCarousel(vehicles, adminAds) {
         const imgSrc = v.image_url || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240'%3E%3Crect fill='%23e2e8f0' width='400' height='240'/%3E%3Ctext x='200' y='125' text-anchor='middle' fill='%2394a3b8' font-size='16' font-family='sans-serif'%3ENo Image%3C/text%3E%3C/svg%3E";
         const isNew = v.created_at && (Date.now() - new Date(v.created_at).getTime()) < 24 * 60 * 60 * 1000;
 
+        // For "rent with driver only" cars, the displayed price is rent + driver service.
+        var driverOnly = (v.rent_with_driver_only === 1 || v.rent_with_driver_only === true);
+        var basePrice = parseFloat(v.price_per_day) || 0;
+        var driverPrice = 0;
+        if (driverOnly) {
+            var vExtras = v.extras;
+            if (typeof vExtras === 'string') { try { vExtras = JSON.parse(vExtras); } catch (e) { vExtras = {}; } }
+            vExtras = vExtras || {};
+            driverPrice = parseFloat(vExtras.driver_service) || 0;
+        }
+        var totalPrice = basePrice + driverPrice;
+
         html += `
-            <div class="fleet-card" data-category="${(v.category||'').toLowerCase()}" data-engine="${(v.engine||'').toLowerCase()}" data-gearbox="${(v.gearbox||'').toLowerCase()}" data-drivetype="${(v.drive_type||'').toLowerCase()}" data-interior="${(v.interior_type||'').toLowerCase()}" data-steering="${(v.steering_side||'').toLowerCase()}" data-payment="${(v.payment_method||'').toLowerCase()}" onclick="if(!event.target.closest('button'))window.location.href='vehicle.html?id=${v.id}'">
+            <div class="fleet-card ${v.is_vip ? 'fleet-card-vip' : ''}" data-category="${(v.category||'').toLowerCase()}" data-engine="${(v.engine||'').toLowerCase()}" data-gearbox="${(v.gearbox||'').toLowerCase()}" data-drivetype="${(v.drive_type||'').toLowerCase()}" data-interior="${(v.interior_type||'').toLowerCase()}" data-steering="${(v.steering_side||'').toLowerCase()}" data-payment="${(v.payment_method||'').toLowerCase()}" onclick="if(!event.target.closest('button'))window.location.href='vehicle.html?id=${v.id}'">
                 <div class="fleet-card-img">
                     <img src="${imgSrc}" alt="${v.name}">
                     ${isNew ? '<span class="fleet-card-badge">NEW</span>' : ''}
@@ -568,11 +573,12 @@ function renderCarousel(vehicles, adminAds) {
                     ${(v.rent_with_driver_only === 1 || v.rent_with_driver_only === true) ? '<div class="driver-only-badge"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M5 11l1.5-4.5A2 2 0 018.4 5h7.2a2 2 0 011.9 1.5L19 11m-14 0h14m-14 0a2 2 0 00-2 2v3h2m12-5a2 2 0 012 2v3h-2m-12 0h12m-12 0v1a1 1 0 001 1h1a1 1 0 001-1v-1m8 0v1a1 1 0 001 1h1a1 1 0 001-1v-1M7 14h.01M17 14h.01"/></svg><span data-i18n="fleet.driver_only">Only rent out with driver</span></div>' : ''}
                     <div class="fleet-card-price-row">
                         <div class="fleet-card-price">
-                            <span class="fleet-price-amount">$${v.price_per_day || 0}</span>
+                            <span class="fleet-price-amount" data-price-usd="${totalPrice}">$${totalPrice}</span>
                             <span class="fleet-price-unit" data-i18n="fleet.per_day">/day</span>
                         </div>
                         <span class="fleet-card-year">${v.year || 'N/A'}</span>
                     </div>
+                    ${(driverOnly && driverPrice > 0) ? `<div class="fleet-card-price-breakdown" style="font-size:11px;color:#A0A3B0;margin-top:-4px;margin-bottom:8px;"><span data-price-usd="${basePrice}">$${basePrice}</span> <span data-i18n="fleet.rent">rent</span> + <span data-price-usd="${driverPrice}">$${driverPrice}</span> <span data-i18n="fleet.driver">driver</span></div>` : ''}
                     <button class="fleet-card-btn" onclick="selectVehicle(${v.id})" data-i18n="fleet.select_vehicle">Select Vehicle</button>
                 </div>
             </div>
@@ -604,18 +610,14 @@ function renderCarousel(vehicles, adminAds) {
             + '<span class="fleet-ad-card__cta">' + cta + ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></span>'
             + '</div></a>';
     }
-    // Place each ad at its admin "Position" (1-indexed tile slot). Insert in
-    // ascending position order so earlier inserts shift later ones correctly;
-    // a position beyond the current tile count appends at the end.
-    adminAds.slice().sort(function (a, b) {
-        return (parseInt(a.position) || 999) - (parseInt(b.position) || 999);
-    }).forEach(function (ad) {
-        var idx = Math.max(1, parseInt(ad.position) || 1) - 1;
+    // Place the first 2 admin ads immediately after the first block of cards.
+    // The homepage layout is: 8 cards, 2 ads, 6 cards (3 VIP + 3 random).
+    adminAds.slice(0, 2).forEach(function (ad) {
         var children = carouselTrack.children;
-        if (idx >= children.length) {
+        if (firstBlockLength >= children.length) {
             carouselTrack.insertAdjacentHTML('beforeend', buildAdCard(ad));
         } else {
-            children[idx].insertAdjacentHTML('beforebegin', buildAdCard(ad));
+            children[firstBlockLength].insertAdjacentHTML('beforebegin', buildAdCard(ad));
         }
     });
 

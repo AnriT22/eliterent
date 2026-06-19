@@ -72,7 +72,9 @@
     "seats": "seats",
     "auto": "Auto",
     "manual": "Manual",
-    "driver_only": "Only rent out with driver"
+    "driver_only": "Only rent out with driver",
+    "rent": "rent",
+    "driver": "driver"
   },
   "features": {
     "title": "Why Choose EliteAuto?",

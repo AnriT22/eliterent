@@ -277,4 +277,97 @@ router.post('/partner/capture-order', authenticateToken, requireRole('partner'),
     }
 });
 
+// ============================================================
+// VEHICLE VIP UPGRADE ($2.00) — 30 days green glow badge
+// ============================================================
+var VEHICLE_VIP_FEE = 2.00;
+
+// POST /api/payments/vehicle/:vehicleId/vip/create-order
+router.post('/vehicle/:vehicleId/vip/create-order', authenticateToken, requireRole('partner'), async (req, res) => {
+    try {
+        var vehicleId = parseInt(req.params.vehicleId);
+        if (!vehicleId || isNaN(vehicleId)) return res.status(400).json({ error: 'vehicle_id required' });
+
+        var vehicle = await queryOne('SELECT id, partner_id, name, vip_until FROM vehicles WHERE id = $1', [vehicleId]);
+        if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
+        if (vehicle.partner_id !== req.user.id) return res.status(403).json({ error: 'Not your vehicle' });
+
+        // Already has an active paid VIP
+        if (vehicle.vip_until && new Date(vehicle.vip_until) > new Date()) {
+            return res.status(400).json({ error: 'This vehicle already has an active VIP badge.' });
+        }
+
+        if (!paypal.isConfigured()) {
+            return res.status(503).json({ error: 'Payment system not configured. Contact admin.' });
+        }
+
+        var desc = 'EliteAuto.rent — VIP highlight for ' + (vehicle.name || 'Vehicle') + ' (30 days)';
+        var order = await paypal.createOrder(vehicleId, VEHICLE_VIP_FEE, 'USD', desc, 'GE');
+
+        res.json({ orderId: order.id });
+    } catch (err) {
+        console.error('Vehicle VIP create-order error:', err);
+        res.status(500).json({ error: 'Failed to create VIP payment order' });
+    }
+});
+
+// POST /api/payments/vehicle/:vehicleId/vip/capture-order
+router.post('/vehicle/:vehicleId/vip/capture-order', authenticateToken, requireRole('partner'), async (req, res) => {
+    try {
+        var vehicleId = parseInt(req.params.vehicleId);
+        var orderId = req.body.order_id;
+        if (!vehicleId || isNaN(vehicleId)) return res.status(400).json({ error: 'vehicle_id required' });
+        if (!orderId) return res.status(400).json({ error: 'order_id required' });
+
+        var vehicle = await queryOne('SELECT id, partner_id, name, vip_until FROM vehicles WHERE id = $1', [vehicleId]);
+        if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
+        if (vehicle.partner_id !== req.user.id) return res.status(403).json({ error: 'Not your vehicle' });
+
+        if (!paypal.isConfigured()) {
+            return res.status(503).json({ error: 'Payment system not configured' });
+        }
+
+        var capture = await paypal.captureOrder(orderId);
+
+        if (capture.status === 'COMPLETED') {
+            var captureId = '';
+            var capturedAmount = 0;
+            try {
+                var capData = capture.purchase_units[0].payments.captures[0];
+                captureId = capData.id;
+                capturedAmount = parseFloat(capData.amount.value) || 0;
+            } catch (e) {}
+
+            if (Math.abs(capturedAmount - VEHICLE_VIP_FEE) > 0.01) {
+                console.error('VEHICLE VIP PAYMENT MISMATCH: vehicle #' + vehicleId + ' expected $' + VEHICLE_VIP_FEE.toFixed(2) + ' but PayPal captured $' + capturedAmount.toFixed(2));
+                return res.status(400).json({ error: 'Payment amount mismatch. Please contact support.', status: 'MISMATCH' });
+            }
+
+            // Activate VIP for 30 days from now
+            await execute(
+                `UPDATE vehicles
+                 SET vip_until = CURRENT_TIMESTAMP + INTERVAL '30 days',
+                     updated_at = CURRENT_TIMESTAMP
+                 WHERE id = $1`,
+                [vehicleId]
+            );
+
+            res.json({
+                status: 'COMPLETED',
+                message: 'VIP badge activated for 30 days!',
+                captureId: captureId,
+                vehicleId: vehicleId
+            });
+        } else {
+            res.status(400).json({
+                status: capture.status,
+                error: 'Payment not completed. Status: ' + capture.status
+            });
+        }
+    } catch (err) {
+        console.error('Vehicle VIP capture-order error:', err);
+        res.status(500).json({ error: 'Failed to capture VIP payment' });
+    }
+});
+
 module.exports = router;

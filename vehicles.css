@@ -480,10 +480,36 @@
     transition: box-shadow 0.25s, transform 0.25s;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 .vc-card:hover {
     box-shadow: 0 12px 32px rgba(0,0,0,0.13);
     transform: translateY(-4px);
+}
+
+/* VIP highlight — admin-chosen green glow badge */
+.vc-card.vc-vip {
+    border: 1.5px solid #22c55e;
+    box-shadow: 0 0 16px rgba(34, 197, 94, 0.35);
+}
+.vc-card.vc-vip:hover {
+    box-shadow: 0 0 24px rgba(34, 197, 94, 0.55), 0 12px 32px rgba(0,0,0,0.18);
+}
+.vc-card.vc-vip::before {
+    content: 'VIP';
+    position: absolute;
+    top: 52px;
+    right: 10px;
+    z-index: 2;
+    background: #22c55e;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .vc-image-wrap {

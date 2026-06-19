@@ -149,11 +149,35 @@
                 '<div class="vd-location" style="font-size:13px;color:#A0A3B0;margin-top:4px;display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + esc(locLabel) + '</div>');
         }
 
-        // Price
+        // Price — for "rent with driver only" cars, show rent + driver service total.
+        var vdDriverOnly = (v.rent_with_driver_only === 1 || v.rent_with_driver_only === true);
+        var vdDriverPrice = 0;
+        if (vdDriverOnly) {
+            var vdEx = v.extras;
+            if (typeof vdEx === 'string') { try { vdEx = JSON.parse(vdEx); } catch (e) { vdEx = {}; } }
+            vdEx = vdEx || {};
+            vdDriverPrice = parseFloat(vdEx.driver_service) || 0;
+        }
+        var vdHeadlinePrice = (parseFloat(v.price_per_day) || 0) + vdDriverPrice;
         var priceEl = document.getElementById('vdPrice');
-        priceEl.setAttribute('data-price-usd', v.price_per_day || 0);
+        priceEl.setAttribute('data-price-usd', vdHeadlinePrice);
         priceEl.classList.add('vd-price-amount');
-        priceEl.textContent = (typeof Currency !== 'undefined') ? Currency.formatPrice(v.price_per_day || 0) : ('$' + (v.price_per_day || 0));
+        priceEl.textContent = (typeof Currency !== 'undefined') ? Currency.formatPrice(vdHeadlinePrice) : ('$' + vdHeadlinePrice);
+        var vdPriceBreakdownEl = document.getElementById('vdPriceBreakdown');
+        if (!vdPriceBreakdownEl && vdDriverOnly && vdDriverPrice > 0) {
+            vdPriceBreakdownEl = document.createElement('div');
+            vdPriceBreakdownEl.id = 'vdPriceBreakdown';
+            vdPriceBreakdownEl.style.cssText = 'font-size:12px;color:#A0A3B0;margin-top:2px;';
+            if (priceEl.parentNode) priceEl.parentNode.appendChild(vdPriceBreakdownEl);
+        }
+        if (vdPriceBreakdownEl) {
+            vdPriceBreakdownEl.style.display = (vdDriverOnly && vdDriverPrice > 0) ? '' : 'none';
+            if (vdDriverOnly && vdDriverPrice > 0) {
+                var rentStr = (typeof Currency !== 'undefined') ? Currency.formatPrice(v.price_per_day || 0) : ('$' + (v.price_per_day || 0));
+                var drvStr = (typeof Currency !== 'undefined') ? Currency.formatPrice(vdDriverPrice) : ('$' + vdDriverPrice);
+                vdPriceBreakdownEl.textContent = rentStr + ' ' + vt('fleet.rent', 'rent') + ' + ' + drvStr + ' ' + vt('fleet.driver', 'driver');
+            }
+        }
 
         // Partner
         if (v.company_name) {
@@ -631,7 +655,22 @@
         if (vehicleData) {
             var priceEl = document.getElementById('vdPrice');
             if (priceEl) {
-                priceEl.textContent = (typeof Currency !== 'undefined') ? Currency.formatPrice(vehicleData.price_per_day || 0) : ('$' + (vehicleData.price_per_day || 0));
+                var ccDriverOnly = (vehicleData.rent_with_driver_only === 1 || vehicleData.rent_with_driver_only === true);
+                var ccDriverPrice = 0;
+                if (ccDriverOnly) {
+                    var ccEx = vehicleData.extras;
+                    if (typeof ccEx === 'string') { try { ccEx = JSON.parse(ccEx); } catch (e) { ccEx = {}; } }
+                    ccEx = ccEx || {};
+                    ccDriverPrice = parseFloat(ccEx.driver_service) || 0;
+                }
+                var ccHeadline = (parseFloat(vehicleData.price_per_day) || 0) + ccDriverPrice;
+                priceEl.textContent = (typeof Currency !== 'undefined') ? Currency.formatPrice(ccHeadline) : ('$' + ccHeadline);
+                var ccBreakdown = document.getElementById('vdPriceBreakdown');
+                if (ccBreakdown && ccDriverOnly && ccDriverPrice > 0) {
+                    var rStr = (typeof Currency !== 'undefined') ? Currency.formatPrice(vehicleData.price_per_day || 0) : ('$' + (vehicleData.price_per_day || 0));
+                    var dStr = (typeof Currency !== 'undefined') ? Currency.formatPrice(ccDriverPrice) : ('$' + ccDriverPrice);
+                    ccBreakdown.textContent = rStr + ' ' + vt('fleet.rent', 'rent') + ' + ' + dStr + ' ' + vt('fleet.driver', 'driver');
+                }
             }
             if (typeof Currency !== 'undefined') Currency.refresh();
             // Re-calc booking total if dates selected
