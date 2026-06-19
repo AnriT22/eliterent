@@ -337,6 +337,12 @@ async function initDB() {
         }
     } catch (e) { /* columns may already exist or table not yet created */ }
 
+    // Expand ad_cards.placement to allow new ad surfaces (existing DBs)
+    try {
+        await pool.query(`ALTER TABLE ad_cards DROP CONSTRAINT IF EXISTS ad_cards_placement_check`);
+        await pool.query(`ALTER TABLE ad_cards ADD CONSTRAINT ad_cards_placement_check CHECK (placement IN ('cars','drivers','both','vehicles','blog','checkout'))`);
+    } catch (e) { /* table not yet created */ }
+
     // Add partner signup method / paid columns (existing DBs)
     try {
         await pool.query(`ALTER TABLE partner_profiles ADD COLUMN IF NOT EXISTS signup_method TEXT DEFAULT 'invite'`);
@@ -441,7 +447,7 @@ async function initDB() {
             title_ru TEXT, title_ka TEXT, title_he TEXT,
             description_ru TEXT, description_ka TEXT, description_he TEXT,
             cta_text_ru TEXT, cta_text_ka TEXT, cta_text_he TEXT,
-            placement TEXT DEFAULT 'cars' CHECK(placement IN ('cars', 'drivers', 'both')),
+            placement TEXT DEFAULT 'cars' CHECK(placement IN ('cars', 'drivers', 'both', 'vehicles', 'blog', 'checkout')),
             position INTEGER DEFAULT 4,
             clicks INTEGER DEFAULT 0,
             is_active INTEGER DEFAULT 1,
