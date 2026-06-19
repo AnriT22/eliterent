@@ -7,7 +7,9 @@ const router = express.Router();
 // GET /api/vehicles — list all active vehicles (public)
 router.get('/', async (req, res) => {
     try {
-        var sql = `SELECT v.*, u.full_name as partner_name, pp.company_name
+        var sql = `SELECT v.*,
+                          (CASE WHEN v.is_vip = 1 OR v.vip_until > NOW() THEN 1 ELSE 0 END) AS is_vip,
+                          u.full_name as partner_name, pp.company_name
                    FROM vehicles v
                    JOIN users u ON v.partner_id = u.id
                    LEFT JOIN partner_profiles pp ON u.id = pp.user_id
@@ -73,8 +75,8 @@ router.get('/', async (req, res) => {
             'newest': 'v.created_at DESC'
         };
         var sort = sortMap[req.query.sort] || 'v.created_at DESC';
-        // Admin-set priority always wins (higher priority shown first), then the chosen sort
-        sql += ' ORDER BY v.priority DESC, ' + sort;
+        // VIP cars first, then admin-set priority, then the chosen sort
+        sql += ' ORDER BY (CASE WHEN v.is_vip = 1 OR v.vip_until > NOW() THEN 1 ELSE 0 END) DESC, v.priority DESC, ' + sort;
 
         var vehicles = await queryAll(sql, params);
 
@@ -85,11 +87,56 @@ router.get('/', async (req, res) => {
     }
 });
 
+// GET /api/vehicles/homepage — structured data for homepage fleet section
+// Homepage fleet section shows exactly 8 tiles: 3 admin-picked VIP cars + 3 random non-VIP cars + 2 admin ads.
+router.get('/homepage', async (req, res) => {
+    try {
+        var baseSql = `SELECT v.*,
+                              (CASE WHEN v.is_vip = 1 OR v.vip_until > NOW() THEN 1 ELSE 0 END) AS is_vip,
+                              u.full_name as partner_name, pp.company_name
+                       FROM vehicles v
+                       JOIN users u ON v.partner_id = u.id
+                       LEFT JOIN partner_profiles pp ON u.id = pp.user_id
+                       WHERE v.status = 'active' AND pp.is_verified = 1`;
+
+        // 3 admin-picked VIP cars (homepage_vip_position 1,2,3) — active VIPs only
+        var vipFeatured = await queryAll(
+            baseSql + ` AND (v.is_vip = 1 OR v.vip_until > NOW()) AND v.homepage_vip_position IN (1,2,3)
+                       ORDER BY v.homepage_vip_position ASC, v.created_at DESC
+                       LIMIT 3`,
+            []
+        );
+
+        // Build a list of excluded IDs so VIP featured cars don't repeat in random pool
+        var excludedIds = vipFeatured.map(function (v) { return v.id; });
+        var excludeClause = excludedIds.length ? ' AND v.id NOT IN (' + excludedIds.join(',') + ')' : '';
+
+        // 3 random non-VIP cars to fill the remaining car slots
+        // Strict non-VIP: not flagged is_vip AND not within an active vip_until window.
+        var randomCars = await queryAll(
+            baseSql + ` AND v.is_vip = 0 AND (v.vip_until IS NULL OR v.vip_until <= NOW())` + excludeClause +
+            ` ORDER BY RANDOM() LIMIT 3`,
+            []
+        );
+
+        res.json({
+            vipFeatured: vipFeatured,
+            randomCars: randomCars,
+            vipCount: vipFeatured.length,
+            randomCount: randomCars.length
+        });
+    } catch (err) {
+        console.error('Get homepage vehicles error:', err);
+        res.status(500).json({ error: 'Failed to get homepage vehicles' });
+    }
+});
+
 // GET /api/vehicles/my — get partner's own vehicles (protected, partner only)
 router.get('/my', authenticateToken, requireRole('partner'), async (req, res) => {
     try {
         var vehicles = await queryAll(
-            'SELECT * FROM vehicles WHERE partner_id = $1 ORDER BY created_at DESC',
+            `SELECT *, (CASE WHEN is_vip = 1 OR vip_until > NOW() THEN 1 ELSE 0 END) AS is_vip
+             FROM vehicles WHERE partner_id = $1 ORDER BY created_at DESC`,
             [req.user.id]
         );
         res.json({ vehicles, count: vehicles.length });
@@ -103,7 +150,9 @@ router.get('/my', authenticateToken, requireRole('partner'), async (req, res) =>
 router.get('/:id', async (req, res) => {
     try {
         var vehicle = await queryOne(
-            `SELECT v.*, u.full_name as partner_name, pp.company_name, pp.whatsapp, pp.telegram, pp.location as partner_location
+            `SELECT v.*,
+                    (CASE WHEN v.is_vip = 1 OR v.vip_until > NOW() THEN 1 ELSE 0 END) AS is_vip,
+                    u.full_name as partner_name, pp.company_name, pp.whatsapp, pp.telegram, pp.location as partner_location
              FROM vehicles v
              JOIN users u ON v.partner_id = u.id
              LEFT JOIN partner_profiles pp ON u.id = pp.user_id

@@ -298,6 +298,29 @@ async function initDB() {
         await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS priority INTEGER DEFAULT 0`);
     } catch (e) { /* column may already exist or table not yet created */ }
 
+    // Add pin_page / pin_position so admin can place a vehicle at an exact slot
+    // (page + position) in the public vehicles.html grid. 0 = not pinned.
+    try {
+        await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS pin_page INTEGER DEFAULT 0`);
+        await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS pin_position INTEGER DEFAULT 0`);
+    } catch (e) { /* column may already exist or table not yet created */ }
+
+    // Add is_vip flag so admin can highlight a vehicle card with a green VIP glow.
+    try {
+        await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS is_vip INTEGER DEFAULT 0`);
+    } catch (e) { /* column may already exist or table not yet created */ }
+
+    // Add vip_until so partner-paid VIP auto-expires after 30 days.
+    try {
+        await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS vip_until TIMESTAMP DEFAULT NULL`);
+    } catch (e) { /* column may already exist or table not yet created */ }
+
+    // Add homepage_vip_position so admin can pick up to 3 VIP cars to show
+    // in the second block of the homepage (positions 1, 2, 3). NULL = not featured.
+    try {
+        await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS homepage_vip_position INTEGER DEFAULT NULL`);
+    } catch (e) { /* column may already exist or table not yet created */ }
+
     // Add clicks column to ad_cards for tracking ad engagement (existing DBs)
     try {
         await pool.query(`ALTER TABLE ad_cards ADD COLUMN IF NOT EXISTS clicks INTEGER DEFAULT 0`);

@@ -609,6 +609,66 @@ router.put('/vehicles/:id/priority', async (req, res) => {
     }
 });
 
+// Pin a vehicle to an exact slot in the public grid: body { page, position }.
+// page/position are 1-based. Sending 0 (or empty) for either clears the pin.
+router.put('/vehicles/:id/pin', async (req, res) => {
+    try {
+        const vehicleId = parseInt(req.params.id);
+        if (isNaN(vehicleId)) return res.status(400).json({ error: 'Invalid vehicle id' });
+
+        var page = parseInt(req.body.page);
+        var position = parseInt(req.body.position);
+        if (isNaN(page) || page < 1) page = 0;
+        if (isNaN(position) || position < 1) position = 0;
+        // Both must be set to pin; otherwise treat as cleared.
+        if (page === 0 || position === 0) { page = 0; position = 0; }
+        if (page > 100000) page = 100000;
+        if (position > 100000) position = 100000;
+
+        await execute(
+            'UPDATE vehicles SET pin_page = $1, pin_position = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3',
+            [page, position, vehicleId]
+        );
+        res.json({ message: 'Vehicle pin updated', pin_page: page, pin_position: position });
+    } catch (err) {
+        console.error('Update vehicle pin error:', err);
+        res.status(500).json({ error: 'Failed to update vehicle pin' });
+    }
+});
+
+// Toggle VIP highlight (green glow) on a vehicle card: body { vip: true|false }.
+router.put('/vehicles/:id/vip', async (req, res) => {
+    try {
+        const vehicleId = parseInt(req.params.id);
+        if (isNaN(vehicleId)) return res.status(400).json({ error: 'Invalid vehicle id' });
+        var vip = req.body.vip ? 1 : 0;
+        await execute('UPDATE vehicles SET is_vip = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [vip, vehicleId]);
+        res.json({ message: 'Vehicle VIP updated', is_vip: vip });
+    } catch (err) {
+        console.error('Update vehicle VIP error:', err);
+        res.status(500).json({ error: 'Failed to update vehicle VIP' });
+    }
+});
+
+// Set homepage VIP slot for a vehicle (positions 1, 2, 3). Send 0 or null to clear.
+router.put('/vehicles/:id/homepage-vip', async (req, res) => {
+    try {
+        const vehicleId = parseInt(req.params.id);
+        if (isNaN(vehicleId)) return res.status(400).json({ error: 'Invalid vehicle id' });
+        var pos = parseInt(req.body.position);
+        if (isNaN(pos) || pos < 1 || pos > 3) pos = null;
+        // If assigning a slot, clear that slot from any other vehicle first
+        if (pos !== null) {
+            await execute('UPDATE vehicles SET homepage_vip_position = NULL, updated_at = CURRENT_TIMESTAMP WHERE homepage_vip_position = $1 AND id != $2', [pos, vehicleId]);
+        }
+        await execute('UPDATE vehicles SET homepage_vip_position = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [pos, vehicleId]);
+        res.json({ message: 'Homepage VIP slot updated', homepage_vip_position: pos });
+    } catch (err) {
+        console.error('Update homepage VIP position error:', err);
+        res.status(500).json({ error: 'Failed to update homepage VIP slot' });
+    }
+});
+
 router.delete('/vehicles/:id/approve-delete', async (req, res) => {
     try {
         const vehicleId = parseInt(req.params.id);

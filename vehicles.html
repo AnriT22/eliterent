@@ -14,7 +14,7 @@
     <link rel="alternate" hreflang="ka" href="https://eliteauto.rent/ka/vehicles.html">
     <link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/vehicles.html">
     <link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/vehicles.html">
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" href="/images/Lettermark.png">
     <meta property="og:title" content="Rent a Car in Georgia — From $25/day | EliteAuto">
     <meta property="og:description" content="Find the perfect rental car in Georgia from verified partners.">
     <meta property="og:url" content="https://eliteauto.rent/vehicles.html">
@@ -67,7 +67,7 @@
       ]
     }
     </script>
-    <link rel="stylesheet" href="style.css?v=8">
+    <link rel="stylesheet" href="style.css?v=9">
     <link rel="stylesheet" href="premium.css?v=5">
     <link rel="stylesheet" href="vehicles.css?v=6">
     <link rel="stylesheet" href="navbar-auth.css?v=5">
@@ -682,7 +682,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=9"></script>
+    <script src="script.js?v=12"></script>
     <script>
     (function () {
         var grid = document.getElementById('vpGrid');
@@ -798,6 +798,29 @@
                 if (pb !== pa) return pb - pa;
                 return (b.dataset.created || '').localeCompare(a.dataset.created || '');
             });
+
+            // Admin pins: place specific cards at an exact absolute slot
+            // (page P, position N) → index = (P-1)*VP_PER_PAGE + (N-1).
+            // Lower target index is inserted first so multiple pins stack correctly.
+            var pinned = [];
+            visible.forEach(function (c) {
+                var pg = parseInt(c.dataset.pinPage, 10) || 0;
+                var pos = parseInt(c.dataset.pinPosition, 10) || 0;
+                if (pg > 0 && pos > 0) pinned.push({ card: c, target: (pg - 1) * VP_PER_PAGE + (pos - 1) });
+            });
+            if (pinned.length) {
+                var pinnedSet = pinned.map(function (p) { return p.card; });
+                var unpinned = visible.filter(function (c) { return pinnedSet.indexOf(c) === -1; });
+                pinned.sort(function (a, b) { return a.target - b.target; });
+                var result = unpinned.slice();
+                pinned.forEach(function (p) {
+                    var t = p.target;
+                    if (t > result.length) t = result.length;
+                    if (t < 0) t = 0;
+                    result.splice(t, 0, p.card);
+                });
+                visible = result;
+            }
 
             // Reset to page 1 whenever the filter/sort/search set changes (not on page clicks)
             var sig = [search, yearFilter, sortVal, cats.join(','), engines.join(','), gearboxes.join(','),
@@ -1258,7 +1281,7 @@
         var favIds = {};
         function buildCards(favSet) {
             vehicles.forEach(function(v) {
-                var imgSrc = v.image_url || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240'%3E%3Crect fill='%23e2e8f0' width='400' height='240'/%3E%3Ctext x='200' y='125' text-anchor='middle' fill='%2394a3b8' font-size='16' font-family='sans-serif'%3ENo Image%3C/text%3E%3C/svg%3E";
+                var imgSrc = v.image_url || "data:image/png,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240'%3E%3Crect fill='%23e2e8f0' width='400' height='240'/%3E%3Ctext x='200' y='125' text-anchor='middle' fill='%2394a3b8' font-size='16' font-family='sans-serif'%3ENo Image%3C/text%3E%3C/svg%3E";
                 var cat     = (v.category   || 'economy').toLowerCase();
                 var engine  = (v.engine     || 'gasoline').toLowerCase();
                 var gearbox = (v.gearbox    || 'automatic').toLowerCase();
@@ -1270,8 +1293,19 @@
                 var isNew   = v.created_at && (now - new Date(v.created_at).getTime()) < DAY;
                 var isFav   = !!favSet[v.id];
 
+                // For "rent with driver only" cars, the card price is rent + driver service.
+                var driverOnly = (v.rent_with_driver_only === 1 || v.rent_with_driver_only === true);
+                var driverPrice = 0;
+                if (driverOnly) {
+                    var vExtras = v.extras;
+                    if (typeof vExtras === 'string') { try { vExtras = JSON.parse(vExtras); } catch (e) { vExtras = {}; } }
+                    vExtras = vExtras || {};
+                    driverPrice = parseFloat(vExtras.driver_service) || 0;
+                }
+                var totalPrice = (parseFloat(price) || 0) + driverPrice;
+
                 var card = document.createElement('div');
-                card.className = 'vc-card';
+                card.className = 'vc-card' + (v.is_vip ? ' vc-vip' : '');
                 card.setAttribute('data-id',       v.id);
                 card.setAttribute('data-category',  cat);
                 card.setAttribute('data-engine',    engine);
@@ -1281,10 +1315,13 @@
                 card.setAttribute('data-steering',  (v.steering_side || 'left').toLowerCase());
                 card.setAttribute('data-payment',   (v.payment_method || 'cash').toLowerCase());
                 card.setAttribute('data-year',      year);
-                card.setAttribute('data-price',     price);
+                card.setAttribute('data-price',     totalPrice);
                 card.setAttribute('data-name',      name);
                 card.setAttribute('data-created',   v.created_at || '');
                 card.setAttribute('data-priority',  v.priority || 0);
+                card.setAttribute('data-pin-page',     v.pin_page || 0);
+                card.setAttribute('data-pin-position', v.pin_position || 0);
+                card.setAttribute('data-is-vip',      v.is_vip || 0);
                 card.setAttribute('data-imgurl',    v.image_url  || '');
 
                 card.innerHTML =
@@ -1305,7 +1342,8 @@
                     + '</div>'
                     + '<div class="vc-location" style="font-size:12px;color:#A0A3B0;margin-top:4px;display:flex;align-items:center;gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + (v.location_city || v.region || 'Tbilisi') + '</div>'
                     + '<div class="vc-price-section">'
-                    + '<div class="vc-price-row"><span class="vc-price-label" data-i18n="vehicles.price_per_day">Price per day:</span><span class="vc-price-amount" data-price-usd="' + price + '">$' + price + '</span><span class="vc-price-unit" data-i18n="fleet.per_day">/day</span></div>'
+                    + '<div class="vc-price-row"><span class="vc-price-label" data-i18n="vehicles.price_per_day">Price per day:</span><span class="vc-price-amount" data-price-usd="' + totalPrice + '">$' + totalPrice + '</span><span class="vc-price-unit" data-i18n="fleet.per_day">/day</span></div>'
+                    + (driverOnly && driverPrice > 0 ? '<div class="vc-price-breakdown" style="font-size:11px;color:#A0A3B0;margin-top:-2px;margin-bottom:6px;"><span data-price-usd="' + price + '">$' + price + '</span> <span data-i18n="fleet.rent">rent</span> + <span data-price-usd="' + driverPrice + '">$' + driverPrice + '</span> <span data-i18n="fleet.driver">driver</span></div>' : '')
                     + '<button class="vc-book-btn" data-i18n="fleet.book_now">Book Now</button>'
                     + (v.company_name ? '<div class="vc-partner-name">by ' + v.company_name + '</div>' : '')
                     + '</div>'
@@ -1480,7 +1518,7 @@
         });
     })();
     </script>
-    <script src="navbar-auth.js?v=2"></script>
+    <script src="navbar-auth.js?v=3"></script>
     <script src="currency.js?v=3"></script>
 <script src="premium-animations.js"></script>
 </body>

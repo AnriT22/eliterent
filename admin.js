@@ -561,6 +561,9 @@ function escHtml(s) {
                     + '<td class="hide-mobile">' + date + '</td>'
                     + '<td>'
                     + '<button class="admin-action-btn primary" onclick="adminViewVehicle(' + v.id + ')">View</button>'
+                    + '<button class="admin-action-btn" onclick="adminOpenPin(' + v.id + ')">' + ((parseInt(v.pin_page) > 0 && parseInt(v.pin_position) > 0) ? ('\uD83D\uDCCD P' + v.pin_page + '/' + v.pin_position) : 'Pin') + '</button>'
+                    + '<button class="admin-action-btn" style="' + (parseInt(v.is_vip) ? 'background:#16a34a;border-color:#16a34a;color:#fff;' : '') + '" onclick="adminToggleVip(' + v.id + ',' + (parseInt(v.is_vip) ? 0 : 1) + ')">' + (parseInt(v.is_vip) ? '\u2605 VIP' : 'VIP') + '</button>'
+                    + '<button class="admin-action-btn" style="' + (parseInt(v.homepage_vip_position) ? 'background:#22c55e;border-color:#22c55e;color:#fff;' : '') + '" onclick="adminSetHomepageVip(' + v.id + ',' + (parseInt(v.homepage_vip_position) || 0) + ')" title="Homepage VIP slot">' + (parseInt(v.homepage_vip_position) ? 'Home VIP ' + v.homepage_vip_position : 'Home VIP') + '</button>'
                     + (status === 'pending' ? '<button class="admin-action-btn success" onclick="adminSetVehicleStatus(' + v.id + ',\'active\')">Approve</button>' : '')
                     + (status === 'delete_requested' ? '<button class="admin-action-btn success" onclick="adminApproveDelete(' + v.id + ')">Approve Delete</button>' : '')
                     + (status === 'delete_requested' ? '<button class="admin-action-btn" onclick="adminRejectDelete(' + v.id + ')">Reject Delete</button>' : '')
@@ -633,6 +636,75 @@ function escHtml(s) {
     };
     window.adminRejectDelete = function (id) {
         apiPut('/api/admin/vehicles/' + id + '/reject-delete', {}).then(function () { loadVehicles(); });
+    };
+
+    // ---- Toggle VIP green glow on a vehicle card ----
+    window.adminToggleVip = function (id, vip) {
+        apiPut('/api/admin/vehicles/' + id + '/vip', { vip: !!vip }).then(function () { loadVehicles(); })
+            .catch(function () { alert('Failed to update VIP'); });
+    };
+
+    // ---- Set which VIP car appears in a homepage slot (1, 2, or 3) ----
+    window.adminSetHomepageVip = function (id, currentPos) {
+        var newPos = prompt('Set homepage VIP slot (1, 2, or 3). Leave empty or type 0 to remove.', currentPos || '');
+        if (newPos === null) return;
+        newPos = parseInt(newPos) || 0;
+        if (newPos < 0 || newPos > 3) { alert('Slot must be between 1 and 3 (or 0 to clear).'); return; }
+        apiPut('/api/admin/vehicles/' + id + '/homepage-vip', { position: newPos }).then(function () { loadVehicles(); })
+            .catch(function () { alert('Failed to update homepage VIP slot'); });
+    };
+
+    // ---- Pin a vehicle to an exact page + position on vehicles.html ----
+    window.adminOpenPin = function (id) {
+        var v = _adminVehicles.find(function (x) { return x.id === id; });
+        if (!v) return;
+        var curPage = parseInt(v.pin_page) || '';
+        var curPos = parseInt(v.pin_position) || '';
+
+        var overlay = document.getElementById('vehiclePinModal');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'vehiclePinModal';
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9999;';
+            overlay.innerHTML =
+                '<div style="background:#1C1E26;border:1px solid #3A3F4B;border-radius:14px;padding:24px;width:340px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,0.5);">'
+                + '<h3 style="margin:0 0 6px;font-size:17px;color:#EAEAEA;">Pin vehicle on page</h3>'
+                + '<p id="pinVehName" style="margin:0 0 16px;font-size:13px;color:#A0A3B0;"></p>'
+                + '<div style="display:flex;gap:12px;margin-bottom:8px;">'
+                + '<div style="flex:1;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Page</label><input type="number" min="1" id="pinPageInput" style="width:100%;padding:10px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>'
+                + '<div style="flex:1;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Position (1-12)</label><input type="number" min="1" max="12" id="pinPositionInput" style="width:100%;padding:10px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>'
+                + '</div>'
+                + '<p style="font-size:11px;color:#6b7280;margin:0 0 16px;">12 cards per page. Position 1 = top-left of that page. Leave blank to unpin.</p>'
+                + '<div style="display:flex;gap:8px;justify-content:flex-end;">'
+                + '<button class="admin-action-btn" id="pinClearBtn">Unpin</button>'
+                + '<button class="admin-action-btn" id="pinCancelBtn">Cancel</button>'
+                + '<button class="admin-action-btn success" id="pinSaveBtn">Save</button>'
+                + '</div>'
+                + '</div>';
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.style.display = 'none'; });
+        }
+
+        overlay.style.display = 'flex';
+        document.getElementById('pinVehName').textContent = '#' + v.id + ' — ' + (v.name || 'Vehicle');
+        document.getElementById('pinPageInput').value = curPage;
+        document.getElementById('pinPositionInput').value = curPos;
+
+        function save(page, position) {
+            apiPut('/api/admin/vehicles/' + id + '/pin', { page: page, position: position }).then(function () {
+                overlay.style.display = 'none';
+                loadVehicles();
+            }).catch(function () { alert('Failed to update pin'); });
+        }
+
+        document.getElementById('pinSaveBtn').onclick = function () {
+            var page = parseInt(document.getElementById('pinPageInput').value) || 0;
+            var position = parseInt(document.getElementById('pinPositionInput').value) || 0;
+            if (page > 0 && (position < 1 || position > 12)) { alert('Position must be between 1 and 12.'); return; }
+            save(page, position);
+        };
+        document.getElementById('pinClearBtn').onclick = function () { save(0, 0); };
+        document.getElementById('pinCancelBtn').onclick = function () { overlay.style.display = 'none'; };
     };
 
     window.adminViewVehicle = function (id) {
