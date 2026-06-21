@@ -67,12 +67,16 @@
       ]
     }
     </script>
-    <link rel="stylesheet" href="style.css?v=9">
-    <link rel="stylesheet" href="premium.css?v=5">
-    <link rel="stylesheet" href="vehicles.css?v=6">
-    <link rel="stylesheet" href="navbar-auth.css?v=5">
-    <script src="api-helper.js"></script>
-    <script src="i18n.js?v=5"></script>
+    <link rel="preload" href="style.css?v=10" as="style">
+    <link rel="stylesheet" href="style.css?v=10">
+    <link rel="preload" href="premium.css?v=6" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="premium.css?v=6"></noscript>
+    <link rel="preload" href="vehicles.css?v=7" as="style">
+    <link rel="stylesheet" href="vehicles.css?v=7">
+    <link rel="preload" href="navbar-auth.css?v=6" as="style">
+    <link rel="stylesheet" href="navbar-auth.css?v=6">
+    <script src="api-helper.js?v=2" defer></script>
+    <script src="i18n.js?v=6" defer></script>
 </head>
 <body>
 
@@ -81,7 +85,7 @@
         <div class="container header-content">
             <div class="header-left">
                 <a href="/" class="logo">
-                    <img src="images/logo3.png" alt="EliteAuto.rent" class="logo-img">
+                    <img src="images/logo3.png" alt="EliteAuto.rent" class="logo-img" loading="lazy">
                     <span class="logo-text">EliteAuto.rent</span>
                 </a>
             </div>
@@ -140,7 +144,7 @@
     <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
     <div class="mobile-nav-panel" id="mobileNavPanel">
         <div class="mobile-nav-header">
-            <a href="/" class="logo"><img src="images/logo3.png" alt="EliteAuto.rent"><span>EliteAuto.rent</span></a>
+            <a href="/" class="logo"><img src="images/logo3.png" alt="EliteAuto.rent" loading="lazy"><span>EliteAuto.rent</span></a>
             <button class="mobile-nav-close" id="mobileNavClose">&#10005;</button>
         </div>
         <nav class="mobile-nav-links">
@@ -433,10 +437,10 @@
                 <p data-i18n="footer.tagline">Premium car rental marketplace for Georgia adventures.</p>
                 <div class="social-icons">
                     <a href="https://www.facebook.com/profile.php?id=61583448788067" target="_blank" class="social-icon" title="Facebook">
-                        <img src="images/Facebook_Logo.png" alt="Facebook" width="18" height="18" style="object-fit:contain;">
+                        <img src="images/Facebook_Logo.png" alt="Facebook" width="18" height="18" style="object-fit:contain;" loading="lazy">
                     </a>
                     <a href="https://www.instagram.com/eliterentalgeorgia/" target="_blank" class="social-icon" title="Instagram">
-                        <img src="images/Instagram.png" alt="Instagram" width="18" height="18" style="object-fit:contain;">
+                        <img src="images/Instagram.png" alt="Instagram" width="18" height="18" style="object-fit:contain;" loading="lazy">
                     </a>
                 </div>
             </div>
@@ -502,7 +506,7 @@
             <h2 class="bk-title" data-i18n="booking_modal.title">Confirm Your Booking</h2>
 
             <div class="bk-vehicle-row" id="bkVehicleRow">
-                <img class="bk-vehicle-img" id="bkVehicleImg" src="" alt="">
+                <img class="bk-vehicle-img" id="bkVehicleImg" src="" alt="" loading="lazy">
                 <div class="bk-vehicle-info">
                     <div class="bk-vehicle-name" id="bkVehicleName"></div>
                     <div class="bk-vehicle-meta" id="bkVehicleMeta"></div>
@@ -682,7 +686,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=12"></script>
+    <script src="script.js?v=13"></script>
     <script>
     (function () {
         var grid = document.getElementById('vpGrid');
@@ -721,7 +725,7 @@
             function btn(label, page, active, disabled) {
                 var s = 'min-width:42px;height:42px;padding:0 12px;border-radius:10px;font-size:15px;font-weight:700;transition:all .15s;'
                     + (active
-                        ? 'background:#1C1E26;color:#fff;border:1px solid #1C1E26;cursor:default;'
+                        ? 'background:#D4AF37;color:#0B0C10;border:1px solid #D4AF37;cursor:default;'
                         : disabled
                             ? 'background:transparent;color:#454a55;border:1px solid #2A2D38;cursor:default;'
                             : 'background:transparent;color:#EAEAEA;border:1px solid #2A2D38;cursor:pointer;');
@@ -731,117 +735,130 @@
             }
             var html = '';
             var maxBtns = 5;
+            var atStart = vpCurrentPage <= 1;
+            var atEnd = vpCurrentPage >= totalPages;
+            html += btn('|&#8249;', 1, false, atStart);                // first
+            html += btn('&#8249;', vpCurrentPage - 1, false, atStart); // prev
             var start = Math.max(1, vpCurrentPage - 2);
             var end = Math.min(totalPages, start + maxBtns - 1);
             start = Math.max(1, end - maxBtns + 1);
             for (var p = start; p <= end; p++) html += btn(String(p), p, p === vpCurrentPage, false);
-            var atEnd = vpCurrentPage >= totalPages;
             html += btn('&#8250;', vpCurrentPage + 1, false, atEnd);   // next
             html += btn('&#8250;|', totalPages, false, atEnd);         // last
             el.innerHTML = html;
         }
 
         function applyFilters() {
-            var cards = Array.from(document.querySelectorAll('.vc-card'));
-            var search = document.getElementById('vpSearch').value.toLowerCase().trim();
-            var yearBtn = document.querySelector('.vp-year-btn.active');
-            var yearFilter = yearBtn ? yearBtn.dataset.year : 'all';
-            var sortVal = document.getElementById('vpSort').value;
+            try {
+                var cards = Array.from(document.querySelectorAll('.vc-card'));
+                var search = document.getElementById('vpSearch').value.toLowerCase().trim();
+                var yearBtn = document.querySelector('.vp-year-btn.active');
+                var yearFilter = yearBtn ? yearBtn.dataset.year : 'all';
+                var sortVal = document.getElementById('vpSort').value;
 
-            var cats = getChecked('category');
-            var engines = getChecked('engine');
-            var gearboxes = getChecked('gearbox');
-            var drives = getChecked('drive');
-            var interiors = getChecked('interior');
-            var steerings = getChecked('steering');
-            var payments = getChecked('payment');
-            var priceMin = parseInt(document.getElementById('priceRangeMin').value) || 0;
-            var priceMax = parseInt(document.getElementById('priceRangeMax').value) || 500;
+                var cats = getChecked('category');
+                var engines = getChecked('engine');
+                var gearboxes = getChecked('gearbox');
+                var drives = getChecked('drive');
+                var interiors = getChecked('interior');
+                var steerings = getChecked('steering');
+                var payments = getChecked('payment');
+                var priceMin = parseInt(document.getElementById('priceRangeMin').value) || 0;
+                var priceMax = parseInt(document.getElementById('priceRangeMax').value) || 500;
 
-            var visible = cards.filter(function (card) {
-                var n = (card.dataset.name || '').toLowerCase();
-                var year = parseInt(card.dataset.year, 10);
-                var cat = card.dataset.category;
-                var eng = card.dataset.engine;
-                var gear = card.dataset.gearbox;
-                var drv = card.dataset.drive;
-                var intr = card.dataset.interior;
-                var steer = card.dataset.steering;
-                var pay = card.dataset.payment;
-                var price = parseFloat(card.dataset.price) || 0;
+                var visible = cards.filter(function (card) {
+                    var n = (card.dataset.name || '').toLowerCase();
+                    var year = parseInt(card.dataset.year, 10);
+                    var cat = card.dataset.category;
+                    var eng = card.dataset.engine;
+                    var gear = card.dataset.gearbox;
+                    var drv = card.dataset.drive;
+                    var intr = card.dataset.interior;
+                    var steer = card.dataset.steering;
+                    var pay = card.dataset.payment;
+                    var price = parseFloat(card.dataset.price) || 0;
 
-                if (search && n.indexOf(search) === -1) return false;
-                if (yearFilter === '2024' && year < 2024) return false;
-                if (yearFilter === '2020' && (year < 2020 || year > 2023)) return false;
-                if (yearFilter === '2016' && (year < 2016 || year > 2019)) return false;
-                if (yearFilter === 'old' && year >= 2016) return false;
-                if (cats.length && cats.indexOf(cat) === -1) return false;
-                if (engines.length && engines.indexOf(eng) === -1) return false;
-                if (gearboxes.length && gearboxes.indexOf(gear) === -1) return false;
-                if (drives.length && drives.indexOf(drv) === -1) return false;
-                if (interiors.length && interiors.indexOf(intr) === -1) return false;
-                if (steerings.length && steerings.indexOf(steer) === -1) return false;
-                if (payments.length && payments.indexOf(pay) === -1) return false;
-                if (price < priceMin) return false;
-                if (priceMax < 500 && price > priceMax) return false;
-                return true;
-            });
-
-            visible.sort(function (a, b) {
-                if (sortVal === 'price-asc') return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
-                if (sortVal === 'price-desc') return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
-                if (sortVal === 'year-desc') return parseInt(b.dataset.year, 10) - parseInt(a.dataset.year, 10);
-                if (sortVal === 'name-asc') return (a.dataset.name || '').localeCompare(b.dataset.name || '');
-                // Default: admin-set priority wins (higher first), then newest
-                var pa = parseInt(a.dataset.priority, 10) || 0;
-                var pb = parseInt(b.dataset.priority, 10) || 0;
-                if (pb !== pa) return pb - pa;
-                return (b.dataset.created || '').localeCompare(a.dataset.created || '');
-            });
-
-            // Admin pins: place specific cards at an exact absolute slot
-            // (page P, position N) → index = (P-1)*VP_PER_PAGE + (N-1).
-            // Lower target index is inserted first so multiple pins stack correctly.
-            var pinned = [];
-            visible.forEach(function (c) {
-                var pg = parseInt(c.dataset.pinPage, 10) || 0;
-                var pos = parseInt(c.dataset.pinPosition, 10) || 0;
-                if (pg > 0 && pos > 0) pinned.push({ card: c, target: (pg - 1) * VP_PER_PAGE + (pos - 1) });
-            });
-            if (pinned.length) {
-                var pinnedSet = pinned.map(function (p) { return p.card; });
-                var unpinned = visible.filter(function (c) { return pinnedSet.indexOf(c) === -1; });
-                pinned.sort(function (a, b) { return a.target - b.target; });
-                var result = unpinned.slice();
-                pinned.forEach(function (p) {
-                    var t = p.target;
-                    if (t > result.length) t = result.length;
-                    if (t < 0) t = 0;
-                    result.splice(t, 0, p.card);
+                    if (search && n.indexOf(search) === -1) return false;
+                    if (yearFilter === '2024' && year < 2024) return false;
+                    if (yearFilter === '2020' && (year < 2020 || year > 2023)) return false;
+                    if (yearFilter === '2016' && (year < 2016 || year > 2019)) return false;
+                    if (yearFilter === 'old' && year >= 2016) return false;
+                    if (cats.length && cats.indexOf(cat) === -1) return false;
+                    if (engines.length && engines.indexOf(eng) === -1) return false;
+                    if (gearboxes.length && gearboxes.indexOf(gear) === -1) return false;
+                    if (drives.length && drives.indexOf(drv) === -1) return false;
+                    if (interiors.length && interiors.indexOf(intr) === -1) return false;
+                    if (steerings.length && steerings.indexOf(steer) === -1) return false;
+                    if (payments.length && payments.indexOf(pay) === -1) return false;
+                    if (price < priceMin) return false;
+                    if (priceMax < 500 && price > priceMax) return false;
+                    return true;
                 });
-                visible = result;
+
+                visible.sort(function (a, b) {
+                    if (sortVal === 'price-asc') return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                    if (sortVal === 'price-desc') return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                    if (sortVal === 'year-desc') return parseInt(b.dataset.year, 10) - parseInt(a.dataset.year, 10);
+                    if (sortVal === 'name-asc') return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+                    // Default: VIP first, then admin-set priority (higher first), then newest
+                    var va = parseInt(a.dataset.isVip, 10) || 0;
+                    var vb = parseInt(b.dataset.isVip, 10) || 0;
+                    if (vb !== va) return vb - va;
+                    var pa = parseInt(a.dataset.priority, 10) || 0;
+                    var pb = parseInt(b.dataset.priority, 10) || 0;
+                    if (pb !== pa) return pb - pa;
+                    return (b.dataset.created || '').localeCompare(a.dataset.created || '');
+                });
+
+                // Admin pins: place specific cards at an exact absolute slot
+                // (page P, position N) → index = (P-1)*VP_PER_PAGE + (N-1).
+                // Lower target index is inserted first so multiple pins stack correctly.
+                var pinned = [];
+                visible.forEach(function (c) {
+                    var pg = parseInt(c.dataset.pinPage, 10) || 0;
+                    var pos = parseInt(c.dataset.pinPosition, 10) || 0;
+                    if (pg > 0 && pos > 0) pinned.push({ card: c, target: (pg - 1) * VP_PER_PAGE + (pos - 1) });
+                });
+                if (pinned.length) {
+                    var pinnedSet = pinned.map(function (p) { return p.card; });
+                    var unpinned = visible.filter(function (c) { return pinnedSet.indexOf(c) === -1; });
+                    pinned.sort(function (a, b) { return a.target - b.target; });
+                    var result = unpinned.slice();
+                    pinned.forEach(function (p) {
+                        var t = p.target;
+                        if (t > result.length) t = result.length;
+                        if (t < 0) t = 0;
+                        result.splice(t, 0, p.card);
+                    });
+                    visible = result;
+                }
+
+                // Reset to page 1 whenever the filter/sort/search set changes (not on page clicks)
+                var sig = [search, yearFilter, sortVal, cats.join(','), engines.join(','), gearboxes.join(','),
+                    drives.join(','), interiors.join(','), steerings.join(','), payments.join(','), priceMin, priceMax].join('|');
+                if (sig !== vpLastSig) { vpCurrentPage = 1; vpLastSig = sig; }
+
+                var totalPages = Math.max(1, Math.ceil(visible.length / VP_PER_PAGE));
+                if (vpCurrentPage > totalPages) vpCurrentPage = totalPages;
+                var pStart = (vpCurrentPage - 1) * VP_PER_PAGE;
+
+                // Re-append ALL visible cards in sorted order (keeps DOM order stable
+                // across page changes), but only display the current page's slice.
+                cards.forEach(function (c) { c.style.display = 'none'; });
+                visible.forEach(function (c, idx) {
+                    grid.appendChild(c);
+                    if (idx >= pStart && idx < pStart + VP_PER_PAGE) c.style.display = '';
+                });
+                // Re-place admin ad cards after the grid has been re-ordered/paginated,
+                // so they keep their chosen Position instead of being shoved to the front.
+                if (typeof window.injectVehiclesAds === 'function') window.injectVehiclesAds();
+                renderVpPagination(visible.length);
+
+                var badge = document.getElementById('vpCountBadge');
+                if (badge) badge.textContent = window.carsAvailableText(visible.length);
+            } catch (err) {
+                console.error('applyFilters error:', err);
             }
-
-            // Reset to page 1 whenever the filter/sort/search set changes (not on page clicks)
-            var sig = [search, yearFilter, sortVal, cats.join(','), engines.join(','), gearboxes.join(','),
-                drives.join(','), interiors.join(','), steerings.join(','), payments.join(','), priceMin, priceMax].join('|');
-            if (sig !== vpLastSig) { vpCurrentPage = 1; vpLastSig = sig; }
-
-            var totalPages = Math.max(1, Math.ceil(visible.length / VP_PER_PAGE));
-            if (vpCurrentPage > totalPages) vpCurrentPage = totalPages;
-            var pStart = (vpCurrentPage - 1) * VP_PER_PAGE;
-
-            // Re-append ALL visible cards in sorted order (keeps DOM order stable
-            // across page changes), but only display the current page's slice.
-            cards.forEach(function (c) { c.style.display = 'none'; });
-            visible.forEach(function (c, idx) {
-                grid.appendChild(c);
-                if (idx >= pStart && idx < pStart + VP_PER_PAGE) c.style.display = '';
-            });
-            renderVpPagination(visible.length);
-
-            var badge = document.getElementById('vpCountBadge');
-            if (badge) badge.textContent = window.carsAvailableText(visible.length);
         }
         window.applyFilters = applyFilters;
 
@@ -1252,6 +1269,8 @@
                 return;
             }
             renderVehiclesGrid(vehicles);
+            // Ad cards are placed by applyFilters() (called inside renderVehiclesGrid),
+            // which re-runs on every filter/sort/page change to keep them in position.
         })
         .catch(function(err) { console.error('vcLoadVehicles error:', err); if (loadingState) loadingState.style.display = 'none'; });
     }
@@ -1266,6 +1285,43 @@
         var s = String(raw).replace(/_/g, ' ');
         return s.charAt(0).toUpperCase() + s.slice(1);
     }
+
+    // ---- Admin placement=vehicles ad cards (appended after the grid renders) ----
+    var _vcAdsCache = null;
+    function vcEsc(s){ var d=document.createElement('div'); d.textContent=(s==null?'':s); return d.innerHTML; }
+    function vcAdLoc(ad,b){ var lang=(window.I18n&&I18n.lang&&I18n.lang())||localStorage.getItem('EliteAuto_lang')||'en'; return (lang&&lang!=='en'&&ad[b+'_'+lang])?ad[b+'_'+lang]:(ad[b]||''); }
+    window.vcTrackAd = function(id){ if(id) fetch('/api/ads/'+id+'/click',{method:'POST'}).catch(function(){}); };
+    function vcAdCardHtml(ad){
+        var cover = ad.cover_url ? '<div style="height:180px;background:#2A2D3A;background-size:cover;background-position:center;background-image:url('+vcEsc(ad.cover_url)+');"></div>' : '';
+        return '<a class="vc-ad-injected" href="'+vcEsc(ad.target_link||'#')+'" target="_blank" rel="noopener sponsored" onclick="vcTrackAd('+(ad.id||0)+')" style="display:flex;flex-direction:column;background:#1A1814;border:1px solid #C9A84C;border-radius:16px;overflow:hidden;text-decoration:none;">'
+            + cover
+            + '<div style="padding:16px;"><span style="display:inline-block;background:#D4AF37;color:#0B0C10;font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;margin-bottom:6px;">Sponsored</span>'
+            + '<div style="font-size:16px;font-weight:700;color:#EAEAEA;margin:0 0 6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">'+vcEsc(vcAdLoc(ad,'title'))+'</div>'
+            + '<div style="font-size:13px;color:#A0A3B0;margin:0 0 12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">'+vcEsc(vcAdLoc(ad,'description'))+'</div>'
+            + '<span style="color:#D4AF37;font-weight:700;font-size:13px;">'+vcEsc(vcAdLoc(ad,'cta_text')||'Learn more')+' &#8594;</span>'
+            + '</div></a>';
+    }
+    function injectVehiclesAds(){
+        var grid=document.getElementById('vpGrid'); if(!grid) return;
+        // Always clear previously injected ads first — applyFilters re-appends every
+        // card on each filter/sort/page change, which would otherwise leave the ad
+        // stranded out of place. We re-insert it cleanly each time.
+        Array.prototype.forEach.call(grid.querySelectorAll('.vc-ad-injected'), function(e){ e.remove(); });
+        function place(ads){
+            (ads||[]).slice(0,2).forEach(function(ad){
+                // Insert before the card at the admin-chosen Position among the cards
+                // currently visible on this page; fall back to the end of the grid.
+                var cards=Array.prototype.filter.call(grid.querySelectorAll('.vc-card'), function(c){ return c.style.display!=='none'; });
+                var pos=Math.max(1, parseInt(ad.position)||(cards.length+1));
+                var anchor=cards[pos-1];
+                if(anchor){ anchor.insertAdjacentHTML('beforebegin', vcAdCardHtml(ad)); }
+                else { grid.insertAdjacentHTML('beforeend', vcAdCardHtml(ad)); }
+            });
+        }
+        if(_vcAdsCache){ place(_vcAdsCache); return; }
+        fetch('/api/ads?placement=vehicles').then(function(r){return r.json();}).then(function(d){ _vcAdsCache=d.ads||[]; place(_vcAdsCache); }).catch(function(){});
+    }
+    window.injectVehiclesAds = injectVehiclesAds;
 
     function renderVehiclesGrid(vehicles) {
         var grid = document.getElementById('vpGrid');
@@ -1326,7 +1382,7 @@
 
                 card.innerHTML =
                     '<div class="vc-image-wrap">'
-                    + '<img src="' + imgSrc + '" alt="' + name + '">'
+                    + '<img src="' + imgSrc + '" alt="' + name + '" loading="lazy">'
                     + '<span class="vc-year-badge">' + year + '</span>'
                     + (isNew ? '<span class="vc-new-badge">NEW</span>' : '')
                     + '<button class="vc-fav-btn' + (isFav ? ' active' : '') + '">' + (isFav ? '&#9829;' : '&#9825;') + '</button>'
@@ -1518,8 +1574,8 @@
         });
     })();
     </script>
-    <script src="navbar-auth.js?v=3"></script>
-    <script src="currency.js?v=3"></script>
-<script src="premium-animations.js"></script>
+    <script src="navbar-auth.js?v=4"></script>
+    <script src="currency.js?v=4"></script>
+<script src="premium-animations.js?v=2"></script>
 </body>
 </html>
