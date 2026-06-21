@@ -8,11 +8,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel — EliteAuto.rent</title>
     <link rel="icon" type="image/png" href="/images/Lettermark.png">
-    <link rel="stylesheet" href="style.css?v=9">
-    <link rel="stylesheet" href="premium.css?v=5">
-    <link rel="stylesheet" href="admin.css?v=4">
-    <script src="api-helper.js"></script>
-    <script src="i18n.js?v=5"></script>
+    <link rel="stylesheet" href="style.css?v=10">
+    <link rel="stylesheet" href="premium.css?v=6">
+    <link rel="stylesheet" href="admin.css?v=5">
+    <script src="api-helper.js?v=2"></script>
+    <script src="i18n.js?v=6"></script>
 </head>
 <body class="admin-page">
     <button class="admin-mobile-toggle" id="adminMobileToggle">☰</button>
@@ -22,7 +22,7 @@
         <aside class="admin-sidebar" id="adminSidebar">
             <div class="admin-sidebar-header">
                 <a href="index.html" class="admin-logo">
-                    <img src="images/logo3.png" alt="EliteAuto.rent" class="logo-img" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+                    <img src="images/logo3.png" alt="EliteAuto.rent" class="logo-img" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" loading="lazy">
                     <span>EliteAuto.rent</span>
                 </a>
                 <span class="admin-badge">Admin</span>
@@ -409,7 +409,7 @@
                             <input type="file" id="adCoverFile" accept="image/*" style="display:none;">
                             <input type="hidden" id="adCoverUrl">
                             <div id="adCoverPreviewWrap" style="display:none;margin-bottom:8px;">
-                                <img id="adCoverPreview" src="" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid #3A3F4B;">
+                                <img id="adCoverPreview" src="" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid #3A3F4B;" loading="lazy">
                             </div>
                             <button type="button" id="adCoverUploadBtn" style="padding:10px 14px;border:1px dashed #3A3F4B;border-radius:8px;background:#262A35;color:#A0A3B0;cursor:pointer;width:100%;box-sizing:border-box;font-size:13px;">
                                 + Upload Cover Image
@@ -442,17 +442,18 @@
                                 </div>
                             </div>
                         </details>
-                        <div style="display:flex;gap:12px;">
-                            <div style="flex:1;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Placement</label>
-                                <select id="adPlacement" class="db-input" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;">
-                                    <option value="cars">Cars (homepage)</option>
-                                    <option value="drivers">Drivers page</option>
-                                    <option value="both">Both (home + drivers)</option>
-                                    <option value="vehicles">Vehicles page</option>
-                                    <option value="blog">Blog / Explore</option>
-                                    <option value="checkout">Checkout (booking)</option>
-                                </select>
+                        <div>
+                            <label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:6px;">Placement <span style="color:#6b7280;">(check every page this ad should appear on)</span></label>
+                            <div id="adPlacementBoxes" style="display:flex;flex-wrap:wrap;gap:8px 18px;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;">
+                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="ad-placement-cb" value="cars" style="width:15px;height:15px;"> Cars (homepage)</label>
+                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="ad-placement-cb" value="drivers" style="width:15px;height:15px;"> Drivers page</label>
+                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="ad-placement-cb" value="vehicles" style="width:15px;height:15px;"> Vehicles page</label>
+                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="ad-placement-cb" value="blog" style="width:15px;height:15px;"> Blog / Explore</label>
+                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="ad-placement-cb" value="checkout" style="width:15px;height:15px;"> Checkout (booking)</label>
                             </div>
+                        </div>
+                        <div style="display:flex;gap:12px;">
+                            <div style="flex:1;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Page <span style="color:#6b7280;">(Vehicles page only)</span></label><input type="number" id="adPage" class="db-input" value="1" min="1" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
                             <div style="flex:1;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Position</label><input type="number" id="adPosition" class="db-input" value="4" min="1" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
                         </div>
                         <label style="display:flex;align-items:center;gap:8px;color:#A0A3B0;font-size:13px;"><input type="checkbox" id="adIsActive" checked style="width:16px;height:16px;"> Active</label>
@@ -549,6 +550,6 @@
     })();
     </script>
     <script src="admin.js?v=3"></script>
-<script src="premium-animations.js"></script>
+<script src="premium-animations.js?v=2"></script>
 </body>
 </html>

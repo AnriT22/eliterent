@@ -6,7 +6,21 @@ const router = express.Router();
 
 function sanitizeAd(b, existing) {
     existing = existing || {};
-    var placement = ['cars', 'drivers', 'both', 'vehicles', 'blog', 'checkout'].indexOf(b.placement) !== -1 ? b.placement : (existing.placement || 'cars');
+    // Placement is a comma-separated list of surfaces — an ad can target several pages
+    // at once (e.g. "vehicles,blog,checkout"). Accept a `placements` array (new admin UI)
+    // or a legacy single/comma `placement` string. 'both' is kept for old records.
+    var VALID = ['cars', 'drivers', 'vehicles', 'blog', 'checkout', 'both'];
+    var rawList = Array.isArray(b.placements) ? b.placements
+        : (b.placement !== undefined ? String(b.placement).split(',') : null);
+    var placement;
+    if (rawList) {
+        var clean = rawList.map(function (x) { return String(x).trim(); })
+            .filter(function (x) { return VALID.indexOf(x) !== -1; });
+        clean = clean.filter(function (x, i) { return clean.indexOf(x) === i; });   // dedupe
+        placement = clean.length ? clean.join(',') : (existing.placement || 'cars');
+    } else {
+        placement = existing.placement || 'cars';
+    }
     var out = {
         title: b.title !== undefined ? (b.title ? String(b.title).slice(0, 200) : null) : (existing.title || null),
         description: b.description !== undefined ? (b.description ? String(b.description).slice(0, 1000) : null) : (existing.description || null),
@@ -14,6 +28,7 @@ function sanitizeAd(b, existing) {
         target_link: b.target_link !== undefined ? String(b.target_link || '').slice(0, 1000) : (existing.target_link || ''),
         cta_text: b.cta_text !== undefined ? (b.cta_text ? String(b.cta_text).slice(0, 60) : null) : (existing.cta_text || null),
         placement: placement,
+        page: b.page !== undefined ? Math.max(1, parseInt(b.page) || 1) : (existing.page || 1),
         position: b.position !== undefined ? Math.max(1, parseInt(b.position) || 4) : (existing.position || 4),
         is_active: b.is_active !== undefined ? (b.is_active ? 1 : 0) : (existing.is_active !== undefined ? existing.is_active : 1)
     };
@@ -34,11 +49,17 @@ function sanitizeAd(b, existing) {
 router.get('/', async (req, res) => {
     try {
         var placement = ['cars', 'drivers', 'vehicles', 'blog', 'checkout'].indexOf(req.query.placement) !== -1 ? req.query.placement : null;
-        var sql = 'SELECT id, title, description, cover_url, target_link, cta_text, placement, position, title_ru, title_ka, title_he, description_ru, description_ka, description_he, cta_text_ru, cta_text_ka, cta_text_he FROM ad_cards WHERE is_active = 1';
+        var sql = 'SELECT id, title, description, cover_url, target_link, cta_text, placement, page, position, title_ru, title_ka, title_he, description_ru, description_ka, description_he, cta_text_ru, cta_text_ka, cta_text_he FROM ad_cards WHERE is_active = 1';
         var params = [];
         if (placement) {
-            sql += " AND (placement = $1 OR placement = 'both')";
-            params.push(placement);
+            // placement is a comma-separated list; match if the requested surface is one
+            // of its entries. 'both' is a legacy alias for cars + drivers.
+            var clauses = ["(',' || COALESCE(placement,'') || ',') LIKE $1"];
+            params.push('%,' + placement + ',%');
+            if (placement === 'cars' || placement === 'drivers') {
+                clauses.push("(',' || COALESCE(placement,'') || ',') LIKE '%,both,%'");
+            }
+            sql += ' AND (' + clauses.join(' OR ') + ')';
         }
         sql += ' ORDER BY position ASC, id ASC';
         var rows = await queryAll(sql, params);
@@ -69,10 +90,10 @@ router.post('/admin', authenticateToken, requireRole('admin'), async (req, res) 
         if (!a.target_link) return res.status(400).json({ error: 'Target link is required' });
         await execute(
             `INSERT INTO ad_cards (title, description, cover_url, target_link, cta_text, placement, position, is_active,
-               title_ru, title_ka, title_he, description_ru, description_ka, description_he, cta_text_ru, cta_text_ka, cta_text_he)
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
+               title_ru, title_ka, title_he, description_ru, description_ka, description_he, cta_text_ru, cta_text_ka, cta_text_he, page)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)`,
             [a.title, a.description, a.cover_url, a.target_link, a.cta_text, a.placement, a.position, a.is_active,
-             a.title_ru, a.title_ka, a.title_he, a.description_ru, a.description_ka, a.description_he, a.cta_text_ru, a.cta_text_ka, a.cta_text_he]
+             a.title_ru, a.title_ka, a.title_he, a.description_ru, a.description_ka, a.description_he, a.cta_text_ru, a.cta_text_ka, a.cta_text_he, a.page]
         );
         var created = await queryOne('SELECT * FROM ad_cards ORDER BY id DESC LIMIT 1', []);
         res.status(201).json({ message: 'Ad card created', ad: created });
@@ -94,10 +115,10 @@ router.put('/admin/:id', authenticateToken, requireRole('admin'), async (req, re
             `UPDATE ad_cards SET title=$1, description=$2, cover_url=$3, target_link=$4, cta_text=$5,
                placement=$6, position=$7, is_active=$8,
                title_ru=$9, title_ka=$10, title_he=$11, description_ru=$12, description_ka=$13, description_he=$14,
-               cta_text_ru=$15, cta_text_ka=$16, cta_text_he=$17,
-               updated_at=CURRENT_TIMESTAMP WHERE id=$18`,
+               cta_text_ru=$15, cta_text_ka=$16, cta_text_he=$17, page=$18,
+               updated_at=CURRENT_TIMESTAMP WHERE id=$19`,
             [a.title, a.description, a.cover_url, a.target_link, a.cta_text, a.placement, a.position, a.is_active,
-             a.title_ru, a.title_ka, a.title_he, a.description_ru, a.description_ka, a.description_he, a.cta_text_ru, a.cta_text_ka, a.cta_text_he, id]
+             a.title_ru, a.title_ka, a.title_he, a.description_ru, a.description_ka, a.description_he, a.cta_text_ru, a.cta_text_ka, a.cta_text_he, a.page, id]
         );
         var updated = await queryOne('SELECT * FROM ad_cards WHERE id = $1', [id]);
         res.json({ message: 'Ad card updated', ad: updated });

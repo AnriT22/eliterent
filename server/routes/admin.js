@@ -129,28 +129,38 @@ router.get('/analytics', async (req, res) => {
 // ========================================
 router.get('/visitors', async (req, res) => {
     try {
+        var excludeBots = req.query.excludeBots === '1';
+        var botClause = excludeBots ? " AND is_bot = 0" : "";
+
         // Total page views
-        const todayViews = await queryOne("SELECT COUNT(*) as count FROM page_visits WHERE created_at >= CURRENT_DATE");
-        const weekViews = await queryOne("SELECT COUNT(*) as count FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'");
-        const monthViews = await queryOne("SELECT COUNT(*) as count FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'");
+        const todayViews = await queryOne("SELECT COUNT(*) as count FROM page_visits WHERE created_at >= CURRENT_DATE" + botClause);
+        const weekViews = await queryOne("SELECT COUNT(*) as count FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'" + botClause);
+        const monthViews = await queryOne("SELECT COUNT(*) as count FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'" + botClause);
 
         // Unique visitors (by visitor_id cookie)
-        const todayUnique = await queryOne("SELECT COUNT(DISTINCT visitor_id) as count FROM page_visits WHERE created_at >= CURRENT_DATE");
-        const weekUnique = await queryOne("SELECT COUNT(DISTINCT visitor_id) as count FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'");
-        const monthUnique = await queryOne("SELECT COUNT(DISTINCT visitor_id) as count FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'");
+        const todayUnique = await queryOne("SELECT COUNT(DISTINCT visitor_id) as count FROM page_visits WHERE created_at >= CURRENT_DATE" + botClause);
+        const weekUnique = await queryOne("SELECT COUNT(DISTINCT visitor_id) as count FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'" + botClause);
+        const monthUnique = await queryOne("SELECT COUNT(DISTINCT visitor_id) as count FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'" + botClause);
 
         // Top pages this week
         const topPages = await queryAll(
-            "SELECT page, COUNT(*) as views, COUNT(DISTINCT visitor_id) as unique_visitors FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '7 days' GROUP BY page ORDER BY views DESC LIMIT 10"
+            "SELECT page, COUNT(*) as views, COUNT(DISTINCT visitor_id) as unique_visitors FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'" + botClause + " GROUP BY page ORDER BY views DESC LIMIT 10"
         );
 
         // Daily breakdown (last 14 days)
         const dailyBreakdown = await queryAll(
-            "SELECT created_at::date as date, COUNT(*) as views, COUNT(DISTINCT visitor_id) as unique_visitors FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '14 days' GROUP BY date ORDER BY date DESC"
+            "SELECT created_at::date as date, COUNT(*) as views, COUNT(DISTINCT visitor_id) as unique_visitors FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '14 days'" + botClause + " GROUP BY date ORDER BY date DESC"
         );
 
         // Live — visitors in last 5 minutes
-        const liveNow = await queryOne("SELECT COUNT(DISTINCT visitor_id) as count FROM page_visits WHERE created_at >= NOW() - INTERVAL '5 minutes'");
+        const liveNow = await queryOne("SELECT COUNT(DISTINCT visitor_id) as count FROM page_visits WHERE created_at >= NOW() - INTERVAL '5 minutes'" + botClause);
+
+        // Bot stats (always show these for context)
+        const botStats = await queryAll(
+            "SELECT is_bot, COUNT(*) as count FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '30 days' GROUP BY is_bot"
+        );
+        var botCount = 0, humanCount = 0;
+        botStats.forEach(function(r){ if(r.is_bot == 1) botCount = parseInt(r.count); else humanCount = parseInt(r.count); });
 
         res.json({
             views: {
@@ -165,7 +175,8 @@ router.get('/visitors', async (req, res) => {
             },
             live: parseInt(liveNow.count),
             topPages: topPages,
-            daily: dailyBreakdown
+            daily: dailyBreakdown,
+            botStats: { bots: botCount, humans: humanCount, excludeBots: excludeBots }
         });
     } catch (err) {
         console.error('Visitors analytics error:', err);
@@ -177,7 +188,10 @@ router.get('/visitors', async (req, res) => {
 router.get('/visitors/recent', async (req, res) => {
     try {
         const limit = Math.min(parseInt(req.query.limit) || 100, 500);
-        // Group by visitor_id + ip — show first/last seen, total visits, pages
+        var excludeBots = req.query.excludeBots === '1';
+        var botWhere = excludeBots ? " AND MAX(is_bot) = 0" : "";
+
+        // Group by visitor_id + ip — show first/last seen, total visits, pages, bot flags
         const rows = await queryAll(
             `SELECT
                 visitor_id,
@@ -187,10 +201,13 @@ router.get('/visitors/recent', async (req, res) => {
                 MAX(created_at) as last_seen,
                 (array_agg(DISTINCT page))[1:5] as pages,
                 (array_agg(user_agent ORDER BY created_at DESC))[1] as user_agent,
-                (array_agg(referrer ORDER BY created_at DESC))[1] as referrer
+                (array_agg(referrer ORDER BY created_at DESC))[1] as referrer,
+                MAX(is_bot) as is_bot,
+                MAX(is_verified) as is_verified
             FROM page_visits
             WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
             GROUP BY visitor_id, ip
+            HAVING true` + (excludeBots ? ` AND MAX(is_bot) = 0` : ``) + `
             ORDER BY last_seen DESC
             LIMIT $1`,
             [limit]
@@ -198,7 +215,7 @@ router.get('/visitors/recent', async (req, res) => {
         // Caller IP so admin can identify their own visits
         let callerIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
         if (callerIp.includes(',')) callerIp = callerIp.split(',')[0].trim();
-        res.json({ visitors: rows, callerIp: callerIp });
+        res.json({ visitors: rows, callerIp: callerIp, excludeBots: excludeBots });
     } catch (err) {
         console.error('Recent visitors error:', err);
         res.status(500).json({ error: 'Failed to load recent visitors' });

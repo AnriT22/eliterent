@@ -361,6 +361,15 @@ async function renderVehiclePage(id) {
 // Dynamic sitemap: the static sitemap.xml (marketing URLs + funnel hreflang) with
 // every active vehicle page auto-appended, so new inventory is submitted to Google
 // without editing a file. Scales to thousands of cars (well under the 50k cap).
+function fmtSitemapDate(d) {
+    if (!d) return '';
+    if (d instanceof Date) return d.toISOString().slice(0, 10);
+    var s = String(d).slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    var dt = new Date(d);
+    return isNaN(dt.getTime()) ? '' : dt.toISOString().slice(0, 10);
+}
+
 async function renderSitemap() {
     var xml = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
     var vehicles = [];
@@ -368,7 +377,7 @@ async function renderSitemap() {
     catch (e) { console.error('[SEO] sitemap vehicles:', e.message); }
     if (vehicles && vehicles.length) {
         var entries = vehicles.map(function (v) {
-            var lastmod = v.created_at ? '    <lastmod>' + escapeHtml(String(v.created_at).slice(0, 10)) + '</lastmod>\n' : '';
+            var lastmod = v.created_at ? '    <lastmod>' + fmtSitemapDate(v.created_at) + '</lastmod>\n' : '';
             return '  <url>\n    <loc>' + SITE + '/vehicle.html?id=' + v.id + '</loc>\n'
                 + lastmod + '    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n';
         }).join('');

@@ -22,12 +22,16 @@
     <meta name="twitter:title" content="Vehicle Details — EliteAuto.rent">
     <meta name="twitter:description" content="View vehicle details, availability, pricing and book your rental car.">
     <meta name="twitter:image" content="https://eliteauto.rent/images/og-preview.jpg">
-    <link rel="stylesheet" href="style.css?v=9">
-    <link rel="stylesheet" href="premium.css?v=5">
-    <link rel="stylesheet" href="navbar-auth.css?v=5">
-    <link rel="stylesheet" href="vehicle.css?v=4">
-    <script src="api-helper.js"></script>
-    <script src="i18n.js?v=5"></script>
+    <link rel="preload" href="style.css?v=10" as="style">
+    <link rel="stylesheet" href="style.css?v=10">
+    <link rel="preload" href="premium.css?v=6" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="premium.css?v=6"></noscript>
+    <link rel="preload" href="navbar-auth.css?v=6" as="style">
+    <link rel="stylesheet" href="navbar-auth.css?v=6">
+    <link rel="preload" href="vehicle.css?v=5" as="style">
+    <link rel="stylesheet" href="vehicle.css?v=5">
+    <script src="api-helper.js?v=2" defer></script>
+    <script src="i18n.js?v=6" defer></script>
 </head>
 <body>
     <!-- HEADER -->
@@ -35,7 +39,7 @@
         <div class="container header-content">
             <div class="header-left">
                 <a href="/" class="logo">
-                    <img src="images/logo3.png" alt="EliteAuto.rent" class="logo-img">
+                    <img src="images/logo3.png" alt="EliteAuto.rent" class="logo-img" loading="lazy">
                     <span class="logo-text">EliteAuto.rent</span>
                 </a>
             </div>
@@ -63,7 +67,7 @@
     <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
     <div class="mobile-nav-panel" id="mobileNavPanel">
         <div class="mobile-nav-header">
-            <a href="/" class="logo"><img src="images/logo3.png" alt="EliteAuto.rent"><span>EliteAuto.rent</span></a>
+            <a href="/" class="logo"><img src="images/logo3.png" alt="EliteAuto.rent" loading="lazy"><span>EliteAuto.rent</span></a>
             <button class="mobile-nav-close" id="mobileNavClose">&#10005;</button>
         </div>
         <nav class="mobile-nav-links">
@@ -114,7 +118,7 @@
             <!-- Image Gallery -->
             <div class="vd-gallery">
                 <div class="vd-main-img-wrap">
-                    <img id="vdMainImg" src="" alt="" class="vd-main-img">
+                    <img id="vdMainImg" src="" alt="" class="vd-main-img" loading="lazy">
                     <button class="vd-fav-btn" id="vdFavBtn" title="Add to favorites">&#9825;</button>
                     <span class="vd-year-badge" id="vdYearBadge"></span>
                 </div>
@@ -229,7 +233,7 @@
             <h2 class="bk-title" data-i18n="vehicle_page.confirm_booking">Confirm Your Booking</h2>
 
             <div class="bk-vehicle-row">
-                <img class="bk-vehicle-img" id="vdBkImg" src="" alt="">
+                <img class="bk-vehicle-img" id="vdBkImg" src="" alt="" loading="lazy">
                 <div class="bk-vehicle-info">
                     <div class="bk-vehicle-name" id="vdBkName"></div>
                     <div class="bk-vehicle-meta" id="vdBkMeta"></div>
@@ -324,7 +328,7 @@
     </a>
     <footer class="footer">
         <div class="container footer-content">
-            <div class="footer-column"><h4 data-i18n="footer.tagline">EliteAuto.rent</h4><p data-i18n="footer.tagline">Premium car rental marketplace for Georgia adventures.</p><div class="social-icons"><a href="https://www.facebook.com/profile.php?id=61583448788067" target="_blank" class="social-icon" title="Facebook"><img src="images/Facebook_Logo.png" alt="Facebook" width="20" height="20"></a><a href="https://www.instagram.com/eliterentalgeorgia/" target="_blank" class="social-icon" title="Instagram"><img src="images/Instagram.png" alt="Instagram" width="20" height="20"></a></div></div>
+            <div class="footer-column"><h4 data-i18n="footer.tagline">EliteAuto.rent</h4><p data-i18n="footer.tagline">Premium car rental marketplace for Georgia adventures.</p><div class="social-icons"><a href="https://www.facebook.com/profile.php?id=61583448788067" target="_blank" class="social-icon" title="Facebook"><img src="images/Facebook_Logo.png" alt="Facebook" width="20" height="20" loading="lazy"></a><a href="https://www.instagram.com/eliterentalgeorgia/" target="_blank" class="social-icon" title="Instagram"><img src="images/Instagram.png" alt="Instagram" width="20" height="20" loading="lazy"></a></div></div>
             <div class="footer-column"><h4 data-i18n="footer.legal">Legal</h4><ul><li><a href="tos.html" data-i18n="footer.terms">Terms & Conditions</a></li><li><a href="privacy.html" data-i18n="footer.privacy">Privacy Policy</a></li><li><a href="#" onclick="document.getElementById('contactModal').style.display='flex'; return false;">Contact</a></li></ul></div>
             <div class="footer-column"><h4 data-i18n="footer.contact_title">Contact</h4><p>📧 elite.rental25@gmail.com</p><p>📞 +995 591 522 299</p><p>📍 <span data-i18n="footer.address">13 University St, Tbilisi, Georgia</span></p></div>
         </div>
@@ -348,8 +352,8 @@
     </div>
 
     <script src="vehicle.js?v=3"></script>
-    <script src="navbar-auth.js?v=3"></script>
-    <script src="currency.js?v=3"></script>
-<script src="premium-animations.js"></script>
+    <script src="navbar-auth.js?v=4"></script>
+    <script src="currency.js?v=4"></script>
+<script src="premium-animations.js?v=2"></script>
 </body>
 </html>

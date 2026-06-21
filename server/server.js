@@ -178,15 +178,41 @@ app.use((req, res, next) => {
 // client-side (admin.js, dashboard.js check localStorage token+role → redirect to login).
 // All sensitive data/actions are protected server-side via API-level JWT auth middleware.
 
-// Visitor tracking — log page views for HTML pages (non-blocking)
+// ========== Visitor tracking with bot detection ==========
+function isBot(req) {
+    var ua = req.headers['user-agent'] || '';
+    var lowerUa = ua.toLowerCase();
+
+    // 1. Known bot/crawler strings
+    if (/bot|crawl|spider|slurp|scrape|scan|fetch|libcurl|wget|curl|python-requests|httpclient| okhttp|axios|node-fetch|undici|phantomjs|headless|selenium|puppeteer|playwright|apifox|postman|insomnia|ahrefs|semrush|majestic|moz|blexbot|dotbot|rogerbot|bingpreview|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|discordbot|slackbot|applebot|yandex|baidu|sogou|exabot|nutch|jakarta|guzzlehttp|java\//i.test(ua)) return true;
+
+    // 2. Very short or empty UA (most real browsers send 80+ chars)
+    if (!ua || ua.length < 30) return true;
+
+    // 3. Missing critical headers real browsers always send
+    if (!req.headers['accept-language']) return true;
+    if (!req.headers['accept']) return true;
+
+    // 4. No JS-capable indicators — real browsers send Accept: text/html, application/xhtml+xml
+    var accept = req.headers['accept'] || '';
+    if (!accept.includes('text/html')) return true;
+
+    // 5. Known headless/browser automation markers
+    if (lowerUa.includes('headless') || lowerUa.includes('selenium') || lowerUa.includes('webdriver')) return true;
+
+    // 6. No referrer on non-first-page visits is suspicious but not conclusive — leave for client-side verification
+    return false;
+}
+
 app.use((req, res, next) => {
     if (req.method !== 'GET') return next();
     var p = req.path;
     // Track root, .html pages — skip assets, API, uploads
     if (p !== '/' && !p.endsWith('.html')) return next();
-    // Skip bots/crawlers
+
+    var bot = isBot(req);
     var ua = req.headers['user-agent'] || '';
-    if (/bot|crawl|spider|slurp|facebook|twitter|whatsapp/i.test(ua)) return next();
+
     // Get or set visitor cookie
     var cookies = {};
     (req.headers.cookie || '').split(';').forEach(function(c) {
@@ -198,18 +224,41 @@ app.use((req, res, next) => {
         vid = crypto.randomBytes(12).toString('hex');
         res.setHeader('Set-Cookie', 'vid=' + vid + '; Path=/; HttpOnly; SameSite=Lax; Max-Age=31536000');
     }
-    // Fire-and-forget insert
+
+    // Fire-and-forget insert (mark bot flag server-side)
     var { getPool } = require('./db');
     var pool = getPool();
     if (pool) {
         var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
         if (ip.includes(',')) ip = ip.split(',')[0].trim();
         pool.query(
-            'INSERT INTO page_visits (page, ip, user_agent, referrer, visitor_id) VALUES ($1, $2, $3, $4, $5)',
-            [p, ip, (ua || '').substring(0, 500), (req.headers['referer'] || '').substring(0, 500), vid]
+            'INSERT INTO page_visits (page, ip, user_agent, referrer, visitor_id, is_bot) VALUES ($1, $2, $3, $4, $5, $6)',
+            [p, ip, (ua || '').substring(0, 500), (req.headers['referer'] || '').substring(0, 500), vid, bot ? 1 : 0]
         ).catch(function() {});
     }
     next();
+});
+
+// Client-side human verification — lightweight JS ping after page load
+app.post('/api/verify-human', (req, res) => {
+    var cookies = {};
+    (req.headers.cookie || '').split(';').forEach(function(c) {
+        var parts = c.trim().split('=');
+        if (parts.length === 2) cookies[parts[0]] = parts[1];
+    });
+    var vid = cookies['vid'];
+    if (!vid) return res.json({ ok: false });
+
+    var { getPool } = require('./db');
+    var pool = getPool();
+    if (pool) {
+        // Mark recent visits from this visitor as verified human
+        pool.query(
+            "UPDATE page_visits SET is_verified = 1 WHERE visitor_id = $1 AND created_at > NOW() - INTERVAL '1 hour'",
+            [vid]
+        ).catch(function() {});
+    }
+    res.json({ ok: true });
 });
 
 // SEO: inject server-rendered content for ALL visitors (before static), with NO
