@@ -139,7 +139,8 @@
             + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
             + 'Your payment is secured by PayPal. We never store your card details.'
             + '</div>'
-            + '<div id="paypal-button-container"></div>';
+            + '<div id="paypal-button-container"></div>'
+            + '<div id="google-pay-container"></div>';
 
         // Start countdown timer
         if (paymentExpiresAt) {
@@ -176,17 +177,18 @@
             }, 1000);
         }
 
-        // Load PayPal JS SDK dynamically
-        var sdkUrl = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(config.clientId) + '&currency=USD&intent=capture&disable-funding=credit,paylater';
+        // Load PayPal JS SDK dynamically (with Google Pay component)
+        var sdkUrl = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(config.clientId) + '&currency=USD&intent=capture&components=buttons,googlepay&disable-funding=credit,paylater';
         var script = document.createElement('script');
         script.src = sdkUrl;
         script.onload = function () {
             renderPayPalButtons(bookingId, serviceFee);
+            setupGooglePay(bookingId, serviceFee);
         };
         script.onerror = function () {
-            // Retry once without any extra params
+            // Retry without googlepay component (buttons only)
             var s2 = document.createElement('script');
-            s2.src = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(config.clientId) + '&currency=USD&intent=capture';
+            s2.src = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(config.clientId) + '&currency=USD&intent=capture&disable-funding=credit,paylater';
             s2.onload = function () { renderPayPalButtons(bookingId, serviceFee); };
             s2.onerror = function () {
                 document.getElementById('paypal-button-container').innerHTML =
@@ -199,107 +201,135 @@
         payBody.innerHTML = '<div class="pay-error">Failed to load booking details. Please try again.</div>';
     });
 
-    function renderGooglePay(bookingId, serviceFee, clientId) {
-        if (typeof google === 'undefined' || !google.payments) {
-            // Google Pay JS not loaded yet, wait a bit
-            setTimeout(function() { renderGooglePay(bookingId, serviceFee, clientId); }, 500);
+    function setupGooglePay(bookingId, serviceFee) {
+        if (!window.paypal || !paypal.Googlepay) {
+            console.log('PayPal Google Pay component not available');
+            var gc = document.getElementById('google-pay-container');
+            if (gc) gc.style.display = 'none';
             return;
         }
+        if (typeof google === 'undefined' || !google.payments) {
+            // Google Pay JS not loaded yet, wait a bit
+            setTimeout(function () { setupGooglePay(bookingId, serviceFee); }, 500);
+            return;
+        }
+
         var container = document.getElementById('google-pay-container');
         if (!container) return;
 
-        var allowedPaymentMethods = [{
-            type: 'CARD',
-            parameters: {
-                allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
-                allowedCardNetworks: ['AMEX', 'DISCOVER', 'MASTERCARD', 'VISA']
-            },
-            tokenizationSpecification: {
-                type: 'PAYMENT_GATEWAY',
-                parameters: {
-                    gateway: 'paypal',
-                    gatewayMerchantId: clientId
-                }
+        paypal.Googlepay().config().then(function (config) {
+            if (!config.isEligible) {
+                container.style.display = 'none';
+                return;
             }
-        }];
 
-        var gpClient = new google.payments.api.PaymentsClient({ environment: 'TEST' });
+            var paymentsClient = new google.payments.api.PaymentsClient({
+                environment: config.environment || 'PRODUCTION',
+                merchantInfo: config.merchantInfo,
+                paymentDataCallbacks: {
+                    onPaymentAuthorized: function () {
+                        return { transactionState: 'SUCCESS' };
+                    }
+                }
+            });
 
-        gpClient.isReadyToPay({
-            apiVersion: 2,
-            apiVersionMinor: 0,
-            allowedPaymentMethods: allowedPaymentMethods
-        }).then(function(response) {
-            if (response.result) {
-                var btn = gpClient.createButton({
-                    onClick: function() { onGooglePayClick(gpClient, allowedPaymentMethods, bookingId, serviceFee); },
+            paymentsClient.isReadyToPay({
+                apiVersion: 2,
+                apiVersionMinor: 0,
+                allowedPaymentMethods: config.allowedPaymentMethods
+            }).then(function (response) {
+                if (!response.result) {
+                    container.style.display = 'none';
+                    return;
+                }
+
+                var button = paymentsClient.createButton({
+                    onClick: function () {
+                        onGooglePayClick(paymentsClient, config, bookingId, serviceFee);
+                    },
                     buttonColor: 'black',
                     buttonType: 'pay',
                     buttonSizeMode: 'fill'
                 });
+
                 container.innerHTML = '';
                 container.style.height = '45px';
-                container.appendChild(btn);
-            }
-        }).catch(function(err) {
-            console.log('Google Pay not available:', err);
+                container.appendChild(button);
+            }).catch(function (err) {
+                console.log('Google Pay ready check failed:', err);
+                container.style.display = 'none';
+            });
+        }).catch(function (err) {
+            console.log('PayPal Google Pay config failed:', err);
             container.style.display = 'none';
         });
     }
 
-    function onGooglePayClick(gpClient, allowedPaymentMethods, bookingId, serviceFee) {
-        var paymentDataRequest = {
-            apiVersion: 2,
-            apiVersionMinor: 0,
-            allowedPaymentMethods: allowedPaymentMethods,
-            transactionInfo: {
-                totalPriceStatus: 'FINAL',
-                totalPrice: serviceFee.toFixed(2),
-                currencyCode: 'USD',
-                countryCode: 'US'
-            },
-            merchantInfo: {
-                merchantName: 'EliteAuto.rent'
-            }
-        };
+    function onGooglePayClick(paymentsClient, config, bookingId, serviceFee) {
+        var gc = document.getElementById('google-pay-container');
+        if (gc) gc.innerHTML = '<div class="pay-loading">Processing Google Pay...</div>';
 
-        gpClient.loadPaymentData(paymentDataRequest)
-        .then(function(paymentData) {
-            // Google Pay approved — now create PayPal order and capture
-            var container = document.getElementById('google-pay-container');
-            container.innerHTML = '<div class="pay-loading">Processing Google Pay...</div>';
+        // 1. Create PayPal order first
+        fetch('/api/payments/create-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ booking_id: bookingId })
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.error) throw new Error(data.error);
+            var orderId = data.orderId;
 
-            return fetch('/api/payments/create-order', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                body: JSON.stringify({ booking_id: bookingId })
-            }).then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.error) throw new Error(data.error);
-                return fetch('/api/payments/capture-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ order_id: data.orderId, booking_id: bookingId })
-                }).then(function(r) { return r.json(); });
+            // 2. Load Google Pay payment data
+            return paymentsClient.loadPaymentData({
+                apiVersion: 2,
+                apiVersionMinor: 0,
+                allowedPaymentMethods: config.allowedPaymentMethods,
+                merchantInfo: config.merchantInfo,
+                transactionInfo: {
+                    totalPriceStatus: 'FINAL',
+                    totalPrice: serviceFee.toFixed(2),
+                    currencyCode: 'USD',
+                    countryCode: 'US'
+                }
+            }).then(function (paymentData) {
+                // 3. Confirm order with PayPal using the Google Pay token
+                return paypal.Googlepay().confirmOrder({
+                    orderId: orderId,
+                    paymentMethodData: paymentData.paymentMethodData
+                });
+            }).then(function (order) {
+                // 4. Handle order status
+                if (order.status === 'COMPLETED') {
+                    return { status: 'COMPLETED' };
+                } else if (order.status === 'APPROVED') {
+                    // Capture the approved order
+                    return fetch('/api/payments/capture-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                        body: JSON.stringify({ order_id: orderId, booking_id: bookingId })
+                    }).then(function (r) { return r.json(); });
+                } else {
+                    throw new Error('Unexpected order status: ' + order.status);
+                }
             });
         })
-        .then(function(result) {
+        .then(function (result) {
             if (result.status === 'COMPLETED') {
                 document.getElementById('payBody').innerHTML =
                     '<div class="pay-success">'
                     + '<div class="pay-success-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>'
                     + '<h2>Payment Successful!</h2>'
-                    + '<p>Service fee of $' + serviceFee.toFixed(2) + ' has been paid.<br>Your booking is now confirmed.</p>'
+                    + '<p>Service fee of $' + serviceFee.toFixed(2) + ' has been paid.<br>Your booking is now confirmed and awaiting admin approval.</p>'
                     + '<a href="guest-profile.html" class="pay-success-btn">View My Bookings</a>'
                     + '</div>';
             } else {
-                document.getElementById('google-pay-container').innerHTML = '<div class="pay-error">Payment failed: ' + (result.error || 'Unknown') + '</div>';
+                throw new Error(result.error || 'Payment failed');
             }
         })
-        .catch(function(err) {
+        .catch(function (err) {
             if (err.statusCode === 'CANCELED') return;
             console.error('Google Pay error:', err);
-            var gc = document.getElementById('google-pay-container');
             if (gc) gc.innerHTML = '<div class="pay-error">Google Pay error. Try PayPal instead.</div>';
         });
     }
