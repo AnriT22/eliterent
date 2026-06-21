@@ -1612,7 +1612,7 @@ function escHtml(s) {
                 + '<td>' + a.id + '</td>'
                 + '<td><b>' + esc(a.title || 'Untitled') + '</b><br><span style="font-size:11px;color:#A0A3B0;">' + esc(a.target_link || '') + '</span></td>'
                 + '<td>' + esc(a.placement || 'cars') + '</td>'
-                + '<td>' + a.position + '</td>'
+                + '<td>' + ((String(a.placement || '').split(',').indexOf('vehicles') !== -1) ? ('pg' + (a.page || 1) + ' · ' + a.position) : a.position) + '</td>'
                 + '<td>' + clickBadge + '</td>'
                 + '<td>' + (a.is_active ? '<span style="color:#22c55e;font-size:12px;">Yes</span>' : '<span style="color:#ef4444;font-size:12px;">No</span>') + '</td>'
                 + '<td style="white-space:nowrap;">'
@@ -1650,7 +1650,8 @@ function escHtml(s) {
         if (status) status.textContent = '';
         document.getElementById('adTargetLink').value = '';
         document.getElementById('adCtaText').value = '';
-        document.getElementById('adPlacement').value = 'cars';
+        document.querySelectorAll('.ad-placement-cb').forEach(function (cb) { cb.checked = (cb.value === 'cars'); });
+        document.getElementById('adPage').value = '1';
         document.getElementById('adPosition').value = '4';
         document.getElementById('adIsActive').checked = true;
         adTrFields(function (key, id) { var el = document.getElementById(id); if (el) el.value = ''; });
@@ -1706,12 +1707,14 @@ function escHtml(s) {
             cover_url: document.getElementById('adCoverUrl').value || null,
             target_link: document.getElementById('adTargetLink').value,
             cta_text: document.getElementById('adCtaText').value || null,
-            placement: document.getElementById('adPlacement').value,
+            placements: Array.prototype.map.call(document.querySelectorAll('.ad-placement-cb:checked'), function (cb) { return cb.value; }),
+            page: parseInt(document.getElementById('adPage').value) || 1,
             position: parseInt(document.getElementById('adPosition').value) || 4,
             is_active: document.getElementById('adIsActive').checked
         };
         adTrFields(function (key, id) { var el = document.getElementById(id); payload[key] = (el && el.value) ? el.value : null; });
         if (!payload.target_link) { alert('Target link is required'); return; }
+        if (!payload.placements.length) { alert('Pick at least one placement (page) for this ad'); return; }
         var editId = adEditId.value;
         var url = editId ? '/api/ads/admin/' + editId : '/api/ads/admin';
         var method = editId ? 'PUT' : 'POST';
@@ -1741,7 +1744,10 @@ function escHtml(s) {
         }
         document.getElementById('adTargetLink').value = a.target_link || '';
         document.getElementById('adCtaText').value = a.cta_text || '';
-        document.getElementById('adPlacement').value = a.placement || 'cars';
+        var plList = String(a.placement || 'cars').split(',').map(function (s) { return s.trim(); });
+        if (plList.indexOf('both') !== -1) { plList.push('cars', 'drivers'); }   // legacy combined value
+        document.querySelectorAll('.ad-placement-cb').forEach(function (cb) { cb.checked = plList.indexOf(cb.value) !== -1; });
+        document.getElementById('adPage').value = a.page || '1';
         document.getElementById('adPosition').value = a.position || '4';
         document.getElementById('adIsActive').checked = !!a.is_active;
         adTrFields(function (key, id) { var el = document.getElementById(id); if (el) el.value = a[key] || ''; });

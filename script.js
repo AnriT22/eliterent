@@ -1391,6 +1391,12 @@ function init() {
     safeInit(initHeaderScrollEffects);
     safeInit(initResponsiveMenu);
     safeInit(initAccessibility);
+
+    // Human verification ping — proves browser executes JavaScript (most bots don't)
+    // Delayed so it doesn't block critical rendering
+    setTimeout(function () {
+        fetch('/api/verify-human', { method: 'POST', credentials: 'same-origin' }).catch(function () {});
+    }, 2000);
 }
 
 // Run initialization when DOM is ready

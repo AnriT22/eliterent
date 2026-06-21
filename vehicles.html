@@ -71,10 +71,21 @@
     <link rel="stylesheet" href="style.css?v=10">
     <link rel="preload" href="premium.css?v=6" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="premium.css?v=6"></noscript>
-    <link rel="preload" href="vehicles.css?v=7" as="style">
-    <link rel="stylesheet" href="vehicles.css?v=7">
+    <link rel="preload" href="vehicles.css?v=8" as="style">
+    <link rel="stylesheet" href="vehicles.css?v=8">
     <link rel="preload" href="navbar-auth.css?v=6" as="style">
     <link rel="stylesheet" href="navbar-auth.css?v=6">
+    <!-- Critical layout fallback: the .vp-grid display:grid rule lives in vehicles.css.
+         If that file is ever slow, missing, or stale in a visitor's cache, the car grid
+         collapses to a single column (cards are styled by the shared style.css, so they
+         still look fine — only the grid layout breaks). This inline copy sits AFTER the
+         vehicles.css link, so it guarantees the multi-column grid on every paint
+         regardless of cache state. Keep in sync with .vp-grid in vehicles.css. -->
+    <style>
+        #vpGrid.vp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        @media (max-width: 900px) { #vpGrid.vp-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
+        @media (max-width: 540px) { #vpGrid.vp-grid { grid-template-columns: 1fr; } }
+    </style>
     <script src="api-helper.js?v=2" defer></script>
     <script src="i18n.js?v=6" defer></script>
 </head>
@@ -711,7 +722,28 @@
             if (g) window.scrollTo({ top: Math.max(0, g.getBoundingClientRect().top + window.pageYOffset - 90), behavior: 'smooth' });
         };
 
-        function renderVpPagination(totalItems) {
+        // Cars shown on a given page = VP_PER_PAGE minus the ad tiles assigned to it.
+        function vcCarsOnPage(pageNum) {
+            var ads = (typeof window.vcAdsForPage === 'function') ? window.vcAdsForPage(pageNum) : 0;
+            return Math.max(1, VP_PER_PAGE - ads);
+        }
+        // Build the per-page plan [{start, count}] over the visible cars. Each page's
+        // car capacity varies because ads are assigned to specific pages, so every page
+        // still totals at most VP_PER_PAGE tiles (cars + ads).
+        function vcPagePlan(totalCars) {
+            var plan = [], idx = 0, page = 1, guard = 0;
+            do {
+                var count = Math.min(vcCarsOnPage(page), totalCars - idx);
+                if (count < 0) count = 0;
+                plan.push({ start: idx, count: count });
+                idx += count;
+                page++;
+            } while (idx < totalCars && guard++ < 10000);
+            if (!plan.length) plan.push({ start: 0, count: 0 });
+            return plan;
+        }
+
+        function renderVpPagination(totalPages) {
             var el = document.getElementById('vpPagination');
             if (!el) {
                 el = document.createElement('div');
@@ -720,7 +752,7 @@
                 var g = document.getElementById('vpGrid');
                 if (g && g.parentNode) g.parentNode.insertBefore(el, g.nextSibling);
             }
-            var totalPages = Math.max(1, Math.ceil(totalItems / VP_PER_PAGE));
+            totalPages = Math.max(1, totalPages || 1);
             if (totalPages <= 1) { el.innerHTML = ''; return; }
             function btn(label, page, active, disabled) {
                 var s = 'min-width:42px;height:42px;padding:0 12px;border-radius:10px;font-size:15px;font-weight:700;transition:all .15s;'
@@ -838,21 +870,28 @@
                     drives.join(','), interiors.join(','), steerings.join(','), payments.join(','), priceMin, priceMax].join('|');
                 if (sig !== vpLastSig) { vpCurrentPage = 1; vpLastSig = sig; }
 
-                var totalPages = Math.max(1, Math.ceil(visible.length / VP_PER_PAGE));
+                // A page shows VP_PER_PAGE *tiles* total — ad cards count toward that,
+                // and each ad is assigned to a specific page, so per-page car capacity
+                // varies. The page plan slices the cars accordingly.
+                var plan = vcPagePlan(visible.length);
+                var totalPages = plan.length;
                 if (vpCurrentPage > totalPages) vpCurrentPage = totalPages;
-                var pStart = (vpCurrentPage - 1) * VP_PER_PAGE;
+                if (vpCurrentPage < 1) vpCurrentPage = 1;
+                window.vpCurrentPageNum = vpCurrentPage;   // read by injectVehiclesAds
+                var slice = plan[vpCurrentPage - 1] || { start: 0, count: 0 };
+                var pStart = slice.start, pCount = slice.count;
 
                 // Re-append ALL visible cards in sorted order (keeps DOM order stable
                 // across page changes), but only display the current page's slice.
                 cards.forEach(function (c) { c.style.display = 'none'; });
                 visible.forEach(function (c, idx) {
                     grid.appendChild(c);
-                    if (idx >= pStart && idx < pStart + VP_PER_PAGE) c.style.display = '';
+                    if (idx >= pStart && idx < pStart + pCount) c.style.display = '';
                 });
                 // Re-place admin ad cards after the grid has been re-ordered/paginated,
-                // so they keep their chosen Position instead of being shoved to the front.
+                // so they keep their chosen Page + Position instead of being shoved around.
                 if (typeof window.injectVehiclesAds === 'function') window.injectVehiclesAds();
-                renderVpPagination(visible.length);
+                renderVpPagination(totalPages);
 
                 var badge = document.getElementById('vpCountBadge');
                 if (badge) badge.textContent = window.carsAvailableText(visible.length);
@@ -1301,14 +1340,24 @@
             + '<span style="color:#D4AF37;font-weight:700;font-size:13px;">'+vcEsc(vcAdLoc(ad,'cta_text')||'Learn more')+' &#8594;</span>'
             + '</div></a>';
     }
+    // Ads that belong on a given results page (admin sets each ad's Page + Position).
+    // Capped at 2 per page so a page never fills with ads.
+    function vcAdsForPageList(pageNum){
+        return (_vcAdsCache||[]).filter(function(ad){ return (parseInt(ad.page)||1)===pageNum; }).slice(0,2);
+    }
+    // How many ad tiles land on a page — pagination subtracts this from the per-page
+    // tile budget so cars + ads never exceed VP_PER_PAGE on that page.
+    window.vcAdsForPage = function(pageNum){ return vcAdsForPageList(pageNum).length; };
+
     function injectVehiclesAds(){
         var grid=document.getElementById('vpGrid'); if(!grid) return;
         // Always clear previously injected ads first — applyFilters re-appends every
         // card on each filter/sort/page change, which would otherwise leave the ad
         // stranded out of place. We re-insert it cleanly each time.
         Array.prototype.forEach.call(grid.querySelectorAll('.vc-ad-injected'), function(e){ e.remove(); });
+        var pageNum = window.vpCurrentPageNum || 1;
         function place(ads){
-            (ads||[]).slice(0,2).forEach(function(ad){
+            (ads||[]).forEach(function(ad){
                 // Insert before the card at the admin-chosen Position among the cards
                 // currently visible on this page; fall back to the end of the grid.
                 var cards=Array.prototype.filter.call(grid.querySelectorAll('.vc-card'), function(c){ return c.style.display!=='none'; });
@@ -1318,8 +1367,13 @@
                 else { grid.insertAdjacentHTML('beforeend', vcAdCardHtml(ad)); }
             });
         }
-        if(_vcAdsCache){ place(_vcAdsCache); return; }
-        fetch('/api/ads?placement=vehicles').then(function(r){return r.json();}).then(function(d){ _vcAdsCache=d.ads||[]; place(_vcAdsCache); }).catch(function(){});
+        if(_vcAdsCache){ place(vcAdsForPageList(pageNum)); return; }
+        // First load: fetch once, then re-run the filter/pagination pass so each page's
+        // size accounts for its own ad tiles (each page shows VP_PER_PAGE tiles total).
+        fetch('/api/ads?placement=vehicles').then(function(r){return r.json();}).then(function(d){
+            _vcAdsCache=d.ads||[];
+            if(typeof window.applyFilters==='function'){ window.applyFilters(); } else { place(vcAdsForPageList(window.vpCurrentPageNum||1)); }
+        }).catch(function(){ _vcAdsCache=_vcAdsCache||[]; });
     }
     window.injectVehiclesAds = injectVehiclesAds;
 

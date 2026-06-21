@@ -1727,6 +1727,10 @@ body {
     text-align: center;
     font-weight: 700;
     line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .fleet-ad-card__desc {
@@ -1734,6 +1738,10 @@ body {
     font-size: 13px;
     line-height: 1.5;
     margin: 0 0 14px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .fleet-ad-card__cta {

@@ -326,6 +326,11 @@ async function initDB() {
         await pool.query(`ALTER TABLE ad_cards ADD COLUMN IF NOT EXISTS clicks INTEGER DEFAULT 0`);
     } catch (e) { /* column may already exist or table not yet created */ }
 
+    // Add page column to ad_cards — which results page a vehicles-placement ad shows on (existing DBs)
+    try {
+        await pool.query(`ALTER TABLE ad_cards ADD COLUMN IF NOT EXISTS page INTEGER DEFAULT 1`);
+    } catch (e) { /* column may already exist or table not yet created */ }
+
     // Per-language ad card text (existing DBs): RU / KA / HE for title/description/cta
     try {
         var _adBases = ['title', 'description', 'cta_text'];
@@ -337,10 +342,11 @@ async function initDB() {
         }
     } catch (e) { /* columns may already exist or table not yet created */ }
 
-    // Expand ad_cards.placement to allow new ad surfaces (existing DBs)
+    // placement is now a comma-separated list of surfaces (an ad can target several
+    // pages at once), so the single-value CHECK constraint is dropped. Values are
+    // validated in the API layer (sanitizeAd).
     try {
         await pool.query(`ALTER TABLE ad_cards DROP CONSTRAINT IF EXISTS ad_cards_placement_check`);
-        await pool.query(`ALTER TABLE ad_cards ADD CONSTRAINT ad_cards_placement_check CHECK (placement IN ('cars','drivers','both','vehicles','blog','checkout'))`);
     } catch (e) { /* table not yet created */ }
 
     // Add partner signup method / paid columns (existing DBs)
@@ -398,9 +404,17 @@ async function initDB() {
             user_agent TEXT,
             referrer TEXT,
             visitor_id TEXT,
+            is_bot INTEGER DEFAULT 0,
+            is_verified INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
+
+    // Bot-detection columns for existing databases
+    try {
+        await pool.query(`ALTER TABLE page_visits ADD COLUMN IF NOT EXISTS is_bot INTEGER DEFAULT 0`);
+        await pool.query(`ALTER TABLE page_visits ADD COLUMN IF NOT EXISTS is_verified INTEGER DEFAULT 0`);
+    } catch (e) { /* columns may already exist */ }
 
     // Drivers registry — partner-added driver profiles, admin-moderated.
     // Directory/contact model (no online booking). Hidden until approved.
@@ -447,7 +461,8 @@ async function initDB() {
             title_ru TEXT, title_ka TEXT, title_he TEXT,
             description_ru TEXT, description_ka TEXT, description_he TEXT,
             cta_text_ru TEXT, cta_text_ka TEXT, cta_text_he TEXT,
-            placement TEXT DEFAULT 'cars' CHECK(placement IN ('cars', 'drivers', 'both', 'vehicles', 'blog', 'checkout')),
+            placement TEXT DEFAULT 'cars',
+            page INTEGER DEFAULT 1,
             position INTEGER DEFAULT 4,
             clicks INTEGER DEFAULT 0,
             is_active INTEGER DEFAULT 1,
@@ -490,6 +505,8 @@ async function initDB() {
         'CREATE INDEX IF NOT EXISTS idx_availability_date ON vehicle_availability(date)',
         'CREATE INDEX IF NOT EXISTS idx_page_visits_created ON page_visits(created_at)',
         'CREATE INDEX IF NOT EXISTS idx_page_visits_visitor ON page_visits(visitor_id)',
+        'CREATE INDEX IF NOT EXISTS idx_page_visits_bot ON page_visits(is_bot)',
+        'CREATE INDEX IF NOT EXISTS idx_page_visits_verified ON page_visits(is_verified)',
         'CREATE INDEX IF NOT EXISTS idx_drivers_partner ON drivers(partner_id)',
         'CREATE INDEX IF NOT EXISTS idx_drivers_status ON drivers(status)',
         'CREATE INDEX IF NOT EXISTS idx_ad_cards_placement ON ad_cards(placement)',

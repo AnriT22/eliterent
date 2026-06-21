@@ -9,11 +9,11 @@
     <meta name="description" content="Hire verified professional drivers in Georgia, Armenia and USA. Experienced chauffeurs with own vehicles or fleet partners.">
     <link rel="canonical" href="https://eliteauto.rent/drivers.html">
     <link rel="icon" type="image/png" href="/images/Lettermark.png">
-    <link rel="stylesheet" href="style.css?v=9">
-    <link rel="stylesheet" href="premium.css?v=5">
-    <link rel="stylesheet" href="navbar-auth.css?v=5">
-    <script src="api-helper.js"></script>
-    <script src="i18n.js?v=5"></script>
+    <link rel="stylesheet" href="style.css?v=10">
+    <link rel="stylesheet" href="premium.css?v=6">
+    <link rel="stylesheet" href="navbar-auth.css?v=6">
+    <script src="api-helper.js?v=2"></script>
+    <script src="i18n.js?v=6"></script>
     <style>
         .drivers-page { min-height: 100vh; background: #12141D; padding: 24px 0 60px; }
         .drivers-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
@@ -77,8 +77,8 @@
         }
         .ad-card-cover { height: 180px; background-size: cover; background-position: center; background-color: #2A2D3A; }
         .ad-card-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
-        .ad-card-body h4 { margin: 0 0 6px; font-size: 16px; color: #EAEAEA; text-align: center; }
-        .ad-card-body p { margin: 0 0 12px; font-size: 13px; color: #A0A3B0; flex: 1; }
+        .ad-card-body h4 { margin: 0 0 6px; font-size: 16px; color: #EAEAEA; text-align: center; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+        .ad-card-body p { margin: 0 0 12px; font-size: 13px; color: #A0A3B0; flex: 1; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
         .ad-card-cta {
             display: inline-block; background: #C9A84C; color: #0F1117; text-decoration: none;
             border-radius: 10px; padding: 10px 16px; font-size: 13px; font-weight: 600;
@@ -151,7 +151,7 @@
         <div class="container header-content">
             <div class="header-left">
                 <a href="/" class="logo">
-                    <img src="images/logo3.png" alt="EliteAuto.rent" class="logo-img">
+                    <img src="images/logo3.png" alt="EliteAuto.rent" class="logo-img" loading="lazy">
                     <span class="logo-text">EliteAuto.rent</span>
                 </a>
             </div>
@@ -197,7 +197,7 @@
     <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
     <div class="mobile-nav-panel" id="mobileNavPanel">
         <div class="mobile-nav-header">
-            <a href="/" class="logo"><img src="images/logo3.png" alt="EliteAuto.rent"><span>EliteAuto.rent</span></a>
+            <a href="/" class="logo"><img src="images/logo3.png" alt="EliteAuto.rent" loading="lazy"><span>EliteAuto.rent</span></a>
             <button class="mobile-nav-close" id="mobileNavClose">&#10005;</button>
         </div>
         <nav class="mobile-nav-links">
@@ -257,8 +257,8 @@
                 <h4>EliteAuto.rent</h4>
                 <p data-i18n="footer.tagline">Premium car rental marketplace for Georgia adventures.</p>
                 <div class="social-icons">
-                    <a href="https://www.facebook.com/profile.php?id=61583448788067" target="_blank" class="social-icon" title="Facebook"><img src="images/Facebook_Logo.png" alt="Facebook" width="18" height="18" style="object-fit:contain;"></a>
-                    <a href="https://www.instagram.com/eliterentalgeorgia/" target="_blank" class="social-icon" title="Instagram"><img src="images/Instagram.png" alt="Instagram" width="18" height="18" style="object-fit:contain;"></a>
+                    <a href="https://www.facebook.com/profile.php?id=61583448788067" target="_blank" class="social-icon" title="Facebook"><img src="images/Facebook_Logo.png" alt="Facebook" width="18" height="18" style="object-fit:contain;" loading="lazy"></a>
+                    <a href="https://www.instagram.com/eliterentalgeorgia/" target="_blank" class="social-icon" title="Instagram"><img src="images/Instagram.png" alt="Instagram" width="18" height="18" style="object-fit:contain;" loading="lazy"></a>
                 </div>
             </div>
             <div class="footer-column">
@@ -325,7 +325,7 @@
         </div>
     </div>
 
-    <script src="navbar-auth.js?v=3"></script>
+    <script src="navbar-auth.js?v=4"></script>
     <script>
     (function() {
         var page = 1, limit = 12, hasMore = false, ads = [], currentFilters = {};
@@ -437,7 +437,7 @@
                     }
 
                     content.innerHTML = '<div style="display:flex;gap:16px;flex-wrap:wrap;">'
-                        + '<img src="' + photo + '" class="driver-detail-photo" alt="">'
+                        + '<img src="' + photo + '" class="driver-detail-photo" alt="" loading="lazy">'
                         + '<div style="flex:1;min-width:200px;">'
                         + '<div style="font-size:20px;font-weight:700;color:#EAEAEA;margin-bottom:4px;">' + esc(d.full_name) + '</div>'
                         + '<div style="margin-bottom:8px;">' + renderStars(rating) + (rc > 0 ? '<span class="count">' + rating + ' (' + rc + ')</span>' : '') + '</div>'
