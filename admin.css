@@ -265,6 +265,85 @@
     color: #0f172a;
 }
 
+/* UPGRADED DUAL VISITOR CHART */
+.dual-chart {
+    position: relative;
+    align-items: flex-end;
+    gap: 4px;
+    padding-top: 20px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.chart-day-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
+    position: relative;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+.chart-day-group:hover { opacity: 0.85; }
+
+.chart-day-value {
+    font-size: 10px;
+    font-weight: 700;
+    color: #C9A84C;
+    margin-bottom: 4px;
+    white-space: nowrap;
+}
+
+.chart-bars-wrap {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    width: 100%;
+    justify-content: center;
+}
+
+.chart-bar {
+    width: 8px;
+    border-radius: 3px 3px 0 0;
+    min-height: 4px;
+    transition: height 0.4s ease;
+}
+
+.chart-bar.total-bar {
+    background: linear-gradient(to top, rgba(201,168,76,0.25), rgba(201,168,76,0.45));
+}
+
+.chart-bar.unique-bar {
+    background: linear-gradient(to top, #C9A84C, #E8CF7A);
+    box-shadow: 0 -2px 8px rgba(201,168,76,0.25);
+}
+
+.chart-day-label {
+    margin-top: 6px;
+    font-size: 9px;
+    color: #94a3b8;
+    text-align: center;
+    white-space: nowrap;
+    letter-spacing: -0.2px;
+}
+
+.chart-day-label.muted {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.chart-avg-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: repeating-linear-gradient(90deg, rgba(148,163,184,0.4) 0, rgba(148,163,184,0.4) 6px, transparent 6px, transparent 12px);
+    pointer-events: none;
+    z-index: 2;
+}
+
 /* TOOLBAR */
 .admin-toolbar {
     display: flex;
@@ -695,6 +774,22 @@
     }
     .admin-bar .bar-value {
         font-size: 9px;
+    }
+
+    /* Dual chart mobile */
+    .dual-chart {
+        gap: 2px;
+        padding-bottom: 22px;
+    }
+    .chart-bar {
+        width: 5px;
+        border-radius: 2px 2px 0 0;
+    }
+    .chart-day-value {
+        font-size: 8px;
+    }
+    .chart-day-label {
+        font-size: 7.5px;
     }
 
     /* Hide non-essential columns on mobile */
