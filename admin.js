@@ -106,8 +106,11 @@ function escHtml(s) {
         loadVisitors();
     }
 
+    var _excludeBots = false;
+
     function loadVisitors() {
-        apiGet('/api/admin/visitors').then(function (data) {
+        var url = '/api/admin/visitors' + (_excludeBots ? '?excludeBots=1' : '');
+        apiGet(url).then(function (data) {
             var vGrid = document.getElementById('visitorStatsGrid');
             if (!vGrid) return;
 
@@ -115,10 +118,20 @@ function escHtml(s) {
                 ? '<span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;background:#22c55e;border-radius:50%;display:inline-block;animation:livePulse 1.5s ease-in-out infinite;"></span>' + data.live + ' online now</span>'
                 : '0 online now';
 
+            // Bot stats indicator
+            var botIndicator = '';
+            if (data.botStats) {
+                var total = data.botStats.bots + data.botStats.humans;
+                var botPct = total > 0 ? Math.round(data.botStats.bots / total * 100) : 0;
+                botIndicator = '<div style="font-size:11px;color:#A0A3B0;margin-top:4px;">'
+                    + '<span style="color:#ef4444;font-weight:600;">' + data.botStats.bots + '</span> suspected bots / '
+                    + '<span style="color:#22c55e;font-weight:600;">' + data.botStats.humans + '</span> humans this month</div>';
+            }
+
             vGrid.innerHTML = ''
                 + statCard('Visitors Today', data.unique.today, 'orange', data.views.today + ' page views')
                 + statCard('Visitors This Week', data.unique.week, 'blue', data.views.week + ' page views')
-                + statCard('Visitors This Month', data.unique.month, 'purple', data.views.month + ' page views')
+                + statCard('Visitors This Month', data.unique.month, 'purple', data.views.month + ' page views' + botIndicator)
                 + statCard('Live Now', data.live, 'green', liveHtml);
 
             // Daily visitors chart
@@ -135,14 +148,25 @@ function escHtml(s) {
     }
 
     function loadRecentVisitors() {
-        apiGet('/api/admin/visitors/recent?limit=100').then(function (data) {
+        var url = '/api/admin/visitors/recent?limit=100' + (_excludeBots ? '&excludeBots=1' : '');
+        apiGet(url).then(function (data) {
             var el = document.getElementById('recentVisitorsTable');
             if (!el) return;
             var visitors = data.visitors || [];
             var callerIp = data.callerIp || '';
             var ipLabel = document.getElementById('recentVisitorsCallerIp');
             if (ipLabel && callerIp) {
-                ipLabel.textContent = 'Your IP: ' + callerIp + ' (highlighted)';
+                ipLabel.innerHTML = 'Your IP: ' + callerIp + ' (highlighted)'
+                    + ' &nbsp;|&nbsp; <label style="cursor:pointer;font-size:12px;color:#EAEAEA;">'
+                    + '<input type="checkbox" id="excludeBotsToggle" ' + (_excludeBots ? 'checked' : '') + ' style="vertical-align:middle;margin-right:4px;">'
+                    + 'Hide suspected bots</label>';
+                var toggle = document.getElementById('excludeBotsToggle');
+                if (toggle) {
+                    toggle.addEventListener('change', function () {
+                        _excludeBots = toggle.checked;
+                        loadVisitors();
+                    });
+                }
             }
             if (visitors.length === 0) {
                 el.innerHTML = '<p style="color:#94a3b8;font-size:13px;padding:12px;">No visitors yet</p>';
@@ -156,6 +180,12 @@ function escHtml(s) {
                 if (/mac os|macintosh/i.test(ua)) return '🖥️ Mac';
                 if (/linux/i.test(ua)) return '🖥️ Linux';
                 return '?';
+            }
+            function botBadge(v) {
+                if (v.is_bot == 1) return ' <span class="admin-status" style="background:#ef4444;color:#fff;font-size:9px;">BOT</span>';
+                if (v.is_verified == 1) return ' <span class="admin-status" style="background:#22c55e;color:#fff;font-size:9px;">HUMAN</span>';
+                if (v.visits > 20) return ' <span class="admin-status" style="background:#f59e0b;color:#fff;font-size:9px;">LIKELY BOT</span>';
+                return '';
             }
             function fmtTime(ts) {
                 if (!ts) return '-';
@@ -172,6 +202,7 @@ function escHtml(s) {
                 + '<th>IP</th>'
                 + '<th>Device</th>'
                 + '<th>Visits</th>'
+                + '<th>Status</th>'
                 + '<th class="hide-mobile">Pages</th>'
                 + '<th>Last seen</th>'
                 + '<th class="hide-mobile">First seen</th>'
@@ -185,6 +216,7 @@ function escHtml(s) {
                     + '<td style="font-family:monospace;font-size:11px;">' + escHtml(v.ip || '-') + youBadge + '</td>'
                     + '<td>' + detectDevice(v.user_agent || '') + '</td>'
                     + '<td><strong>' + v.visits + '</strong></td>'
+                    + '<td>' + botBadge(v) + '</td>'
                     + '<td class="hide-mobile" style="font-size:11px;color:#64748b;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + pages + '">' + pages + '</td>'
                     + '<td>' + fmtTime(v.last_seen) + '</td>'
                     + '<td class="hide-mobile">' + fmtTime(v.first_seen) + '</td>'
@@ -205,21 +237,66 @@ function escHtml(s) {
             el.innerHTML = '<p style="color:#A0A3B0;font-size:13px;margin:auto;">No data yet — visitor tracking just started</p>';
             return;
         }
-        var maxVal = Math.max.apply(null, data.map(function (d) { return parseInt(d.views) || 0; }));
+
+        // Parse + sort ascending (oldest left)
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var parsed = data.map(function (d) {
+            var dt = new Date(d.date);
+            if (isNaN(dt.getTime())) {
+                var parts = String(d.date).split(/[-T]/);
+                if (parts.length >= 3) dt = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            }
+            return {
+                date: dt,
+                views: parseInt(d.views) || 0,
+                unique: parseInt(d.unique_visitors) || 0
+            };
+        }).sort(function (a, b) { return a.date - b.date; });
+
+        var maxVal = Math.max.apply(null, parsed.map(function (d) { return d.views; }));
         if (maxVal === 0) maxVal = 1;
+
         el.innerHTML = '';
-        el.style.paddingBottom = '24px';
-        data.reverse().forEach(function (d) {
-            var views = parseInt(d.views) || 0;
-            var unique = parseInt(d.unique_visitors) || 0;
-            var h = Math.max(8, (views / maxVal) * (maxHeight - 40));
-            var bar = document.createElement('div');
-            bar.className = 'admin-bar';
-            bar.style.height = h + 'px';
-            var lbl = (d.date || '').replace(/^\d{4}-/, '');
-            bar.innerHTML = '<span class="bar-value" title="' + views + ' views / ' + unique + ' unique">' + unique + '</span><span class="bar-label">' + lbl + '</span>';
-            el.appendChild(bar);
+        el.className = 'admin-chart-placeholder dual-chart';
+
+        var isMobile = window.innerWidth <= 768;
+        var skip = (isMobile && parsed.length > 7) ? 2 : 1;
+
+        parsed.forEach(function (d, idx) {
+            var group = document.createElement('div');
+            group.className = 'chart-day-group';
+            group.title = months[d.date.getMonth()] + ' ' + d.date.getDate() + ': ' + d.unique + ' unique / ' + d.views + ' total views';
+
+            var uniqueH = Math.max(4, (d.unique / maxVal) * (maxHeight - 50));
+            var totalH  = Math.max(4, (d.views  / maxVal) * (maxHeight - 50));
+
+            var valLbl = document.createElement('div');
+            valLbl.className = 'chart-day-value';
+            valLbl.textContent = String(d.unique);
+
+            var wrap = document.createElement('div');
+            wrap.className = 'chart-bars-wrap';
+            wrap.innerHTML =
+                '<div class="chart-bar total-bar" style="height:' + totalH + 'px;"></div>' +
+                '<div class="chart-bar unique-bar" style="height:' + uniqueH + 'px;"></div>';
+
+            var lbl = document.createElement('div');
+            lbl.className = 'chart-day-label' + (idx % skip !== 0 ? ' muted' : '');
+            lbl.textContent = months[d.date.getMonth()] + ' ' + d.date.getDate();
+
+            group.appendChild(valLbl);
+            group.appendChild(wrap);
+            group.appendChild(lbl);
+            el.appendChild(group);
         });
+
+        // Average line
+        var avg = parsed.reduce(function (s, d) { return s + d.unique; }, 0) / parsed.length;
+        var line = document.createElement('div');
+        line.className = 'chart-avg-line';
+        line.style.bottom = Math.max(4, (avg / maxVal) * (maxHeight - 50)) + 'px';
+        line.title = 'Avg unique: ' + Math.round(avg);
+        el.appendChild(line);
     }
 
     function renderTopPages(containerId, pages) {
@@ -270,12 +347,24 @@ function escHtml(s) {
         if (maxVal === 0) maxVal = 1;
         el.innerHTML = '';
         el.style.paddingBottom = '24px';
-        data.reverse().forEach(function (d) {
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        data.slice().reverse().forEach(function (d) {
             var h = Math.max(8, ((d[valueKey] || 0) / maxVal) * (maxHeight - 40));
             var bar = document.createElement('div');
             bar.className = 'admin-bar';
             bar.style.height = h + 'px';
-            var lbl = (d[labelKey] || '').replace(/^\d{4}-/, '');
+            var raw = d[labelKey] || '';
+            var dt = new Date(raw);
+            var lbl;
+            if (isNaN(dt.getTime())) {
+                var parts = String(raw).split(/[-T]/);
+                if (parts.length >= 3) dt = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            }
+            if (!isNaN(dt.getTime())) {
+                lbl = months[dt.getMonth()] + ' ' + dt.getDate();
+            } else {
+                lbl = String(raw).replace(/^\d{4}-/, '');
+            }
             bar.innerHTML = '<span class="bar-value">' + (d[valueKey] || 0) + '</span><span class="bar-label">' + lbl + '</span>';
             el.appendChild(bar);
         });
