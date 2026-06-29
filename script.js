@@ -601,12 +601,12 @@ function renderCarousel(vehicles, adminAds, firstBlockLength) {
     }
     function buildAdCard(ad) {
         var img = ad.cover_url || 'images/svaneti.jpg';
-        var badge = ad.placement === 'both' ? 'Sponsored' : 'Recommended';
+        var badge = 'Recommended';
         var trackClick = ad.id ? ' onclick="trackAdClick(' + ad.id + ')"' : '';
         var title = adLocalized(ad, 'title');
         var desc = adLocalized(ad, 'description');
         var cta = adLocalized(ad, 'cta_text') || 'Learn More';
-        return '<a class="fleet-ad-card" href="' + (ad.target_link || 'vehicles.html') + '" rel="noopener sponsored" target="_blank"' + trackClick + '>'
+        return '<a class="fleet-ad-card" href="' + (ad.target_link || 'vehicles.html') + '" rel="noopener" target="_blank"' + trackClick + '>'
             + '<div class="fleet-ad-card__img"><img src="' + img + '" alt="' + title + '" loading="lazy"><span class="fleet-ad-card__badge">' + badge + '</span></div>'
             + '<div class="fleet-ad-card__body"><h3 class="fleet-ad-card__title">' + title + '</h3>'
             + '<p class="fleet-ad-card__desc">' + desc + '</p>'
