@@ -1715,6 +1715,7 @@ select.db-input option:checked {
     border-radius: 8px;
     background: #1A1814;
     cursor: pointer;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1761,6 +1762,22 @@ select.db-input option:checked {
     border-color: rgba(201,168,76,0.3);
     color: #C9A84C;
     cursor: not-allowed;
+}
+
+/* Date has an hour-level block (specific hours unavailable). Amber overrides the
+   green "available" look so partners can see which days carry an hours block. */
+.availability-day.hours-blocked {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+}
+.availability-day.hours-blocked::after {
+    content: '\23F1'; /* stopwatch */
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    font-size: 10px;
+    opacity: 0.8;
 }
 
 .availability-legend {

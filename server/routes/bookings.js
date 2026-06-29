@@ -318,9 +318,16 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
       if (typeof pf === 'string') { try { pf = JSON.parse(pf); } catch (e) { pf = {}; } }
       pf = pf || {};
 
+      var af = pf.airport_fees || {};
       function getLocFee(locStr) {
         if (!locStr) return 0;
-        if (locStr.indexOf('Airport') !== -1) return parseFloat(pf.airport_fee) || 0;
+        if (locStr.indexOf('Airport') !== -1) {
+          var low = String(locStr).toLowerCase();
+          if (low.indexOf('tbilisi') !== -1 && af.tbilisi !== undefined && af.tbilisi !== '') return parseFloat(af.tbilisi) || 0;
+          if (low.indexOf('kutaisi') !== -1 && af.kutaisi !== undefined && af.kutaisi !== '') return parseFloat(af.kutaisi) || 0;
+          if (low.indexOf('batumi') !== -1 && af.batumi !== undefined && af.batumi !== '') return parseFloat(af.batumi) || 0;
+          return parseFloat(pf.airport_fee) || 0; // legacy single airport fee
+        }
         if (locStr.indexOf('Delivery') !== -1) return parseFloat(pf.delivery_fee) || 0;
         return 0;
       }
@@ -394,6 +401,34 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
             error:
               "Vehicle already has an overlapping reservation for these dates",
           });
+      }
+
+      // Reject if the rental window overlaps a partner hour-block (incl. its buffer).
+      // Mirrors the client-side enforcement so a stale/bypassed UI can't book blocked time.
+      var blockRows = await txClient.query(
+        'SELECT start_ts, end_ts, buffer_minutes FROM vehicle_time_blocks WHERE vehicle_id = $1',
+        [vehicle_id],
+      );
+      if (blockRows.rows.length) {
+        var toMs = function (s) {
+          var m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+          return m ? Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) : null;
+        };
+        var pMs = toMs(pickup_date + 'T' + pickup_time);
+        var dMs = toMs(dropoff_date + 'T' + dropoff_time);
+        var hitsBlock = blockRows.rows.some(function (b) {
+          var bs = toMs(b.start_ts), be = toMs(b.end_ts);
+          if (bs == null || be == null || pMs == null || dMs == null) return false;
+          be += (b.buffer_minutes == null ? 120 : b.buffer_minutes) * 60000; // apply buffer
+          return pMs < be && dMs > bs; // window overlaps the (buffered) block
+        });
+        if (hitsBlock) {
+          await txClient.query('ROLLBACK');
+          txClient.release();
+          return res.status(409).json({
+            error: "The selected time overlaps a period when this vehicle is unavailable. Please choose a different time.",
+          });
+        }
       }
 
       // Create booking with pending status

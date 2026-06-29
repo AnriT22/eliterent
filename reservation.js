@@ -192,7 +192,7 @@
         var badgeClass = isFree ? 'free' : 'paid';
         var badgeText = isFree ? 'Free' : fmtMoney(price);
         return '<label class="rv-loc-option' + (isFirst ? ' selected' : '') + '">'
-            + '<input type="radio" name="' + radioName + '" value="' + value + '"' + (isFirst ? ' checked' : '') + '>'
+            + '<input type="radio" name="' + radioName + '" value="' + value + '" data-fee="' + price + '"' + (isFirst ? ' checked' : '') + '>'
             + '<div class="rv-loc-option-inner">'
             + (!isFirst ? '<span class="rv-loc-plus">+</span>' : '')
             + '<div class="rv-loc-name">' + name + '</div>'
@@ -242,8 +242,23 @@
         pickupHtml += buildLocOption(officeAddr + ' (Office)', 'pickupLoc', officeAddr + ' (Office)', 'Address: ' + officeAddr, 0, true);
         dropoffHtml += buildLocOption(officeAddr + ' (Office)', 'dropoffLoc', officeAddr + ' (Office)', 'Address: ' + officeAddr, 0, true);
 
-        // Airport
-        if (hasAirport) {
+        // Airport — one option per airport the partner serves (blank = not offered).
+        var af = pf.airport_fees || {};
+        var AIRPORTS = [['Tbilisi', 'tbilisi'], ['Kutaisi', 'kutaisi'], ['Batumi', 'batumi']];
+        var anyNewAirport = false;
+        if (feesEnabled) {
+            AIRPORTS.forEach(function (a) {
+                var raw = af[a[1]];
+                var fee = parseFloat(raw);
+                if (raw !== null && raw !== undefined && raw !== '' && !isNaN(fee)) {
+                    anyNewAirport = true;
+                    pickupHtml += buildLocOption(a[0] + ' Airport Pickup', 'pickupLoc', a[0] + ' Airport', '', fee, false);
+                    dropoffHtml += buildLocOption(a[0] + ' Airport Drop-off', 'dropoffLoc', a[0] + ' Airport', '', fee, false);
+                }
+            });
+        }
+        // Backward compat: older vehicles stored a single airport fee.
+        if (!anyNewAirport && hasAirport) {
             pickupHtml += buildLocOption('Airport Pickup', 'pickupLoc', 'Airport', '', airportFee, false);
             dropoffHtml += buildLocOption('Airport Drop-off', 'dropoffLoc', 'Airport', '', airportFee, false);
         }
@@ -378,23 +393,9 @@
     function getLocationSurcharge(radioName) {
         var radio = document.querySelector('input[name="' + radioName + '"]:checked');
         if (!radio) return 0;
-        var val = radio.value;
-        if (val.indexOf('Office') !== -1) return 0;
-
-        var pf = getPickupFees();
-        var feesEnabled = !!(vehicleData && vehicleData.pickup_fees_enabled);
-
-        if (val.indexOf('Delivery') !== -1) {
-            if (feesEnabled) return parseFloat(pf.delivery_fee) || 0;
-            var opts = getServiceOptions();
-            return parseFloat(((opts.locations || {}).delivery || {}).price) || 0;
-        }
-        // Airport
-        if (feesEnabled) return parseFloat(pf.airport_fee) || 0;
-        var opts2 = getServiceOptions();
-        var oldAirport = (opts2.locations || {}).airport || {};
-        if (oldAirport.enabled) return parseFloat(oldAirport.price) || 0;
-        return 0;
+        // The exact fee for each option is set on the radio when it's built, so just read it.
+        var f = parseFloat(radio.getAttribute('data-fee'));
+        return isNaN(f) ? 0 : f;
     }
 
     function getVehicleExtraServices() {

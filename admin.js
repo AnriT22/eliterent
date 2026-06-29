@@ -484,6 +484,7 @@ function escHtml(s) {
                 tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#A0A3B0;padding:30px;">No partners found</td></tr>';
                 return;
             }
+            window._adminPartners = partners;
             tbody.innerHTML = partners.map(function (p) {
                 var date = p.created_at ? new Date(p.created_at).toLocaleDateString() : '-';
                 var verified = p.is_verified ? 'verified' : 'unverified';
@@ -510,6 +511,11 @@ function escHtml(s) {
                     + '<td class="hide-mobile">' + date + '</td>'
                     + '<td>'
                     + verifyBtn
+                    + (p.phone_verified
+                        ? '<button class="admin-action-btn" onclick="adminPhoneVerify(' + p.id + ',0)" title="Block this partner from adding vehicles again">Unverify Phone</button>'
+                        : '<button class="admin-action-btn success" onclick="adminPhoneVerify(' + p.id + ',1)" title="Allow this partner to add vehicles without OTP">Verify Phone</button>')
+                    + '<button class="admin-action-btn" onclick="adminSetPhone(' + p.id + ')" title="Set or change this partner\'s phone number">Set Phone</button>'
+                    + '<button class="admin-action-btn" onclick="adminSetCompanyName(' + p.id + ')" title="Change the &quot;by ___&quot; name shown on this partner\'s vehicle cards">Set Name</button>'
                     + '<button class="admin-action-btn danger" onclick="adminDeleteUser(' + p.id + ')">Delete</button>'
                     + '</td></tr>';
             }).join('');
@@ -521,6 +527,32 @@ function escHtml(s) {
     };
     window.adminUnverifyPartner = function (id) {
         apiPut('/api/admin/partners/' + id + '/unverify').then(function () { loadPartners(); });
+    };
+
+    // Admin override of phone verification — lets a partner add vehicles without OTP.
+    window.adminPhoneVerify = function (id, val) {
+        var url = '/api/admin/users/' + id + '/phone-' + (val ? 'verify' : 'unverify');
+        apiPut(url).then(function () { loadPartners(); }).catch(function (e) { alert('Failed: ' + (e && e.message || 'error')); });
+    };
+
+    // Admin sets or changes a partner's phone number (prefilled with the current one).
+    window.adminSetPhone = function (id) {
+        var p = (window._adminPartners || []).filter(function (x) { return x.id === id; })[0] || {};
+        var phone = prompt('Set / change phone number for this partner:', p.phone || '');
+        if (phone === null) return; // cancelled
+        apiPut('/api/admin/users/' + id + '/edit', { phone: phone.trim() })
+            .then(function () { loadPartners(); })
+            .catch(function (e) { alert('Failed: ' + (e && e.message || 'error')); });
+    };
+
+    // Admin sets/changes the partner's company name (the "by ___" on vehicle cards).
+    window.adminSetCompanyName = function (id) {
+        var p = (window._adminPartners || []).filter(function (x) { return x.id === id; })[0] || {};
+        var name = prompt('Set / change the name shown as "by ___" on this partner\'s vehicle cards:', p.company_name || '');
+        if (name === null) return; // cancelled
+        apiPut('/api/admin/partners/' + id + '/company-name', { company_name: name.trim() })
+            .then(function () { loadPartners(); })
+            .catch(function (e) { alert('Failed: ' + (e && e.message || 'error')); });
     };
 
     document.getElementById('partnerSearch').addEventListener('input', function () {

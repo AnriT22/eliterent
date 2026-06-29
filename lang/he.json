@@ -1,4 +1,10 @@
 {
+    "country_popup": {
+        "button": "בחר מדינה",
+        "title": "בחר מדינה",
+        "subtitle": "היכן תרצה לשכור רכב?",
+        "soon": "בקרוב"
+    },
   "nav": {
     "home": "דף הבית",
     "vehicles": "רכבים",
@@ -47,6 +53,7 @@
   "filters": {
     "title": "אפשרויות סינון",
     "category": "קטגוריה",
+    "brand": "מותג",
     "price_range": "טווח מחירים",
     "engine": "מנוע",
     "gearbox": "תיבת הילוכים",
@@ -208,6 +215,11 @@
     "title": "הצי שלנו",
     "subtitle": "עיינו והזמינו מתוך מבחר רכבים איכותיים שנבחרו בקפידה",
     "search_placeholder": "חיפוש רכבים...",
+    "search_brand": "חיפוש מותג...",
+    "see_all": "הצג הכל",
+    "show_less": "הצג פחות",
+    "hero_title": "השכרת רכב בגיאורגיה <span class=\"vp-header-accent\">טביליסי, באתומי וקוטאיסי</span>",
+    "hero_subtitle": "השווה שותפים מקומיים מאומתים. רכבי שטח, סדאנים, רכבי כלכלה ויוקרה מ-25$ ליום עם איסוף משדה תעופה.",
     "sort_label": "מיון לפי",
     "sort_default": "מומלצים",
     "sort_newest": "החדשים ביותר",
@@ -229,7 +241,9 @@
     "reset_all": "איפוס כל הסינונים",
     "no_vehicles_title": "אין רכבים עדיין",
     "no_vehicles_desc": "שותפים יכולים להוסיף רכבים מלוח הבקרה שלהם",
-    "cars_available": "{{count}} רכבים זמינים"
+    "cars_available": "{{count}} רכבים זמינים",
+    "select_country": "בחר מדינה",
+    "select_country_desc": "בחר את המיקום שלך כדי לראות רכבים זמינים"
   },
   "filter_options": {
     "economy": "אקונומי",
@@ -260,7 +274,12 @@
     "check_all": "סמן הכול",
     "interior_type": "סוג ריפוד",
     "steering_side": "צד ההגה",
-    "payment_method": "אמצעי תשלום"
+    "payment_method": "אמצעי תשלום",
+    "country_georgia": "גיאורגיה",
+    "country_turkey": "טורקיה",
+    "country_uae": "איחוד האמירויות הערביות",
+    "country_armenia": "ארמניה",
+    "country_usa": "ארצות הברית"
   },
   "vehicle_page": {
     "back": "חזרה לרכבים",
@@ -302,6 +321,10 @@
     "pickup_date": "תאריך איסוף",
     "dropoff_date": "תאריך החזרה",
     "pickup_time": "שעת איסוף",
+    "hours_unavailable": "לא זמין",
+    "legend_available": "זמין",
+    "legend_blocked": "תפוס",
+    "legend_partial": "שעות מוגבלות",
     "dropoff_time": "שעת החזרה",
     "select_date": "בחרו תאריך",
     "free_cancel": "ביטול חינם",

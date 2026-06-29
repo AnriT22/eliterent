@@ -484,8 +484,11 @@ function loadCarouselWithAvailability() {
     // VIP featured cars are fixed by admin. Visitor can use the full fleet page for date filtering.
     
     // Fetch homepage structured vehicles AND admin ads in parallel
+    var homeApiUrl = '/api/vehicles/homepage';
+    var savedCountry = sessionStorage.getItem('selectedCountry');
+    if (savedCountry) homeApiUrl += '?country=' + encodeURIComponent(savedCountry);
     Promise.all([
-        fetch('/api/vehicles/homepage').then(function (r) { return r.json(); }),
+        fetch(homeApiUrl).then(function (r) { return r.json(); }),
         fetch('/api/ads?placement=cars').then(function (r) { return r.json(); }).catch(function () { return { ads: [] }; })
     ])
         .then(function (results) {
