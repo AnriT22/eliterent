@@ -456,6 +456,57 @@ router.put('/users/:id/edit', async (req, res) => {
     }
 });
 
+// Admin override: mark a user's phone as verified so a partner can add vehicles
+// without going through OTP. Optionally set/replace the phone number in the same call.
+router.put('/users/:id/phone-verify', async (req, res) => {
+    try {
+        const userId = parseInt(req.params.id);
+        const user = await queryOne('SELECT id FROM users WHERE id = $1 AND role != $2', [userId, 'admin']);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (req.body && req.body.phone !== undefined && String(req.body.phone).trim() !== '') {
+            await execute('UPDATE users SET phone = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [String(req.body.phone).trim(), userId]);
+        }
+        await execute('UPDATE users SET phone_verified = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
+        res.json({ message: 'Phone marked verified' });
+    } catch (err) {
+        console.error('Admin phone-verify error:', err);
+        res.status(500).json({ error: 'Failed to verify phone' });
+    }
+});
+
+// Admin: remove the phone-verified flag (partner can no longer add vehicles until verified again).
+router.put('/users/:id/phone-unverify', async (req, res) => {
+    try {
+        const userId = parseInt(req.params.id);
+        await execute('UPDATE users SET phone_verified = 0, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
+        res.json({ message: 'Phone verification removed' });
+    } catch (err) {
+        console.error('Admin phone-unverify error:', err);
+        res.status(500).json({ error: 'Failed to unverify phone' });
+    }
+});
+
+// Admin: set/change the partner's company name — this is the "by ___" shown on
+// every vehicle card and the vehicle detail page.
+router.put('/partners/:id/company-name', async (req, res) => {
+    try {
+        const userId = parseInt(req.params.id);
+        const name = (req.body && req.body.company_name != null) ? String(req.body.company_name).trim() : '';
+        const u = await queryOne("SELECT id FROM users WHERE id = $1 AND role = 'partner'", [userId]);
+        if (!u) return res.status(404).json({ error: 'Partner not found' });
+        const existing = await queryOne('SELECT id FROM partner_profiles WHERE user_id = $1', [userId]);
+        if (existing) {
+            await execute('UPDATE partner_profiles SET company_name = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2', [name || null, userId]);
+        } else {
+            await execute('INSERT INTO partner_profiles (user_id, company_name) VALUES ($1, $2)', [userId, name || null]);
+        }
+        res.json({ message: 'Company name updated' });
+    } catch (err) {
+        console.error('Admin company-name error:', err);
+        res.status(500).json({ error: 'Failed to update company name' });
+    }
+});
+
 router.put('/users/:id/notes', async (req, res) => {
     try {
         const userId = parseInt(req.params.id);

@@ -22,6 +22,10 @@ router.get('/', async (req, res) => {
             sql += ' AND LOWER(v.location_city) = LOWER($' + paramIdx++ + ')';
             params.push(req.query.location);
         }
+        if (req.query.country) {
+            sql += ' AND LOWER(v.country) = LOWER($' + paramIdx++ + ')';
+            params.push(req.query.country);
+        }
         if (req.query.category) {
             sql += ' AND v.category = $' + paramIdx++;
             params.push(req.query.category);
@@ -98,13 +102,18 @@ router.get('/homepage', async (req, res) => {
                        JOIN users u ON v.partner_id = u.id
                        LEFT JOIN partner_profiles pp ON u.id = pp.user_id
                        WHERE v.status = 'active' AND pp.is_verified = 1`;
+        var params = [];
+        if (req.query.country) {
+            baseSql += ' AND LOWER(v.country) = LOWER($1)';
+            params.push(req.query.country);
+        }
 
         // 3 admin-picked VIP cars (homepage_vip_position 1,2,3) — active VIPs only
         var vipFeatured = await queryAll(
             baseSql + ` AND (v.is_vip = 1 OR v.vip_until > NOW()) AND v.homepage_vip_position IN (1,2,3)
                        ORDER BY v.homepage_vip_position ASC, v.created_at DESC
                        LIMIT 3`,
-            []
+            params
         );
 
         // Build a list of excluded IDs so VIP featured cars don't repeat in random pool
@@ -116,7 +125,7 @@ router.get('/homepage', async (req, res) => {
         var randomCars = await queryAll(
             baseSql + ` AND v.is_vip = 0 AND (v.vip_until IS NULL OR v.vip_until <= NOW())` + excludeClause +
             ` ORDER BY RANDOM() LIMIT 3`,
-            []
+            params
         );
 
         res.json({

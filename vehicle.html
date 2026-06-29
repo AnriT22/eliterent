@@ -22,14 +22,14 @@
     <meta name="twitter:title" content="Vehicle Details — EliteAuto.rent">
     <meta name="twitter:description" content="View vehicle details, availability, pricing and book your rental car.">
     <meta name="twitter:image" content="https://eliteauto.rent/images/og-preview.jpg">
-    <link rel="preload" href="style.css?v=10" as="style">
-    <link rel="stylesheet" href="style.css?v=10">
+    <link rel="preload" href="style.css?v=12" as="style">
+    <link rel="stylesheet" href="style.css?v=12">
     <link rel="preload" href="premium.css?v=6" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="premium.css?v=6"></noscript>
     <link rel="preload" href="navbar-auth.css?v=6" as="style">
     <link rel="stylesheet" href="navbar-auth.css?v=6">
-    <link rel="preload" href="vehicle.css?v=5" as="style">
-    <link rel="stylesheet" href="vehicle.css?v=5">
+    <link rel="preload" href="vehicle.css?v=6" as="style">
+    <link rel="stylesheet" href="vehicle.css?v=6">
     <script src="api-helper.js?v=2" defer></script>
     <script src="i18n.js?v=6" defer></script>
 </head>
@@ -314,6 +314,11 @@
                 <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
             </div>
             <div class="vd-cal-grid" id="vdCalGrid"></div>
+            <div class="vd-cal-legend">
+                <span class="vd-legend-item"><span class="vd-legend-dot avail"></span><span data-i18n="vehicle_page.legend_available">Available</span></span>
+                <span class="vd-legend-item"><span class="vd-legend-dot part"></span><span data-i18n="vehicle_page.legend_partial">Limited hours</span></span>
+                <span class="vd-legend-item"><span class="vd-legend-dot block"></span><span data-i18n="vehicle_page.legend_blocked">Unavailable</span></span>
+            </div>
             <div class="vd-cal-footer">
                 <span id="vdCalInstruction" data-i18n="vehicle_page.select_a_date">Select a date</span>
                 <button class="vd-cal-apply" id="vdCalApply" data-i18n="vehicle_page.apply">Apply</button>
@@ -351,7 +356,7 @@
         </div>
     </div>
 
-    <script src="vehicle.js?v=3"></script>
+    <script src="vehicle.js?v=5"></script>
     <script src="navbar-auth.js?v=4"></script>
     <script src="currency.js?v=4"></script>
 <script src="premium-animations.js?v=2"></script>

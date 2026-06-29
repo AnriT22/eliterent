@@ -162,10 +162,10 @@
       }
     }
     </script>
-    <link rel="preload" href="style.css?v=10" as="style">
-    <link rel="stylesheet" href="style.css?v=10">
-    <link rel="preload" href="premium.css?v=6" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="premium.css?v=6"></noscript>
+    <link rel="preload" href="style.css?v=12" as="style">
+    <link rel="stylesheet" href="style.css?v=12">
+    <link rel="preload" href="premium.css?v=7" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="premium.css?v=7"></noscript>
     <link rel="preload" href="navbar-auth.css?v=6" as="style">
     <link rel="stylesheet" href="navbar-auth.css?v=6">
     <script src="api-helper.js?v=2" defer></script>
@@ -673,6 +673,10 @@
     <section class="carousel-section">
         <div class="container">
             <div class="carousel-header">
+                <a href="vehicles.html" class="carousel-header-badge" onclick="if(window.openCountryPopup){openCountryPopup();return false;}">
+                    <span data-i18n="country_popup.button">Choose Country</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </a>
                 <h2 class="carousel-title" data-i18n="fleet.title">Our Fleet</h2>
                 <p class="carousel-subtitle" data-i18n="fleet.subtitle">Meet Some of Our Cars</p>
             </div>
@@ -689,12 +693,6 @@
                     <span data-i18n="fleet.browse_more">Browse More</span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </button>
-                <a href="vehicles.html" class="show-all-link">
-                    <span data-i18n="fleet.show_all">Show all vehicles</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                </a>
             </div>
         </div>
     </section>
@@ -1048,5 +1046,6 @@
     <script src="navbar-auth.js?v=4"></script>
     <script src="currency.js?v=4"></script>
 <script src="premium-animations.js?v=2"></script>
+<script src="country-popup.js?v=1"></script>
 </body>
 </html>

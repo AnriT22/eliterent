@@ -67,8 +67,8 @@
       ]
     }
     </script>
-    <link rel="preload" href="style.css?v=10" as="style">
-    <link rel="stylesheet" href="style.css?v=10">
+    <link rel="preload" href="style.css?v=12" as="style">
+    <link rel="stylesheet" href="style.css?v=12">
     <link rel="preload" href="premium.css?v=6" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="premium.css?v=6"></noscript>
     <link rel="preload" href="vehicles.css?v=8" as="style">
@@ -85,11 +85,48 @@
         #vpGrid.vp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
         @media (max-width: 900px) { #vpGrid.vp-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
         @media (max-width: 540px) { #vpGrid.vp-grid { grid-template-columns: 1fr; } }
+        /* Country selector modal - inlined to guarantee rendering */
+        .country-modal { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .country-modal-overlay { position: absolute; inset: 0; background: rgba(11, 12, 16, 0.92); backdrop-filter: blur(6px); }
+        .country-modal-content { position: relative; background: #1C1E26; border: 1px solid #3A3F4B; border-radius: 20px; padding: 36px 28px; max-width: 480px; width: 100%; box-shadow: 0 24px 60px rgba(0,0,0,0.5); text-align: center; z-index: 1; }
+        .country-modal-header h2 { font-size: 22px; font-weight: 800; color: #F5F5F5; margin: 0 0 6px; }
+        .country-modal-header p { font-size: 14px; color: #A0A3B0; margin: 0 0 24px; }
+        .country-grid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+        .country-card { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 8px !important; padding: 20px 12px !important; background: #262A35 !important; border: 1.5px solid #3A3F4B !important; border-radius: 14px !important; cursor: pointer !important; transition: background 0.18s, border-color 0.18s, transform 0.18s !important; color: #EAEAEA !important; font-size: 14px !important; font-weight: 600 !important; }
+        .country-card:hover { background: #2E3340 !important; border-color: #C9A84C !important; transform: translateY(-2px) !important; }
+        .country-card-flag { font-size: 32px; line-height: 1; }
+        .country-card-name { font-size: 13px; font-weight: 600; color: #EAEAEA; }
+        .vp-topbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .vp-country-btn { display: none; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(201, 168, 76, 0.1); border: 1px solid rgba(201, 168, 76, 0.35); border-radius: 24px; color: #C9A84C; font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+        .vp-country-btn:hover { background: rgba(201, 168, 76, 0.18); border-color: #C9A84C; }
+        .vp-country-flag { font-size: 14px; line-height: 1; }
+        .vp-country-label { text-transform: capitalize; }
+        @media (max-width: 540px) {
+            .country-modal-content { padding: 28px 20px; }
+            .country-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+            .country-card { padding: 16px 10px !important; }
+            .country-card-flag { font-size: 28px; }
+            .vp-topbar-left { gap: 8px; }
+        }
     </style>
     <script src="api-helper.js?v=2" defer></script>
     <script src="i18n.js?v=6" defer></script>
 </head>
 <body>
+
+    <!-- COUNTRY SELECTOR MODAL -->
+    <div id="countrySelectorModal" class="country-modal" style="display:none;">
+        <div class="country-modal-overlay"></div>
+        <div class="country-modal-content">
+            <div class="country-modal-header">
+                <h2 data-i18n="vehicles_page.select_country">Select Country</h2>
+                <p data-i18n="vehicles_page.select_country_desc">Choose your location to see available vehicles</p>
+            </div>
+            <div class="country-grid" id="countryGrid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
 
     <!-- HEADER -->
     <header class="header sticky-header">
@@ -227,6 +264,30 @@
                     </div>
                     <div class="vf-divider"></div>
                     <button class="vf-check-all" data-group="category" data-i18n="filter_options.check_all">Check all</button>
+                </div>
+            </div>
+
+            <!-- Brand -->
+            <div class="vf-panel" id="panelBrand">
+                <div class="vf-panel-header" data-target="bodyBrand">
+                    <span class="vf-panel-title" data-i18n="filters.brand">Brand</span>
+                    <svg class="vf-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="vf-panel-body" id="bodyBrand">
+                    <div class="vf-brand-search-wrap">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" class="vf-brand-search" id="vfBrandSearch" placeholder="Search brand..." autocomplete="off" data-i18n-placeholder="vehicles_page.search_brand">
+                        <button type="button" class="vf-brand-clear" id="vfBrandClear" aria-label="Clear search" title="Clear">&times;</button>
+                    </div>
+                    <button type="button" class="vf-brand-toggle" id="brandToggle">
+                        <svg class="vf-toggle-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        <span data-i18n="vehicles_page.see_all">See all</span>
+                    </button>
+                    <div class="vf-checkbox-grid" id="brandCheckboxList">
+                        <p style="font-size:12px;color:#A0A3B0;margin:0;">—</p>
+                    </div>
+                    <div class="vf-divider"></div>
+                    <button class="vf-check-all" data-group="brand" data-i18n="filter_options.check_all">Check all</button>
                 </div>
             </div>
 
@@ -384,11 +445,18 @@
         <!-- MAIN CONTENT -->
         <main class="vp-main">
             <header class="vp-page-header">
-                <h1>Rent a Car in Georgia <span class="vp-header-accent">Tbilisi, Batumi &amp; Kutaisi</span></h1>
-                <p>Compare verified local partners. SUVs, sedans, economy and luxury cars from $25/day with airport pickup.</p>
+                <h1 data-i18n-html="vehicles_page.hero_title">Rent a Car in Georgia <span class="vp-header-accent">Tbilisi, Batumi &amp; Kutaisi</span></h1>
+                <p data-i18n="vehicles_page.hero_subtitle">Compare verified local partners. SUVs, sedans, economy and luxury cars from $25/day with airport pickup.</p>
             </header>
             <div class="vp-topbar">
-                <span class="vp-count-badge" id="vpCountBadge">Loading...</span>
+                <div class="vp-topbar-left">
+                    <span class="vp-count-badge" id="vpCountBadge">Loading...</span>
+                    <button type="button" class="vp-country-btn" id="vpCountryBtn" onclick="window.openCountrySelector()" title="Change country">
+                        <span class="vp-country-flag" id="vpCountryFlag">🌍</span>
+                        <span class="vp-country-label" id="vpCountryLabel">--</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                </div>
                 <div class="vp-topbar-right">
                     <input type="text" class="vp-search-input" id="vpSearch" placeholder="Search cars..." data-i18n-placeholder="vehicles_page.search_placeholder">
                     <button type="button" class="vp-clear-btn" id="vpClearBtn" onclick="window.clearAllVehicleFilters()" style="display:none;">Clear</button>
@@ -789,6 +857,7 @@
                 var sortVal = document.getElementById('vpSort').value;
 
                 var cats = getChecked('category');
+                var brands = getChecked('brand');
                 var engines = getChecked('engine');
                 var gearboxes = getChecked('gearbox');
                 var drives = getChecked('drive');
@@ -802,6 +871,7 @@
                     var n = (card.dataset.name || '').toLowerCase();
                     var year = parseInt(card.dataset.year, 10);
                     var cat = card.dataset.category;
+                    var brand = card.dataset.brand;
                     var eng = card.dataset.engine;
                     var gear = card.dataset.gearbox;
                     var drv = card.dataset.drive;
@@ -816,6 +886,7 @@
                     if (yearFilter === '2016' && (year < 2016 || year > 2019)) return false;
                     if (yearFilter === 'old' && year >= 2016) return false;
                     if (cats.length && cats.indexOf(cat) === -1) return false;
+                    if (brands.length && brands.indexOf(brand) === -1) return false;
                     if (engines.length && engines.indexOf(eng) === -1) return false;
                     if (gearboxes.length && gearboxes.indexOf(gear) === -1) return false;
                     if (drives.length && drives.indexOf(drv) === -1) return false;
@@ -1070,6 +1141,143 @@
             cb.addEventListener('change', function() { applyFilters(); updateClearButtonVisibility(); });
         });
 
+        /* Brand filter — comprehensive list of all brands (same as partner form).
+           Selections are preserved across reloads (date/location search re-renders). */
+        var BRAND_LIST = [
+            'Acura','Aston Martin','Audi','Bentley','BMW','BYD','Cadillac','Chery','Chevrolet',
+            'Chrysler','Citroen','Dacia','Daewoo','Dodge','Ferrari','Fiat','Ford','Geely','Genesis',
+            'Haval','Honda','Hyundai','Infiniti','Jaguar','Jeep','Kia','Lamborghini','Land Rover',
+            'Lexus','Lincoln','Lucid','Maserati','Mazda','McLaren','Mercedes-Benz','MG','Mitsubishi',
+            'NIO','Nissan','Opel','Peugeot','Polestar','Porsche','Renault','Rivian','Rolls-Royce',
+            'SEAT','Skoda','Subaru','Suzuki','Tesla','Toyota','Volkswagen','Volvo','Other'
+        ];
+
+        window.vcPopulateBrandFilter = function (vehicles) {
+            var list = document.getElementById('brandCheckboxList');
+            if (!list) return;
+            var prevChecked = {};
+            list.querySelectorAll('input[name="brand"]:checked').forEach(function (cb) { prevChecked[cb.value] = true; });
+            var esc = window.vcEsc || function (s) { return s == null ? '' : String(s); };
+            var VISIBLE_COUNT = 8;
+
+            list.innerHTML = BRAND_LIST.map(function (brand, i) {
+                var key = brand.toLowerCase();
+                var checked = prevChecked[key] ? ' checked' : '';
+                var hidden = (i >= VISIBLE_COUNT && !prevChecked[key]) ? ' vf-brand-hidden' : '';
+                return '<label class="vf-checkbox-row' + hidden + '" data-brand-label="' + esc(key) + '" data-brand-index="' + i + '"><input type="checkbox" name="brand" value="' + esc(key) + '"' + checked + '><span class="vf-custom-checkbox"></span>' + esc(brand) + '</label>';
+            }).join('');
+
+            list.querySelectorAll('input[name="brand"]').forEach(function (cb) {
+                cb.addEventListener('change', function () { applyFilters(); updateClearButtonVisibility(); });
+            });
+
+            var searchInput = document.getElementById('vfBrandSearch');
+            var clearBtn = document.getElementById('vfBrandClear');
+            var toggleBtn = document.getElementById('brandToggle');
+
+            function setClearBtnVisibility() {
+                if (clearBtn) clearBtn.style.display = searchInput.value ? 'flex' : 'none';
+            }
+
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function () {
+                    searchInput.value = '';
+                    searchInput.dispatchEvent(new Event('input'));
+                    searchInput.focus();
+                });
+            }
+
+            var showAll = false;
+            var BRAND_TOGGLE_TEXT = {
+                'en': { see_all: 'See all', show_less: 'Show less' },
+                'ka': { see_all: 'ყველას ჩვენება', show_less: 'ნაკლების ჩვენება' },
+                'ru': { see_all: 'Показать все', show_less: 'Показать меньше' },
+                'he': { see_all: 'הצג הכל', show_less: 'הצג פחות' }
+            };
+            function applyToggleLabel() {
+                if (!toggleBtn) return;
+                var label = toggleBtn.querySelector('span');
+                if (!label) return;
+                var key = showAll ? 'vehicles_page.show_less' : 'vehicles_page.see_all';
+                label.setAttribute('data-i18n', key);
+                var t = (typeof I18n !== 'undefined' && I18n.t) ? I18n.t : function (k) { return k; };
+                var translated = t(key);
+                if (translated !== key) {
+                    label.textContent = translated;
+                } else {
+                    var lang = (typeof I18n !== 'undefined' && I18n.getCurrentLang) ? I18n.getCurrentLang() : 'en';
+                    var map = BRAND_TOGGLE_TEXT[lang] || BRAND_TOGGLE_TEXT['en'];
+                    label.textContent = showAll ? map.show_less : map.see_all;
+                }
+            }
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function () {
+                    showAll = !showAll;
+                    var chevron = toggleBtn.querySelector('.vf-toggle-chevron');
+                    if (chevron) chevron.style.transform = showAll ? 'rotate(180deg)' : '';
+                    applyToggleLabel();
+                    list.querySelectorAll('.vf-checkbox-row').forEach(function (row) {
+                        var index = parseInt(row.getAttribute('data-brand-index'), 10);
+                        var isChecked = row.querySelector('input[name="brand"]').checked;
+                        if (showAll) {
+                            row.classList.remove('vf-brand-hidden');
+                        } else {
+                            if (index >= VISIBLE_COUNT && !isChecked) row.classList.add('vf-brand-hidden');
+                        }
+                    });
+                });
+            }
+
+            if (typeof I18n !== 'undefined' && I18n.onReady) {
+                I18n.onReady(applyToggleLabel);
+            }
+
+            document.addEventListener('languageChanged', function () {
+                applyToggleLabel();
+            });
+
+            if (searchInput && !searchInput._brandFilterBound) {
+                searchInput._brandFilterBound = true;
+                searchInput.addEventListener('input', function () {
+                    var q = this.value.toLowerCase().trim();
+                    var hasQuery = !!q;
+                    setClearBtnVisibility();
+
+                    if (toggleBtn) toggleBtn.style.display = hasQuery ? 'none' : '';
+
+                    var anyVisible = false;
+                    list.querySelectorAll('.vf-checkbox-row').forEach(function (row) {
+                        var label = row.getAttribute('data-brand-label') || '';
+
+                        if (hasQuery) {
+                            var match = label.indexOf(q) !== -1;
+                            row.style.display = match ? '' : 'none';
+                            row.classList.remove('vf-brand-hidden');
+                            if (match) anyVisible = true;
+                        } else {
+                            row.style.display = '';
+                            var index = parseInt(row.getAttribute('data-brand-index'), 10);
+                            var isChecked = row.querySelector('input[name="brand"]').checked;
+                            if (index >= VISIBLE_COUNT && !isChecked && !showAll) row.classList.add('vf-brand-hidden');
+                            else row.classList.remove('vf-brand-hidden');
+                        }
+                    });
+
+                    var noResults = document.getElementById('brandNoResults');
+                    if (hasQuery) {
+                        if (!anyVisible && !noResults) {
+                            list.insertAdjacentHTML('beforeend', '<div class="vf-brand-no-results" id="brandNoResults">No brands found</div>');
+                        } else if (anyVisible && noResults) {
+                            noResults.remove();
+                        }
+                    } else if (noResults) {
+                        noResults.remove();
+                    }
+                });
+            }
+        };
+
         /* Price range slider */
         (function() {
             var rMin = document.getElementById('priceRangeMin');
@@ -1297,6 +1505,8 @@
         var locInput = document.getElementById('pickupLocation');
         var locVal = locInput ? locInput.value.trim() : '';
         if (locVal) apiUrl += '&location=' + encodeURIComponent(locVal);
+        var selectedCountry = localStorage.getItem('selectedCountry') || sessionStorage.getItem('selectedCountry');
+        if (selectedCountry) apiUrl += '&country=' + encodeURIComponent(selectedCountry);
         if (vcSelStart && vcSelEnd) apiUrl += '&pickup_date=' + vcFmt(vcSelStart) + '&dropoff_date=' + vcFmt(vcSelEnd);
         fetch(apiUrl)
         .then(function(res) { return res.json(); })
@@ -1324,6 +1534,18 @@
         var s = String(raw).replace(/_/g, ' ');
         return s.charAt(0).toUpperCase() + s.slice(1);
     }
+
+    // Brand of a vehicle: the partner-set brand, or the first word of the name as a
+    // fallback (e.g. "BMW X5" -> "BMW"). Used for the customer-facing Brand filter.
+    function vcBrandOf(v) {
+        var b = (v && v.brand != null ? String(v.brand) : '').trim();
+        if (!b) {
+            var nm = (v && v.name != null ? String(v.name) : '').trim();
+            b = nm.split(/\s+/)[0] || '';
+        }
+        return b;
+    }
+    window.vcBrandOf = vcBrandOf;
 
     // ---- Admin placement=vehicles ad cards (appended after the grid renders) ----
     var _vcAdsCache = null;
@@ -1382,6 +1604,9 @@
         if (!grid) return;
         grid.innerHTML = '';
 
+        // Rebuild the Brand filter from the brands present in the current result set.
+        if (typeof window.vcPopulateBrandFilter === 'function') window.vcPopulateBrandFilter(vehicles);
+
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
         var user = null;
         try { user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')); } catch(e) {}
@@ -1424,6 +1649,7 @@
                 card.setAttribute('data-interior',  (v.interior_type || 'fabric').toLowerCase());
                 card.setAttribute('data-steering',  (v.steering_side || 'left').toLowerCase());
                 card.setAttribute('data-payment',   (v.payment_method || 'cash').toLowerCase());
+                card.setAttribute('data-brand',     vcBrandOf(v).toLowerCase());
                 card.setAttribute('data-year',      year);
                 card.setAttribute('data-price',     totalPrice);
                 card.setAttribute('data-name',      name);
@@ -1627,9 +1853,107 @@
             if (e.target === this) this.style.display = 'none';
         });
     })();
+
+    // ========================================
+    // COUNTRY SELECTOR
+    // ========================================
+    (function() {
+        var COUNTRIES = [
+            { code: 'georgia', flag: '🇬🇪', label: 'Georgia' },
+            { code: 'armenia', flag: '🇦🇲', label: 'Armenia' },
+            { code: 'turkey', flag: '🇹🇷', label: 'Turkey' },
+            { code: 'uae', flag: '🇦🇪', label: 'United Arab Emirates' },
+            { code: 'usa', flag: '🇺🇸', label: 'United States' }
+        ];
+
+        function getCountryLabel(code) {
+            var c = COUNTRIES.find(function(x) { return x.code === code; });
+            return c ? c.label : (code ? code.charAt(0).toUpperCase() + code.slice(1) : 'Unknown');
+        }
+        function getCountryFlag(code) {
+            var c = COUNTRIES.find(function(x) { return x.code === code; });
+            return c ? c.flag : '🌍';
+        }
+
+        function buildCountryGrid() {
+            var grid = document.getElementById('countryGrid');
+            if (!grid) return;
+            grid.innerHTML = COUNTRIES.map(function(c) {
+                var tLabel = (typeof I18n !== 'undefined' && I18n.t) ? I18n.t('filter_options.country_' + c.code) : null;
+                var label = (tLabel && tLabel !== 'filter_options.country_' + c.code) ? tLabel : c.label;
+                return '<button type="button" class="country-card" data-country="' + c.code + '">'
+                    + '<span class="country-card-flag">' + c.flag + '</span>'
+                    + '<span class="country-card-name">' + label + '</span>'
+                    + '</button>';
+            }).join('');
+            grid.querySelectorAll('.country-card').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var code = this.getAttribute('data-country');
+                    sessionStorage.setItem('selectedCountry', code);
+                    hideCountryModal();
+                    updateCountryButton();
+                    vcLoadVehicles();
+                });
+            });
+        }
+
+        function showCountryModal() {
+            var modal = document.getElementById('countrySelectorModal');
+            if (!modal) return;
+            buildCountryGrid();
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideCountryModal() {
+            var modal = document.getElementById('countrySelectorModal');
+            if (!modal) return;
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        function updateCountryButton() {
+            var code = sessionStorage.getItem('selectedCountry');
+            var flagEl = document.getElementById('vpCountryFlag');
+            var labelEl = document.getElementById('vpCountryLabel');
+            var btn = document.getElementById('vpCountryBtn');
+            if (!code) {
+                if (flagEl) flagEl.textContent = '🌍';
+                if (labelEl) labelEl.textContent = '--';
+                if (btn) btn.style.display = 'none';
+                return;
+            }
+            var tLabel = (typeof I18n !== 'undefined' && I18n.t) ? I18n.t('filter_options.country_' + code) : null;
+            var label = (tLabel && tLabel !== 'filter_options.country_' + code) ? tLabel : getCountryLabel(code);
+            if (flagEl) flagEl.textContent = getCountryFlag(code);
+            if (labelEl) labelEl.textContent = label;
+            if (btn) btn.style.display = 'inline-flex';
+        }
+
+        window.openCountrySelector = function() {
+            showCountryModal();
+        };
+
+        // Check on page load
+        var savedCountry = sessionStorage.getItem('selectedCountry');
+        if (!savedCountry) {
+            showCountryModal();
+        } else {
+            updateCountryButton();
+        }
+
+        // Re-translate labels when language changes
+        document.addEventListener('languageChanged', function() {
+            updateCountryButton();
+            if (document.getElementById('countrySelectorModal') && document.getElementById('countrySelectorModal').style.display !== 'none') {
+                buildCountryGrid();
+            }
+        });
+    })();
     </script>
     <script src="navbar-auth.js?v=4"></script>
     <script src="currency.js?v=4"></script>
 <script src="premium-animations.js?v=2"></script>
+<script src="country-popup.js?v=1"></script>
 </body>
 </html>

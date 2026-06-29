@@ -1,4 +1,10 @@
 {
+    "country_popup": {
+        "button": "Choose Country",
+        "title": "Choose your country",
+        "subtitle": "Where would you like to rent a car?",
+        "soon": "Soon"
+    },
   "nav": {
     "home": "Home",
     "vehicles": "Vehicles",
@@ -47,6 +53,7 @@
   "filters": {
     "title": "Filter Options",
     "category": "Category",
+    "brand": "Brand",
     "price_range": "Price Range",
     "engine": "Engine",
     "gearbox": "Gearbox",
@@ -208,6 +215,11 @@
     "title": "Our Fleet",
     "subtitle": "Browse and book from our curated selection of quality vehicles",
     "search_placeholder": "Search vehicles...",
+    "search_brand": "Search brand...",
+    "see_all": "See all",
+    "show_less": "Show less",
+    "hero_title": "Rent a Car in Georgia <span class=\"vp-header-accent\">Tbilisi, Batumi &amp; Kutaisi</span>",
+    "hero_subtitle": "Compare verified local partners. SUVs, sedans, economy and luxury cars from $25/day with airport pickup.",
     "sort_label": "Sort by",
     "sort_default": "Featured",
     "sort_newest": "Newest",
@@ -229,7 +241,9 @@
     "reset_all": "Reset All Filters",
     "no_vehicles_title": "No vehicles yet",
     "no_vehicles_desc": "Partners can add vehicles from their dashboard",
-    "cars_available": "{{count}} cars available"
+    "cars_available": "{{count}} cars available",
+    "select_country": "Select Country",
+    "select_country_desc": "Choose your location to see available vehicles"
   },
   "filter_options": {
     "economy": "Economy",
@@ -260,7 +274,12 @@
     "check_all": "Check all",
     "interior_type": "Interior Type",
     "steering_side": "Steering Wheel Side",
-    "payment_method": "Payment Method"
+    "payment_method": "Payment Method",
+    "country_georgia": "Georgia",
+    "country_turkey": "Turkey",
+    "country_uae": "United Arab Emirates",
+    "country_armenia": "Armenia",
+    "country_usa": "United States"
   },
   "vehicle_page": {
     "back": "Back to Vehicles",
@@ -302,6 +321,10 @@
     "pickup_date": "Pick-up Date",
     "dropoff_date": "Drop-off Date",
     "pickup_time": "Pick-up Time",
+    "hours_unavailable": "Unavailable",
+    "legend_available": "Available",
+    "legend_blocked": "Unavailable",
+    "legend_partial": "Limited hours",
     "dropoff_time": "Drop-off Time",
     "select_date": "Select date",
     "free_cancel": "Free Cancel",
@@ -781,6 +804,10 @@
     "fees_hint": "By default, your office location is used for free pickup/dropoff.",
     "office_address": "Office Address",
     "airport_fee": "Airport Fee ($)",
+    "airport_fees_title": "Airport pickup fees ($) — leave blank for airports you don't serve",
+    "airport_tbilisi": "Tbilisi Airport ($)",
+    "airport_kutaisi": "Kutaisi Airport ($)",
+    "airport_batumi": "Batumi Airport ($)",
     "delivery_fee": "Delivery Fee ($)",
     "visibility_title": "Visibility & Settings",
     "visible_search": "Visible in Search Results",
@@ -812,7 +839,13 @@
     "avail_available": "Available",
     "avail_blocked": "Blocked",
     "avail_booked": "Booked",
+    "avail_hours_blocked": "Hours blocked",
     "avail_save": "Save Changes",
+    "hours_title": "Block specific hours",
+    "hours_hint": "Block an exact date & time range for this vehicle. A 2-hour buffer is added automatically after the end time so you can receive, inspect and prepare the car.",
+    "hours_from": "From (date & time)",
+    "hours_to": "To (date & time)",
+    "hours_add": "Block",
     "add_new_vehicle": "Add New Vehicle",
     "wz_car_details": "Car Details",
     "wz_features": "Features",

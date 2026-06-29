@@ -7,6 +7,7 @@
     var vehicleId = null;
     var vehicleData = null;
     var blockedDates = {};
+    var vdBlockIntervals = []; // hour-level blocks (buffer already applied): [{startMs, endMs}]
     var vdPickupDate = null;
     var vdDropoffDate = null;
     var vdCalTarget = null; // 'pickup' or 'dropoff'
@@ -51,7 +52,56 @@
             vehicleData = fetchedData;
             renderPage(vehicleData);
             loadBlockedDates();
+            loadTimeBlocks();
         }
+    }
+
+    // Naive local 'YYYY-MM-DDTHH:MM' -> ms (treated as UTC for safe arithmetic)
+    function vdLocalMs(s) {
+        var m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+        return m ? Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) : null;
+    }
+    // Load hour-level blocks (buffer already applied server-side via effective_end)
+    function loadTimeBlocks() {
+        fetch('/api/availability/' + vehicleId + '/time-blocks')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            vdBlockIntervals = (data.blocks || []).map(function (b) {
+                return { startMs: vdLocalMs(b.effective_start), endMs: vdLocalMs(b.effective_end) };
+            }).filter(function (b) { return b.startMs != null && b.endMs != null; });
+            if (vdCalDisplay) renderCalendar();
+            updateDateDisplay();
+        })
+        .catch(function () {});
+    }
+    // Is the clock hour `hour` on date `dateStr` (YYYY-MM-DD) inside any block?
+    function vdHourBlocked(dateStr, hour) {
+        var m = String(dateStr || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (!m) return false;
+        var slot = Date.UTC(+m[1], +m[2] - 1, +m[3], hour, 0);
+        for (var i = 0; i < vdBlockIntervals.length; i++) {
+            if (slot >= vdBlockIntervals[i].startMs && slot < vdBlockIntervals[i].endMs) return true;
+        }
+        return false;
+    }
+    // Every bookable hour (0..23) on this date blocked?
+    function vdDateFullyBlocked(dateStr) {
+        if (!vdBlockIntervals.length) return false;
+        for (var h = 0; h < 24; h++) { if (!vdHourBlocked(dateStr, h)) return false; }
+        return true;
+    }
+    // Does this date intersect any hour block (incl. buffer)? Used to flag
+    // partially-blocked days so the customer sees them like the partner's yellow.
+    function vdDateHasBlock(dateStr) {
+        if (!vdBlockIntervals.length) return false;
+        var m = String(dateStr || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (!m) return false;
+        var dayStart = Date.UTC(+m[1], +m[2] - 1, +m[3], 0, 0);
+        var dayEnd = dayStart + 24 * 3600000;
+        for (var i = 0; i < vdBlockIntervals.length; i++) {
+            if (vdBlockIntervals[i].startMs < dayEnd && vdBlockIntervals[i].endMs > dayStart) return true;
+        }
+        return false;
     }
 
     fetch('/api/vehicles/' + vehicleId)
@@ -113,7 +163,7 @@
         cur.setDate(cur.getDate() + 1);
         while (cur < endDate) {
             var ds = vdFmt(cur);
-            if (blockedDates[ds]) return ds;
+            if (blockedDates[ds] || vdDateFullyBlocked(ds)) return ds;
             cur.setDate(cur.getDate() + 1);
         }
         return null;
@@ -432,9 +482,10 @@
 
             if (date < today) {
                 dayEl.classList.add('past');
-            } else if (blockedDates[dateStr]) {
+            } else if (blockedDates[dateStr] || vdDateFullyBlocked(dateStr)) {
                 dayEl.classList.add('blocked');
             } else {
+                if (vdDateHasBlock(dateStr)) dayEl.classList.add('partial');
                 if (activeDate && vdFmt(activeDate) === dateStr) dayEl.classList.add('selected');
                 if (date.toDateString() === today.toDateString()) dayEl.classList.add('today');
 
@@ -505,6 +556,65 @@
         if (e.target === this) this.style.display = 'none';
     });
 
+    // Group ['00:00','01:00',...,'11:00'] -> '00:00–12:00'
+    function vdSummariseHours(list) {
+        var hours = list.map(function (v) { return parseInt(v.split(':')[0], 10); }).sort(function (a, b) { return a - b; });
+        var ranges = [], s = null, prev = null;
+        hours.forEach(function (h) {
+            if (s === null) { s = h; prev = h; }
+            else if (h === prev + 1) { prev = h; }
+            else { ranges.push([s, prev]); s = h; prev = h; }
+        });
+        if (s !== null) ranges.push([s, prev]);
+        function p(n) { return String(n).padStart(2, '0'); }
+        return ranges.map(function (r) {
+            var endH = r[1] + 1;
+            return p(r[0]) + ':00–' + (endH >= 24 ? '24:00' : p(endH) + ':00');
+        }).join(', ');
+    }
+
+    // Disable blocked hour options on the time selects for the chosen dates, and
+    // show a small note of the unavailable hours. Called from updateDateDisplay.
+    function vdApplyTimeBlocks() {
+        applyForSelect('vdPickupTime', vdPickupDate, 'vdPickupTimeNote');
+        applyForSelect('vdDropoffTime', vdDropoffDate, 'vdDropoffTimeNote');
+
+        function applyForSelect(selId, dateObj, noteId) {
+            var sel = document.getElementById(selId);
+            if (!sel) return;
+            var dateStr = dateObj ? vdFmt(dateObj) : null;
+            var blockedList = [], availableList = [], firstEnabled = null;
+            for (var i = 0; i < sel.options.length; i++) {
+                var opt = sel.options[i];
+                var hour = parseInt(opt.value.split(':')[0], 10);
+                var blocked = dateStr ? vdHourBlocked(dateStr, hour) : false;
+                opt.disabled = blocked;
+                // Draw a strikethrough line through blocked hours (combining overlay
+                // U+0336 — renders reliably in native <option>s where CSS does not).
+                opt.textContent = blocked ? opt.value.split('').map(function (c) { return c + '̶'; }).join('') : opt.value;
+                if (blocked) blockedList.push(opt.value);
+                else { availableList.push(opt.value); if (firstEnabled === null) firstEnabled = opt.value; }
+            }
+            var curOpt = sel.options[sel.selectedIndex];
+            if (curOpt && curOpt.disabled && firstEnabled !== null) sel.value = firstEnabled;
+
+            var note = document.getElementById(noteId);
+            if (!note) {
+                note = document.createElement('div');
+                note.id = noteId;
+                note.style.cssText = 'font-size:11px;color:#ef4444;margin-top:4px;line-height:1.4;';
+                sel.parentNode.appendChild(note);
+            }
+            if (dateStr && blockedList.length) {
+                note.innerHTML = '<span style="color:#ef4444;">' + vt('vehicle_page.hours_unavailable', 'Unavailable') + ': ' + vdSummariseHours(blockedList) + '</span>'
+                    + (availableList.length ? '<br><span style="color:#16a34a;">' + vt('vehicle_page.legend_available', 'Available') + ': ' + vdSummariseHours(availableList) + '</span>' : '');
+                note.style.display = '';
+            } else {
+                note.style.display = 'none';
+            }
+        }
+    }
+
     function updateDateDisplay() {
         var pickupEl = document.getElementById('vdPickupVal');
         var dropoffEl = document.getElementById('vdDropoffVal');
@@ -525,6 +635,9 @@
             dropoffEl.textContent = 'Select date';
             document.getElementById('vdDropoffBox').classList.remove('active');
         }
+
+        // Disable hours blocked by the partner (incl. buffer) for the chosen dates
+        vdApplyTimeBlocks();
 
         var clearBtn = document.getElementById('vdClearBtn');
         if (vdPickupDate && vdDropoffDate && vehicleData) {

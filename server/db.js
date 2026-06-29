@@ -221,6 +221,22 @@ async function initDB() {
         )
     `);
 
+    // Hour-level vehicle blocks — partner blocks a specific date+time range. A buffer
+    // (default 2h) is added after end_ts automatically when computing customer-facing
+    // availability, giving the partner time to receive/inspect/clean the vehicle.
+    // Times are stored as naive local 'YYYY-MM-DD HH:MM' strings (Georgia local time).
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS vehicle_time_blocks (
+            id SERIAL PRIMARY KEY,
+            vehicle_id INTEGER NOT NULL,
+            start_ts TEXT NOT NULL,
+            end_ts TEXT NOT NULL,
+            buffer_minutes INTEGER DEFAULT 120,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE
+        )
+    `);
+
     await pool.query(`
         CREATE TABLE IF NOT EXISTS password_resets (
             id SERIAL PRIMARY KEY,

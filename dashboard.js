@@ -31,12 +31,15 @@
         if (verified) {
             statusEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(34,197,94,0.15);color:#22c55e;border-radius:20px;font-size:12px;font-weight:600;margin-top:6px;">'
                 + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>'
-                + (typeof I18n !== 'undefined' ? I18n.t('partner_dashboard.verified') : 'Verified') + '</span>';
+                + '<span data-i18n="partner_dashboard.verified">Verified</span></span>';
         } else {
             statusEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(249,115,22,0.15);color:#f97316;border-radius:20px;font-size:12px;font-weight:600;margin-top:6px;">'
                 + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
-                + (typeof I18n !== 'undefined' ? I18n.t('partner_dashboard.not_approved') : 'Not Approved Yet') + '</span>';
+                + '<span data-i18n="partner_dashboard.not_approved">Not Approved Yet</span></span>';
         }
+        // Translate now with whatever language is loaded; the global languageChanged
+        // listener re-translates these data-i18n spans if the file loads/changes later.
+        if (typeof I18n !== 'undefined' && I18n.translatePage) I18n.translatePage(statusEl);
     }
 
     // Show restriction banner for unverified partners
@@ -1375,7 +1378,13 @@
             pickup_fees_enabled: getChecked('vPickupFeesEnabled'),
             pickup_fees: {
                 office_address: getVal('locOfficeAddress').trim(),
-                airport_fee: getFloat('locAirportPrice'),
+                // Per-airport fees — kept as raw strings so a blank means "not offered"
+                // (vs. 0 = offered for free). Any airport left blank is hidden at checkout.
+                airport_fees: {
+                    tbilisi: getVal('locAirportTbilisi').trim(),
+                    kutaisi: getVal('locAirportKutaisi').trim(),
+                    batumi: getVal('locAirportBatumi').trim()
+                },
                 delivery_fee: getFloat('locDeliveryPrice')
             },
             custom_pricing_enabled: getChecked('vCustomPricingEnabled'),
@@ -1721,7 +1730,12 @@
             // Pickup fees
             var pf = (typeof v.pickup_fees === 'string') ? JSON.parse(v.pickup_fees || '{}') : (v.pickup_fees || {});
             setVal('locOfficeAddress', pf.office_address || '');
-            setVal('locAirportPrice', pf.airport_fee || '');
+            var af = pf.airport_fees || {};
+            // Backward compat: old vehicles stored a single airport_fee — map it to Tbilisi.
+            var tbil = (af.tbilisi !== undefined && af.tbilisi !== '') ? af.tbilisi : (pf.airport_fee != null ? pf.airport_fee : '');
+            setVal('locAirportTbilisi', tbil === 0 ? '0' : (tbil || ''));
+            setVal('locAirportKutaisi', (af.kutaisi === 0 ? '0' : (af.kutaisi || '')));
+            setVal('locAirportBatumi', (af.batumi === 0 ? '0' : (af.batumi || '')));
             setVal('locDeliveryPrice', pf.delivery_fee || '');
 
             // Show/hide pickup fees container
@@ -1894,6 +1908,33 @@
     var currentMonth = new Date();
     var availabilityData = {};
     var changedDates = new Set();
+    var partnerBlockIntervals = []; // hour-level blocks (buffer applied) as [{startMs, endMs}]
+
+    function vdPopulateHourSelects() {
+        ['blockStartHour', 'blockEndHour'].forEach(function (id) {
+            var sel = document.getElementById(id);
+            if (!sel || sel.options.length) return; // populate once
+            for (var h = 0; h < 24; h++) {
+                var v = String(h).padStart(2, '0') + ':00';
+                var o = document.createElement('option');
+                o.value = v; o.textContent = v;
+                sel.appendChild(o);
+            }
+        });
+        var sh = document.getElementById('blockStartHour'); if (sh) sh.value = '10:00';
+        var eh = document.getElementById('blockEndHour'); if (eh) eh.value = '10:00';
+    }
+    // Does date (YYYY-MM-DD) intersect any hour block (incl. buffer)?
+    function dashDateHasBlock(dateStr) {
+        if (!partnerBlockIntervals.length) return false;
+        var m = String(dateStr).match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (!m) return false;
+        var dayStart = Date.UTC(+m[1], +m[2] - 1, +m[3], 0, 0);
+        var dayEnd = dayStart + 24 * 3600000;
+        return partnerBlockIntervals.some(function (b) {
+            return b.startMs < dayEnd && b.endMs > dayStart;
+        });
+    }
 
     window.openAvailabilityCalendar = function (vehicleId) {
         currentVehicleId = vehicleId;
@@ -1903,8 +1944,13 @@
         
         var modal = document.getElementById('availabilityModal');
         modal.style.display = 'flex';
-        
+
         loadAvailability(); // renders after data loads
+        vdPopulateHourSelects();
+        if (typeof loadTimeBlocks === 'function') loadTimeBlocks();
+        var bsd = document.getElementById('blockStartDate'), bed = document.getElementById('blockEndDate');
+        if (bsd) bsd.value = ''; if (bed) bed.value = '';
+        var tbErr = document.getElementById('timeBlockError'); if (tbErr) tbErr.style.display = 'none';
     };
 
     window.closeAvailabilityCalendar = function () {
@@ -1983,7 +2029,8 @@
             if (isPast) {
                 html += '<div class="availability-day past" data-date="' + dateStr + '">' + day + '</div>';
             } else {
-                html += '<div class="availability-day ' + statusClass + '" data-date="' + dateStr + '" onclick="toggleDate(\'' + dateStr + '\')">' + day + '</div>';
+                var hb = (status !== 'blocked' && status !== 'booked' && dashDateHasBlock(dateStr)) ? ' hours-blocked' : '';
+                html += '<div class="availability-day ' + statusClass + hb + '" data-date="' + dateStr + '" onclick="toggleDate(\'' + dateStr + '\')">' + day + '</div>';
             }
         }
         
@@ -2055,6 +2102,110 @@
             var btn = document.getElementById('availabilitySaveBtn');
             if (btn) { btn.textContent = 'Error!'; btn.style.background = '#ef4444'; setTimeout(function(){ btn.textContent = 'Save'; btn.style.background = ''; }, 2000); }
         });
+    };
+
+    // ========================================
+    // HOUR-LEVEL TIME BLOCKS (within the availability modal)
+    // ========================================
+    function tbMs(ts) {
+        var m = String(ts || '').match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+        return m ? Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) : null;
+    }
+    function tbFmt(ts) {
+        // 'YYYY-MM-DDTHH:MM' -> 'Jun 25, 10:00'
+        var m = String(ts || '').match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+        if (!m) return ts || '';
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return months[parseInt(m[2], 10) - 1] + ' ' + parseInt(m[3], 10) + ', ' + m[4] + ':' + m[5];
+    }
+    function tbAddMinutes(ts, mins) {
+        var m = String(ts || '').match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+        if (!m) return ts;
+        var ms = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) + mins * 60000;
+        var d = new Date(ms);
+        function p(n) { return String(n).padStart(2, '0'); }
+        return d.getUTCFullYear() + '-' + p(d.getUTCMonth() + 1) + '-' + p(d.getUTCDate()) + 'T' + p(d.getUTCHours()) + ':' + p(d.getUTCMinutes());
+    }
+
+    window.loadTimeBlocks = function () {
+        if (!currentVehicleId) return;
+        var list = document.getElementById('timeBlocksList');
+        fetch('/api/availability/' + currentVehicleId + '/time-blocks')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            var blocks = data.blocks || [];
+            // Store effective intervals so the calendar can flag affected dates
+            partnerBlockIntervals = blocks.map(function (b) {
+                return { startMs: tbMs(b.effective_start), endMs: tbMs(b.effective_end) };
+            }).filter(function (b) { return b.startMs != null && b.endMs != null; });
+            renderCalendar();
+            if (!list) return;
+            if (!blocks.length) {
+                list.innerHTML = '<p style="font-size:12px;color:#94a3b8;margin:0;">No hour blocks yet.</p>';
+                return;
+            }
+            list.innerHTML = blocks.map(function (b) {
+                var buf = (b.buffer_minutes == null ? 120 : b.buffer_minutes);
+                var bufLabel = buf >= 60 ? (buf / 60) + 'h' : buf + 'm';
+                return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:6px;background:#f8fafc;">'
+                    + '<div style="font-size:13px;color:#334155;">'
+                    + '<b>' + tbFmt(b.start) + '</b> &rarr; <b>' + tbFmt(b.end) + '</b>'
+                    + '<span style="color:#94a3b8;"> (+' + bufLabel + ' buffer &rarr; ' + tbFmt(b.effective_end) + ')</span>'
+                    + '</div>'
+                    + '<button type="button" onclick="deleteTimeBlock(' + b.id + ')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:13px;font-weight:600;">Remove</button>'
+                    + '</div>';
+            }).join('');
+        })
+        .catch(function (err) { console.error('Load time-blocks error:', err); });
+    };
+
+    window.addTimeBlock = function () {
+        if (!currentVehicleId) return;
+        var sDate = (document.getElementById('blockStartDate') || {}).value;
+        var sHour = (document.getElementById('blockStartHour') || {}).value;
+        var eDate = (document.getElementById('blockEndDate') || {}).value;
+        var eHour = (document.getElementById('blockEndHour') || {}).value;
+        var errEl = document.getElementById('timeBlockError');
+        function showErr(msg) { if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; } }
+        if (errEl) errEl.style.display = 'none';
+        if (!sDate || !eDate) { showErr('Pick both a start and end date.'); return; }
+        var start = sDate + 'T' + (sHour || '00:00');
+        var end = eDate + 'T' + (eHour || '00:00');
+        if (end <= start) { showErr('End must be after start.'); return; }
+
+        // Guard against rapid re-clicks creating duplicate blocks while a request is
+        // in flight. (The server is also idempotent for identical blocks.)
+        var btn = document.querySelector('.availability-hours button[onclick*="addTimeBlock"]');
+        if (btn) { if (btn.getAttribute('data-busy') === '1') return; btn.setAttribute('data-busy', '1'); btn.disabled = true; }
+        function release() { if (btn) { btn.removeAttribute('data-busy'); btn.disabled = false; } }
+
+        fetch('/api/availability/' + currentVehicleId + '/time-blocks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ start: start, end: end })
+        })
+        // Tolerate a non-JSON body (e.g. a proxy/timeout HTML page) so it doesn't get
+        // mis-reported as a network error — fall back to an empty object.
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, status: r.status, j: j }; }); })
+        .then(function (res) {
+            // 2xx (incl. 200 "already exists") = success; clear inputs and refresh.
+            if (!res.ok) { showErr((res.j && res.j.error) || ('Could not save block (error ' + res.status + ').')); return; }
+            var sd = document.getElementById('blockStartDate'); if (sd) sd.value = '';
+            var ed = document.getElementById('blockEndDate'); if (ed) ed.value = '';
+            loadTimeBlocks();
+        })
+        .catch(function (err) { console.error('Add time-block error:', err); showErr('Network error. Try again.'); })
+        .then(release, release); // finally: re-enable the button
+    };
+
+    window.deleteTimeBlock = function (id) {
+        if (!currentVehicleId || !id) return;
+        fetch('/api/availability/' + currentVehicleId + '/time-blocks/' + id, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(function () { loadTimeBlocks(); })
+        .catch(function (err) { console.error('Delete time-block error:', err); });
     };
 
     // ========================================
