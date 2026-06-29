@@ -208,7 +208,7 @@
             var wrap=document.getElementById('egAds');
             wrap.innerHTML = ads.map(function(ad){
                 var cover = ad.cover_url ? '<div class="eg-ad__cover" style="background-image:url('+esc(ad.cover_url)+')"></div>' : '';
-                return '<a class="eg-ad" href="'+esc(ad.target_link||'#')+'" target="_blank" rel="noopener sponsored" onclick="(function(){})();">'
+                return '<a class="eg-ad" href="'+esc(ad.target_link||'#')+'" target="_blank" rel="noopener" onclick="(function(){})();">'
                     + cover
                     + '<div class="eg-ad__body"><span class="eg-ad__badge">'+esc(adLoc(ad,'title')?'Featured':'Featured')+'</span>'
                     + '<h4>'+esc(adLoc(ad,'title'))+'</h4>'
