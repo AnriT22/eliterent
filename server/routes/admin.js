@@ -1368,6 +1368,15 @@ router.post('/payout-requests/:id/process', authenticateToken, requireRole('admi
             return res.status(400).json({ error: 'Request already processed' });
         }
 
+        // Rejecting a pending request must refund the amount that was deducted from
+        // the partner's referral balance when they submitted it.
+        if (action === 'reject' && row.status === 'pending') {
+            await execute(
+                "UPDATE partner_profiles SET referral_balance = referral_balance + $1 WHERE user_id = $2",
+                [parseFloat(row.amount) || 0, row.partner_user_id],
+            );
+        }
+
         await execute(
             "UPDATE partner_payout_requests SET status = $1, processed_at = CURRENT_TIMESTAMP WHERE id = $2",
             [status, id],
