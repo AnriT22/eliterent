@@ -365,6 +365,11 @@ router.put('/users/:id/reject', async (req, res) => {
         }
         await execute("UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE (guest_id = $1 OR partner_id = $1) AND status IN ('pending', 'accepted', 'pending_verification', 'cancel_requested')", [userId]);
 
+        // Clean up referral data before deleting user (FK constraints)
+        await execute('DELETE FROM partner_referral_commissions WHERE referrer_user_id = $1 OR referred_user_id = $1', [userId]);
+        await execute('DELETE FROM partner_payout_requests WHERE partner_user_id = $1', [userId]);
+        await execute('UPDATE partner_profiles SET referred_by_user_id = NULL WHERE referred_by_user_id = $1', [userId]);
+
         if (user.role === 'partner') {
             await execute('DELETE FROM partner_profiles WHERE user_id = $1', [userId]);
             await execute('DELETE FROM vehicles WHERE partner_id = $1', [userId]);
@@ -402,6 +407,12 @@ router.delete('/users/:id', async (req, res) => {
             await unblockDatesForBooking(activeBookings[i].vehicle_id, activeBookings[i].pickup_date, activeBookings[i].dropoff_date);
         }
         await execute("UPDATE bookings SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE (guest_id = $1 OR partner_id = $1) AND status IN ('pending', 'accepted', 'pending_verification', 'cancel_requested')", [userId]);
+
+        // Clean up referral data before deleting user (FK constraints)
+        await execute('DELETE FROM partner_referral_commissions WHERE referrer_user_id = $1 OR referred_user_id = $1', [userId]);
+        await execute('DELETE FROM partner_payout_requests WHERE partner_user_id = $1', [userId]);
+        // Remove this user as a referrer from other partner profiles
+        await execute('UPDATE partner_profiles SET referred_by_user_id = NULL WHERE referred_by_user_id = $1', [userId]);
 
         if (user.role === 'partner') {
             await execute('DELETE FROM partner_profiles WHERE user_id = $1', [userId]);
@@ -1271,6 +1282,100 @@ router.put('/change-password', async (req, res) => {
     } catch (err) {
         console.error('Admin change password error:', err);
         res.status(500).json({ error: 'Failed to change password' });
+    }
+});
+
+// GET /api/admin/referrals — list all referral relationships
+router.get('/referrals', authenticateToken, requireRole('admin'), async (req, res) => {
+    try {
+        var sql = `SELECT u.id as partner_id, u.full_name, u.email, pp.company_name, pp.referral_code, pp.referral_balance,
+                          r.full_name as referrer_name, r.email as referrer_email, rp.company_name as referrer_company, rp.referral_code as referrer_code,
+                          (SELECT COUNT(*) FROM vehicles v WHERE v.partner_id = u.id AND v.status = 'active') as active_cars
+                   FROM partner_profiles pp
+                   JOIN users u ON pp.user_id = u.id
+                   LEFT JOIN users r ON pp.referred_by_user_id = r.id
+                   LEFT JOIN partner_profiles rp ON rp.user_id = r.id
+                   WHERE pp.referred_by_user_id IS NOT NULL`;
+        var rows = await queryAll(sql);
+        res.json({ referrals: rows });
+    } catch (err) {
+        console.error('Admin referrals list error:', err);
+        res.status(500).json({ error: 'Failed to list referrals' });
+    }
+});
+
+// GET /api/admin/referral-commissions — list all commissions
+router.get('/referral-commissions', authenticateToken, requireRole('admin'), async (req, res) => {
+    try {
+        var status = req.query.status || 'all';
+        var sql = `SELECT prc.*,
+                          pf.full_name as referrer_name, pf.email as referrer_email,
+                          pt.full_name as referred_name, pt.email as referred_email
+                   FROM partner_referral_commissions prc
+                   JOIN users pf ON prc.referrer_user_id = pf.id
+                   JOIN users pt ON prc.referred_user_id = pt.id
+                   WHERE 1=1`;
+        var params = [];
+        if (status !== 'all') {
+            sql += ' AND prc.status = $1';
+            params.push(status);
+        }
+        sql += ' ORDER BY prc.created_at DESC';
+        var rows = await queryAll(sql, params);
+        res.json({ commissions: rows });
+    } catch (err) {
+        console.error('Admin referral commissions error:', err);
+        res.status(500).json({ error: 'Failed to list commissions' });
+    }
+});
+
+// GET /api/admin/payout-requests — list all payout requests
+router.get('/payout-requests', authenticateToken, requireRole('admin'), async (req, res) => {
+    try {
+        var status = req.query.status || 'pending';
+        var sql = `SELECT ppr.*,
+                          u.full_name, u.email, pp.company_name, pp.referral_payout_method, pp.referral_payout_details
+                   FROM partner_payout_requests ppr
+                   JOIN users u ON ppr.partner_user_id = u.id
+                   LEFT JOIN partner_profiles pp ON pp.user_id = u.id
+                   WHERE 1=1`;
+        var params = [];
+        if (status !== 'all') {
+            sql += ' AND ppr.status = $1';
+            params.push(status);
+        }
+        sql += ' ORDER BY ppr.created_at DESC';
+        var rows = await queryAll(sql, params);
+        res.json({ requests: rows });
+    } catch (err) {
+        console.error('Admin payout requests error:', err);
+        res.status(500).json({ error: 'Failed to list payout requests' });
+    }
+});
+
+// POST /api/admin/payout-requests/:id/process — approve/reject/pay a payout request
+router.post('/payout-requests/:id/process', authenticateToken, requireRole('admin'), async (req, res) => {
+    try {
+        var id = parseInt(req.params.id, 10);
+        var action = req.body.action; // approve, reject, paid
+        if (!['approve', 'reject', 'paid'].includes(action)) {
+            return res.status(400).json({ error: 'Invalid action' });
+        }
+        var status = action === 'approve' ? 'approved' : (action === 'reject' ? 'rejected' : 'paid');
+        var row = await queryOne('SELECT * FROM partner_payout_requests WHERE id = $1', [id]);
+        if (!row) return res.status(404).json({ error: 'Payout request not found' });
+        if (row.status !== 'pending' && action !== 'paid') {
+            return res.status(400).json({ error: 'Request already processed' });
+        }
+
+        await execute(
+            "UPDATE partner_payout_requests SET status = $1, processed_at = CURRENT_TIMESTAMP WHERE id = $2",
+            [status, id],
+        );
+        res.json({ message: 'Payout request ' + status });
+    } catch (err) {
+        console.error('Admin payout process error:', err);
+        res.status(500).json({ error: 'Failed to process payout request' });
     }
 });
 

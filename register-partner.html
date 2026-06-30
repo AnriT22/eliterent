@@ -95,7 +95,12 @@
                     <div class="progress-line"></div>
                     <div class="progress-step" data-step="3">
                         <span class="progress-number">3</span>
-                        <span class="progress-label">Verify</span>
+                        <span class="progress-label" data-i18n="partner_register.step_referral">Referral</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="4">
+                        <span class="progress-number">4</span>
+                        <span class="progress-label" data-i18n="partner_register.step_verify">Verify</span>
                     </div>
                 </div>
 
@@ -242,6 +247,30 @@
                     </div>
                 </form>
 
+                <!-- REFERRAL STEP: Who invited you? -->
+                <div id="pReferralStep" style="display:none; padding:8px 0;">
+                    <div class="choice-step-badge">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        Referral Program
+                    </div>
+                    <div class="choice-step-title">Were you invited by a partner?</div>
+                    <p class="choice-card-desc" style="text-align:center; margin-bottom:16px;">Enter their referral code to link your account. If you don't have one, you can skip.</p>
+
+                    <div class="choice-card choice-card-secondary" style="max-width:360px; margin:0 auto;">
+                        <div class="choice-card-header">
+                            <div class="choice-card-icon">🎁</div>
+                            <h3>Partner Referral Code</h3>
+                        </div>
+                        <div class="choice-code-wrap">
+                            <input type="text" id="pReferralCodeInput" class="form-input" placeholder="ELITE0000" autocomplete="off" maxlength="20" style="text-transform:uppercase;letter-spacing:2px;text-align:center;">
+                        </div>
+                        <button type="button" class="btn btn-primary btn-full" id="pReferralApplyBtn">Apply Code</button>
+                        <button type="button" class="btn btn-secondary btn-full" id="pReferralSkipBtn" style="margin-top:8px; opacity:.8;">I don't have a code</button>
+                        <div id="pReferralError" class="form-error" style="text-align:center;margin-top:8px;display:none;"></div>
+                        <p class="choice-card-note">Your own referral code will be generated automatically.</p>
+                    </div>
+                </div>
+
                 <!-- CHOICE STEP: Pay $4.99 OR Enter Invite Code -->
                 <div id="pChoiceStep" style="display:none; padding:8px 0;">
                     <div class="choice-step-badge">
@@ -257,6 +286,9 @@
                         <span class="ces-badge" id="choiceEmailBadge">Checking…</span>
                     </div>
 
+                    <div class="choice-step-back" style="text-align:center;margin-bottom:16px;">
+                        <button type="button" class="btn btn-secondary" id="choiceBackToReferralBtn" style="min-width:200px;">← Back to Referral Step</button>
+                    </div>
                     <div class="choice-cards">
                         <!-- Pay $4.99 Card -->
                         <div class="choice-card choice-card-primary" id="choicePayCard">

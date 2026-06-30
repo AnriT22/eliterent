@@ -2558,6 +2558,143 @@ select.db-input option:checked {
     min-height: 48px;
 }
 
+/* ========================================
+   REFERRAL PROGRAM STYLES
+   ======================================== */
+
+.db-referral-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.db-referral-card {
+    background: #1A1814;
+    border: 1px solid #2A2520;
+    border-radius: 14px;
+    padding: 18px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.db-referral-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+}
+
+.db-referral-card.highlight {
+    border-color: #D4AF37;
+    background: linear-gradient(135deg, rgba(212,175,55,0.08) 0%, #1A1814 100%);
+}
+
+.drc-label {
+    font-size: 12px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.drc-code-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.drc-code {
+    font-size: 22px;
+    font-weight: 800;
+    color: #D4AF37;
+    letter-spacing: 2px;
+    font-family: monospace;
+}
+
+.drc-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #F0ECE2;
+}
+
+.db-referral-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.db-referral-earnings {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.db-referral-stat {
+    background: #1A1814;
+    border: 1px solid #2A2520;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+}
+
+.db-referral-stat .label {
+    display: block;
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 6px;
+}
+
+.db-referral-stat .value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #F0ECE2;
+}
+
+.db-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #F0ECE2;
+    margin: 24px 0 12px;
+}
+
+.db-referral-table-wrapper {
+    overflow-x: auto;
+}
+
+.db-referral-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.db-referral-table th,
+.db-referral-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #2A2520;
+}
+
+.db-referral-table th {
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.db-referral-table td {
+    color: #EAEAEA;
+}
+
+@media (max-width: 768px) {
+    .db-referral-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .db-referral-earnings {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 480px) {
     .vip-modal {
         max-width: 100%;

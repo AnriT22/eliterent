@@ -11,14 +11,25 @@
     var nextBtn = document.getElementById('pNextStep');
     var prevBtn = document.getElementById('pPrevStep');
 
-    // ---- GOOGLE OAUTH: skip straight to choice step ----
+    // ---- GOOGLE OAUTH / post-phone flow: skip straight to referral, choice, or payment step ----
     var urlParams = new URLSearchParams(window.location.search);
     var isGoogleChoice = urlParams.get('step') === 'choice';
-    if (isGoogleChoice) {
-        // User already registered via Google OAuth — just show the choice step
+    var isGoogleReferral = urlParams.get('step') === 'referral';
+    var isGooglePayment = urlParams.get('step') === 'payment';
+    if (isGoogleReferral || isGoogleChoice || isGooglePayment) {
+        // User already registered via Google OAuth or came from phone verification — show the appropriate step
         var storedUser = null;
         try { storedUser = JSON.parse(localStorage.getItem('user')); } catch (e) {}
-        enterChoiceStep({ user: storedUser || {} });
+        var googleData = { user: storedUser || {} };
+        if (isGoogleReferral) {
+            googleData.needsReferralSelection = true;
+            googleData.needsPathSelection = true;
+            enterReferralStep(googleData);
+        } else if (isGooglePayment) {
+            enterPaymentStep();
+        } else {
+            enterChoiceStep(googleData);
+        }
     }
 
     nextBtn.addEventListener('click', function () {
@@ -63,7 +74,15 @@
         initPhoneFormat(phoneInput, 'pPhoneCode');
     }
 
-    // Force uppercase on choice-step invite code input
+    // Force uppercase on referral code and invite code inputs
+    var referralInput = document.getElementById('pReferralCodeInput');
+    if (referralInput) {
+        referralInput.addEventListener('input', function () {
+            var pos = this.selectionStart;
+            this.value = this.value.toUpperCase();
+            this.setSelectionRange(pos, pos);
+        });
+    }
     var choiceInviteInput = document.getElementById('pChoiceInviteCode');
     if (choiceInviteInput) {
         choiceInviteInput.addEventListener('input', function () {
@@ -86,6 +105,29 @@
         choiceApplyBtnEl.addEventListener('click', function (e) {
             e.preventDefault();
             chooseInvitePath();
+        });
+    }
+
+    // Bind referral-step buttons
+    var referralApplyBtn = document.getElementById('pReferralApplyBtn');
+    if (referralApplyBtn) {
+        referralApplyBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            applyReferralCode();
+        });
+    }
+    var referralSkipBtn = document.getElementById('pReferralSkipBtn');
+    if (referralSkipBtn) {
+        referralSkipBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            skipReferral();
+        });
+    }
+    var choiceBackToReferralBtn = document.getElementById('choiceBackToReferralBtn');
+    if (choiceBackToReferralBtn) {
+        choiceBackToReferralBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            backToReferralStep();
         });
     }
 
@@ -195,7 +237,11 @@
                 localStorage.setItem('isLoggedIn', 'true');
             }
 
-            // New flow: show choice step (Pay $4.99 vs Invite Code)
+            // New flow: show referral step first, then choice step (Pay $4.99 vs Invite Code)
+            if (data.needsReferralSelection) {
+                enterReferralStep(data);
+                return;
+            }
             if (data.needsPathSelection) {
                 enterChoiceStep(data);
                 return;
@@ -230,10 +276,10 @@
         if (googleBtn) googleBtn.style.display = 'none';
         if (authFooter) authFooter.style.display = 'none';
 
-        // Mark step 3 as active in progress bar
+        // Mark step 4 as active (Account/Company completed, Referral completed)
         document.querySelectorAll('.registration-progress .progress-step').forEach(function (step, i) {
             step.classList.remove('active', 'completed');
-            if (i < 2) step.classList.add('completed');
+            if (i < 3) step.classList.add('completed');
             else step.classList.add('active');
         });
 
@@ -270,6 +316,87 @@
     }
     window.choosePayPath = choosePayPath;
 
+    function backToReferralStep() {
+        document.getElementById('pChoiceStep').style.display = 'none';
+        if (storedReferralData) {
+            enterReferralStep(storedReferralData);
+        }
+    }
+    window.backToReferralStep = backToReferralStep;
+
+    /* ---- REFERRAL STEP: Apply partner referral code ---- */
+    var storedReferralData = null;
+
+    function enterReferralStep(data) {
+        storedReferralData = data;
+        form.style.display = 'none';
+        document.getElementById('pFormActions').style.display = 'none';
+        var authDivider = document.getElementById('pAuthDivider');
+        var googleBtn = document.getElementById('googlePartnerBtn');
+        var authFooter = document.querySelector('.auth-footer');
+        if (authDivider) authDivider.style.display = 'none';
+        if (googleBtn) googleBtn.style.display = 'none';
+        if (authFooter) authFooter.style.display = 'none';
+
+        document.querySelectorAll('.registration-progress .progress-step').forEach(function (step, i) {
+            step.classList.remove('active', 'completed');
+            if (i < 2) step.classList.add('completed');
+            else if (i === 2) step.classList.add('active');
+        });
+
+        document.getElementById('pReferralStep').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    window.enterReferralStep = enterReferralStep;
+
+    async function applyReferralCode() {
+        var input = document.getElementById('pReferralCodeInput');
+        var errorEl = document.getElementById('pReferralError');
+        var btn = document.getElementById('pReferralApplyBtn');
+        var code = input.value.trim().toUpperCase();
+
+        if (!code) {
+            errorEl.textContent = 'Please enter a referral code';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Checking…';
+        errorEl.style.display = 'none';
+
+        try {
+            var res = await fetch('/api/register/partner/apply-referral', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + (localStorage.getItem('token') || ''),
+                },
+                body: JSON.stringify({ referral_code: code }),
+            });
+            var data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || 'Invalid referral code');
+            }
+
+            document.getElementById('pReferralStep').style.display = 'none';
+            window.location.href = 'verify-phone.html?v=2';
+        } catch (err) {
+            btn.disabled = false;
+            btn.textContent = 'Apply Code';
+            errorEl.textContent = err.message;
+            errorEl.style.display = 'block';
+        }
+    }
+    window.applyReferralCode = applyReferralCode;
+
+    function skipReferral() {
+        document.getElementById('pReferralStep').style.display = 'none';
+        window.location.href = 'verify-phone.html?v=2';
+    }
+    window.skipReferral = skipReferral;
+
     async function chooseInvitePath() {
         var code = document.getElementById('pChoiceInviteCode').value.trim().toUpperCase();
         var errorEl = document.getElementById('choiceInviteError');
@@ -300,10 +427,11 @@
                 throw new Error(data.error || 'Invalid invite code');
             }
 
-            // Success — hide choice, show pending approval, then go to phone verify
+            // Success — hide choice, show pending approval, then go to dashboard
+            // (phone verification already happened before the choice step)
             document.getElementById('pChoiceStep').style.display = 'none';
             showPendingApproval();
-            setTimeout(function () { window.location.href = 'verify-phone.html?v=2'; }, 4000);
+            setTimeout(function () { window.location.href = 'partner-dashboard.html'; }, 4000);
 
         } catch (err) {
             btn.disabled = false;
@@ -427,7 +555,7 @@
                     document.getElementById('pPaymentSuccess').style.display = 'block';
                     document.querySelector('.payment-cancel-link') && (document.querySelector('.payment-cancel-link').style.display = 'none');
 
-                    setTimeout(function () { window.location.href = 'verify-phone.html?v=2'; }, 3000);
+                    setTimeout(function () { window.location.href = 'partner-dashboard.html'; }, 3000);
                 },
                 onError: function (err) {
                     console.error('PayPal error:', err);
