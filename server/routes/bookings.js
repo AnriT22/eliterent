@@ -3,6 +3,7 @@ const { authenticateToken, requireRole } = require("../middleware/auth");
 const { queryAll, queryOne, execute, getClient } = require("../db-helpers");
 const { escapeHtml } = require("../mailer");
 const { getReservationFeePercent } = require("../services/reservation-fee");
+const { getTierFromCarCount } = require("../routes/partner");
 
 const router = express.Router();
 
@@ -85,6 +86,51 @@ async function unblockDatesForBooking(vehicleId, startStr, endStr) {
       [vehicleId, dates[i]],
     );
   }
+}
+
+// When a booking is accepted, credit the referrer's balance with a commission from the service fee.
+async function creditReferralCommission(booking) {
+  var serviceFee = parseFloat(booking.service_fee) || 0;
+  if (serviceFee <= 0) return;
+
+  var partnerProfile = await queryOne(
+    "SELECT referred_by_user_id FROM partner_profiles WHERE user_id = $1",
+    [booking.partner_id],
+  );
+  if (!partnerProfile || !partnerProfile.referred_by_user_id) return;
+  var referrerId = partnerProfile.referred_by_user_id;
+
+  // Count active cars from all partners referred by this referrer
+  var carCount = await queryOne(
+    `SELECT COUNT(*) as count
+     FROM vehicles v
+     JOIN partner_profiles pp ON v.partner_id = pp.user_id
+     WHERE pp.referred_by_user_id = $1 AND v.status = 'active'`,
+    [referrerId],
+  );
+  var totalCars = parseInt(carCount.count, 10) || 0;
+  var tier = getTierFromCarCount(totalCars);
+  if (tier.percent <= 0) return;
+
+  var commissionAmount = Math.round(serviceFee * tier.percent * 100) / 100;
+
+  // Avoid duplicate commission for the same booking
+  var existing = await queryOne(
+    "SELECT id FROM partner_referral_commissions WHERE booking_id = $1",
+    [booking.id],
+  );
+  if (existing) return;
+
+  await execute(
+    `INSERT INTO partner_referral_commissions
+     (referrer_user_id, referred_user_id, booking_id, service_fee_amount, commission_percent, commission_amount, tier_car_count, status)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, 'approved')`,
+    [referrerId, booking.partner_id, booking.id, serviceFee, tier.percent, commissionAmount, totalCars],
+  );
+  await execute(
+    "UPDATE partner_profiles SET referral_balance = referral_balance + $1 WHERE user_id = $2",
+    [commissionAmount, referrerId],
+  );
 }
 
 function parseJsonArray(value) {
@@ -353,8 +399,10 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
       ) / 100;
     // Two-dimensional matrix fee: percentage depends on the effective daily
     // price tier and the rental-duration tier (see services/reservation-fee.js).
+    // The website fee base includes the delivery/location fee so the platform
+    // also earns a commission on delivery charges.
     var feePercent = getReservationFeePercent(dailyPrice, days);
-    var serviceFee = Math.round(rentalTotal * feePercent * 100) / 100;
+    var serviceFee = Math.round((rentalTotal + location_fee) * feePercent * 100) / 100;
     var total_price =
       Math.round((rentalTotal + extrasTotal + location_fee) * 100) / 100;
 
@@ -641,6 +689,7 @@ router.patch("/:id/status", authenticateToken, async (req, res) => {
         booking.pickup_date,
         booking.dropoff_date,
       );
+      await creditReferralCommission(booking);
     }
     if (status === "cancelled" || status === "rejected") {
       await unblockDatesForBooking(

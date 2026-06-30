@@ -14,6 +14,70 @@ const router = express.Router();
 // One-time partner signup verification fee (USD) for partners without an invite code
 const PARTNER_SIGNUP_FEE = 4.99;
 
+const FOUNDER_EMAIL = "elite.retal25@gmail.com";
+const FOUNDER_CODE = "ELITE0000";
+
+// Generate a unique 8-character referral code (ELITE + 4 alphanumerics)
+function generateReferralCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // avoid 0/O/I/L
+  let suffix = "";
+  for (let i = 0; i < 4; i++) {
+    suffix += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return "ELITE" + suffix;
+}
+
+async function assignUniqueReferralCode(client, userId) {
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const code = generateReferralCode();
+    try {
+      await (client || execute)(
+        "UPDATE partner_profiles SET referral_code = $1 WHERE user_id = $2 AND referral_code IS NULL",
+        [code, userId],
+      );
+      // verify it stuck (could be null if row not found or already has code)
+      const row = await (client || queryOne)(
+        "SELECT referral_code FROM partner_profiles WHERE user_id = $1",
+        [userId],
+      );
+      if (row && row.referral_code) return row.referral_code;
+    } catch (e) {
+      // collision or missing row, retry
+      if (e.message && e.message.indexOf("unique") === -1 && e.message.indexOf("duplicate") === -1) {
+        console.error("assignUniqueReferralCode error:", e.message);
+      }
+    }
+  }
+  return null;
+}
+
+async function getOrCreateFounder() {
+  var founder = await queryOne("SELECT id FROM users WHERE email = $1", [FOUNDER_EMAIL]);
+  if (founder) return founder.id;
+  var hash = await bcrypt.hash("founder-not-used-" + crypto.randomBytes(16).toString("hex"), 12);
+  await execute(
+    "INSERT INTO users (email, password_hash, full_name, phone, role, is_approved, is_verified) VALUES ($1, $2, $3, $4, $5, 1, 1)",
+    [FOUNDER_EMAIL, hash, "EliteAuto Founder", "+1 founder", "admin"],
+  );
+  founder = await queryOne("SELECT id FROM users WHERE email = $1", [FOUNDER_EMAIL]);
+  await execute(
+    "INSERT INTO partner_profiles (user_id, company_name, referral_code, signup_method, signup_paid) VALUES ($1, $2, $3, $4, 1)",
+    [founder.id, "EliteAuto", FOUNDER_CODE, "paid"],
+  );
+  return founder.id;
+}
+
+async function resolveReferralCode(code) {
+  if (!code) return null;
+  const normalized = String(code).trim().toUpperCase();
+  if (normalized === "") return null;
+  const row = await queryOne(
+    "SELECT user_id FROM partner_profiles WHERE UPPER(referral_code) = $1",
+    [normalized],
+  );
+  return row ? row.user_id : null;
+}
+
 // CSRF state for Google OAuth — sign with HMAC to prevent forged state params
 function signOAuthState(role) {
   const JWT_SECRET = require("../middleware/auth").JWT_SECRET;
@@ -533,6 +597,7 @@ router.post("/register/partner", async (req, res) => {
       location,
       telegram,
       invite_code,
+      referral_code,
     } = req.body;
 
     if (!email || !password || !full_name) {
@@ -619,6 +684,17 @@ router.post("/register/partner", async (req, res) => {
       signupMethod = "invite";
     }
 
+    // Resolve referral code (who referred this new partner). If none provided, default to founder.
+    var referrerUserId = null;
+    if (referral_code) {
+      referrerUserId = await resolveReferralCode(referral_code);
+      if (!referrerUserId) {
+        return res.status(400).json({ error: "Invalid referral code" });
+      }
+    } else {
+      referrerUserId = await getOrCreateFounder();
+    }
+
     // Phone verification required before approval (is_approved=0)
     await execute(
       "INSERT INTO users (email, password_hash, full_name, phone, role, is_approved, is_verified) VALUES ($1, $2, $3, $4, $5, 0, 0)",
@@ -635,8 +711,8 @@ router.post("/register/partner", async (req, res) => {
     await execute(
       `
             INSERT INTO partner_profiles
-            (user_id, company_name, description, location, whatsapp, telegram, signup_method, signup_paid, invite_code_used)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, 0, $8)`,
+            (user_id, company_name, description, location, whatsapp, telegram, signup_method, signup_paid, invite_code_used, referred_by_user_id)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, 0, $8, $9)`,
       [
         userId,
         company_name,
@@ -646,8 +722,12 @@ router.post("/register/partner", async (req, res) => {
         telegram || null,
         signupMethod,
         signupMethod === "invite" ? normalizedInvite : null,
+        referrerUserId,
       ],
     );
+
+    // Generate a unique referral code for this partner
+    await assignUniqueReferralCode(null, userId);
 
     // Owner alert: a new partner signed up and needs approval (fire-and-forget, never blocks).
     (async () => {
@@ -711,6 +791,10 @@ router.post("/register/partner", async (req, res) => {
     }
 
     var partnerToken = generateToken({ id: newUser.id, email: newUser.email, role: newUser.role });
+    var partnerProfile = await queryOne(
+      "SELECT referral_code FROM partner_profiles WHERE user_id = $1",
+      [userId],
+    );
     res.status(201).json({
       message: "Partner account created! Please verify your phone number.",
       requiresVerification: true,
@@ -721,11 +805,14 @@ router.post("/register/partner", async (req, res) => {
       user: { id: newUser.id, email: newUser.email, full_name: newUser.full_name, phone: newUser.phone, role: newUser.role, is_approved: 0, is_verified: 0, phone_verified: 0 },
       partnerData: {
         company_name: company_name,
+        referral_code: partnerProfile ? partnerProfile.referral_code : null,
+        referred_by: referrerUserId,
       },
       signup_method: signupMethod,
       // Paid partners must pay the $4.99 fee to get auto-verified; invite partners wait for admin approval.
       requiresPayment: signupMethod === "paid",
       needsPathSelection: signupMethod === "paid",
+      needsReferralSelection: true,
       signup_fee: signupMethod === "paid" ? PARTNER_SIGNUP_FEE : 0,
       pending_approval: signupMethod === "invite",
     });
@@ -785,6 +872,46 @@ router.post("/register/partner/apply-invite", authenticateToken, async (req, res
   } catch (err) {
     console.error("Apply invite code error:", err);
     res.status(500).json({ error: "Failed to apply invite code" });
+  }
+});
+
+// POST /api/register/partner/apply-referral — apply a partner referral code after account creation
+router.post("/register/partner/apply-referral", authenticateToken, async (req, res) => {
+  try {
+    var code = (req.body.referral_code || "").trim().toUpperCase();
+    if (!code) {
+      return res.status(400).json({ error: "Referral code is required" });
+    }
+
+    var referrerId = await resolveReferralCode(code);
+    if (!referrerId) {
+      return res.status(400).json({ error: "Invalid referral code" });
+    }
+    if (referrerId === req.user.id) {
+      return res.status(400).json({ error: "You cannot refer yourself" });
+    }
+
+    var profile = await queryOne(
+      "SELECT referred_by_user_id FROM partner_profiles WHERE user_id = $1",
+      [req.user.id],
+    );
+    if (!profile) {
+      return res.status(404).json({ error: "Partner profile not found" });
+    }
+    // If already linked to a non-founder referrer, do not allow changing.
+    if (profile.referred_by_user_id && profile.referred_by_user_id !== (await getOrCreateFounder())) {
+      return res.status(409).json({ error: "Referral code already applied" });
+    }
+
+    await execute(
+      "UPDATE partner_profiles SET referred_by_user_id = $1 WHERE user_id = $2",
+      [referrerId, req.user.id],
+    );
+
+    res.json({ message: "Referral code applied successfully", referrer_user_id: referrerId });
+  } catch (err) {
+    console.error("Apply referral code error:", err);
+    res.status(500).json({ error: "Failed to apply referral code" });
   }
 });
 
@@ -950,14 +1077,16 @@ router.post("/auth/google", async (req, res) => {
       [googleEmail],
     );
 
-    // If partner, create partner_profiles entry
+    // If partner, create partner_profiles entry with founder referrer and a unique referral code
     if (isPartner) {
       const existingProfile = await queryOne("SELECT id FROM partner_profiles WHERE user_id = $1", [newUser.id]);
       if (!existingProfile) {
+        var founderId = await getOrCreateFounder();
         await execute(
-          "INSERT INTO partner_profiles (user_id, company_name, signup_method, signup_paid, is_verified) VALUES ($1, $2, $3, 0, 0)",
-          [newUser.id, googleName, "paid"]
+          "INSERT INTO partner_profiles (user_id, company_name, signup_method, signup_paid, is_verified, referred_by_user_id) VALUES ($1, $2, $3, 0, 0, $4)",
+          [newUser.id, googleName, "paid", founderId]
         );
+        await assignUniqueReferralCode(null, newUser.id);
       }
     }
 
@@ -989,7 +1118,16 @@ router.post("/auth/google", async (req, res) => {
       isNewUser: true,
     };
     if (isPartner) {
+      const partnerProfile = await queryOne(
+        "SELECT referral_code FROM partner_profiles WHERE user_id = $1",
+        [newUser.id],
+      );
       response.needsPathSelection = true;
+      response.needsReferralSelection = true;
+      response.partnerData = {
+        company_name: googleName,
+        referral_code: partnerProfile ? partnerProfile.referral_code : null,
+      };
     }
     res.status(201).json(response);
   } catch (err) {
@@ -1155,14 +1293,16 @@ router.get("/auth/google/callback", async (req, res) => {
       [googleEmail]
     );
 
-    // If partner, also create partner_profiles entry
+    // If partner, also create partner_profiles entry with founder referrer and a unique referral code
     if (isPartner) {
       const existingProfile = await queryOne("SELECT id FROM partner_profiles WHERE user_id = $1", [newUser.id]);
       if (!existingProfile) {
+        var founderId = await getOrCreateFounder();
         await execute(
-          "INSERT INTO partner_profiles (user_id, company_name, signup_method, signup_paid, is_verified) VALUES ($1, $2, $3, 0, 0)",
-          [newUser.id, googleName, "paid"]
+          "INSERT INTO partner_profiles (user_id, company_name, signup_method, signup_paid, is_verified, referred_by_user_id) VALUES ($1, $2, $3, 0, 0, $4)",
+          [newUser.id, googleName, "paid", founderId]
         );
+        await assignUniqueReferralCode(null, newUser.id);
       }
     }
 
@@ -1185,7 +1325,7 @@ router.get("/auth/google/callback", async (req, res) => {
     console.log("[Google Callback] Created new user:", googleEmail, "role:", userRole);
     var redirectUrl = "/google-auth-success.html?token=" + token + "&user=" + userData + "&new=1";
     if (isPartner) {
-      redirectUrl += "&needsPathSelection=1";
+      redirectUrl += "&needsPathSelection=1&needsReferralSelection=1";
     }
     return res.redirect(redirectUrl);
 
@@ -1392,6 +1532,9 @@ router.get("/me", authenticateToken, async (req, res) => {
           steering_sides: JSON.parse(profile.steering_sides || "[]"),
           payment_methods: JSON.parse(profile.payment_methods || "[]"),
           is_verified: profile.is_verified,
+          signup_method: profile.signup_method,
+          signup_paid: profile.signup_paid,
+          invite_code_used: profile.invite_code_used,
         };
       }
     }

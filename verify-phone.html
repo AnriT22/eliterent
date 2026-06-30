@@ -166,13 +166,28 @@
         var nameEl = document.getElementById('userName');
         var emailEl = document.getElementById('userEmail');
 
-        nameEl.textContent = user.full_name || user.email;
+        nameEl.textContent = user.full_name || user.email || '';
         emailEl.textContent = user.email || '';
+        avatarEl.innerHTML = '';
+        var initials = ((user.full_name || user.email || '?')[0] || '?').toUpperCase();
         if (user.avatar_url) {
-            avatarEl.innerHTML = '<img class="vp-avatar" src="' + user.avatar_url + '" onerror="this.parentElement.innerHTML=\'<div class=vp-avatar-placeholder loading="lazy">' + ((user.full_name || '?')[0] || '?').toUpperCase() + '</div>\'">';
+            var img = document.createElement('img');
+            img.className = 'vp-avatar';
+            img.src = user.avatar_url;
+            img.loading = 'lazy';
+            img.onerror = function() {
+                avatarEl.innerHTML = '';
+                var placeholder = document.createElement('div');
+                placeholder.className = 'vp-avatar-placeholder';
+                placeholder.textContent = initials;
+                avatarEl.appendChild(placeholder);
+            };
+            avatarEl.appendChild(img);
         } else {
-            var initials = ((user.full_name || '?')[0] || '?').toUpperCase();
-            avatarEl.innerHTML = '<div class="vp-avatar-placeholder">' + initials + '</div>';
+            var placeholder = document.createElement('div');
+            placeholder.className = 'vp-avatar-placeholder';
+            placeholder.textContent = initials;
+            avatarEl.appendChild(placeholder);
         }
         infoBar.style.display = 'flex';
 
@@ -350,6 +365,28 @@
             document.getElementById('otpError').style.display = 'none';
         };
 
+        function goToVerificationChoice() {
+            // Reuse the existing choice step on the registration page (with full logic).
+            // If partner already verified (paid) OR already chose a path (invite applied),
+            // skip straight to dashboard to avoid looping back to the choice step.
+            fetch('/api/me', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            }).then(function(r) { return r.json(); }).then(function(data) {
+                var p = data && data.user && data.user.partner_profile;
+                var pathChosen = data && data.user && (
+                    data.user.is_verified ||
+                    (p && (p.is_verified || p.signup_paid || p.invite_code_used || p.signup_method === 'invite'))
+                );
+                if (pathChosen) {
+                    window.location.href = '/partner-dashboard.html';
+                    return;
+                }
+                window.location.href = '/register-partner.html?step=choice';
+            }).catch(function() {
+                window.location.href = '/register-partner.html?step=choice';
+            });
+        }
+
         window.skipVerification = function() {
             fetch('/api/otp/phone-verify/skip', {
                 method: 'POST',
@@ -358,12 +395,11 @@
                     'Authorization': 'Bearer ' + token
                 }
             }).catch(function() {});
-            // Skip = go to dashboard directly (don't loop back to choice step)
             var role = user.role;
             if (role === 'admin') {
                 window.location.href = '/admin.html';
             } else if (role === 'partner') {
-                window.location.href = '/partner-dashboard.html';
+                goToVerificationChoice();
             } else {
                 window.location.href = '/index.html';
             }
@@ -374,8 +410,7 @@
             if (role === 'admin') {
                 window.location.href = '/admin.html';
             } else if (role === 'partner') {
-                // All partners go to dashboard after phone verify (dashboard shows pending banners if needed)
-                window.location.href = '/partner-dashboard.html';
+                goToVerificationChoice();
             } else {
                 window.location.href = '/index.html';
             }

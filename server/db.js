@@ -411,6 +411,53 @@ async function initDB() {
         )
     `);
 
+    // Partner referral system — every partner gets a unique code and can earn from referrals
+    try {
+        await pool.query(`ALTER TABLE partner_profiles ADD COLUMN IF NOT EXISTS referral_code TEXT UNIQUE`);
+        await pool.query(`ALTER TABLE partner_profiles ADD COLUMN IF NOT EXISTS referred_by_user_id INTEGER REFERENCES users(id)`);
+        await pool.query(`ALTER TABLE partner_profiles ADD COLUMN IF NOT EXISTS referral_balance REAL DEFAULT 0`);
+        await pool.query(`ALTER TABLE partner_profiles ADD COLUMN IF NOT EXISTS referral_payout_method TEXT`);
+        await pool.query(`ALTER TABLE partner_profiles ADD COLUMN IF NOT EXISTS referral_payout_details TEXT`);
+    } catch (e) { /* columns may already exist or table not yet created */ }
+
+    try {
+        await pool.query(`CREATE INDEX IF NOT EXISTS idx_partner_profiles_referral_code ON partner_profiles(referral_code)`);
+        await pool.query(`CREATE INDEX IF NOT EXISTS idx_partner_profiles_referred_by ON partner_profiles(referred_by_user_id)`);
+    } catch (e) { /* indexes may already exist */ }
+
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS partner_referral_commissions (
+            id SERIAL PRIMARY KEY,
+            referrer_user_id INTEGER NOT NULL REFERENCES users(id),
+            referred_user_id INTEGER NOT NULL REFERENCES users(id),
+            booking_id INTEGER REFERENCES bookings(id),
+            service_fee_amount REAL NOT NULL,
+            commission_percent REAL NOT NULL,
+            commission_amount REAL NOT NULL,
+            tier_car_count INTEGER NOT NULL,
+            status TEXT DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    try {
+        await pool.query(`CREATE INDEX IF NOT EXISTS idx_referral_commissions_referrer ON partner_referral_commissions(referrer_user_id)`);
+        await pool.query(`CREATE INDEX IF NOT EXISTS idx_referral_commissions_booking ON partner_referral_commissions(booking_id)`);
+    } catch (e) { /* indexes may already exist */ }
+
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS partner_payout_requests (
+            id SERIAL PRIMARY KEY,
+            partner_user_id INTEGER NOT NULL REFERENCES users(id),
+            amount REAL NOT NULL,
+            method TEXT NOT NULL,
+            details TEXT,
+            status TEXT DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            processed_at TIMESTAMP
+        )
+    `);
+
     // Page visits tracking
     await pool.query(`
         CREATE TABLE IF NOT EXISTS page_visits (

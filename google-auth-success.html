@@ -40,6 +40,7 @@
                 var userStr = params.get('user');
                 var isNew = params.get('new');
                 var needsPathSelection = params.get('needsPathSelection');
+                var needsReferralSelection = params.get('needsReferralSelection');
 
                 if (!token || !userStr) {
                     document.getElementById('statusText').textContent = 'Authentication failed';
@@ -72,15 +73,12 @@
                 var isApproved = user.is_approved;
                 var phoneVerified = user.phone_verified;
                 setTimeout(function() {
-                    // NEW unverified partner → show choice step FIRST (promo code or $4.99)
-                    if (role === 'partner' && isNew && !isVerified) {
-                        window.location.href = '/register-partner.html?step=choice';
+                    // Unverified partner → show referral step FIRST, then choice step
+                    if (role === 'partner' && !isVerified) {
+                        window.location.href = '/register-partner.html?step=referral';
                     // Partner without phone verified → verify phone (after choice step redirects here)
                     } else if (role === 'partner' && !phoneVerified) {
                         window.location.href = '/verify-phone.html?v=2';
-                    // Partner phone verified but still not verified (invite waiting admin approval)
-                    } else if (role === 'partner' && !isVerified) {
-                        window.location.href = '/register-partner.html?step=choice';
                     } else if (role === 'admin') {
                         window.location.href = '/admin.html';
                     } else if (role === 'partner') {

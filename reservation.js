@@ -671,7 +671,8 @@
             return sum + (service.perDay ? price * days : price);
         }, 0) * 100) / 100;
         var locationFee = getLocationSurcharge('pickupLoc') + getLocationSurcharge('dropoffLoc');
-        var websiteFee = Math.round(rentalTotal * getReservationFeePercent(dailyPrice, days) * 100) / 100;
+        // Website fee base includes the delivery/location fee so the platform earns on delivery too (mirrors bookings.js).
+        var websiteFee = Math.round((rentalTotal + locationFee) * getReservationFeePercent(dailyPrice, days) * 100) / 100;
         var deposit = parseFloat(vehicleData.deposit_amount) || 0;
         var grandTotal = Math.round((rentalTotal + extrasTotal + locationFee + deposit) * 100) / 100;
         var payNow = websiteFee;
@@ -806,6 +807,48 @@
         };
     }
 
+    // Require the delivery address whenever a "Delivery to your address" option is
+    // chosen for pickup and/or drop-off — so the price covers a real address.
+    function clearAddrError(inputId) {
+        var inp = document.getElementById(inputId); if (inp) inp.style.borderColor = '';
+        var err = document.getElementById(inputId + 'Err'); if (err) err.style.display = 'none';
+    }
+    function setAddrError(inputId, msg) {
+        var inp = document.getElementById(inputId); if (!inp) return;
+        inp.style.display = 'block';
+        inp.style.borderColor = '#ef4444';
+        var errId = inputId + 'Err';
+        var err = document.getElementById(errId);
+        if (!err) {
+            err = document.createElement('div');
+            err.id = errId;
+            err.style.cssText = 'color:#ef4444;font-size:12px;margin-top:4px;';
+            inp.parentNode.insertBefore(err, inp.nextSibling);
+            inp.addEventListener('input', function () { clearAddrError(inputId); });
+        }
+        err.textContent = msg;
+        err.style.display = 'block';
+    }
+    function validateDeliveryAddresses() {
+        var msg = (typeof I18n !== 'undefined' && I18n.t && I18n.t('reservation.delivery_addr_required') !== 'reservation.delivery_addr_required')
+            ? I18n.t('reservation.delivery_addr_required') : 'Please enter the delivery address.';
+        var ok = true, firstBad = null;
+        [['pickupLoc', 'rvPickupCustom'], ['dropoffLoc', 'rvDropoffCustom']].forEach(function (pair) {
+            clearAddrError(pair[1]);
+            var sel = document.querySelector('input[name="' + pair[0] + '"]:checked');
+            if (sel && sel.value.indexOf('Delivery') !== -1) {
+                var inp = document.getElementById(pair[1]);
+                if (!inp || !inp.value.trim()) {
+                    setAddrError(pair[1], msg);
+                    if (!firstBad) firstBad = inp;
+                    ok = false;
+                }
+            }
+        });
+        if (!ok && firstBad) { firstBad.focus(); firstBad.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+        return ok;
+    }
+
     // Show Send Code confirmation modal
     function showSendCodeModal(bookingPayload, btn) {
         var phone = (user && user.phone) ? user.phone : '';
@@ -892,6 +935,8 @@
 
     document.getElementById('rvBookBtn').addEventListener('click', function () {
         var btn = this;
+        // Block until any chosen delivery option has an address entered.
+        if (!validateDeliveryAddresses()) return;
         btn.disabled = true;
         btn.querySelector('span:nth-child(2)').textContent = (typeof I18n !== 'undefined' ? I18n.t('reservation.sending', 'Submitting...') : 'Submitting...');
         var payload = collectBookingData();

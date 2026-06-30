@@ -1850,4 +1850,108 @@ function escHtml(s) {
 
     // Initial load
     loadAnalytics();
+
+    // ========================================
+    // REFERRAL MANAGEMENT
+    // ========================================
+    var adminRefView = document.getElementById('adminRefViewSelect');
+    var adminRefTableBody = document.getElementById('adminRefTableBody');
+    var adminRefTable = document.getElementById('adminRefTable');
+
+    function fmtDate(date) {
+        return date ? new Date(date).toLocaleDateString() : '-';
+    }
+
+    async function loadAdminReferrals() {
+        if (!adminRefTableBody) return;
+        try {
+            var view = adminRefView ? adminRefView.value : 'referrals';
+            var html = '';
+
+            if (view === 'referrals') {
+                var res = await fetch('/api/admin/referrals', { headers: { 'Authorization': 'Bearer ' + token } });
+                var data = await res.json();
+                var rows = data.referrals || [];
+                var totalCars = 0;
+                adminRefTable.innerHTML = '<thead><tr><th>Partner</th><th>Code</th><th>Referred By</th><th>Cars</th><th>Balance</th></tr></thead><tbody id="adminRefTableBody"></tbody>';
+                adminRefTableBody = document.getElementById('adminRefTableBody');
+                rows.forEach(function(r) {
+                    totalCars += parseInt(r.active_cars || 0, 10);
+                    html += '<tr>'
+                        + '<td>' + (r.company_name || r.full_name || r.email) + '</td>'
+                        + '<td>' + (r.referral_code || '-') + '</td>'
+                        + '<td>' + (r.referrer_company || r.referrer_name || r.referrer_email || '-') + ' (' + (r.referrer_code || '') + ')</td>'
+                        + '<td>' + (r.active_cars || 0) + '</td>'
+                        + '<td>$' + parseFloat(r.referral_balance || 0).toFixed(2) + '</td>'
+                        + '</tr>';
+                });
+                document.getElementById('adminRefTotalPartners').textContent = rows.length;
+                document.getElementById('adminRefTotalCars').textContent = totalCars;
+            } else if (view === 'commissions') {
+                var res = await fetch('/api/admin/referral-commissions?status=all', { headers: { 'Authorization': 'Bearer ' + token } });
+                var data = await res.json();
+                var rows = data.commissions || [];
+                adminRefTable.innerHTML = '<thead><tr><th>Referrer</th><th>Referred</th><th>Booking</th><th>Service Fee</th><th>%</th><th>Commission</th><th>Status</th><th>Date</th></tr></thead><tbody id="adminRefTableBody"></tbody>';
+                adminRefTableBody = document.getElementById('adminRefTableBody');
+                rows.forEach(function(r) {
+                    html += '<tr>'
+                        + '<td>' + (r.referrer_name || r.referrer_email) + '</td>'
+                        + '<td>' + (r.referred_name || r.referred_email) + '</td>'
+                        + '<td>' + (r.booking_id || '-') + '</td>'
+                        + '<td>$' + parseFloat(r.service_fee_amount || 0).toFixed(2) + '</td>'
+                        + '<td>' + Math.round((r.commission_percent || 0) * 100) + '%</td>'
+                        + '<td>$' + parseFloat(r.commission_amount || 0).toFixed(2) + '</td>'
+                        + '<td>' + (r.status || '-') + '</td>'
+                        + '<td>' + fmtDate(r.created_at) + '</td>'
+                        + '</tr>';
+                });
+            } else if (view === 'payouts') {
+                var res = await fetch('/api/admin/payout-requests?status=all', { headers: { 'Authorization': 'Bearer ' + token } });
+                var data = await res.json();
+                var rows = data.requests || [];
+                var pendingCount = 0;
+                adminRefTable.innerHTML = '<thead><tr><th>Partner</th><th>Amount</th><th>Method</th><th>Details</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody id="adminRefTableBody"></tbody>';
+                adminRefTableBody = document.getElementById('adminRefTableBody');
+                rows.forEach(function(r) {
+                    if (r.status === 'pending') pendingCount++;
+                    html += '<tr>'
+                        + '<td>' + (r.company_name || r.full_name || r.email) + '</td>'
+                        + '<td>$' + parseFloat(r.amount || 0).toFixed(2) + '</td>'
+                        + '<td>' + (r.method || '-') + '</td>'
+                        + '<td>' + (r.details || '') + '</td>'
+                        + '<td>' + (r.status || '-') + '</td>'
+                        + '<td>' + fmtDate(r.created_at) + '</td>'
+                        + '<td>' + (r.status === 'pending' ? '<button class="admin-action-btn success" onclick="processPayout(' + r.id + ', \'approve\')">Approve</button> <button class="admin-action-btn danger" onclick="processPayout(' + r.id + ', \'reject\')">Reject</button> <button class="admin-action-btn" onclick="processPayout(' + r.id + ', \'paid\')">Mark Paid</button>' : '') + '</td>'
+                        + '</tr>';
+                });
+                document.getElementById('adminRefPendingPayouts').textContent = pendingCount;
+            }
+            adminRefTableBody.innerHTML = html || '<tr><td colspan="8" style="text-align:center;color:#A0A3B0;padding:40px;">No records</td></tr>';
+        } catch (err) {
+            console.error('Admin referrals load error:', err);
+            if (adminRefTableBody) adminRefTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#ef4444;padding:40px;">Failed to load</td></tr>';
+        }
+    }
+
+    window.processPayout = async function(id, action) {
+        try {
+            var res = await fetch('/api/admin/payout-requests/' + id + '/process', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ action: action })
+            });
+            if (!res.ok) throw new Error('Failed');
+            loadAdminReferrals();
+        } catch (err) {
+            alert('Failed to process payout: ' + err.message);
+        }
+    };
+
+    if (adminRefView) {
+        adminRefView.addEventListener('change', loadAdminReferrals);
+    }
+    var referralsNavItem = document.querySelector('.admin-nav-item[data-tab="referrals"]');
+    if (referralsNavItem) {
+        referralsNavItem.addEventListener('click', loadAdminReferrals);
+    }
 })();

@@ -1896,10 +1896,170 @@
     }
 
     // ========================================
+    // REFERRAL PROGRAM
+    // ========================================
+    function fmtMoney(amount) {
+        return '$' + parseFloat(amount || 0).toFixed(2);
+    }
+
+    function loadReferralStats() {
+        var tab = document.getElementById('tab-referrals');
+        if (!tab) return;
+
+        fetch('/api/partner/referral-stats', { headers: { 'Authorization': 'Bearer ' + token } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.error) return;
+
+            document.getElementById('refMyCode').textContent = data.my_code || '-';
+            document.getElementById('refPartnerCount').textContent = data.total_referred_partners || 0;
+            document.getElementById('refCarCount').textContent = data.total_referral_cars || 0;
+            document.getElementById('refCurrentTier').textContent = (data.tier && data.tier.percent ? Math.round(data.tier.percent * 100) : 0) + '%';
+            document.getElementById('refBalance').textContent = fmtMoney(data.balance);
+            document.getElementById('refEarningsTotal').textContent = fmtMoney(data.earnings && data.earnings.total);
+            document.getElementById('refEarningsPending').textContent = fmtMoney(data.earnings && data.earnings.pending);
+            document.getElementById('refEarningsMonth').textContent = fmtMoney(data.earnings && data.earnings.this_month);
+
+            var referredByEl = document.getElementById('refReferredBy');
+            if (referredByEl) {
+                if (data.referred_by) {
+                    referredByEl.textContent = (data.referred_by.company_name || data.referred_by.full_name || data.referred_by.email) + ' (' + (data.referred_by.referral_code || '') + ')';
+                } else {
+                    referredByEl.textContent = 'EliteAuto Founder';
+                }
+            }
+
+            var tbody = document.querySelector('#refPartnersTable tbody');
+            var empty = document.getElementById('refEmptyPartners');
+            var partners = data.referred_partners || [];
+            if (tbody) {
+                tbody.innerHTML = '';
+                if (partners.length === 0) {
+                    if (empty) empty.style.display = 'block';
+                } else {
+                    if (empty) empty.style.display = 'none';
+                    partners.forEach(function(p) {
+                        var row = document.createElement('tr');
+                        row.innerHTML = '<td>' + (p.company_name || p.full_name || p.email) + '</td>'
+                            + '<td>' + (p.referral_code || '-') + '</td>'
+                            + '<td>' + (p.active_cars || 0) + '</td>'
+                            + '<td>' + (p.created_at ? new Date(p.created_at).toLocaleDateString() : '-') + '</td>';
+                        tbody.appendChild(row);
+                    });
+                }
+            }
+
+            var payoutBtn = document.getElementById('refRequestPayoutBtn');
+            if (payoutBtn) {
+                payoutBtn.disabled = (data.balance || 0) < (data.min_payout_amount || 50);
+                payoutBtn.title = payoutBtn.disabled ? 'Minimum payout is $' + (data.min_payout_amount || 50) : '';
+            }
+        })
+        .catch(function(err) {
+            console.error('Load referral stats error:', err);
+        });
+    }
+
+    var copyCodeBtn = document.getElementById('refCopyCodeBtn');
+    if (copyCodeBtn) {
+        copyCodeBtn.addEventListener('click', function() {
+            var code = document.getElementById('refMyCode').textContent;
+            if (!code || code === '-') return;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(code).then(function() {
+                    copyCodeBtn.textContent = ((typeof I18n!=='undefined'&&I18n.t&&I18n.t('partner_dashboard.copied')!=='partner_dashboard.copied')?I18n.t('partner_dashboard.copied'):'Copied');
+                    setTimeout(function() { copyCodeBtn.textContent = ((typeof I18n!=='undefined'&&I18n.t&&I18n.t('partner_dashboard.copy')!=='partner_dashboard.copy')?I18n.t('partner_dashboard.copy'):'Copy'); }, 1500);
+                });
+            } else {
+                var ta = document.createElement('textarea');
+                ta.value = code;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                copyCodeBtn.textContent = ((typeof I18n!=='undefined'&&I18n.t&&I18n.t('partner_dashboard.copied')!=='partner_dashboard.copied')?I18n.t('partner_dashboard.copied'):'Copied');
+                setTimeout(function() { copyCodeBtn.textContent = ((typeof I18n!=='undefined'&&I18n.t&&I18n.t('partner_dashboard.copy')!=='partner_dashboard.copy')?I18n.t('partner_dashboard.copy'):'Copy'); }, 1500);
+            }
+        });
+    }
+
+    var referralsNavItem = document.querySelector('.db-nav-item[data-tab="referrals"]');
+    if (referralsNavItem) {
+        referralsNavItem.addEventListener('click', loadReferralStats);
+    }
+
+    var refRequestPayoutBtn = document.getElementById('refRequestPayoutBtn');
+    var refPayoutMethodBtn = document.getElementById('refPayoutMethodBtn');
+    var refPayoutModal = document.getElementById('refPayoutModal');
+    var refPayoutAmount = document.getElementById('refPayoutAmount');
+    var refPayoutMethod = document.getElementById('refPayoutMethod');
+    var refPayoutDetails = document.getElementById('refPayoutDetails');
+    var refSubmitPayoutBtn = document.getElementById('refSubmitPayoutBtn');
+    var refPayoutError = document.getElementById('refPayoutError');
+    var refPayoutSuccess = document.getElementById('refPayoutSuccess');
+
+    function openRefPayoutModal() {
+        if (refPayoutModal) refPayoutModal.style.display = 'flex';
+        if (refPayoutError) refPayoutError.style.display = 'none';
+        if (refPayoutSuccess) refPayoutSuccess.style.display = 'none';
+        if (refPayoutAmount) refPayoutAmount.value = '';
+        if (refPayoutDetails) refPayoutDetails.value = '';
+    }
+    window.openRefPayoutModal = openRefPayoutModal;
+
+    function closeRefPayoutModal() {
+        if (refPayoutModal) refPayoutModal.style.display = 'none';
+    }
+    window.closeRefPayoutModal = closeRefPayoutModal;
+
+    if (refRequestPayoutBtn) refRequestPayoutBtn.addEventListener('click', openRefPayoutModal);
+    if (refPayoutMethodBtn) refPayoutMethodBtn.addEventListener('click', openRefPayoutModal);
+
+    if (refPayoutModal) {
+        refPayoutModal.addEventListener('click', function(e) {
+            if (e.target === refPayoutModal) closeRefPayoutModal();
+        });
+    }
+
+    if (refSubmitPayoutBtn) {
+        refSubmitPayoutBtn.addEventListener('click', async function() {
+            var amount = parseFloat(refPayoutAmount ? refPayoutAmount.value : 0);
+            var method = refPayoutMethod ? refPayoutMethod.value : 'bank';
+            var details = refPayoutDetails ? refPayoutDetails.value.trim() : '';
+            if (refPayoutError) refPayoutError.style.display = 'none';
+            if (refPayoutSuccess) refPayoutSuccess.style.display = 'none';
+
+            if (isNaN(amount) || amount <= 0) {
+                if (refPayoutError) { refPayoutError.textContent = 'Please enter a valid amount'; refPayoutError.style.display = 'block'; }
+                return;
+            }
+
+            try {
+                var res = await fetch('/api/partner/payout-request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token,
+                    },
+                    body: JSON.stringify({ amount: amount, method: method, details: details }),
+                });
+                var data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to submit request');
+                if (refPayoutSuccess) refPayoutSuccess.style.display = 'block';
+                loadReferralStats();
+                setTimeout(closeRefPayoutModal, 2000);
+            } catch (err) {
+                if (refPayoutError) { refPayoutError.textContent = err.message; refPayoutError.style.display = 'block'; }
+            }
+        });
+    }
+
+    // ========================================
     // INIT
     // ========================================
     loadVehicles();
     loadProfile();
+    loadReferralStats();
 
     // ========================================
     // AVAILABILITY CALENDAR
