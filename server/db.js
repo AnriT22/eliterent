@@ -76,6 +76,11 @@ async function initDB() {
             signup_paypal_order_id TEXT,
             signup_paypal_capture_id TEXT,
             invite_code_used TEXT,
+            referral_code TEXT UNIQUE,
+            referred_by_user_id INTEGER REFERENCES users(id),
+            referral_balance REAL DEFAULT 0,
+            referral_payout_method TEXT,
+            referral_payout_details TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -138,6 +143,9 @@ async function initDB() {
             custom_pricing_ranges TEXT,
             registration_number TEXT,
             priority INTEGER DEFAULT 0,
+            is_vip INTEGER DEFAULT 0,
+            vip_until TIMESTAMP,
+            homepage_vip_position INTEGER,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (partner_id) REFERENCES users(id) ON DELETE CASCADE
@@ -170,6 +178,7 @@ async function initDB() {
             paypal_order_id TEXT,
             paypal_capture_id TEXT,
             payment_date TIMESTAMP,
+            payment_expires_at TIMESTAMP,
             promo_code TEXT,
             promo_discount REAL DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -307,6 +316,11 @@ async function initDB() {
     // Add rent_with_driver_only flag to vehicles (existing DBs)
     try {
         await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS rent_with_driver_only INTEGER DEFAULT 0`);
+    } catch (e) { /* column may already exist or table not yet created */ }
+
+    // Add payment_expires_at to bookings for the 8-minute payment countdown timer (existing DBs)
+    try {
+        await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_expires_at TIMESTAMP`);
     } catch (e) { /* column may already exist or table not yet created */ }
 
     // Add priority column to vehicles so admin can pin/order vehicles on the page (existing DBs)
