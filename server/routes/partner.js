@@ -121,6 +121,58 @@ router.get("/referral-stats", authenticateToken, async (req, res) => {
   }
 });
 
+// POST /api/partner/apply-referral — existing partner enters a referrer code
+router.post("/apply-referral", authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== "partner") {
+      return res.status(403).json({ error: "Only partners can apply referral codes" });
+    }
+    var code = String(req.body.referral_code || "").trim().toUpperCase();
+    if (!code) return res.status(400).json({ error: "Referral code required" });
+
+    // Check partner doesn't already have a referrer
+    var myProfile = await queryOne(
+      "SELECT referral_code, referred_by_user_id FROM partner_profiles WHERE user_id = $1",
+      [req.user.id],
+    );
+    if (!myProfile) return res.status(404).json({ error: "Partner profile not found" });
+    if (myProfile.referred_by_user_id) {
+      return res.status(400).json({ error: "You already have a referrer. It cannot be changed." });
+    }
+    if (myProfile.referral_code && myProfile.referral_code.toUpperCase() === code) {
+      return res.status(400).json({ error: "You cannot refer yourself." });
+    }
+
+    // Find referrer by code
+    var referrer = await queryOne(
+      "SELECT user_id, referral_code FROM partner_profiles WHERE UPPER(referral_code) = $1",
+      [code],
+    );
+    if (!referrer) return res.status(404).json({ error: "Invalid referral code" });
+    if (referrer.user_id === req.user.id) {
+      return res.status(400).json({ error: "You cannot refer yourself." });
+    }
+
+    // Link this partner to the referrer
+    await execute(
+      "UPDATE partner_profiles SET referred_by_user_id = $1 WHERE user_id = $2",
+      [referrer.user_id, req.user.id],
+    );
+
+    res.json({
+      success: true,
+      message: "Referral code applied successfully",
+      referrer: {
+        code: referrer.referral_code,
+        name: (await queryOne("SELECT full_name, company_name FROM users u LEFT JOIN partner_profiles pp ON u.id = pp.user_id WHERE u.id = $1", [referrer.user_id])) || {},
+      },
+    });
+  } catch (err) {
+    console.error("Apply referral error:", err);
+    res.status(500).json({ error: "Failed to apply referral code" });
+  }
+});
+
 // POST /api/partner/payout-request
 router.post("/payout-request", authenticateToken, async (req, res) => {
   try {

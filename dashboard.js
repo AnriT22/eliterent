@@ -1954,9 +1954,63 @@
                 payoutBtn.disabled = (data.balance || 0) < (data.min_payout_amount || 50);
                 payoutBtn.title = payoutBtn.disabled ? 'Minimum payout is $' + (data.min_payout_amount || 50) : '';
             }
+
+            // Show "Apply Referral Code" box if partner doesn't have a referrer yet
+            var applyBox = document.getElementById('refApplyBox');
+            if (applyBox) {
+                applyBox.style.display = data.referred_by ? 'none' : 'block';
+            }
         })
         .catch(function(err) {
             console.error('Load referral stats error:', err);
+        });
+    }
+
+    // Apply referral code for already-registered partners
+    var refApplyBtn = document.getElementById('refApplyBtn');
+    var refApplyInput = document.getElementById('refApplyInput');
+    var refApplyError = document.getElementById('refApplyError');
+    var refApplySuccess = document.getElementById('refApplySuccess');
+    var refApplyBoxEl = document.getElementById('refApplyBox');
+
+    if (refApplyBtn && refApplyInput) {
+        refApplyBtn.addEventListener('click', function() {
+            var code = refApplyInput.value.trim().toUpperCase();
+            if (!code) return;
+            refApplyError.style.display = 'none';
+            refApplySuccess.style.display = 'none';
+            refApplyBtn.disabled = true;
+            refApplyBtn.textContent = 'Applying...';
+
+            fetch('/api/partner/apply-referral', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ referral_code: code })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                refApplyBtn.disabled = false;
+                refApplyBtn.textContent = ((typeof I18n !== 'undefined' && I18n.t && I18n.t('partner_dashboard.apply_referral') !== 'partner_dashboard.apply_referral') ? I18n.t('partner_dashboard.apply_referral') : 'Apply Code');
+                if (data.error) {
+                    refApplyError.textContent = data.error;
+                    refApplyError.style.display = 'block';
+                } else {
+                    refApplySuccess.textContent = data.message || 'Referral code applied!';
+                    refApplySuccess.style.display = 'block';
+                    if (refApplyBoxEl) refApplyBoxEl.style.display = 'none';
+                    loadReferralStats(); // refresh to show new referrer
+                }
+            })
+            .catch(function(err) {
+                refApplyBtn.disabled = false;
+                refApplyBtn.textContent = ((typeof I18n !== 'undefined' && I18n.t && I18n.t('partner_dashboard.apply_referral') !== 'partner_dashboard.apply_referral') ? I18n.t('partner_dashboard.apply_referral') : 'Apply Code');
+                refApplyError.textContent = 'Network error. Please try again.';
+                refApplyError.style.display = 'block';
+            });
+        });
+
+        refApplyInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') refApplyBtn.click();
         });
     }
 
