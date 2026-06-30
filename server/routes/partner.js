@@ -6,6 +6,34 @@ const router = express.Router();
 
 const MIN_PAYOUT_AMOUNT = 50;
 
+// Generate a unique 8-character referral code (ELITE + 4 alphanumerics)
+function generateReferralCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // avoid 0/O/I/L
+  let suffix = "";
+  for (let i = 0; i < 4; i++) {
+    suffix += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return "ELITE" + suffix;
+}
+
+async function ensureReferralCode(userId) {
+  var row = await queryOne("SELECT referral_code FROM partner_profiles WHERE user_id = $1", [userId]);
+  if (row && row.referral_code) return row.referral_code;
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const code = generateReferralCode();
+    try {
+      await execute("UPDATE partner_profiles SET referral_code = $1 WHERE user_id = $2", [code, userId]);
+      var check = await queryOne("SELECT referral_code FROM partner_profiles WHERE user_id = $1", [userId]);
+      if (check && check.referral_code) return check.referral_code;
+    } catch (e) {
+      if (e.message && e.message.indexOf("unique") === -1 && e.message.indexOf("duplicate") === -1) {
+        console.error("ensureReferralCode error:", e.message);
+      }
+    }
+  }
+  return null;
+}
+
 function getTierFromCarCount(carCount) {
   var c = Math.max(0, parseInt(carCount, 10) || 0);
   if (c >= 41) return { percent: 0.30, label: "41+", name: "Diamond" };
@@ -20,6 +48,11 @@ async function getReferralStats(userId) {
     [userId],
   );
   if (!profile) return null;
+
+  // Auto-generate referral code if missing (existing partners from before the feature)
+  if (!profile.referral_code) {
+    profile.referral_code = await ensureReferralCode(userId);
+  }
 
   var referredPartners = await queryAll(
     `SELECT u.id, u.full_name, u.email, u.created_at, pp.company_name, pp.referral_code,
