@@ -114,9 +114,10 @@ async function creditReferralCommission(booking) {
 
   var commissionAmount = Math.round(serviceFee * tier.percent * 100) / 100;
 
-  // Avoid duplicate commission for the same booking
+  // Avoid duplicate commission for the same booking (a previously reversed
+  // commission does not count, so a re-accepted booking can be credited again).
   var existing = await queryOne(
-    "SELECT id FROM partner_referral_commissions WHERE booking_id = $1",
+    "SELECT id FROM partner_referral_commissions WHERE booking_id = $1 AND status != 'reversed'",
     [booking.id],
   );
   if (existing) return;
@@ -130,6 +131,27 @@ async function creditReferralCommission(booking) {
   await execute(
     "UPDATE partner_profiles SET referral_balance = referral_balance + $1 WHERE user_id = $2",
     [commissionAmount, referrerId],
+  );
+}
+
+// When an accepted booking is later cancelled/rejected, reverse any referral
+// commission that was credited for it: deduct it back from the referrer's
+// balance and mark the commission row as reversed. Idempotent — a no-op if no
+// active commission exists for the booking.
+async function reverseReferralCommission(booking) {
+  var row = await queryOne(
+    "SELECT id, referrer_user_id, commission_amount FROM partner_referral_commissions WHERE booking_id = $1 AND status != 'reversed'",
+    [booking.id],
+  );
+  if (!row) return;
+
+  await execute(
+    "UPDATE partner_profiles SET referral_balance = referral_balance - $1 WHERE user_id = $2",
+    [parseFloat(row.commission_amount) || 0, row.referrer_user_id],
+  );
+  await execute(
+    "UPDATE partner_referral_commissions SET status = 'reversed' WHERE id = $1",
+    [row.id],
   );
 }
 
@@ -697,6 +719,7 @@ router.patch("/:id/status", authenticateToken, async (req, res) => {
         booking.pickup_date,
         booking.dropoff_date,
       );
+      await reverseReferralCommission(booking);
     }
 
     var { sendEmail } = require("../mailer");
@@ -846,3 +869,4 @@ router.get("/:id", authenticateToken, async (req, res) => {
 });
 
 module.exports = router;
+module.exports.reverseReferralCommission = reverseReferralCommission;

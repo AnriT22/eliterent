@@ -883,6 +883,7 @@ router.patch('/bookings/:id/status', async (req, res) => {
 
         if (status === 'rejected' || status === 'cancelled') {
             await unblockDatesForBooking(booking.vehicle_id, booking.pickup_date, booking.dropoff_date);
+            try { await require('./bookings').reverseReferralCommission(booking); } catch (e) { console.error('reverseReferralCommission error:', e.message); }
 
             var pStatus = String(booking.payment_status || 'unpaid');
             if (pStatus === 'paid' && booking.paypal_capture_id && paypal.isConfigured()) {

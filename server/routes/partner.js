@@ -78,7 +78,7 @@ async function getReferralStats(userId) {
   }
 
   var earnings = await queryOne(
-    "SELECT COALESCE(SUM(commission_amount), 0) as total, COALESCE(SUM(CASE WHEN status = 'pending' THEN commission_amount ELSE 0 END), 0) as pending FROM partner_referral_commissions WHERE referrer_user_id = $1",
+    "SELECT COALESCE(SUM(commission_amount), 0) as total, COALESCE(SUM(CASE WHEN status = 'pending' THEN commission_amount ELSE 0 END), 0) as pending FROM partner_referral_commissions WHERE referrer_user_id = $1 AND status != 'reversed'",
     [userId],
   );
 
