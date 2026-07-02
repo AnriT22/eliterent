@@ -449,6 +449,7 @@ async function middleware(req, res, next) {
         }
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('Cache-Control', 'public, max-age=300');
+        try { html = require('./head-inject').inject(html); } catch (e) {}
         res.send(html);
     } catch (err) {
         console.error('[SEO] prerender error:', err.message);
