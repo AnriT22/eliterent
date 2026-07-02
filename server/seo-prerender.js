@@ -288,9 +288,11 @@ function buildVehicleContentHtml(v, url, img) {
 }
 
 function buildVehicleSchema(v, url, img) {
+    // schema.org "Car" is a subtype of Product, so it keeps offer/brand/image
+    // support while adding real vehicle specs — richer, more specific results.
     var product = {
         '@context': 'https://schema.org',
-        '@type': 'Product',
+        '@type': 'Car',
         name: v.name || 'Rental car',
         image: img,
         description: vehicleDesc(v),
@@ -300,10 +302,20 @@ function buildVehicleSchema(v, url, img) {
             '@type': 'Offer',
             priceCurrency: 'USD',
             price: String(v.price_per_day || 0),
+            priceValidUntil: new Date(Date.now() + 365 * 864e5).toISOString().slice(0, 10),
+            itemCondition: 'https://schema.org/UsedCondition',
             availability: 'https://schema.org/InStock',
+            businessFunction: 'https://schema.org/LeaseOut',
             url: url
         }
     };
+    // Add only the specs that are actually present on the record (no invented data).
+    if (v.gearbox) product.vehicleTransmission = String(v.gearbox).replace(/_/g, ' ');
+    if (v.engine) product.fuelType = String(v.engine).replace(/_/g, ' ');
+    if (v.seats) product.vehicleSeatingCapacity = parseInt(v.seats, 10) || undefined;
+    if (v.doors) product.numberOfDoors = parseInt(v.doors, 10) || undefined;
+    if (v.year) product.vehicleModelDate = String(v.year);
+    if (v.drive_type) product.driveWheelConfiguration = String(v.drive_type).replace(/_/g, ' ');
     var crumbs = {
         '@context': 'https://schema.org',
         '@type': 'BreadcrumbList',
