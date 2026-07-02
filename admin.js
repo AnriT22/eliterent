@@ -106,7 +106,7 @@ function escHtml(s) {
         loadVisitors();
     }
 
-    var _excludeBots = false;
+    var _excludeBots = true; // default to human-only view; toggle to include bots
 
     function loadVisitors() {
         var url = '/api/admin/visitors' + (_excludeBots ? '?excludeBots=1' : '');

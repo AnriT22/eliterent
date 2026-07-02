@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
@@ -331,6 +332,32 @@ app.use((req, res, next) => {
     }
     next();
 });
+
+// Analytics: inject GA4 / Search-Console tags into the <head> of every html
+// page from one place (server/head-inject.js). Runs before express.static so
+// it owns html delivery for the non-prerendered pages; assets fall through.
+// No-op when no IDs are configured, so it's safe until you add them.
+const headInject = require('./head-inject');
+if (headInject.isEnabled) {
+    app.get(/.*/, (req, res, next) => {
+        try {
+            if (req.method !== 'GET') return next();
+            var p = req.path;
+            var isHtml = p === '/' || p.endsWith('.html');
+            if (!isHtml) return next();
+            var rel = p === '/' ? 'index.html' : p.replace(/^\/+/, '');
+            var filePath = path.join(__dirname, '..', rel);
+            // keep inside the site root
+            if (filePath.indexOf(path.join(__dirname, '..')) !== 0) return next();
+            fs.readFile(filePath, 'utf8', (err, html) => {
+                if (err) return next();
+                res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                res.setHeader('Cache-Control', 'no-cache');
+                res.send(headInject.inject(html));
+            });
+        } catch (e) { next(); }
+    });
+}
 
 // Serve static files with caching
 app.use(express.static(path.join(__dirname, '..'), {
