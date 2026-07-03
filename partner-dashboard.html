@@ -2069,6 +2069,10 @@
                 <p class="vip-modal-subtitle" data-i18n="partner_dashboard.vip_modal_sub">$10 &middot; 30 days green glow badge &amp; priority placement</p>
             </div>
             <div class="vip-modal-body">
+                <div id="vipBonusBanner" style="display:none;">
+                    <span class="vbb-emoji">&#127873;</span>
+                    <span class="vbb-text" data-i18n-html="partner_dashboard.vip_first_bonus_banner">First VIP unlocks a <strong>$10 bonus</strong> — get $10 free wallet credit the moment you activate your first car. Use it toward another month or another car, on us.</span>
+                </div>
                 <div class="vip-preview-card">
                     <div class="vip-preview-img-wrap">
                         <img id="vipCarImg" src="" alt="" loading="lazy">
@@ -2091,6 +2095,13 @@
     </div>
 
     <style>
+        #vipBonusBanner { display:flex; align-items:center; gap:10px; margin:0 0 14px; padding:12px 14px;
+            background:linear-gradient(135deg,#C9A84C 0%,#e6c766 100%); color:#1a1400; border-radius:12px;
+            font-size:13.5px; line-height:1.4; box-shadow:0 4px 14px rgba(201,168,76,0.35);
+            animation:vbbPulse 2s ease-in-out infinite; }
+        #vipBonusBanner .vbb-emoji { font-size:24px; flex-shrink:0; }
+        #vipBonusBanner strong { color:#1a1400; }
+        @keyframes vbbPulse { 0%,100%{ box-shadow:0 4px 14px rgba(201,168,76,0.35);} 50%{ box-shadow:0 4px 22px rgba(201,168,76,0.65);} }
         #vipCarBalances { display:flex; gap:12px; margin:14px 0; }
         .vip-bal-card { flex:1; background:#1C1E26; border:1px solid #2A2E38; border-radius:10px; padding:12px 14px; display:flex; flex-direction:column; gap:4px; }
         .vip-bal-card span { font-size:11px; color:#A0A3B0; text-transform:uppercase; letter-spacing:0.4px; }
@@ -2106,7 +2117,7 @@
 
     <script src="location-data.js?v=1"></script>
 
-    <script src="dashboard.js?v=17"></script>
+    <script src="dashboard.js?v=18"></script>
 
 <script src="premium-animations.js?v=2"></script>
 
