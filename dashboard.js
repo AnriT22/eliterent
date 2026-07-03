@@ -2216,8 +2216,7 @@
         loadAvailability(); // renders after data loads
         vdPopulateHourSelects();
         if (typeof loadTimeBlocks === 'function') loadTimeBlocks();
-        var bsd = document.getElementById('blockStartDate'), bed = document.getElementById('blockEndDate');
-        if (bsd) bsd.value = ''; if (bed) bed.value = '';
+        vcClearBlockDateFields();
         var tbErr = document.getElementById('timeBlockError'); if (tbErr) tbErr.style.display = 'none';
     };
 
@@ -2427,8 +2426,41 @@
         .catch(function (err) { console.error('Load time-blocks error:', err); });
     };
 
+    // Compose the Day/Month/Year fields into the hidden YYYY-MM-DD input the
+    // block logic reads. Empty (invalid/incomplete) => empty hidden value.
+    function vcComposeBlockDate(which) {
+        var d = document.getElementById('block' + which + 'Day');
+        var m = document.getElementById('block' + which + 'Month');
+        var y = document.getElementById('block' + which + 'Year');
+        var hid = document.getElementById('block' + which + 'Date');
+        if (!d || !m || !y || !hid) return;
+        var dv = parseInt(d.value, 10), mv = parseInt(m.value, 10), yv = parseInt(y.value, 10);
+        if (dv >= 1 && dv <= 31 && mv >= 1 && mv <= 12 && yv >= 2000) {
+            hid.value = yv + '-' + String(mv).padStart(2, '0') + '-' + String(dv).padStart(2, '0');
+        } else {
+            hid.value = '';
+        }
+    }
+    function vcClearBlockDateFields() {
+        ['StartDay', 'StartMonth', 'StartYear', 'EndDay', 'EndMonth', 'EndYear'].forEach(function (s) {
+            var e = document.getElementById('block' + s); if (e) e.value = '';
+        });
+        var sd = document.getElementById('blockStartDate'); if (sd) sd.value = '';
+        var ed = document.getElementById('blockEndDate'); if (ed) ed.value = '';
+    }
+    // Keep the hidden inputs in sync as the partner types (attached once).
+    (function () {
+        ['Start', 'End'].forEach(function (which) {
+            ['Day', 'Month', 'Year'].forEach(function (part) {
+                var el = document.getElementById('block' + which + part);
+                if (el) el.addEventListener('input', function () { vcComposeBlockDate(which); });
+            });
+        });
+    })();
+
     window.addTimeBlock = function () {
         if (!currentVehicleId) return;
+        vcComposeBlockDate('Start'); vcComposeBlockDate('End');
         var sDate = (document.getElementById('blockStartDate') || {}).value;
         var sHour = (document.getElementById('blockStartHour') || {}).value;
         var eDate = (document.getElementById('blockEndDate') || {}).value;
@@ -2458,8 +2490,7 @@
         .then(function (res) {
             // 2xx (incl. 200 "already exists") = success; clear inputs and refresh.
             if (!res.ok) { showErr((res.j && res.j.error) || ('Could not save block (error ' + res.status + ').')); return; }
-            var sd = document.getElementById('blockStartDate'); if (sd) sd.value = '';
-            var ed = document.getElementById('blockEndDate'); if (ed) ed.value = '';
+            vcClearBlockDateFields();
             loadTimeBlocks();
         })
         .catch(function (err) { console.error('Add time-block error:', err); showErr('Network error. Try again.'); })
