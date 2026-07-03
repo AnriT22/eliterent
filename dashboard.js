@@ -13,6 +13,12 @@
         return;
     }
 
+    // Translate-or-fallback: returns the translation if present, else the given
+    // English fallback (I18n.t returns the key itself when a key is missing).
+    function tOr(key, fallback) {
+        return (typeof I18n !== 'undefined' && I18n.t && I18n.t(key) !== key) ? I18n.t(key) : fallback;
+    }
+
     // Set user info in header
     var nameEl = document.getElementById('dbUserName');
     if (nameEl) nameEl.textContent = user.full_name || user.email;
@@ -1264,7 +1270,8 @@
                 html += '<button class="db-btn-edit" onclick="editVehicle(' + v.id + ')" data-i18n="partner_dashboard.edit_btn">Edit</button>';
                 html += '<button class="db-btn-dates" onclick="openAvailabilityCalendar(' + v.id + ')" data-i18n="partner_dashboard.dates_btn">DATES</button>';
                 if (statusClass === 'active') {
-                    html += '<button class="db-btn-vip" data-id="' + v.id + '" data-i18n="partner_dashboard.vip_btn">' + (vipActive ? '⭐ Extend VIP' : '⭐ VIP') + '</button>';
+                    var vipLabel = vipActive ? tOr('partner_dashboard.vip_extend', '⭐ Extend VIP') : tOr('partner_dashboard.vip_btn', '⭐ VIP');
+                    html += '<button class="db-btn-vip" data-id="' + v.id + '">' + vipLabel + '</button>';
                 }
                 html += '<button class="db-btn-delete" onclick="deleteVehicle(' + v.id + ')" data-i18n="partner_dashboard.delete_btn">Request Delete</button>';
             } else {
@@ -3183,8 +3190,8 @@
                 var vb = (parseFloat(w.vip_balance) || 0).toFixed(2);
                 var rb = (parseFloat(w.referral_balance) || 0).toFixed(2);
                 document.getElementById('vipCarBalances').innerHTML =
-                    '<div class="vip-bal-card"><span>VIP credit</span><strong>$' + vb + '</strong></div>' +
-                    '<div class="vip-bal-card"><span>Referral earnings</span><strong>$' + rb + '</strong></div>';
+                    '<div class="vip-bal-card"><span>' + tOr('partner_dashboard.vip_credit', 'VIP credit') + '</span><strong>$' + vb + '</strong></div>' +
+                    '<div class="vip-bal-card"><span>' + tOr('partner_dashboard.vip_referral_earnings', 'Referral earnings') + '</span><strong>$' + rb + '</strong></div>';
                 renderVipActions(w);
             })
             .catch(function () { document.getElementById('vipCarBalances').textContent = 'Failed to load wallet.'; });
@@ -3206,15 +3213,15 @@
         var a = document.getElementById('vipCarActions');
         var html = '';
         if ((parseFloat(w.vip_balance) || 0) >= fee) {
-            html += '<button class="btn btn-primary vip-act" data-act="balance">Use VIP credit — $' + fee + '</button>';
+            html += '<button class="btn btn-primary vip-act" data-act="balance">' + tOr('partner_dashboard.vip_use_credit', 'Use VIP credit') + ' — $' + fee + '</button>';
         }
         if ((parseFloat(w.referral_balance) || 0) >= fee) {
-            html += '<button class="btn btn-secondary vip-act" data-act="referral">Use referral earnings — $' + fee + '</button>';
+            html += '<button class="btn btn-secondary vip-act" data-act="referral">' + tOr('partner_dashboard.vip_use_referral', 'Use referral earnings') + ' — $' + fee + '</button>';
         }
-        html += '<button class="btn btn-secondary vip-act" data-act="card">Pay $' + fee + ' by card</button>';
-        html += '<button class="btn btn-text vip-act" data-act="topup">Top up VIP wallet</button>';
+        html += '<button class="btn btn-secondary vip-act" data-act="card">' + tOr('partner_dashboard.vip_pay_card', 'Pay by card') + ' — $' + fee + '</button>';
+        html += '<button class="btn btn-text vip-act" data-act="topup">' + tOr('partner_dashboard.vip_topup', 'Top up VIP wallet') + '</button>';
         if (w.first_bonus_available) {
-            html += '<div style="font-size:12px;color:#22c55e;margin-top:8px;">🎁 First-VIP bonus: get $10 free credit added after your first activation.</div>';
+            html += '<div style="font-size:12px;color:#22c55e;margin-top:8px;">🎁 ' + tOr('partner_dashboard.vip_first_bonus', 'First-VIP bonus: get $10 free credit added after your first activation.') + '</div>';
         }
         a.innerHTML = html;
         Array.prototype.forEach.call(a.querySelectorAll('.vip-act'), function (btn) {
@@ -3254,9 +3261,9 @@
 
     function renderVipTopup() {
         var a = document.getElementById('vipCarActions');
-        a.innerHTML = '<div style="font-size:13px;margin-bottom:8px;color:#A0A3B0;">Choose amount to add to your VIP wallet:</div>' +
+        a.innerHTML = '<div style="font-size:13px;margin-bottom:8px;color:#A0A3B0;">' + tOr('partner_dashboard.vip_topup_choose', 'Choose amount to add to your VIP wallet:') + '</div>' +
             [10, 20, 30, 50].map(function (x) { return '<button class="btn btn-secondary vip-top" data-amt="' + x + '" style="margin:0 6px 6px 0;">$' + x + '</button>'; }).join('') +
-            '<div><button class="btn btn-text" id="vipTopBack">← Back</button></div>';
+            '<div><button class="btn btn-text" id="vipTopBack">' + tOr('partner_dashboard.vip_back', '← Back') + '</button></div>';
         document.getElementById('vipTopBack').addEventListener('click', function () { if (_vipWallet) renderVipActions(_vipWallet); });
         Array.prototype.forEach.call(a.querySelectorAll('.vip-top'), function (btn) {
             btn.addEventListener('click', function () { renderVipTopupButton(parseInt(btn.getAttribute('data-amt'), 10)); });

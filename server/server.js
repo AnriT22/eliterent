@@ -554,6 +554,45 @@ initDB().then(() => {
         } catch (e) { /* ignore */ }
     }, 3600 * 1000);
 
+    // VIP expiry reminders — email partners ~3 days before a car's VIP lapses so
+    // they can renew (recurring revenue). Sent once per VIP period via the
+    // vip_expiry_reminded flag, which activateVehicleVip resets on each purchase.
+    const runVipExpiryReminders = async () => {
+        try {
+            const pool = getPool();
+            if (!pool) return;
+            const { sendEmail } = require('./mailer');
+            const rows = (await pool.query(
+                `SELECT v.id, v.name, v.vip_until, u.email AS partner_email, u.full_name AS partner_name
+                 FROM vehicles v JOIN users u ON v.partner_id = u.id
+                 WHERE v.vip_until IS NOT NULL
+                   AND v.vip_until > NOW()
+                   AND v.vip_until < NOW() + INTERVAL '3 days'
+                   AND COALESCE(v.vip_expiry_reminded, 0) = 0`
+            )).rows;
+            for (const r of rows) {
+                // Mark first so a send failure/restart never spams the partner.
+                await pool.query('UPDATE vehicles SET vip_expiry_reminded = 1 WHERE id = $1', [r.id]);
+                if (!r.partner_email) continue;
+                const when = new Date(r.vip_until).toLocaleDateString();
+                try {
+                    await sendEmail({
+                        to: r.partner_email,
+                        subject: 'Your VIP for ' + (r.name || 'your car') + ' expires soon',
+                        text: 'Hello ' + (r.partner_name || 'Partner') + ',\n\n'
+                            + 'The VIP highlight for "' + (r.name || 'your car') + '" expires on ' + when + '.\n'
+                            + 'Renew it from your dashboard to keep the green glow, VIP badge and priority placement — '
+                            + '$10 for another 30 days (or use your VIP wallet / referral earnings).\n\n'
+                            + 'Renew here: https://eliteauto.rent/partner-dashboard.html\n\n— EliteAuto.rent'
+                    });
+                } catch (e) { console.error('[VIP] reminder email failed for vehicle ' + r.id + ':', e.message); }
+            }
+            if (rows.length > 0) console.log('[VIP] Sent ' + rows.length + ' VIP-expiry reminder(s)');
+        } catch (e) { console.error('[VIP] expiry reminder job error:', e.message); }
+    };
+    setInterval(runVipExpiryReminders, 12 * 3600 * 1000); // every 12 hours
+    setTimeout(runVipExpiryReminders, 30 * 1000); // once shortly after boot
+
 }).catch((err) => {
     console.error('Failed to initialize database:', err);
     process.exit(1);

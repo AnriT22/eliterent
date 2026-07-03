@@ -314,6 +314,47 @@
                         <tbody id="finTableBody"></tbody>
                     </table>
                 </div>
+
+                <!-- VIP WALLETS -->
+                <h3 style="margin:28px 0 12px;color:#F0ECE2;">VIP Wallets &amp; Revenue</h3>
+                <div class="fin-summary-grid" id="vipSummaryGrid">
+                    <div class="fin-card fin-card-green">
+                        <div class="fin-card-label">VIP Revenue (top-ups)</div>
+                        <div class="fin-card-value" id="vipTotalTopups">$0.00</div>
+                    </div>
+                    <div class="fin-card fin-card-blue">
+                        <div class="fin-card-label">Active VIP Cars</div>
+                        <div class="fin-card-value" id="vipActiveCars">0</div>
+                    </div>
+                    <div class="fin-card fin-card-purple">
+                        <div class="fin-card-label">Outstanding VIP Credit</div>
+                        <div class="fin-card-value" id="vipOutstanding">$0.00</div>
+                    </div>
+                    <div class="fin-card fin-card-red">
+                        <div class="fin-card-label">Bonus Given Away</div>
+                        <div class="fin-card-value" id="vipBonusGiven">$0.00</div>
+                    </div>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:20px;margin-top:8px;">
+                    <div style="flex:1;min-width:320px;">
+                        <h4 style="color:#A0A3B0;font-size:13px;margin:8px 0;">Partner balances</h4>
+                        <div class="admin-table-wrap">
+                            <table class="admin-table">
+                                <thead><tr><th>Partner</th><th>VIP Credit</th><th>Active VIP</th></tr></thead>
+                                <tbody id="vipPartnersBody"><tr><td colspan="3" style="color:#A0A3B0;">Loading…</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div style="flex:1;min-width:320px;">
+                        <h4 style="color:#A0A3B0;font-size:13px;margin:8px 0;">Recent transactions</h4>
+                        <div class="admin-table-wrap">
+                            <table class="admin-table">
+                                <thead><tr><th>Partner</th><th>Type</th><th>Amount</th><th class="hide-mobile">When</th></tr></thead>
+                                <tbody id="vipTxBody"><tr><td colspan="4" style="color:#A0A3B0;">Loading…</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </section>
             <!-- PROMO CODES TAB -->
             <section class="admin-tab" id="tabPromos">
@@ -596,7 +637,7 @@
         }
     })();
     </script>
-    <script src="admin.js?v=10"></script>
+    <script src="admin.js?v=11"></script>
 <script src="premium-animations.js?v=2"></script>
 </body>
 </html>

@@ -1393,4 +1393,40 @@ router.post('/payout-requests/:id/process', authenticateToken, requireRole('admi
     }
 });
 
+// GET /api/admin/vip-overview — VIP wallet balances, revenue totals, recent tx
+router.get('/vip-overview', authenticateToken, requireRole('admin'), async (req, res) => {
+    try {
+        var totals = await queryOne(
+            `SELECT
+                COALESCE((SELECT SUM(vip_balance) FROM partner_profiles), 0) AS total_balance,
+                COALESCE((SELECT SUM(amount) FROM vip_wallet_transactions WHERE type = 'topup'), 0) AS total_topups,
+                COALESCE((SELECT SUM(amount) FROM vip_wallet_transactions WHERE type = 'bonus'), 0) AS total_bonus,
+                COALESCE((SELECT -SUM(amount) FROM vip_wallet_transactions WHERE type = 'spend'), 0) AS total_spend,
+                (SELECT COUNT(*) FROM vehicles WHERE vip_until > NOW()) AS active_vip_cars`
+        );
+        var partners = await queryAll(
+            `SELECT u.id, u.full_name, u.email, pp.company_name,
+                    COALESCE(pp.vip_balance, 0) AS vip_balance,
+                    (SELECT COUNT(*) FROM vehicles v WHERE v.partner_id = u.id AND v.vip_until > NOW()) AS active_vip_cars
+             FROM partner_profiles pp JOIN users u ON pp.user_id = u.id
+             WHERE COALESCE(pp.vip_balance,0) > 0
+                OR EXISTS (SELECT 1 FROM vehicles v WHERE v.partner_id = u.id AND v.vip_until > NOW())
+             ORDER BY vip_balance DESC, active_vip_cars DESC
+             LIMIT 100`
+        );
+        var transactions = await queryAll(
+            `SELECT t.amount, t.type, t.source, t.vehicle_id, t.balance_after, t.created_at,
+                    u.full_name AS partner_name, u.email AS partner_email, v.name AS vehicle_name
+             FROM vip_wallet_transactions t
+             JOIN users u ON t.partner_user_id = u.id
+             LEFT JOIN vehicles v ON t.vehicle_id = v.id
+             ORDER BY t.created_at DESC LIMIT 50`
+        );
+        res.json({ totals: totals, partners: partners, transactions: transactions });
+    } catch (err) {
+        console.error('Admin vip-overview error:', err);
+        res.status(500).json({ error: 'Failed to load VIP overview' });
+    }
+});
+
 module.exports = router;
