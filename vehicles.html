@@ -1958,9 +1958,12 @@
             var labelEl = document.getElementById('vpCountryLabel');
             var btn = document.getElementById('vpCountryBtn');
             if (!code) {
+                // No country chosen yet: keep the manual selector button
+                // visible so users can still pick a country at any time.
                 if (flagEl) flagEl.textContent = '🌍';
-                if (labelEl) labelEl.textContent = '--';
-                if (btn) btn.style.display = 'none';
+                var tAll = (typeof I18n !== 'undefined' && I18n.t) ? I18n.t('vehicles_page.select_country') : null;
+                if (labelEl) labelEl.textContent = (tAll && tAll !== 'vehicles_page.select_country') ? tAll : 'Select Country';
+                if (btn) btn.style.display = 'inline-flex';
                 return;
             }
             var tLabel = (typeof I18n !== 'undefined' && I18n.t) ? I18n.t('filter_options.country_' + code) : null;
@@ -1974,9 +1977,18 @@
             showCountryModal();
         };
 
+        // ------------------------------------------------------------
+        // FEATURE FLAG: automatic country selector modal on page load.
+        // Set to true to re-enable the modal that auto-appears when a
+        // visitor opens this page without having chosen a country.
+        // When false, the modal never auto-shows, but the manual country
+        // button (window.openCountrySelector) stays fully functional.
+        // ------------------------------------------------------------
+        var AUTO_COUNTRY_MODAL_ENABLED = false;
+
         // Check on page load
         var savedCountry = sessionStorage.getItem('selectedCountry');
-        if (!savedCountry) {
+        if (!savedCountry && AUTO_COUNTRY_MODAL_ENABLED) {
             showCountryModal();
         } else {
             updateCountryButton();
@@ -1994,6 +2006,6 @@
     <script src="navbar-auth.js?v=4"></script>
     <script src="currency.js?v=4"></script>
 <script src="premium-animations.js?v=2"></script>
-<script src="country-popup.js?v=1"></script>
+<script src="country-popup.js?v=2"></script>
 </body>
 </html>
