@@ -472,6 +472,32 @@ async function initDB() {
         )
     `);
 
+    // VIP wallet — a spend-only credit balance partners use to buy VIP for their
+    // cars ($10 / 30 days). Kept separate from referral_balance (which is real,
+    // payout-able cash). vip_first_bonus_used tracks the one-time first-VIP gift.
+    try {
+        await pool.query(`ALTER TABLE partner_profiles ADD COLUMN IF NOT EXISTS vip_balance REAL DEFAULT 0`);
+        await pool.query(`ALTER TABLE partner_profiles ADD COLUMN IF NOT EXISTS vip_first_bonus_used INTEGER DEFAULT 0`);
+    } catch (e) { /* columns may already exist or table not yet created */ }
+
+    // Audit log for every VIP-wallet movement: topup (card), spend (VIP buy),
+    // bonus (first-VIP gift), referral_transfer (moved from referral earnings).
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS vip_wallet_transactions (
+            id SERIAL PRIMARY KEY,
+            partner_user_id INTEGER NOT NULL REFERENCES users(id),
+            amount REAL NOT NULL,
+            type TEXT NOT NULL,
+            source TEXT,
+            vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE SET NULL,
+            balance_after REAL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    try {
+        await pool.query(`CREATE INDEX IF NOT EXISTS idx_vip_wallet_tx_partner ON vip_wallet_transactions(partner_user_id)`);
+    } catch (e) { /* index may already exist */ }
+
     // Page visits tracking
     await pool.query(`
         CREATE TABLE IF NOT EXISTS page_visits (

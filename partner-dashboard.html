@@ -2044,7 +2044,7 @@
                 </div>
                 <div class="vip-price-row">
                     <span class="vip-price-label">Total</span>
-                    <span class="vip-price-amount">$2.00</span>
+                    <span class="vip-price-amount">$10.00</span>
                     <span class="vip-price-period">30 days</span>
                 </div>
                 <div id="vipPayPalContainer"></div>
@@ -2059,13 +2059,54 @@
         </div>
     </div>
 
+    <!-- VIP CAR MODAL — balances + pay by credit / referral / card / top-up -->
+    <div id="vipCarModal" class="vip-modal-overlay" style="display:none;">
+        <div class="vip-modal">
+            <button class="vip-modal-close" onclick="closeVipCarModal()" aria-label="Close">&times;</button>
+            <div class="vip-modal-header">
+                <span class="vip-modal-icon">&#11088;</span>
+                <h3 class="vip-modal-title" data-i18n="partner_dashboard.vip_modal_title">Give this car VIP status</h3>
+                <p class="vip-modal-subtitle" data-i18n="partner_dashboard.vip_modal_sub">$10 &middot; 30 days green glow badge &amp; priority placement</p>
+            </div>
+            <div class="vip-modal-body">
+                <div class="vip-preview-card">
+                    <div class="vip-preview-img-wrap">
+                        <img id="vipCarImg" src="" alt="" loading="lazy">
+                        <span class="vip-preview-badge">VIP</span>
+                    </div>
+                    <div class="vip-preview-body">
+                        <h4 id="vipCarName">Your car</h4>
+                        <p class="vip-preview-text" data-i18n="partner_dashboard.vip_modal_text">Stands out with a green glow and VIP badge across the site for 30 days.</p>
+                    </div>
+                </div>
+                <div id="vipCarBalances" class="vip-balances">Loading…</div>
+                <div id="vipCarActions" class="vip-actions"></div>
+                <div id="vipCarPayPal" style="margin-top:12px;"></div>
+                <div id="vipCarMsg" style="display:none;margin-top:10px;font-size:13px;font-weight:600;"></div>
+            </div>
+            <div class="vip-modal-footer">
+                <button class="vip-btn-secondary" onclick="closeVipCarModal()" data-i18n="partner_dashboard.vip_close">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        #vipCarBalances { display:flex; gap:12px; margin:14px 0; }
+        .vip-bal-card { flex:1; background:#1C1E26; border:1px solid #2A2E38; border-radius:10px; padding:12px 14px; display:flex; flex-direction:column; gap:4px; }
+        .vip-bal-card span { font-size:11px; color:#A0A3B0; text-transform:uppercase; letter-spacing:0.4px; }
+        .vip-bal-card strong { font-size:20px; color:#C9A84C; }
+        #vipCarActions { display:flex; flex-direction:column; gap:8px; }
+        #vipCarActions .btn { width:100%; }
+        #vipCarActions .vip-top { width:auto; display:inline-block; }
+    </style>
+
     <script src="script.js?v=13"></script>
 
     <script src="navbar-auth.js?v=4"></script>
 
     <script src="location-data.js?v=1"></script>
 
-    <script src="dashboard.js?v=14"></script>
+    <script src="dashboard.js?v=15"></script>
 
 <script src="premium-animations.js?v=2"></script>
 

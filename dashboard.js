@@ -1255,10 +1255,17 @@
             html += '</div>';
             html += '<div class="db-vehicle-price">$' + (v.price_per_day || 0) + ' <span data-i18n="fleet.per_day">/day</span></div>';
             html += verBadge;
+            var vipActive = v.vip_until && new Date(v.vip_until) > new Date();
+            if (vipActive) {
+                html += '<div style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;margin-left:6px;background:rgba(201,168,76,0.18);color:#C9A84C;border-radius:12px;font-size:11px;font-weight:700;">⭐ VIP</div>';
+            }
             html += '<div class="db-vehicle-actions">';
             if (statusClass !== 'delete_requested') {
                 html += '<button class="db-btn-edit" onclick="editVehicle(' + v.id + ')" data-i18n="partner_dashboard.edit_btn">Edit</button>';
                 html += '<button class="db-btn-dates" onclick="openAvailabilityCalendar(' + v.id + ')" data-i18n="partner_dashboard.dates_btn">DATES</button>';
+                if (statusClass === 'active') {
+                    html += '<button class="db-btn-vip" data-id="' + v.id + '" data-i18n="partner_dashboard.vip_btn">' + (vipActive ? '⭐ Extend VIP' : '⭐ VIP') + '</button>';
+                }
                 html += '<button class="db-btn-delete" onclick="deleteVehicle(' + v.id + ')" data-i18n="partner_dashboard.delete_btn">Request Delete</button>';
             } else {
                 html += '<span style="color:#ef4444;font-size:12px;font-style:italic;" data-i18n="partner_dashboard.awaiting_deletion">Awaiting admin approval for deletion</span>';
@@ -1268,6 +1275,16 @@
         });
 
         grid.innerHTML = html;
+        // Bind VIP buttons (name/image read from the card so we avoid quoting issues)
+        Array.prototype.forEach.call(grid.querySelectorAll('.db-btn-vip'), function (btn) {
+            btn.addEventListener('click', function () {
+                var card = btn.closest('.db-vehicle-card');
+                var id = parseInt(btn.getAttribute('data-id'), 10);
+                var nm = card ? (card.querySelector('.db-vehicle-name') || {}).textContent : '';
+                var im = card ? (card.querySelector('.db-vehicle-img') || {}).src : '';
+                if (window.openVipCarModal) window.openVipCarModal(id, nm, im);
+            });
+        });
         if (typeof I18n !== 'undefined' && I18n.translatePage) I18n.translatePage(grid);
     }
 
@@ -3099,6 +3116,177 @@
     }
 
     })();
+
+    // ========================================
+    // VIP CAR MODAL — balances + pay by credit / referral / card / top-up
+    // ========================================
+    var _vipCarId = null, _vipWallet = null, _ppSdkPromise = null;
+
+    function vipAuthHeaders() {
+        return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '') };
+    }
+
+    function loadPayPalSdk() {
+        if (_ppSdkPromise) return _ppSdkPromise;
+        _ppSdkPromise = fetch('/api/payments/config').then(function (r) { return r.json(); }).then(function (cfg) {
+            if (!cfg.configured || !cfg.clientId) throw new Error('Payment is not configured yet. Contact support.');
+            if (window.paypal) return window.paypal;
+            return new Promise(function (resolve, reject) {
+                var base = cfg.mode === 'live' ? 'https://www.paypal.com' : 'https://www.sandbox.paypal.com';
+                var s = document.createElement('script');
+                s.src = base + '/sdk/js?client-id=' + encodeURIComponent(cfg.clientId) + '&currency=USD&intent=capture';
+                s.onload = function () { resolve(window.paypal); };
+                s.onerror = function () { reject(new Error('Failed to load PayPal.')); };
+                document.head.appendChild(s);
+            });
+        });
+        return _ppSdkPromise;
+    }
+
+    function vipMsg(text, ok) {
+        var el = document.getElementById('vipCarMsg');
+        if (!el) return;
+        el.textContent = text;
+        el.style.display = 'block';
+        el.style.color = ok ? '#22c55e' : '#ef4444';
+    }
+
+    window.openVipCarModal = function (id, name, img) {
+        _vipCarId = id;
+        var modal = document.getElementById('vipCarModal');
+        if (!modal) return;
+        var nameEl = document.getElementById('vipCarName');
+        var imgEl = document.getElementById('vipCarImg');
+        if (nameEl) nameEl.textContent = name || 'Your car';
+        if (imgEl) imgEl.src = img || 'images/placeholder-car.png';
+        var msg = document.getElementById('vipCarMsg'); if (msg) msg.style.display = 'none';
+        var pp = document.getElementById('vipCarPayPal'); if (pp) pp.innerHTML = '';
+        document.getElementById('vipCarBalances').innerHTML = 'Loading…';
+        document.getElementById('vipCarActions').innerHTML = '';
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        refreshVipWallet();
+    };
+
+    window.closeVipCarModal = function () {
+        var modal = document.getElementById('vipCarModal');
+        if (modal) modal.style.display = 'none';
+        document.body.style.overflow = '';
+        _vipCarId = null;
+    };
+
+    function refreshVipWallet() {
+        fetch('/api/partner/vip-wallet', { headers: vipAuthHeaders() })
+            .then(function (r) { return r.json(); })
+            .then(function (w) {
+                _vipWallet = w;
+                var vb = (parseFloat(w.vip_balance) || 0).toFixed(2);
+                var rb = (parseFloat(w.referral_balance) || 0).toFixed(2);
+                document.getElementById('vipCarBalances').innerHTML =
+                    '<div class="vip-bal-card"><span>VIP credit</span><strong>$' + vb + '</strong></div>' +
+                    '<div class="vip-bal-card"><span>Referral earnings</span><strong>$' + rb + '</strong></div>';
+                renderVipActions(w);
+            })
+            .catch(function () { document.getElementById('vipCarBalances').textContent = 'Failed to load wallet.'; });
+    }
+
+    function payVipVia(endpoint) {
+        document.getElementById('vipCarActions').innerHTML = '<div class="payment-loading">Activating…</div>';
+        fetch(endpoint, { method: 'POST', headers: vipAuthHeaders() })
+            .then(async function (r) { var d = await r.json(); if (!r.ok) throw new Error(d.error || 'Failed'); return d; })
+            .then(function (d) {
+                vipMsg('✓ ' + (d.message || 'VIP activated for 30 days!'), true);
+                setTimeout(function () { closeVipCarModal(); if (window.loadVehicles) window.loadVehicles(); }, 1800);
+            })
+            .catch(function (e) { vipMsg(e.message || 'Payment failed.', false); if (_vipWallet) renderVipActions(_vipWallet); });
+    }
+
+    function renderVipActions(w) {
+        var fee = w.vip_fee || 10;
+        var a = document.getElementById('vipCarActions');
+        var html = '';
+        if ((parseFloat(w.vip_balance) || 0) >= fee) {
+            html += '<button class="btn btn-primary vip-act" data-act="balance">Use VIP credit — $' + fee + '</button>';
+        }
+        if ((parseFloat(w.referral_balance) || 0) >= fee) {
+            html += '<button class="btn btn-secondary vip-act" data-act="referral">Use referral earnings — $' + fee + '</button>';
+        }
+        html += '<button class="btn btn-secondary vip-act" data-act="card">Pay $' + fee + ' by card</button>';
+        html += '<button class="btn btn-text vip-act" data-act="topup">Top up VIP wallet</button>';
+        if (w.first_bonus_available) {
+            html += '<div style="font-size:12px;color:#22c55e;margin-top:8px;">🎁 First-VIP bonus: get $10 free credit added after your first activation.</div>';
+        }
+        a.innerHTML = html;
+        Array.prototype.forEach.call(a.querySelectorAll('.vip-act'), function (btn) {
+            btn.addEventListener('click', function () {
+                var act = btn.getAttribute('data-act');
+                if (act === 'balance') payVipVia('/api/partner/vehicle/' + _vipCarId + '/vip/pay-with-balance');
+                else if (act === 'referral') payVipVia('/api/partner/vehicle/' + _vipCarId + '/vip/pay-with-referral');
+                else if (act === 'card') renderVipCardButton();
+                else if (act === 'topup') renderVipTopup();
+            });
+        });
+    }
+
+    function renderVipCardButton() {
+        var c = document.getElementById('vipCarPayPal');
+        c.innerHTML = 'Loading PayPal…';
+        loadPayPalSdk().then(function (pp) {
+            c.innerHTML = '';
+            pp.Buttons({
+                style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'pay' },
+                createOrder: async function () {
+                    var r = await fetch('/api/payments/vehicle/' + _vipCarId + '/vip/create-order', { method: 'POST', headers: vipAuthHeaders() });
+                    var d = await r.json(); if (!r.ok) throw new Error(d.error || 'Failed to create order'); return d.orderId;
+                },
+                onApprove: async function (ad) {
+                    c.innerHTML = '<div class="payment-loading">Processing…</div>';
+                    var r = await fetch('/api/payments/vehicle/' + _vipCarId + '/vip/capture-order', { method: 'POST', headers: vipAuthHeaders(), body: JSON.stringify({ order_id: ad.orderID }) });
+                    var d = await r.json();
+                    if (!r.ok) { vipMsg(d.error || 'Capture failed.', false); c.innerHTML = ''; return; }
+                    vipMsg('✓ VIP activated for 30 days!', true);
+                    setTimeout(function () { closeVipCarModal(); if (window.loadVehicles) window.loadVehicles(); }, 1800);
+                },
+                onError: function () { vipMsg('Payment failed. Please try again.', false); }
+            }).render('#vipCarPayPal');
+        }).catch(function (e) { c.innerHTML = ''; vipMsg(e.message || 'PayPal unavailable.', false); });
+    }
+
+    function renderVipTopup() {
+        var a = document.getElementById('vipCarActions');
+        a.innerHTML = '<div style="font-size:13px;margin-bottom:8px;color:#A0A3B0;">Choose amount to add to your VIP wallet:</div>' +
+            [10, 20, 30, 50].map(function (x) { return '<button class="btn btn-secondary vip-top" data-amt="' + x + '" style="margin:0 6px 6px 0;">$' + x + '</button>'; }).join('') +
+            '<div><button class="btn btn-text" id="vipTopBack">← Back</button></div>';
+        document.getElementById('vipTopBack').addEventListener('click', function () { if (_vipWallet) renderVipActions(_vipWallet); });
+        Array.prototype.forEach.call(a.querySelectorAll('.vip-top'), function (btn) {
+            btn.addEventListener('click', function () { renderVipTopupButton(parseInt(btn.getAttribute('data-amt'), 10)); });
+        });
+    }
+
+    function renderVipTopupButton(amt) {
+        var c = document.getElementById('vipCarPayPal');
+        c.innerHTML = 'Loading PayPal…';
+        loadPayPalSdk().then(function (pp) {
+            c.innerHTML = '';
+            pp.Buttons({
+                style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' },
+                createOrder: async function () {
+                    var r = await fetch('/api/payments/vip-wallet/topup/create-order', { method: 'POST', headers: vipAuthHeaders(), body: JSON.stringify({ amount: amt }) });
+                    var d = await r.json(); if (!r.ok) throw new Error(d.error || 'Failed to create order'); return d.orderId;
+                },
+                onApprove: async function (ad) {
+                    c.innerHTML = '<div class="payment-loading">Processing…</div>';
+                    var r = await fetch('/api/payments/vip-wallet/topup/capture-order', { method: 'POST', headers: vipAuthHeaders(), body: JSON.stringify({ order_id: ad.orderID, amount: amt }) });
+                    var d = await r.json();
+                    if (!r.ok) { vipMsg(d.error || 'Top-up failed.', false); c.innerHTML = ''; return; }
+                    vipMsg('✓ Wallet topped up! New balance $' + (parseFloat(d.vip_balance) || 0).toFixed(2), true);
+                    c.innerHTML = '';
+                    refreshVipWallet();
+                },
+                onError: function () { vipMsg('Top-up failed. Please try again.', false); }
+            }).render('#vipCarPayPal');
+        }).catch(function (e) { c.innerHTML = ''; vipMsg(e.message || 'PayPal unavailable.', false); });
+    }
 
     console.log('✓ Partner dashboard initialized');
 })();

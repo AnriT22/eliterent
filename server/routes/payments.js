@@ -278,9 +278,9 @@ router.post('/partner/capture-order', authenticateToken, requireRole('partner'),
 });
 
 // ============================================================
-// VEHICLE VIP UPGRADE ($2.00) — 30 days green glow badge
+// VEHICLE VIP UPGRADE ($10.00) — 30 days green glow badge
 // ============================================================
-var VEHICLE_VIP_FEE = 2.00;
+var VEHICLE_VIP_FEE = 10.00;
 
 // POST /api/payments/vehicle/:vehicleId/vip/create-order
 router.post('/vehicle/:vehicleId/vip/create-order', authenticateToken, requireRole('partner'), async (req, res) => {
@@ -343,14 +343,10 @@ router.post('/vehicle/:vehicleId/vip/capture-order', authenticateToken, requireR
                 return res.status(400).json({ error: 'Payment amount mismatch. Please contact support.', status: 'MISMATCH' });
             }
 
-            // Activate VIP for 30 days from now
-            await execute(
-                `UPDATE vehicles
-                 SET vip_until = CURRENT_TIMESTAMP + INTERVAL '30 days',
-                     updated_at = CURRENT_TIMESTAMP
-                 WHERE id = $1`,
-                [vehicleId]
-            );
+            // Activate VIP for 30 days + apply the one-time first-VIP wallet bonus.
+            var partnerRoutes = require('./partner');
+            await partnerRoutes.logVipTx(vehicle.partner_id, -VEHICLE_VIP_FEE, 'spend', 'card', vehicleId, null);
+            await partnerRoutes.activateVehicleVip(vehicleId, vehicle.partner_id);
 
             res.json({
                 status: 'COMPLETED',
@@ -367,6 +363,66 @@ router.post('/vehicle/:vehicleId/vip/capture-order', authenticateToken, requireR
     } catch (err) {
         console.error('Vehicle VIP capture-order error:', err);
         res.status(500).json({ error: 'Failed to capture VIP payment' });
+    }
+});
+
+// ============================================================
+// VIP WALLET TOP-UP — load spend-only VIP credit by card ($10 steps)
+// ============================================================
+var VIP_TOPUP_AMOUNTS = [10, 20, 30, 50];
+
+// POST /api/payments/vip-wallet/topup/create-order  body: { amount }
+router.post('/vip-wallet/topup/create-order', authenticateToken, requireRole('partner'), async (req, res) => {
+    try {
+        var amount = parseInt(req.body.amount, 10);
+        if (VIP_TOPUP_AMOUNTS.indexOf(amount) === -1) {
+            return res.status(400).json({ error: 'Invalid top-up amount' });
+        }
+        if (!paypal.isConfigured()) {
+            return res.status(503).json({ error: 'Payment system not configured. Contact admin.' });
+        }
+        var desc = 'EliteAuto.rent — VIP wallet top-up ($' + amount + ')';
+        var order = await paypal.createOrder('vipwallet-' + req.user.id, amount, 'USD', desc, 'GE');
+        res.json({ orderId: order.id, amount: amount });
+    } catch (err) {
+        console.error('VIP wallet topup create-order error:', err);
+        res.status(500).json({ error: 'Failed to create top-up order' });
+    }
+});
+
+// POST /api/payments/vip-wallet/topup/capture-order  body: { order_id, amount }
+router.post('/vip-wallet/topup/capture-order', authenticateToken, requireRole('partner'), async (req, res) => {
+    try {
+        var orderId = req.body.order_id;
+        var amount = parseInt(req.body.amount, 10);
+        if (!orderId) return res.status(400).json({ error: 'order_id required' });
+        if (VIP_TOPUP_AMOUNTS.indexOf(amount) === -1) return res.status(400).json({ error: 'Invalid amount' });
+        if (!paypal.isConfigured()) return res.status(503).json({ error: 'Payment system not configured' });
+
+        var capture = await paypal.captureOrder(orderId);
+        if (capture.status !== 'COMPLETED') {
+            return res.status(400).json({ status: capture.status, error: 'Payment not completed. Status: ' + capture.status });
+        }
+
+        var capturedAmount = 0;
+        try { capturedAmount = parseFloat(capture.purchase_units[0].payments.captures[0].amount.value) || 0; } catch (e) {}
+        if (Math.abs(capturedAmount - amount) > 0.01) {
+            console.error('VIP TOPUP MISMATCH: partner #' + req.user.id + ' expected $' + amount + ' but captured $' + capturedAmount);
+            return res.status(400).json({ error: 'Payment amount mismatch. Please contact support.', status: 'MISMATCH' });
+        }
+
+        var partnerRoutes = require('./partner');
+        var updated = await queryOne(
+            'UPDATE partner_profiles SET vip_balance = COALESCE(vip_balance,0) + $1 WHERE user_id = $2 RETURNING vip_balance',
+            [amount, req.user.id]
+        );
+        var newBalance = updated ? parseFloat(updated.vip_balance) || 0 : 0;
+        await partnerRoutes.logVipTx(req.user.id, amount, 'topup', 'card', null, newBalance);
+
+        res.json({ status: 'COMPLETED', message: 'Wallet topped up with $' + amount, vip_balance: newBalance });
+    } catch (err) {
+        console.error('VIP wallet topup capture error:', err);
+        res.status(500).json({ error: 'Failed to capture top-up' });
     }
 });
 
