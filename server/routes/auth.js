@@ -12,7 +12,7 @@ const crypto = require("crypto");
 const router = express.Router();
 
 // One-time partner signup verification fee (USD) for partners without an invite code
-const PARTNER_SIGNUP_FEE = 4.99;
+const PARTNER_SIGNUP_FEE = 49.99;
 
 const FOUNDER_EMAIL = "elite.retal25@gmail.com";
 const FOUNDER_CODE = "ELITE0000";
@@ -662,7 +662,7 @@ router.post("/register/partner", async (req, res) => {
         .json({ error: "Phone number is required for account verification" });
     }
 
-    // Determine signup path: invite code (free, needs admin approval) vs paid ($4.99, auto-verified after payment)
+    // Determine signup path: invite code (free, needs admin approval) vs paid ($49.99, auto-verified after payment)
     var signupMethod = "paid";
     var inviteCodeRow = null;
     var normalizedInvite = (invite_code || "").trim().toUpperCase();
@@ -671,6 +671,17 @@ router.post("/register/partner", async (req, res) => {
         "SELECT * FROM partner_invite_codes WHERE UPPER(code) = $1",
         [normalizedInvite],
       );
+      // If not found in invite codes, check partner referral codes
+      if (!inviteCodeRow) {
+        const referralProfile = await queryOne(
+          "SELECT user_id FROM partner_profiles WHERE UPPER(referral_code) = $1",
+          [normalizedInvite],
+        );
+        if (referralProfile) {
+          // Treat referral code as a valid invite code
+          inviteCodeRow = { is_active: true, id: null, code: normalizedInvite };
+        }
+      }
       if (!inviteCodeRow || !inviteCodeRow.is_active) {
         return res.status(400).json({ error: "Invalid or inactive invite code" });
       }
@@ -707,7 +718,7 @@ router.post("/register/partner", async (req, res) => {
     );
     const userId = newUser.id;
 
-    // Insert partner profile. Invite signups need admin approval; paid signups get verified after $4.99 payment.
+    // Insert partner profile. Invite signups need admin approval; paid signups get verified after $49.99 payment.
     await execute(
       `
             INSERT INTO partner_profiles
@@ -732,7 +743,7 @@ router.post("/register/partner", async (req, res) => {
     // Owner alert: a new partner signed up and needs approval (fire-and-forget, never blocks).
     (async () => {
       try {
-        await require("../services/notify").notifyOwner('👤 New partner signup\n' + (newUser.full_name || newUser.email) + (company_name ? ' (' + company_name + ')' : '') + '\nMethod: ' + signupMethod + (signupMethod === 'invite' ? ' — needs admin approval' : ' — pending $4.99 payment') + '\nReview in the admin panel.');
+        await require("../services/notify").notifyOwner('👤 New partner signup\n' + (newUser.full_name || newUser.email) + (company_name ? ' (' + company_name + ')' : '') + '\nMethod: ' + signupMethod + (signupMethod === 'invite' ? ' — needs admin approval' : ' — pending $49.99 payment') + '\nReview in the admin panel.');
       } catch (e) { console.error("[notify] partner:", e.message); }
     })();
 
@@ -809,7 +820,7 @@ router.post("/register/partner", async (req, res) => {
         referred_by: referrerUserId,
       },
       signup_method: signupMethod,
-      // Paid partners must pay the $4.99 fee to get auto-verified; invite partners wait for admin approval.
+      // Paid partners must pay the $49.99 fee to get auto-verified; invite partners wait for admin approval.
       requiresPayment: signupMethod === "paid",
       needsPathSelection: signupMethod === "paid",
       needsReferralSelection: true,
@@ -837,6 +848,17 @@ router.post("/register/partner/apply-invite", authenticateToken, async (req, res
       "SELECT * FROM partner_invite_codes WHERE UPPER(code) = $1",
       [code],
     );
+    // If not found in invite codes, check partner referral codes
+    if (!inviteRow) {
+      const referralProfile = await queryOne(
+        "SELECT user_id FROM partner_profiles WHERE UPPER(referral_code) = $1",
+        [code],
+      );
+      if (referralProfile) {
+        // Treat referral code as a valid invite code
+        inviteRow = { is_active: true, id: null, code: code };
+      }
+    }
     if (!inviteRow || !inviteRow.is_active) {
       return res.status(400).json({ error: "Invalid or inactive invite code" });
     }
@@ -863,10 +885,12 @@ router.post("/register/partner/apply-invite", authenticateToken, async (req, res
       "UPDATE partner_profiles SET signup_method = $1, invite_code_used = $2 WHERE user_id = $3",
       ["invite", code, req.user.id],
     );
-    await execute(
-      "UPDATE partner_invite_codes SET used_count = used_count + 1 WHERE id = $1",
-      [inviteRow.id],
-    );
+    if (inviteRow && inviteRow.id) {
+      await execute(
+        "UPDATE partner_invite_codes SET used_count = used_count + 1 WHERE id = $1",
+        [inviteRow.id],
+      );
+    }
 
     res.json({ message: "Invite code applied successfully", pending_approval: true });
   } catch (err) {
@@ -1096,7 +1120,7 @@ router.post("/auth/google", async (req, res) => {
     (async () => {
       try {
         var notifyText = '👤 New user signup (Google)\n' + (newUser.full_name || newUser.email) + '\nRole: ' + newUser.role;
-        if (isPartner) notifyText += '\nNeeds choice step (pay $4.99 or invite code)';
+        if (isPartner) notifyText += '\nNeeds choice step (pay $49.99 or invite code)';
         await require("../services/notify").notifyOwner(notifyText);
       } catch (e) { console.error("[notify] google:", e.message); }
     })();
@@ -1317,7 +1341,7 @@ router.get("/auth/google/callback", async (req, res) => {
     (async () => {
       try {
         var notifyText = '👤 New user signup (Google)\n' + (newUser.full_name || newUser.email) + '\nRole: ' + newUser.role;
-        if (isPartner) notifyText += '\nNeeds choice step (pay $4.99 or invite code)';
+        if (isPartner) notifyText += '\nNeeds choice step (pay $49.99 or invite code)';
         await require("../services/notify").notifyOwner(notifyText);
       } catch (e) { console.error("[notify] google callback:", e.message); }
     })();

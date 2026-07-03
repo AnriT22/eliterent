@@ -237,7 +237,7 @@
                 localStorage.setItem('isLoggedIn', 'true');
             }
 
-            // New flow: show referral step first, then choice step (Pay $4.99 vs Invite Code)
+            // New flow: show referral step first, then choice step (Pay $49.99 vs Invite Code)
             if (data.needsReferralSelection) {
                 enterReferralStep(data);
                 return;
@@ -264,7 +264,7 @@
         }
     }
 
-    /* ---- CHOICE STEP: Pay $4.99 vs Invite Code ---- */
+    /* ---- CHOICE STEP: Pay $49.99 vs Invite Code ---- */
     function enterChoiceStep(data) {
         // Hide form and related UI
         form.style.display = 'none';
