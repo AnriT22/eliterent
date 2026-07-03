@@ -570,7 +570,7 @@ function renderCarousel(vehicles, adminAds, firstBlockLength) {
         html += `
             <div class="fleet-card ${v.is_vip ? 'fleet-card-vip' : ''}" data-category="${(v.category||'').toLowerCase()}" data-engine="${(v.engine||'').toLowerCase()}" data-gearbox="${(v.gearbox||'').toLowerCase()}" data-drivetype="${(v.drive_type||'').toLowerCase()}" data-interior="${(v.interior_type||'').toLowerCase()}" data-steering="${(v.steering_side||'').toLowerCase()}" data-payment="${(v.payment_method||'').toLowerCase()}" onclick="if(!event.target.closest('button'))window.location.href='vehicle.html?id=${v.id}'">
                 <div class="fleet-card-img">
-                    <img src="${imgSrc}" alt="${v.name}">
+                    <img src="${imgSrc}" alt="${v.name}" style="object-position:50% ${v.image_offset_y == null ? 50 : v.image_offset_y}%;">
                     ${isNew ? '<span class="fleet-card-badge">NEW</span>' : ''}
                 </div>
                 <div class="fleet-card-body">

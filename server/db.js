@@ -480,6 +480,9 @@ async function initDB() {
         await pool.query(`ALTER TABLE partner_profiles ADD COLUMN IF NOT EXISTS vip_first_bonus_used INTEGER DEFAULT 0`);
         // Flag so the "VIP expiring soon" reminder email is sent only once per VIP period.
         await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS vip_expiry_reminded INTEGER DEFAULT 0`);
+        // Vertical crop position (0-100%) for the main photo on cards. 50 = centered
+        // (the previous/default behaviour), so existing vehicles are unaffected.
+        await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS image_offset_y REAL DEFAULT 50`);
     } catch (e) { /* columns may already exist or table not yet created */ }
 
     // Audit log for every VIP-wallet movement: topup (card), spend (VIP buy),

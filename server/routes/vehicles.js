@@ -299,6 +299,13 @@ router.post('/', authenticateToken, requireRole('partner'), async (req, res) => 
             [req.user.id]
         );
 
+        // Vertical crop position for the main photo (0-100%). Saved separately to
+        // keep the big positional INSERT above untouched. Defaults to 50 (centered).
+        if (newVehicle && b.image_offset_y !== undefined && b.image_offset_y !== null) {
+            var offY = Math.max(0, Math.min(100, parseFloat(b.image_offset_y)));
+            if (!isNaN(offY)) await execute('UPDATE vehicles SET image_offset_y = $1 WHERE id = $2', [offY, newVehicle.id]);
+        }
+
         // Owner alert: a car was added and needs approval (fire-and-forget, never blocks).
         (async () => {
             try {
@@ -395,6 +402,13 @@ router.put('/:id', authenticateToken, requireRole('partner'), async (req, res) =
                 req.user.id
             ]
         );
+
+        // Main-photo vertical crop position (0-100%), saved separately from the
+        // big positional UPDATE above. Only touched when the client sends it.
+        if (b.image_offset_y !== undefined && b.image_offset_y !== null) {
+            var offY = Math.max(0, Math.min(100, parseFloat(b.image_offset_y)));
+            if (!isNaN(offY)) await execute('UPDATE vehicles SET image_offset_y = $1 WHERE id = $2 AND partner_id = $3', [offY, vehicleId, req.user.id]);
+        }
 
         var updated = await queryOne('SELECT * FROM vehicles WHERE id = $1', [vehicleId]);
         res.json({ message: 'Vehicle updated', vehicle: updated });
