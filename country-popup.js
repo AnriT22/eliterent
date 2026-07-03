@@ -102,10 +102,12 @@
 
     window.openCountryPopup = show;
 
-    // Auto-show on entry (after a short beat so the page renders first) — only if
-    // the visitor hasn't picked a country yet. Closing without choosing leaves it,
-    // so it appears again on the next page until a country is selected.
-    function maybeAuto() { if (AUTO_SHOW_ENABLED && !getChosen()) setTimeout(show, 700); }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', maybeAuto);
-    else maybeAuto();
+    // ----------------------------------------------------------------
+    // AUTO-SHOW TEMPORARILY DISABLED
+    // The popup no longer appears automatically on entry. To re-enable,
+    // uncomment the block below and set AUTO_SHOW_ENABLED = true.
+    // ----------------------------------------------------------------
+    // function maybeAuto() { if (AUTO_SHOW_ENABLED && !getChosen()) setTimeout(show, 700); }
+    // if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', maybeAuto);
+    // else maybeAuto();
 })();
