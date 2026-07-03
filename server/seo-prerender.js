@@ -460,7 +460,9 @@ async function middleware(req, res, next) {
             return next();
         }
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Cache-Control', 'public, max-age=300');
+        // no-cache so HTML edits (e.g. disabling popups) always reach visitors
+        // immediately instead of being served stale for minutes.
+        res.setHeader('Cache-Control', 'no-cache');
         try { html = require('./head-inject').inject(html); } catch (e) {}
         res.send(html);
     } catch (err) {
