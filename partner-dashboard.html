@@ -1966,7 +1966,12 @@
 
                             <div style="display:flex;gap:6px;">
 
-                                <input type="date" id="blockStartDate" style="flex:1;min-width:0;padding:9px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                                <div style="display:flex;gap:4px;flex:1;min-width:0;">
+                                    <input type="number" id="blockStartDay" min="1" max="31" placeholder="დღე" data-i18n-placeholder="partner_dashboard.day_ph" style="width:30%;min-width:0;padding:9px 4px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;box-sizing:border-box;text-align:center;">
+                                    <input type="number" id="blockStartMonth" min="1" max="12" placeholder="თვე" data-i18n-placeholder="partner_dashboard.month_ph" style="width:30%;min-width:0;padding:9px 4px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;box-sizing:border-box;text-align:center;">
+                                    <input type="number" id="blockStartYear" min="2024" max="2035" placeholder="წელი" data-i18n-placeholder="partner_dashboard.year_ph" style="width:40%;min-width:0;padding:9px 4px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;box-sizing:border-box;text-align:center;">
+                                </div>
+                                <input type="hidden" id="blockStartDate">
 
                                 <select id="blockStartHour" style="width:84px;padding:9px 6px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;box-sizing:border-box;"></select>
 
@@ -1980,7 +1985,12 @@
 
                             <div style="display:flex;gap:6px;">
 
-                                <input type="date" id="blockEndDate" style="flex:1;min-width:0;padding:9px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                                <div style="display:flex;gap:4px;flex:1;min-width:0;">
+                                    <input type="number" id="blockEndDay" min="1" max="31" placeholder="დღე" data-i18n-placeholder="partner_dashboard.day_ph" style="width:30%;min-width:0;padding:9px 4px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;box-sizing:border-box;text-align:center;">
+                                    <input type="number" id="blockEndMonth" min="1" max="12" placeholder="თვე" data-i18n-placeholder="partner_dashboard.month_ph" style="width:30%;min-width:0;padding:9px 4px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;box-sizing:border-box;text-align:center;">
+                                    <input type="number" id="blockEndYear" min="2024" max="2035" placeholder="წელი" data-i18n-placeholder="partner_dashboard.year_ph" style="width:40%;min-width:0;padding:9px 4px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;box-sizing:border-box;text-align:center;">
+                                </div>
+                                <input type="hidden" id="blockEndDate">
 
                                 <select id="blockEndHour" style="width:84px;padding:9px 6px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;box-sizing:border-box;"></select>
 
@@ -2147,7 +2157,7 @@
 
     <script src="location-data.js?v=1"></script>
 
-    <script src="dashboard.js?v=20"></script>
+    <script src="dashboard.js?v=21"></script>
 
 <script src="premium-animations.js?v=2"></script>
 
