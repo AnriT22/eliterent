@@ -448,12 +448,18 @@ function initCalendar() {
     renderCalendars();
     updateDateInput();
 
-    // "Search for a car" button on home page → navigate to vehicles.html
-    const heroSearchBtn = document.querySelector('.booking-form-container .search-btn');
+    // "Search for a car" button on home page → City + Category only.
+    // Redirect to vehicles.html applying the selected city (location) and category.
+    const heroSearchBtn = document.getElementById('homeSearchBtn');
     if (heroSearchBtn) {
         heroSearchBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            window.location.href = 'vehicles.html';
+            const city = (document.getElementById('homeCity') || {}).value || '';
+            const category = (document.getElementById('homeCategory') || {}).value || '';
+            const params = new URLSearchParams();
+            if (city) params.set('location', city);
+            if (category) params.set('category', category);
+            window.location.href = 'vehicles.html' + (params.toString() ? '?' + params.toString() : '');
         });
     }
 }

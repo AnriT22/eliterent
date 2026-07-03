@@ -19,15 +19,17 @@ router.get('/', async (req, res) => {
 
         // Optional filters
         if (req.query.location) {
-            sql += ' AND LOWER(v.location_city) = LOWER($' + paramIdx++ + ')';
-            params.push(req.query.location);
+            // Match by city as a prefix so a city (e.g. "Tbilisi") also covers its
+            // variants like "Tbilisi International Airport" (and trailing spaces).
+            sql += ' AND LOWER(TRIM(v.location_city)) LIKE LOWER($' + paramIdx++ + ')';
+            params.push(String(req.query.location).trim() + '%');
         }
         if (req.query.country) {
             sql += ' AND LOWER(v.country) = LOWER($' + paramIdx++ + ')';
             params.push(req.query.country);
         }
         if (req.query.category) {
-            sql += ' AND v.category = $' + paramIdx++;
+            sql += ' AND LOWER(v.category) = LOWER($' + paramIdx++ + ')';
             params.push(req.query.category);
         }
         if (req.query.engine) {

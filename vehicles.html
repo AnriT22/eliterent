@@ -259,8 +259,10 @@
                         <label class="vf-checkbox-row"><input type="checkbox" name="category" value="sedan"><span class="vf-custom-checkbox"></span><span data-i18n="filter_options.sedan">Sedan</span></label>
                         <label class="vf-checkbox-row"><input type="checkbox" name="category" value="standard"><span class="vf-custom-checkbox"></span><span data-i18n="filter_options.standard">Standard</span></label>
                         <label class="vf-checkbox-row"><input type="checkbox" name="category" value="suv"><span class="vf-custom-checkbox"></span>SUV</label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="category" value="crossover"><span class="vf-custom-checkbox"></span><span data-i18n="filter_options.crossover">Crossover</span></label>
                         <label class="vf-checkbox-row"><input type="checkbox" name="category" value="minivan"><span class="vf-custom-checkbox"></span><span data-i18n="filter_options.minivan">Minivan</span></label>
-                        <label class="vf-checkbox-row"><input type="checkbox" name="category" value="convertible"><span class="vf-custom-checkbox"></span><span data-i18n="filter_options.convertible">Convertible/Coupe</span></label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="category" value="coupe"><span class="vf-custom-checkbox"></span><span data-i18n="filter_options.coupe">Coupe</span></label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="category" value="convertible"><span class="vf-custom-checkbox"></span><span data-i18n="filter_options.convertible">Convertible</span></label>
                     </div>
                     <div class="vf-divider"></div>
                     <button class="vf-check-all" data-group="category" data-i18n="filter_options.check_all">Check all</button>
@@ -966,6 +968,24 @@
 
                 var badge = document.getElementById('vpCountBadge');
                 if (badge) badge.textContent = window.carsAvailableText(visible.length);
+
+                // Friendly "no match" message when filters exclude everything.
+                var noMatch = document.getElementById('vpNoMatch');
+                if (!noMatch) {
+                    noMatch = document.createElement('div');
+                    noMatch.id = 'vpNoMatch';
+                    noMatch.style.cssText = 'grid-column:1/-1;text-align:center;padding:60px 20px;color:#A0A3B0;';
+                    grid.appendChild(noMatch);
+                }
+                if (visible.length === 0) {
+                    var nmT = function (k, f) { return (typeof I18n !== 'undefined' && I18n.t && I18n.t(k) !== k) ? I18n.t(k) : f; };
+                    noMatch.innerHTML = '<div style="font-size:48px;">🔍</div>'
+                        + '<h3 style="color:#EAEAEA;margin:12px 0 4px;">' + nmT('vehicles_page.no_match_title', 'No vehicles found') + '</h3>'
+                        + '<p>' + nmT('vehicles_page.no_match_desc', 'No vehicles found matching your selected city and category.') + '</p>';
+                    noMatch.style.display = '';
+                } else {
+                    noMatch.style.display = 'none';
+                }
             } catch (err) {
                 console.error('applyFilters error:', err);
             }
@@ -1332,6 +1352,13 @@
                 var locInput = document.getElementById('pickupLocation');
                 if (locInput) locInput.value = loc;
             }
+            // Preselect the category coming from the homepage search so it is both
+            // applied and visibly checked (users can see/modify it in the panel).
+            var cat = params.get('category');
+            if (cat) {
+                var catCb = document.querySelector('.vf-panel input[name="category"][value="' + cat.toLowerCase().replace(/"/g, '') + '"]');
+                if (catCb) catCb.checked = true;
+            }
             vcLoadVehicles();
             if (typeof updateClearButtonVisibility === 'function') updateClearButtonVisibility();
         }
@@ -1514,7 +1541,16 @@
             var vehicles = data.vehicles || [];
             if (loadingState) loadingState.style.display = 'none';
             if (vehicles.length === 0) {
-                if (grid) grid.innerHTML = '<div style="padding:60px;text-align:center;grid-column:1/-1;"><div style="font-size:48px;">🚫</div><h3 style="color:#dc2626;">No Vehicles Available</h3><p style="color:#A0A3B0;">All vehicles are blocked for the selected dates. Try different dates.</p></div>';
+                var qp = new URLSearchParams(window.location.search);
+                var hasCityOrCat = qp.get('location') || qp.get('category') || (document.getElementById('pickupLocation') && document.getElementById('pickupLocation').value.trim());
+                var nmT2 = function (k, f) { return (typeof I18n !== 'undefined' && I18n.t && I18n.t(k) !== k) ? I18n.t(k) : f; };
+                if (grid) {
+                    if (hasCityOrCat) {
+                        grid.innerHTML = '<div style="padding:60px;text-align:center;grid-column:1/-1;"><div style="font-size:48px;">🔍</div><h3 style="color:#EAEAEA;margin:12px 0 4px;">' + nmT2('vehicles_page.no_match_title', 'No vehicles found') + '</h3><p style="color:#A0A3B0;">' + nmT2('vehicles_page.no_match_desc', 'No vehicles found matching your selected city and category.') + '</p></div>';
+                    } else {
+                        grid.innerHTML = '<div style="padding:60px;text-align:center;grid-column:1/-1;"><div style="font-size:48px;">🚫</div><h3 style="color:#dc2626;">No Vehicles Available</h3><p style="color:#A0A3B0;">All vehicles are blocked for the selected dates. Try different dates.</p></div>';
+                    }
+                }
                 return;
             }
             renderVehiclesGrid(vehicles);
