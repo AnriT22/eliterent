@@ -370,6 +370,26 @@ router.post("/vehicle/:id/vip/pay-with-referral", authenticateToken, async (req,
   }
 });
 
+// PUT /api/partner/company-name — partner updates their own company name
+router.put("/company-name", authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== "partner") return res.status(403).json({ error: "Partners only" });
+    var name = String(req.body.company_name == null ? "" : req.body.company_name).trim();
+    if (name.length < 2) return res.status(400).json({ error: "Company name must be at least 2 characters" });
+    if (name.length > 150) return res.status(400).json({ error: "Company name must be 150 characters or fewer" });
+
+    var updated = await queryOne(
+      "UPDATE partner_profiles SET company_name = $1 WHERE user_id = $2 RETURNING company_name",
+      [name, req.user.id],
+    );
+    if (!updated) return res.status(404).json({ error: "Partner profile not found" });
+    res.json({ message: "Company name updated", company_name: updated.company_name });
+  } catch (err) {
+    console.error("Update company-name error:", err);
+    res.status(500).json({ error: "Failed to update company name" });
+  }
+});
+
 module.exports = router;
 module.exports.getReferralStats = getReferralStats;
 module.exports.activateVehicleVip = activateVehicleVip;

@@ -1806,7 +1806,15 @@
 
                     <div class="db-profile-row"><strong data-i18n="partner_dashboard.profile_phone">Phone:</strong> <span id="profilePhone">-</span></div>
 
-                    <div class="db-profile-row"><strong data-i18n="partner_dashboard.profile_company">Company:</strong> <span id="profileCompany">-</span></div>
+                    <div class="db-profile-row"><strong data-i18n="partner_dashboard.profile_company">Company:</strong> <span id="profileCompany">-</span>
+                        <button id="editCompanyBtn" type="button" style="margin-left:8px;background:none;border:1px solid #C9A84C;color:#C9A84C;border-radius:6px;padding:2px 10px;font-size:12px;cursor:pointer;" data-i18n="partner_dashboard.edit_btn">Edit</button>
+                        <span id="editCompanyBox" style="display:none;margin-top:8px;">
+                            <input type="text" id="editCompanyInput" maxlength="150" style="padding:8px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#1C1E26;color:#EAEAEA;font-size:13px;min-width:200px;">
+                            <button id="saveCompanyBtn" type="button" style="background:#C9A84C;border:none;color:#1a1400;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;margin-left:6px;" data-i18n="partner_dashboard.save_btn">Save</button>
+                            <button id="cancelCompanyBtn" type="button" style="background:none;border:1px solid #3A3F4B;color:#A0A3B0;border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;margin-left:4px;" data-i18n="partner_dashboard.cancel_btn">Cancel</button>
+                            <span id="editCompanyError" style="color:#ef4444;font-size:12px;display:block;margin-top:4px;"></span>
+                        </span>
+                    </div>
 
                     <div class="db-profile-row"><strong data-i18n="partner_dashboard.profile_location">Location:</strong> <span id="profileLocation">-</span></div>
 
@@ -1927,6 +1935,11 @@
                     <h4 style="margin:0 0 4px;font-size:15px;" data-i18n="partner_dashboard.hours_title">Block specific hours</h4>
 
                     <p style="margin:0 0 12px;font-size:12px;color:#64748b;" data-i18n="partner_dashboard.hours_hint">Block an exact date &amp; time range for this vehicle. A 2-hour buffer is added automatically after the end time so you can receive, inspect and prepare the car.</p>
+
+                    <div style="margin:0 0 12px;padding:8px 12px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.35);border-radius:8px;font-size:12px;color:#C9A84C;display:flex;align-items:center;gap:6px;">
+                        <span style="font-size:14px;">📅</span>
+                        <span data-i18n-html="partner_dashboard.date_format_hint">Pick the <strong>From</strong> date first, then the <strong>To</strong> date. Dates show as Day / Month / Year, and the end must be after the start.</span>
+                    </div>
 
                     <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
 
@@ -2117,7 +2130,7 @@
 
     <script src="location-data.js?v=1"></script>
 
-    <script src="dashboard.js?v=18"></script>
+    <script src="dashboard.js?v=19"></script>
 
 <script src="premium-animations.js?v=2"></script>
 

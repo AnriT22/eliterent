@@ -3125,6 +3125,57 @@
     })();
 
     // ========================================
+    // EDITABLE COMPANY NAME (partner profile)
+    // ========================================
+    (function () {
+        var editBtn = document.getElementById('editCompanyBtn');
+        var box = document.getElementById('editCompanyBox');
+        var input = document.getElementById('editCompanyInput');
+        var saveBtn = document.getElementById('saveCompanyBtn');
+        var cancelBtn = document.getElementById('cancelCompanyBtn');
+        var errEl = document.getElementById('editCompanyError');
+        var span = document.getElementById('profileCompany');
+        if (!editBtn || !box || !input || !saveBtn) return;
+
+        function openEdit() {
+            var cur = (span && span.textContent && span.textContent !== '—') ? span.textContent.trim() : '';
+            input.value = cur;
+            errEl.textContent = '';
+            box.style.display = 'inline-block';
+            editBtn.style.display = 'none';
+            input.focus();
+        }
+        function closeEdit() {
+            box.style.display = 'none';
+            editBtn.style.display = '';
+            errEl.textContent = '';
+        }
+        editBtn.addEventListener('click', openEdit);
+        cancelBtn.addEventListener('click', closeEdit);
+        saveBtn.addEventListener('click', function () {
+            var name = input.value.trim();
+            if (name.length < 2) { errEl.textContent = tOr('partner_dashboard.company_min_err', 'Name must be at least 2 characters.'); return; }
+            if (name.length > 150) { errEl.textContent = tOr('partner_dashboard.company_max_err', 'Name is too long (max 150).'); return; }
+            saveBtn.disabled = true;
+            fetch('/api/partner/company-name', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ company_name: name })
+            }).then(async function (r) { var d = await r.json(); if (!r.ok) throw new Error(d.error || 'Failed'); return d; })
+              .then(function (d) {
+                  if (span) span.textContent = d.company_name;
+                  var hdr = document.getElementById('dbCompanyName');
+                  if (hdr) hdr.textContent = d.company_name;
+                  try { var us = JSON.parse(localStorage.getItem('user') || '{}'); us.company_name = d.company_name; localStorage.setItem('user', JSON.stringify(us)); } catch (e) {}
+                  closeEdit();
+              })
+              .catch(function (e) { errEl.textContent = e.message || 'Failed to save.'; })
+              .finally(function () { saveBtn.disabled = false; });
+        });
+        input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); saveBtn.click(); } if (e.key === 'Escape') closeEdit(); });
+    })();
+
+    // ========================================
     // VIP CAR MODAL — balances + pay by credit / referral / card / top-up
     // ========================================
     var _vipCarId = null, _vipWallet = null, _ppSdkPromise = null;
