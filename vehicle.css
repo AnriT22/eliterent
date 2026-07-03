@@ -96,6 +96,38 @@
 }
 .vd-fav-btn:hover { transform: scale(1.1); }
 .vd-fav-btn.active { color: #ef4444; }
+.vd-share-btn {
+    position: absolute;
+    top: 14px; right: 62px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background: rgba(0,0,0,0.6);
+    color: #D4B86A;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    z-index: 2;
+}
+.vd-share-btn:hover { transform: scale(1.1); background: rgba(212,184,106,0.25); }
+.vd-share-toast {
+    position: fixed;
+    bottom: 28px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1C1E26;
+    color: #EAEAEA;
+    border: 1px solid #C9A84C;
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+    z-index: 10060;
+}
+.vd-share-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .vd-year-badge {
     position: absolute;
     top: 14px; left: 14px;

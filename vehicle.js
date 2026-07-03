@@ -387,6 +387,79 @@
             })
             .catch(function(e) { console.error(e); });
         });
+
+        // ---- Share button: copy car link (+ partner referral code) ----
+        setupShareButton(v);
+    }
+
+    // Fetch the current user's partner referral code (only partners have one).
+    // Cached so we don't refetch on every share click.
+    var _refCodePromise = null;
+    function getMyReferralCode() {
+        if (_refCodePromise) return _refCodePromise;
+        var t = localStorage.getItem('token') || sessionStorage.getItem('token');
+        var u = null;
+        try { u = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')); } catch (e) {}
+        if (!t || !u || u.role !== 'partner') {
+            _refCodePromise = Promise.resolve(null);
+            return _refCodePromise;
+        }
+        _refCodePromise = fetch('/api/partner/referral-stats', { headers: { 'Authorization': 'Bearer ' + t } })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) { return (d && d.my_code) ? d.my_code : null; })
+            .catch(function () { return null; });
+        return _refCodePromise;
+    }
+
+    function showShareToast(msg) {
+        var toast = document.getElementById('vdShareToast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'vdShareToast';
+            toast.className = 'vd-share-toast';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._t);
+        toast._t = setTimeout(function () { toast.classList.remove('show'); }, 2200);
+    }
+
+    function copyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            return navigator.clipboard.writeText(text);
+        }
+        return new Promise(function (resolve, reject) {
+            try {
+                var ta = document.createElement('textarea');
+                ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+                document.body.appendChild(ta); ta.focus(); ta.select();
+                document.execCommand('copy'); document.body.removeChild(ta);
+                resolve();
+            } catch (e) { reject(e); }
+        });
+    }
+
+    function setupShareButton(v) {
+        var btn = document.getElementById('vdShareBtn');
+        if (!btn) return;
+        btn.addEventListener('click', function () {
+            getMyReferralCode().then(function (code) {
+                var base = window.location.origin + '/vehicle.html?id=' + vehicleId;
+                var url = code ? (base + '&ref=' + encodeURIComponent(code)) : base;
+                var title = (v && v.name) ? v.name : 'Car rental';
+                var copiedMsg = vt('vehicle_page.link_copied', 'Link copied!');
+                if (navigator.share) {
+                    navigator.share({ title: title, url: url }).catch(function () {
+                        copyToClipboard(url).then(function () { showShareToast(copiedMsg); }).catch(function () {});
+                    });
+                } else {
+                    copyToClipboard(url).then(function () { showShareToast(copiedMsg); }).catch(function () {
+                        showShareToast(url);
+                    });
+                }
+            });
+        });
     }
 
     function showError() {

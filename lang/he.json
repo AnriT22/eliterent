@@ -338,6 +338,8 @@
   },
   "vehicle_page": {
     "back": "חזרה לרכבים",
+    "share": "שתף רכב זה",
+    "link_copied": "הקישור הועתק!",
     "per_day": "ליום",
     "book_now": "להזמנה",
     "next": "הבא",

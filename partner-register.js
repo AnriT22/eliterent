@@ -345,6 +345,14 @@
         });
 
         document.getElementById('pReferralStep').style.display = 'block';
+
+        // Pre-fill referral code if the visitor arrived via a shared car link (?ref=CODE)
+        try {
+            var pending = localStorage.getItem('pendingReferralCode');
+            var refInput = document.getElementById('pReferralCodeInput');
+            if (pending && refInput && !refInput.value) refInput.value = pending;
+        } catch (e) { /* ignore */ }
+
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     window.enterReferralStep = enterReferralStep;
@@ -380,6 +388,7 @@
                 throw new Error(data.error || 'Invalid referral code');
             }
 
+            try { localStorage.removeItem('pendingReferralCode'); } catch (e) {}
             document.getElementById('pReferralStep').style.display = 'none';
             window.location.href = 'verify-phone.html?v=2';
         } catch (err) {
@@ -392,6 +401,7 @@
     window.applyReferralCode = applyReferralCode;
 
     function skipReferral() {
+        try { localStorage.removeItem('pendingReferralCode'); } catch (e) {}
         document.getElementById('pReferralStep').style.display = 'none';
         window.location.href = 'verify-phone.html?v=2';
     }
