@@ -681,6 +681,7 @@
     "vip_topup_choose": "Choose amount to add to your VIP wallet:",
     "vip_back": "← Back",
     "vip_first_bonus": "First-VIP bonus: get $10 free credit added after your first activation.",
+    "vip_first_bonus_banner": "First VIP unlocks a <strong>$10 bonus</strong> — get $10 free wallet credit the moment you activate your first car. Use it toward another month or another car, on us.",
     "referrals_title": "Referral Program",
     "my_referral_code": "My Referral Code",
     "referred_by": "Referred By",

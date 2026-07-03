@@ -3187,6 +3187,8 @@
             .then(function (r) { return r.json(); })
             .then(function (w) {
                 _vipWallet = w;
+                var banner = document.getElementById('vipBonusBanner');
+                if (banner) banner.style.display = w.first_bonus_available ? 'flex' : 'none';
                 var vb = (parseFloat(w.vip_balance) || 0).toFixed(2);
                 var rb = (parseFloat(w.referral_balance) || 0).toFixed(2);
                 document.getElementById('vipCarBalances').innerHTML =
@@ -3220,9 +3222,7 @@
         }
         html += '<button class="btn vip-act" data-act="card" style="background:#22c55e;border-color:#22c55e;color:#fff;font-weight:700;">' + tOr('partner_dashboard.vip_pay_card', 'Pay by card') + ' — $' + fee + '</button>';
         html += '<button class="btn btn-text vip-act" data-act="topup">' + tOr('partner_dashboard.vip_topup', 'Top up VIP wallet') + '</button>';
-        if (w.first_bonus_available) {
-            html += '<div style="font-size:12px;color:#22c55e;margin-top:8px;">🎁 ' + tOr('partner_dashboard.vip_first_bonus', 'First-VIP bonus: get $10 free credit added after your first activation.') + '</div>';
-        }
+        // (First-VIP bonus now shown as a prominent banner at the top of the modal.)
         a.innerHTML = html;
         Array.prototype.forEach.call(a.querySelectorAll('.vip-act'), function (btn) {
             btn.addEventListener('click', function () {
