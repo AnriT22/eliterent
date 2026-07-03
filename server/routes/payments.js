@@ -292,10 +292,7 @@ router.post('/vehicle/:vehicleId/vip/create-order', authenticateToken, requireRo
         if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
         if (vehicle.partner_id !== req.user.id) return res.status(403).json({ error: 'Not your vehicle' });
 
-        // Already has an active paid VIP
-        if (vehicle.vip_until && new Date(vehicle.vip_until) > new Date()) {
-            return res.status(400).json({ error: 'This vehicle already has an active VIP badge.' });
-        }
+        // Active VIP may be extended — buying again stacks another 30 days.
 
         if (!paypal.isConfigured()) {
             return res.status(503).json({ error: 'Payment system not configured. Contact admin.' });

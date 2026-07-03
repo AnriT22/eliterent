@@ -262,9 +262,13 @@ async function logVipTx(partnerUserId, amount, type, source, vehicleId, balanceA
 // Activate 30-day VIP on a vehicle and apply the one-time first-VIP bonus.
 // Call ONLY after payment/deduction has already succeeded. Returns the new vip_until.
 async function activateVehicleVip(vehicleId, partnerUserId) {
+  // Extend from the later of "now" or the current expiry, so buying VIP on an
+  // already-VIP car stacks another 30 days instead of overwriting/shortening it.
   var row = await queryOne(
     `UPDATE vehicles
-       SET vip_until = CURRENT_TIMESTAMP + INTERVAL '30 days', updated_at = CURRENT_TIMESTAMP
+       SET vip_until = GREATEST(COALESCE(vip_until, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP) + INTERVAL '30 days',
+           vip_expiry_reminded = 0,
+           updated_at = CURRENT_TIMESTAMP
      WHERE id = $1 RETURNING vip_until`,
     [vehicleId],
   );
@@ -285,9 +289,7 @@ async function getVipTargetVehicle(vehicleId, partnerUserId) {
   var v = await queryOne("SELECT id, partner_id, name, vip_until FROM vehicles WHERE id = $1", [vehicleId]);
   if (!v) return { error: 404, message: "Vehicle not found" };
   if (v.partner_id !== partnerUserId) return { error: 403, message: "Not your vehicle" };
-  if (v.vip_until && new Date(v.vip_until) > new Date()) {
-    return { error: 400, message: "This vehicle already has an active VIP badge." };
-  }
+  // Active VIP is allowed to be extended (activateVehicleVip stacks 30 more days).
   return { vehicle: v };
 }
 

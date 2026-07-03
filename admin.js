@@ -1061,6 +1061,43 @@ function escHtml(s) {
             populateFinMonthFilter();
             renderFinancial();
         });
+        loadVipOverview();
+    }
+
+    function loadVipOverview() {
+        apiGet('/api/admin/vip-overview').then(function(data) {
+            var t = data.totals || {};
+            var money = function(n) { return '$' + (parseFloat(n) || 0).toFixed(2); };
+            document.getElementById('vipTotalTopups').textContent = money(t.total_topups);
+            document.getElementById('vipActiveCars').textContent = parseInt(t.active_vip_cars, 10) || 0;
+            document.getElementById('vipOutstanding').textContent = money(t.total_balance);
+            document.getElementById('vipBonusGiven').textContent = money(t.total_bonus);
+
+            var pb = document.getElementById('vipPartnersBody');
+            var partners = data.partners || [];
+            pb.innerHTML = partners.length ? partners.map(function(p) {
+                var nm = escHtml(p.company_name || p.full_name || p.email || '—');
+                return '<tr><td>' + nm + '</td><td><strong style="color:#C9A84C;">' + money(p.vip_balance) + '</strong></td><td>' + (parseInt(p.active_vip_cars,10)||0) + '</td></tr>';
+            }).join('') : '<tr><td colspan="3" style="color:#A0A3B0;">No VIP wallet activity yet</td></tr>';
+
+            var tb = document.getElementById('vipTxBody');
+            var txs = data.transactions || [];
+            function txLabel(type, source) {
+                if (type === 'topup') return 'Top-up (card)';
+                if (type === 'bonus') return 'First-VIP bonus';
+                if (type === 'spend') return 'VIP purchase' + (source === 'referral_balance' ? ' (referral)' : source === 'card' ? ' (card)' : source === 'vip_balance' ? ' (credit)' : '');
+                return type;
+            }
+            tb.innerHTML = txs.length ? txs.map(function(x) {
+                var amt = parseFloat(x.amount) || 0;
+                var color = amt >= 0 ? '#22c55e' : '#ef4444';
+                var nm = escHtml(x.partner_name || x.partner_email || '—');
+                var when = x.created_at ? new Date(x.created_at).toLocaleDateString() : '';
+                return '<tr><td>' + nm + '</td><td>' + txLabel(x.type, x.source) + '</td><td style="color:' + color + ';font-weight:600;">' + (amt >= 0 ? '+' : '') + '$' + Math.abs(amt).toFixed(2) + '</td><td class="hide-mobile">' + when + '</td></tr>';
+            }).join('') : '<tr><td colspan="4" style="color:#A0A3B0;">No transactions yet</td></tr>';
+        }).catch(function() {
+            var pb = document.getElementById('vipPartnersBody'); if (pb) pb.innerHTML = '<tr><td colspan="3" style="color:#ef4444;">Failed to load</td></tr>';
+        });
     }
 
     function populateFinMonthFilter() {
