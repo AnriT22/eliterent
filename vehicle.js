@@ -245,9 +245,12 @@
         imgs = imgs.filter(function(u, i, a) { return u && a.indexOf(u) === i; });
 
         var mainImg = document.getElementById('vdMainImg');
+        // Saved vertical crop position for the main photo (default 50 = centered).
+        var offY = (v.image_offset_y == null ? 50 : v.image_offset_y);
         if (imgs.length > 0) {
             mainImg.src = imgs[0];
             mainImg.alt = name;
+            mainImg.style.objectPosition = '50% ' + offY + '%';
         } else {
             mainImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 480'%3E%3Crect fill='%23e2e8f0' width='800' height='480'/%3E%3Ctext x='400' y='245' text-anchor='middle' fill='%2394a3b8' font-size='20' font-family='sans-serif'%3ENo Image%3C/text%3E%3C/svg%3E";
         }
@@ -262,6 +265,8 @@
                 img.className = 'vd-thumb' + (idx === 0 ? ' active' : '');
                 img.addEventListener('click', function() {
                     mainImg.src = src;
+                    // Apply the saved crop only to the main photo; center the others.
+                    mainImg.style.objectPosition = (idx === 0) ? ('50% ' + offY + '%') : '50% 50%';
                     document.querySelectorAll('.vd-thumb').forEach(function(t) { t.classList.remove('active'); });
                     img.classList.add('active');
                 });

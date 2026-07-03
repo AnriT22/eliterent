@@ -1099,7 +1099,28 @@
         var mainUrl = readyUrls.length > 0 ? readyUrls[0] : '';
         document.getElementById('vImageUrl').value = mainUrl;
         document.getElementById('vGalleryUrls').value = JSON.stringify(readyUrls);
+        updateCardPositionControl(mainUrl);
     }
+
+    // Show/refresh the "position the main photo on the card" control.
+    function updateCardPositionControl(mainUrl) {
+        var wrap = document.getElementById('vCardPositionWrap');
+        var img = document.getElementById('vCardPreviewImg');
+        var slider = document.getElementById('vImageOffsetY');
+        if (!wrap || !img || !slider) return;
+        if (!mainUrl) { wrap.style.display = 'none'; return; }
+        wrap.style.display = 'block';
+        img.src = mainUrl;
+        img.style.objectPosition = '50% ' + (parseFloat(slider.value) || 50) + '%';
+    }
+    // Live preview as the slider moves (attached once).
+    (function () {
+        var slider = document.getElementById('vImageOffsetY');
+        var img = document.getElementById('vCardPreviewImg');
+        if (slider && img) slider.addEventListener('input', function () {
+            img.style.objectPosition = '50% ' + (parseFloat(slider.value) || 50) + '%';
+        });
+    })();
 
     // ========================================
     // TECHNICAL PASSPORT UPLOAD
@@ -1250,7 +1271,7 @@
             }
 
             html += '<div class="db-vehicle-card" data-id="' + v.id + '">';
-            html += '<img class="db-vehicle-img" src="' + imgSrc + '" alt="' + (v.name || '') + '">';
+            html += '<img class="db-vehicle-img" src="' + imgSrc + '" alt="' + (v.name || '') + '" style="object-position:50% ' + (v.image_offset_y == null ? 50 : v.image_offset_y) + '%;">';
             html += '<div class="db-vehicle-body">';
             html += '<div class="db-vehicle-name">' + (v.name || 'Unnamed') + '</div>';
             html += '<div class="db-vehicle-meta">';
@@ -1342,6 +1363,7 @@
             price_per_day: getFloat('vPrice'),
             deposit_amount: getFloat('vDeposit'),
             image_url: getVal('vImageUrl') || null,
+            image_offset_y: (function () { var s = document.getElementById('vImageOffsetY'); return s ? (parseFloat(s.value) || 50) : 50; })(),
             gallery: uploadedUrls.filter(function (u) { return !u.startsWith('__uploading_'); }),
             description: getVal('vDescription').trim() || null,
             tech_passport_front: getVal('vPassportFront') || null,
@@ -1575,6 +1597,8 @@
         var pfContainer = document.getElementById('pickupFeesContainer');
         if (pfContainer) pfContainer.classList.add('vf-hidden');
         uploadedUrls = [];
+        var _offSlider = document.getElementById('vImageOffsetY');
+        if (_offSlider) _offSlider.value = 50;
         renderUploadPreviews();
         syncImageFields();
         // Clear passport fields
@@ -1667,6 +1691,12 @@
             setVal('vPrice', v.price_per_day || '');
             setVal('vDeposit', v.deposit_amount || 0);
             setVal('vImageUrl', v.image_url || '');
+            // Restore saved main-photo card position (default 50 = centered).
+            (function () {
+                var slider = document.getElementById('vImageOffsetY');
+                if (slider) slider.value = (v.image_offset_y === undefined || v.image_offset_y === null) ? 50 : v.image_offset_y;
+                if (v.image_url) updateCardPositionControl(v.image_url);
+            })();
             setVal('vDescription', v.description || '');
             setVal('vRegNumber', v.registration_number || '');
             setVal('vEngineCC', v.engine_cc || '');

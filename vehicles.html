@@ -1698,7 +1698,7 @@
 
                 card.innerHTML =
                     '<div class="vc-image-wrap">'
-                    + '<img src="' + imgSrc + '" alt="' + name + '" loading="lazy">'
+                    + '<img src="' + imgSrc + '" alt="' + name + '" loading="lazy" style="object-position:50% ' + ((v.image_offset_y == null ? 50 : v.image_offset_y)) + '%;">'
                     + '<span class="vc-year-badge">' + year + '</span>'
                     + (isNew ? '<span class="vc-new-badge">NEW</span>' : '')
                     + '<button class="vc-fav-btn' + (isFav ? ' active' : '') + '">' + (isFav ? '&#9829;' : '&#9825;') + '</button>'
