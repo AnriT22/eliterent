@@ -1744,11 +1744,16 @@
                 });
             });
 
+            // Seed the count with the loaded total, then re-apply active filters —
+            // applyFilters() overrides the badge with the actual visible (filtered)
+            // count, so this must run BEFORE it (otherwise the badge shows the
+            // unfiltered total while the grid shows "No vehicles found").
+            var badge = document.getElementById('vpCountBadge');
+            if (badge) badge.textContent = window.carsAvailableText(vehicles.length);
+
             // Re-apply active filters after grid rebuild
             if (typeof applyFilters === 'function') applyFilters();
 
-            var badge = document.getElementById('vpCountBadge');
-            if (badge) badge.textContent = window.carsAvailableText(vehicles.length);
             if (typeof I18n !== 'undefined' && I18n.translatePage) I18n.translatePage(grid);
             if (typeof Currency !== 'undefined' && Currency.refresh) Currency.refresh();
         }
