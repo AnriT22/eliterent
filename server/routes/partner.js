@@ -241,7 +241,137 @@ router.put("/payout-method", authenticateToken, async (req, res) => {
   }
 });
 
+// ==========================================================================
+// VIP WALLET — spend-only credit used to buy VIP status for a partner's cars.
+// $10 / 30 days per car. Fundable by card (PayPal), by moving referral earnings,
+// and seeded with a one-time $10 gift on a partner's first VIP.
+// ==========================================================================
+
+const VIP_FEE = 10;
+const VIP_FIRST_BONUS = 10;
+
+async function logVipTx(partnerUserId, amount, type, source, vehicleId, balanceAfter) {
+  try {
+    await execute(
+      "INSERT INTO vip_wallet_transactions (partner_user_id, amount, type, source, vehicle_id, balance_after) VALUES ($1,$2,$3,$4,$5,$6)",
+      [partnerUserId, amount, type, source || null, vehicleId || null, balanceAfter == null ? null : balanceAfter],
+    );
+  } catch (e) { console.error("logVipTx error:", e.message); }
+}
+
+// Activate 30-day VIP on a vehicle and apply the one-time first-VIP bonus.
+// Call ONLY after payment/deduction has already succeeded. Returns the new vip_until.
+async function activateVehicleVip(vehicleId, partnerUserId) {
+  var row = await queryOne(
+    `UPDATE vehicles
+       SET vip_until = CURRENT_TIMESTAMP + INTERVAL '30 days', updated_at = CURRENT_TIMESTAMP
+     WHERE id = $1 RETURNING vip_until`,
+    [vehicleId],
+  );
+
+  // One-time first-VIP gift: credit the wallet once, atomically flipping the flag.
+  var bonus = await queryOne(
+    "UPDATE partner_profiles SET vip_balance = vip_balance + $1, vip_first_bonus_used = 1 WHERE user_id = $2 AND COALESCE(vip_first_bonus_used,0) = 0 RETURNING vip_balance",
+    [VIP_FIRST_BONUS, partnerUserId],
+  );
+  if (bonus) {
+    await logVipTx(partnerUserId, VIP_FIRST_BONUS, "bonus", "first_vip", vehicleId, parseFloat(bonus.vip_balance) || 0);
+  }
+  return row ? row.vip_until : null;
+}
+
+// Shared owner/eligibility check for a VIP purchase on a vehicle.
+async function getVipTargetVehicle(vehicleId, partnerUserId) {
+  var v = await queryOne("SELECT id, partner_id, name, vip_until FROM vehicles WHERE id = $1", [vehicleId]);
+  if (!v) return { error: 404, message: "Vehicle not found" };
+  if (v.partner_id !== partnerUserId) return { error: 403, message: "Not your vehicle" };
+  if (v.vip_until && new Date(v.vip_until) > new Date()) {
+    return { error: 400, message: "This vehicle already has an active VIP badge." };
+  }
+  return { vehicle: v };
+}
+
+// GET /api/partner/vip-wallet — balances + first-bonus availability + recent tx
+router.get("/vip-wallet", authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== "partner") return res.status(403).json({ error: "Partners only" });
+    var p = await queryOne(
+      "SELECT COALESCE(vip_balance,0) AS vip_balance, COALESCE(referral_balance,0) AS referral_balance, COALESCE(vip_first_bonus_used,0) AS bonus_used FROM partner_profiles WHERE user_id = $1",
+      [req.user.id],
+    );
+    if (!p) return res.status(404).json({ error: "Partner profile not found" });
+    var txs = await queryAll(
+      "SELECT amount, type, source, vehicle_id, balance_after, created_at FROM vip_wallet_transactions WHERE partner_user_id = $1 ORDER BY created_at DESC LIMIT 20",
+      [req.user.id],
+    );
+    res.json({
+      vip_balance: parseFloat(p.vip_balance) || 0,
+      referral_balance: parseFloat(p.referral_balance) || 0,
+      first_bonus_available: !p.bonus_used,
+      vip_fee: VIP_FEE,
+      transactions: txs,
+    });
+  } catch (err) {
+    console.error("vip-wallet error:", err);
+    res.status(500).json({ error: "Failed to load VIP wallet" });
+  }
+});
+
+// POST /api/partner/vehicle/:id/vip/pay-with-balance — spend VIP credit
+router.post("/vehicle/:id/vip/pay-with-balance", authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== "partner") return res.status(403).json({ error: "Partners only" });
+    var vehicleId = parseInt(req.params.id, 10);
+    if (!vehicleId) return res.status(400).json({ error: "vehicle id required" });
+
+    var target = await getVipTargetVehicle(vehicleId, req.user.id);
+    if (target.error) return res.status(target.error).json({ error: target.message });
+
+    // Atomic deduct — only succeeds if balance is sufficient.
+    var deducted = await queryOne(
+      "UPDATE partner_profiles SET vip_balance = vip_balance - $1 WHERE user_id = $2 AND COALESCE(vip_balance,0) >= $1 RETURNING vip_balance",
+      [VIP_FEE, req.user.id],
+    );
+    if (!deducted) return res.status(400).json({ error: "Insufficient VIP balance", code: "INSUFFICIENT" });
+    await logVipTx(req.user.id, -VIP_FEE, "spend", "vip_balance", vehicleId, parseFloat(deducted.vip_balance) || 0);
+
+    var vipUntil = await activateVehicleVip(vehicleId, req.user.id);
+    res.json({ status: "COMPLETED", message: "VIP activated for 30 days!", vehicleId: vehicleId, vip_until: vipUntil });
+  } catch (err) {
+    console.error("vip pay-with-balance error:", err);
+    res.status(500).json({ error: "Failed to activate VIP" });
+  }
+});
+
+// POST /api/partner/vehicle/:id/vip/pay-with-referral — spend referral earnings
+router.post("/vehicle/:id/vip/pay-with-referral", authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== "partner") return res.status(403).json({ error: "Partners only" });
+    var vehicleId = parseInt(req.params.id, 10);
+    if (!vehicleId) return res.status(400).json({ error: "vehicle id required" });
+
+    var target = await getVipTargetVehicle(vehicleId, req.user.id);
+    if (target.error) return res.status(target.error).json({ error: target.message });
+
+    var deducted = await queryOne(
+      "UPDATE partner_profiles SET referral_balance = referral_balance - $1 WHERE user_id = $2 AND COALESCE(referral_balance,0) >= $1 RETURNING referral_balance",
+      [VIP_FEE, req.user.id],
+    );
+    if (!deducted) return res.status(400).json({ error: "Insufficient referral balance", code: "INSUFFICIENT" });
+    await logVipTx(req.user.id, -VIP_FEE, "spend", "referral_balance", vehicleId, null);
+
+    var vipUntil = await activateVehicleVip(vehicleId, req.user.id);
+    res.json({ status: "COMPLETED", message: "VIP activated for 30 days!", vehicleId: vehicleId, vip_until: vipUntil });
+  } catch (err) {
+    console.error("vip pay-with-referral error:", err);
+    res.status(500).json({ error: "Failed to activate VIP" });
+  }
+});
+
 module.exports = router;
 module.exports.getReferralStats = getReferralStats;
+module.exports.activateVehicleVip = activateVehicleVip;
+module.exports.logVipTx = logVipTx;
+module.exports.VIP_FEE = VIP_FEE;
 module.exports.getTierFromCarCount = getTierFromCarCount;
 module.exports.MIN_PAYOUT_AMOUNT = MIN_PAYOUT_AMOUNT;
