@@ -28,4 +28,15 @@
     }
 
     window.API_BASE_URL = API_BASE;
+
+    // Capture a shared referral code from the URL (?ref=CODE) on any page and
+    // persist it, so a visitor who arrives via a partner's shared car link has
+    // the code auto-applied when they register as a partner.
+    try {
+        var _ref = new URLSearchParams(window.location.search).get('ref');
+        if (_ref) {
+            _ref = _ref.trim().toUpperCase();
+            if (_ref) localStorage.setItem('pendingReferralCode', _ref);
+        }
+    } catch (e) { /* ignore */ }
 })();

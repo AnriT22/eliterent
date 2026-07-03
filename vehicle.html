@@ -28,9 +28,9 @@
     <noscript><link rel="stylesheet" href="premium.css?v=6"></noscript>
     <link rel="preload" href="navbar-auth.css?v=6" as="style">
     <link rel="stylesheet" href="navbar-auth.css?v=6">
-    <link rel="preload" href="vehicle.css?v=6" as="style">
-    <link rel="stylesheet" href="vehicle.css?v=6">
-    <script src="api-helper.js?v=2" defer></script>
+    <link rel="preload" href="vehicle.css?v=7" as="style">
+    <link rel="stylesheet" href="vehicle.css?v=7">
+    <script src="api-helper.js?v=3" defer></script>
     <script src="i18n.js?v=6" defer></script>
 </head>
 <body>
@@ -119,6 +119,9 @@
             <div class="vd-gallery">
                 <div class="vd-main-img-wrap">
                     <img id="vdMainImg" src="" alt="" class="vd-main-img" loading="lazy">
+                    <button class="vd-share-btn" id="vdShareBtn" title="Share this car" data-i18n-title="vehicle_page.share">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                    </button>
                     <button class="vd-fav-btn" id="vdFavBtn" title="Add to favorites">&#9825;</button>
                     <span class="vd-year-badge" id="vdYearBadge"></span>
                 </div>
@@ -356,7 +359,7 @@
         </div>
     </div>
 
-    <script src="vehicle.js?v=5"></script>
+    <script src="vehicle.js?v=6"></script>
     <script src="navbar-auth.js?v=4"></script>
     <script src="currency.js?v=4"></script>
 <script src="premium-animations.js?v=2"></script>
