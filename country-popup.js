@@ -7,13 +7,12 @@
    ============================================================ */
 (function () {
     // ------------------------------------------------------------
-    // FEATURE FLAG: automatic country popup on entry.
-    // Set to true to re-enable the popup that auto-appears when a
-    // visitor lands on the site without having chosen a country.
+    // FEATURE FLAG (central): automatic country popup on entry.
+    // Controlled from site-config.js -> SiteConfig.autoCountryPopup.
     // When false, the popup never auto-shows, but manual triggering
     // via window.openCountryPopup() still works.
     // ------------------------------------------------------------
-    var AUTO_SHOW_ENABLED = false;
+    var AUTO_SHOW_ENABLED = !!(window.SiteConfig && window.SiteConfig.autoCountryPopup);
 
     var COUNTRIES = [
         { code: 'georgia',    name: 'Georgia',    flag: '🇬🇪', live: true },
@@ -102,12 +101,10 @@
 
     window.openCountryPopup = show;
 
-    // ----------------------------------------------------------------
-    // AUTO-SHOW TEMPORARILY DISABLED
-    // The popup no longer appears automatically on entry. To re-enable,
-    // uncomment the block below and set AUTO_SHOW_ENABLED = true.
-    // ----------------------------------------------------------------
-    // function maybeAuto() { if (AUTO_SHOW_ENABLED && !getChosen()) setTimeout(show, 700); }
-    // if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', maybeAuto);
-    // else maybeAuto();
+    // Auto-show on entry — only when SiteConfig.autoCountryPopup is true AND the
+    // visitor hasn't picked a country yet. Currently disabled via the central flag,
+    // so this is a no-op until autoCountryPopup is set back to true.
+    function maybeAuto() { if (AUTO_SHOW_ENABLED && !getChosen()) setTimeout(show, 700); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', maybeAuto);
+    else maybeAuto();
 })();
