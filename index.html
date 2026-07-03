@@ -316,103 +316,45 @@
                 </div>
             </div>
 
-            <!-- Booking Form -->
+            <!-- Search Filter — City + Car Category only -->
             <div class="booking-form-container">
                 <div class="form-group-row">
                     <div class="form-group">
                         <div class="input-wrapper">
                             <span class="input-icon">📍</span>
-                            <input type="text" id="pickupInput" placeholder="Pick-up *" data-i18n-placeholder="hero.pickup_placeholder" class="booking-input" readonly>
-                        </div>
-                        <div class="location-dropdown" id="pickupDropdown" style="display: none;">
-                            <div class="location-item" data-location="Tbilisi">
-                                <span class="location-icon">📍</span>
-                                <span>Tbilisi</span>
-                            </div>
-                            <div class="location-item" data-location="Tbilisi Airport">
-                                <span class="location-icon">📍</span>
-                                <span>Tbilisi Airport</span>
-                            </div>
-                            <div class="location-item" data-location="Kutaisi">
-                                <span class="location-icon">📍</span>
-                                <span>Kutaisi</span>
-                            </div>
-                            <div class="location-item" data-location="Kutaisi Airport">
-                                <span class="location-icon">📍</span>
-                                <span>Kutaisi Airport</span>
-                            </div>
-                            <div class="location-item" data-location="Batumi">
-                                <span class="location-icon">📍</span>
-                                <span>Batumi</span>
-                            </div>
-                            <div class="location-item" data-location="Batumi Airport">
-                                <span class="location-icon">📍</span>
-                                <span>Batumi Airport</span>
-                            </div>
-                            <div class="location-item" data-location="Kobuleti">
-                                <span class="location-icon">📍</span>
-                                <span>Kobuleti</span>
-                            </div>
+                            <select id="homeCity" class="booking-input home-filter-select">
+                                <option value="" data-i18n="hero.any_city">All cities</option>
+                                <option value="Tbilisi">Tbilisi</option>
+                                <option value="Batumi">Batumi</option>
+                                <option value="Kutaisi">Kutaisi</option>
+                                <option value="Kobuleti">Kobuleti</option>
+                            </select>
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="input-wrapper">
-                            <span class="input-icon">📍</span>
-                            <input type="text" id="dropoffInput" placeholder="Drop-off *" data-i18n-placeholder="hero.dropoff_placeholder" class="booking-input" readonly>
-                        </div>
-                        <div class="location-dropdown" id="dropoffDropdown" style="display: none;">
-                            <div class="location-item" data-location="Tbilisi">
-                                <span class="location-icon">📍</span>
-                                <span>Tbilisi</span>
-                            </div>
-                            <div class="location-item" data-location="Tbilisi Airport">
-                                <span class="location-icon">📍</span>
-                                <span>Tbilisi Airport</span>
-                            </div>
-                            <div class="location-item" data-location="Kutaisi">
-                                <span class="location-icon">📍</span>
-                                <span>Kutaisi</span>
-                            </div>
-                            <div class="location-item" data-location="Kutaisi Airport">
-                                <span class="location-icon">📍</span>
-                                <span>Kutaisi Airport</span>
-                            </div>
-                            <div class="location-item" data-location="Batumi">
-                                <span class="location-icon">📍</span>
-                                <span>Batumi</span>
-                            </div>
-                            <div class="location-item" data-location="Batumi Airport">
-                                <span class="location-icon">📍</span>
-                                <span>Batumi Airport</span>
-                            </div>
-                            <div class="location-item" data-location="Kobuleti">
-                                <span class="location-icon">📍</span>
-                                <span>Kobuleti</span>
-                            </div>
+                            <span class="input-icon">🚗</span>
+                            <select id="homeCategory" class="booking-input home-filter-select">
+                                <option value="" data-i18n="hero.any_category">All categories</option>
+                                <option value="suv">SUV</option>
+                                <option value="sedan" data-i18n="filter_options.sedan">Sedan</option>
+                                <option value="coupe">Coupe</option>
+                                <option value="convertible" data-i18n="filter_options.convertible">Convertible</option>
+                                <option value="crossover">Crossover</option>
+                                <option value="minivan" data-i18n="filter_options.minivan">Minivan</option>
+                                <option value="economy" data-i18n="filter_options.economy">Economy</option>
+                                <option value="standard" data-i18n="filter_options.standard">Standard</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <div class="input-wrapper">
-                            <span class="input-icon">📅</span>
-                            <input type="text" id="dateRangeInput" placeholder="Pick-up & Drop-off" data-i18n-placeholder="hero.date_placeholder" class="booking-input" readonly>
-                        </div>
-                    </div>
-                    <button class="search-btn" data-i18n="hero.search_btn">Search for a car</button>
-                </div>
-
-                <!-- Advanced Filters Toggle -->
-                <div class="advanced-filters-toggle">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="4" y1="6" x2="20" y2="6"></line>
-                        <line x1="4" y1="12" x2="20" y2="12"></line>
-                        <line x1="4" y1="18" x2="20" y2="18"></line>
-                    </svg>
-                    <span data-i18n="hero.advanced_filters">Advanced Filters</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
+                    <button class="search-btn" id="homeSearchBtn" data-i18n="hero.search_btn">Search for a car</button>
                 </div>
             </div>
+            <style>
+                .home-filter-select { width:100%; appearance:none; -webkit-appearance:none; cursor:pointer;
+                    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+                    background-repeat:no-repeat; background-position:right 12px center; padding-right:34px; }
+            </style>
         </div>
     </section>
 
@@ -1042,7 +984,7 @@
         </a>
     </div>
 
-    <script src="script.js?v=13"></script>
+    <script src="script.js?v=14"></script>
     <script src="navbar-auth.js?v=4"></script>
     <script src="currency.js?v=4"></script>
 <script src="premium-animations.js?v=2"></script>
