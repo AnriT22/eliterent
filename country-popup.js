@@ -6,6 +6,15 @@
    Included on index.html and vehicles.html.
    ============================================================ */
 (function () {
+    // ------------------------------------------------------------
+    // FEATURE FLAG: automatic country popup on entry.
+    // Set to true to re-enable the popup that auto-appears when a
+    // visitor lands on the site without having chosen a country.
+    // When false, the popup never auto-shows, but manual triggering
+    // via window.openCountryPopup() still works.
+    // ------------------------------------------------------------
+    var AUTO_SHOW_ENABLED = false;
+
     var COUNTRIES = [
         { code: 'georgia',    name: 'Georgia',    flag: '🇬🇪', live: true },
         { code: 'armenia',    name: 'Armenia',    flag: '🇦🇲', live: false },
@@ -96,7 +105,7 @@
     // Auto-show on entry (after a short beat so the page renders first) — only if
     // the visitor hasn't picked a country yet. Closing without choosing leaves it,
     // so it appears again on the next page until a country is selected.
-    function maybeAuto() { if (!getChosen()) setTimeout(show, 700); }
+    function maybeAuto() { if (AUTO_SHOW_ENABLED && !getChosen()) setTimeout(show, 700); }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', maybeAuto);
     else maybeAuto();
 })();
