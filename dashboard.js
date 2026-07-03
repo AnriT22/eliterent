@@ -3218,7 +3218,7 @@
         if ((parseFloat(w.referral_balance) || 0) >= fee) {
             html += '<button class="btn btn-secondary vip-act" data-act="referral">' + tOr('partner_dashboard.vip_use_referral', 'Use referral earnings') + ' — $' + fee + '</button>';
         }
-        html += '<button class="btn btn-secondary vip-act" data-act="card">' + tOr('partner_dashboard.vip_pay_card', 'Pay by card') + ' — $' + fee + '</button>';
+        html += '<button class="btn vip-act" data-act="card" style="background:#22c55e;border-color:#22c55e;color:#fff;font-weight:700;">' + tOr('partner_dashboard.vip_pay_card', 'Pay by card') + ' — $' + fee + '</button>';
         html += '<button class="btn btn-text vip-act" data-act="topup">' + tOr('partner_dashboard.vip_topup', 'Top up VIP wallet') + '</button>';
         if (w.first_bonus_available) {
             html += '<div style="font-size:12px;color:#22c55e;margin-top:8px;">🎁 ' + tOr('partner_dashboard.vip_first_bonus', 'First-VIP bonus: get $10 free credit added after your first activation.') + '</div>';
