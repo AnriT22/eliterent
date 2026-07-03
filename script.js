@@ -338,6 +338,7 @@ function initCalendar() {
     }
 
     function updateDateInput() {
+        if (!dateRangeInput) return; // date field removed from the homepage search
         dateRangeInput.value = formatDateDisplay();
     }
 
