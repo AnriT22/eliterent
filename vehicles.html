@@ -1353,6 +1353,9 @@
                 var locInput = document.getElementById('pickupLocation');
                 if (locInput) locInput.value = loc;
             }
+            // Country coming from the homepage search — filters results server-side.
+            var ctry = params.get('country');
+            if (ctry) window.vcUrlCountry = ctry.toLowerCase();
             // Preselect the category coming from the homepage search so it is both
             // applied and visibly checked (users can see/modify it in the panel).
             var cat = params.get('category');
@@ -1533,7 +1536,9 @@
         var locInput = document.getElementById('pickupLocation');
         var locVal = locInput ? locInput.value.trim() : '';
         if (locVal) apiUrl += '&location=' + encodeURIComponent(locVal);
-        var selectedCountry = localStorage.getItem('selectedCountry') || sessionStorage.getItem('selectedCountry');
+        // A country from the homepage search (?country=) takes precedence over the
+        // popup-selected country, so a cross-border search filters correctly.
+        var selectedCountry = window.vcUrlCountry || localStorage.getItem('selectedCountry') || sessionStorage.getItem('selectedCountry');
         if (selectedCountry) apiUrl += '&country=' + encodeURIComponent(selectedCountry);
         if (vcSelStart && vcSelEnd) apiUrl += '&pickup_date=' + vcFmt(vcSelStart) + '&dropoff_date=' + vcFmt(vcSelEnd);
         fetch(apiUrl)

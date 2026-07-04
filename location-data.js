@@ -204,6 +204,65 @@
         ['Augusta', 'Maine'], ['Springfield', 'Illinois'], ['Lansing', 'Michigan']
     ];
 
+    var TURKEY = [
+        ['Istanbul', 'Istanbul'],
+        ['Istanbul Airport', 'Istanbul'],
+        ['Sabiha Gokcen Airport', 'Istanbul'],
+        ['Ankara', 'Ankara'],
+        ['Esenboga Airport', 'Ankara'],
+        ['Izmir', 'Izmir'],
+        ['Izmir Adnan Menderes Airport', 'Izmir'],
+        ['Antalya', 'Antalya'],
+        ['Antalya Airport', 'Antalya'],
+        ['Alanya', 'Antalya'],
+        ['Bodrum', 'Mugla'],
+        ['Bodrum-Milas Airport', 'Mugla'],
+        ['Dalaman', 'Mugla'],
+        ['Dalaman Airport', 'Mugla'],
+        ['Fethiye', 'Mugla'],
+        ['Marmaris', 'Mugla'],
+        ['Trabzon', 'Trabzon'],
+        ['Trabzon Airport', 'Trabzon'],
+        ['Bursa', 'Bursa'],
+        ['Adana', 'Adana'],
+        ['Gaziantep', 'Gaziantep'],
+        ['Konya', 'Konya'],
+        ['Kayseri', 'Kayseri'],
+        ['Nevsehir (Cappadocia)', 'Nevsehir'],
+        ['Denizli (Pamukkale)', 'Denizli'],
+        ['Samsun', 'Samsun'],
+        ['Eskisehir', 'Eskisehir']
+    ];
+
+    var RUSSIA = [
+        ['Moscow', 'Moscow'],
+        ['Sheremetyevo Airport', 'Moscow'],
+        ['Domodedovo Airport', 'Moscow'],
+        ['Vnukovo Airport', 'Moscow'],
+        ['Saint Petersburg', 'Saint Petersburg'],
+        ['Pulkovo Airport', 'Saint Petersburg'],
+        ['Sochi', 'Krasnodar Krai'],
+        ['Sochi Airport', 'Krasnodar Krai'],
+        ['Krasnodar', 'Krasnodar Krai'],
+        ['Krasnodar Airport', 'Krasnodar Krai'],
+        ['Kazan', 'Tatarstan'],
+        ['Kazan Airport', 'Tatarstan'],
+        ['Yekaterinburg', 'Sverdlovsk'],
+        ['Koltsovo Airport', 'Sverdlovsk'],
+        ['Novosibirsk', 'Novosibirsk'],
+        ['Tolmachevo Airport', 'Novosibirsk'],
+        ['Nizhny Novgorod', 'Nizhny Novgorod'],
+        ['Rostov-on-Don', 'Rostov'],
+        ['Samara', 'Samara'],
+        ['Ufa', 'Bashkortostan'],
+        ['Krasnoyarsk', 'Krasnoyarsk Krai'],
+        ['Vladivostok', 'Primorsky Krai'],
+        ['Kaliningrad', 'Kaliningrad'],
+        ['Volgograd', 'Volgograd'],
+        ['Perm', 'Perm Krai'],
+        ['Chelyabinsk', 'Chelyabinsk']
+    ];
+
     function toObjs(arr) {
         return arr.map(function (c) { return { name: c[0], region: c[1] }; });
     }
@@ -211,6 +270,8 @@
     window.LOCATION_DATA = {
         georgia: { label: 'Georgia', cities: toObjs(GEORGIA) },
         armenia: { label: 'Armenia', cities: toObjs(ARMENIA) },
+        turkey: { label: 'Turkey', cities: toObjs(TURKEY) },
+        russia: { label: 'Russia', cities: toObjs(RUSSIA) },
         usa: { label: 'United States', cities: toObjs(USA) }
     };
 })();
