@@ -1349,6 +1349,7 @@
             country: getVal('vCountry') || 'georgia',
             rent_with_driver_only: getChecked('vRentWithDriverOnly'),
             offroad_allowed: getChecked('vOffroadAllowed'),
+            locations: (typeof window.collectVehicleLocations === 'function') ? window.collectVehicleLocations() : undefined,
             category: getVal('vCategory'),
             year: getInt('vYear'),
             engine: getVal('vEngine'),
@@ -1563,6 +1564,7 @@
     function resetVehicleForm() {
         vehicleForm.reset();
         if (typeof resetDescTabs === 'function') resetDescTabs();
+        if (typeof window.resetVehicleLocations === 'function') window.resetVehicleLocations();
         document.getElementById('vEditId').value = '';
         document.getElementById('addVehicleTitle').textContent = 'Add New Vehicle';
         document.getElementById('submitVehicleBtn').textContent = 'Add Vehicle';
@@ -1678,6 +1680,8 @@
             setVal('vCountry', v.country || 'georgia');
             var offCb = document.getElementById('vOffroadAllowed'); if (offCb) offCb.checked = !!v.offroad_allowed;
             if (typeof window.syncOffroadVisibility === 'function') window.syncOffroadVisibility();
+            if (typeof window.populateLocDatalist === 'function') window.populateLocDatalist();
+            if (typeof window.loadVehicleLocations === 'function') window.loadVehicleLocations(v.id);
             setVal('vLocationCity', v.location_city || '');
             setVal('vRegion', v.region || '');
             if (typeof window.setLocationFields === 'function') {
@@ -2771,6 +2775,7 @@
             setRegion('');
             hideResults();
             syncOffroadVisibility();
+            if (typeof window.populateLocDatalist === 'function') window.populateLocDatalist();
         });
 
         // Helper used by edit-populate to restore saved values
@@ -3213,6 +3218,84 @@
             });
     }
 
+    })();
+
+    // ========================================
+    // PICKUP LOCATIONS (unlimited; add / edit / reorder / delete)
+    // ========================================
+    (function () {
+        var list = document.getElementById('vLocationsList');
+        var addBtn = document.getElementById('vAddLocationBtn');
+        if (!list || !addBtn) return;
+        var btnStyle = 'width:30px;height:34px;border:1px solid #3A3F4B;background:transparent;color:#EAEAEA;border-radius:8px;cursor:pointer;flex-shrink:0;';
+
+        window.addVehicleLocationRow = function (d) {
+            d = d || {};
+            var row = document.createElement('div');
+            row.className = 'vloc-row';
+            row.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;';
+            row.innerHTML =
+                '<input class="vloc-city db-input" list="vLocCitiesDatalist" placeholder="City / Airport" style="flex:2;min-width:130px;">' +
+                '<input class="vloc-name db-input" placeholder="Label (optional)" style="flex:1.5;min-width:110px;">' +
+                '<input class="vloc-address db-input" placeholder="Address (optional)" style="flex:2;min-width:130px;">' +
+                '<input class="vloc-fee db-input" type="number" min="0" step="1" placeholder="Fee $" style="width:82px;">' +
+                '<button type="button" class="vloc-up" title="Move up" style="' + btnStyle + '">↑</button>' +
+                '<button type="button" class="vloc-down" title="Move down" style="' + btnStyle + '">↓</button>' +
+                '<button type="button" class="vloc-del" title="Remove" style="' + btnStyle + 'color:#ef4444;">✕</button>';
+            row.querySelector('.vloc-city').value = d.city || '';
+            row.querySelector('.vloc-name').value = d.name || '';
+            row.querySelector('.vloc-address').value = d.address || '';
+            row.querySelector('.vloc-fee').value = (d.pickup_fee != null && d.pickup_fee !== '') ? d.pickup_fee : '';
+            list.appendChild(row);
+        };
+
+        window.collectVehicleLocations = function () {
+            var country = (document.getElementById('vCountry') || {}).value || 'georgia';
+            var out = [];
+            Array.prototype.forEach.call(list.querySelectorAll('.vloc-row'), function (r) {
+                var city = (((r.querySelector('.vloc-city') || {}).value) || '').trim();
+                if (!city) return;
+                out.push({
+                    country: country,
+                    city: city,
+                    name: (((r.querySelector('.vloc-name') || {}).value) || '').trim(),
+                    address: (((r.querySelector('.vloc-address') || {}).value) || '').trim(),
+                    pickup_fee: parseFloat((r.querySelector('.vloc-fee') || {}).value) || 0
+                });
+            });
+            return out;
+        };
+
+        window.resetVehicleLocations = function () { list.innerHTML = ''; };
+
+        window.loadVehicleLocations = function (vehicleId) {
+            list.innerHTML = '';
+            if (!vehicleId) return;
+            fetch('/api/vehicles/' + vehicleId + '/locations')
+                .then(function (r) { return r.json(); })
+                .then(function (d) { (d.locations || []).forEach(function (l) { window.addVehicleLocationRow(l); }); })
+                .catch(function () {});
+        };
+
+        window.populateLocDatalist = function () {
+            var dl = document.getElementById('vLocCitiesDatalist');
+            if (!dl) return;
+            var country = (document.getElementById('vCountry') || {}).value || 'georgia';
+            var cities = (window.LOCATION_DATA && window.LOCATION_DATA[country]) ? window.LOCATION_DATA[country].cities : [];
+            dl.innerHTML = cities.map(function (c) { return '<option value="' + c.name.replace(/"/g, '') + '">'; }).join('');
+        };
+        window.populateLocDatalist();
+
+        addBtn.addEventListener('click', function () { window.addVehicleLocationRow({}); });
+        list.addEventListener('click', function (e) {
+            var btn = e.target.closest('button');
+            if (!btn) return;
+            var row = btn.closest('.vloc-row');
+            if (!row) return;
+            if (btn.classList.contains('vloc-del')) { row.remove(); }
+            else if (btn.classList.contains('vloc-up')) { var prev = row.previousElementSibling; if (prev) list.insertBefore(row, prev); }
+            else if (btn.classList.contains('vloc-down')) { var next = row.nextElementSibling; if (next) list.insertBefore(next, row); }
+        });
     })();
 
     // ========================================

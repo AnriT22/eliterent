@@ -493,6 +493,27 @@ async function initDB() {
         await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS offroad_allowed INTEGER DEFAULT 0`);
     } catch (e) { /* columns may already exist or table not yet created */ }
 
+    // Extra pickup locations per vehicle (unlimited), each with its own fee. This
+    // is additive: the vehicle's primary location_city/country is unchanged, so
+    // existing filtering, cards and bookings keep working exactly as before.
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS vehicle_locations (
+            id SERIAL PRIMARY KEY,
+            vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
+            country TEXT,
+            city TEXT,
+            airport TEXT,
+            address TEXT,
+            name TEXT,
+            pickup_fee REAL DEFAULT 0,
+            sort_order INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    try {
+        await pool.query(`CREATE INDEX IF NOT EXISTS idx_vehicle_locations_vehicle ON vehicle_locations(vehicle_id)`);
+    } catch (e) { /* index may already exist */ }
+
     // Audit log for every VIP-wallet movement: topup (card), spend (VIP buy),
     // bonus (first-VIP gift), referral_transfer (moved from referral earnings).
     await pool.query(`
