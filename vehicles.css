@@ -598,7 +598,9 @@
 .vc-image-wrap {
     position: relative;
     width: 100%;
-    height: 180px;
+    /* 3:2 to match the detail hero and the partner's crop-position preview, so
+       what a partner positions is exactly what customers see (WYSIWYG). */
+    aspect-ratio: 3 / 2;
     overflow: hidden;
     background: #1A1814;
 }
