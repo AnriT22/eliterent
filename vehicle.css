@@ -72,7 +72,9 @@
     border-radius: 16px;
     overflow: hidden;
     background: #1A1814;
-    aspect-ratio: 16/9;
+    /* 3:2 (was 16:9) — a taller frame shows more of portrait photos, so the
+       main image reads far less "zoomed"/cropped on the detail page. */
+    aspect-ratio: 3/2;
 }
 .vd-main-img {
     width: 100%; height: 100%;
