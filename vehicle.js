@@ -302,9 +302,12 @@
             specsGrid.appendChild(div);
         });
 
-        // Description
-        if (v.description) {
-            document.getElementById('vdDescription').textContent = v.description;
+        // Description — show it in the visitor's language, falling back gracefully
+        // to the legacy/default text or any other available translation.
+        var _dlang = (localStorage.getItem('lang') || document.documentElement.lang || 'en').slice(0, 2);
+        var _desc = v['description_' + _dlang] || v.description || v.description_en || v.description_ka || v.description_ru || v.description_he || '';
+        if (_desc) {
+            document.getElementById('vdDescription').textContent = _desc;
             document.getElementById('vdDescSection').style.display = 'block';
         }
 
@@ -336,6 +339,7 @@
         if (typeof vdExtras === 'string') { try { vdExtras = JSON.parse(vdExtras); } catch(e) { vdExtras = {}; } }
         vdExtras = vdExtras || {};
         if (vdExtras.svaneti_roads) features.push(vt('vehicle_page.svaneti_accepted','Svaneti Roads Accepted'));
+        if (v.offroad_allowed) features.push(vt('vehicle_page.offroad_allowed','Off-road / mountain roads allowed'));
 
         if (v.insurance_included) features.unshift(vt('vehicle_page.insurance_included','Insurance Included'));
         if (v.free_cancellation) features.unshift(vt('vehicle_page.free_cancellation','Free Cancellation'));

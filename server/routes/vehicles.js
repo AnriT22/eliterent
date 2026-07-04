@@ -4,6 +4,28 @@ const { queryAll, queryOne, execute } = require('../db-helpers');
 
 const router = express.Router();
 
+// Save per-language descriptions (en/ka/ru/he) for a vehicle, separately from
+// the big positional INSERT/UPDATE. Also keeps the legacy `description` column
+// populated with the first non-empty translation so existing consumers and the
+// language fallback keep working. No-op when the client sends none of them.
+async function saveVehicleDescriptions(vehicleId, b, legacyDescription) {
+    var has = ['description_en', 'description_ka', 'description_ru', 'description_he']
+        .some(function (k) { return b[k] !== undefined; });
+    if (!has) return;
+    function clean(v) { return (v == null ? '' : String(v)).trim() || null; }
+    var dEn = clean(b.description_en), dKa = clean(b.description_ka),
+        dRu = clean(b.description_ru), dHe = clean(b.description_he);
+    await execute(
+        'UPDATE vehicles SET description_en = $1, description_ka = $2, description_ru = $3, description_he = $4 WHERE id = $5',
+        [dEn, dKa, dRu, dHe, vehicleId]
+    );
+    // Fallback: if the universal description is empty, seed it from a translation.
+    if (!legacyDescription || !String(legacyDescription).trim()) {
+        var fb = dEn || dKa || dRu || dHe;
+        if (fb) await execute("UPDATE vehicles SET description = $1 WHERE id = $2 AND (description IS NULL OR description = '')", [fb, vehicleId]);
+    }
+}
+
 // GET /api/vehicles — list all active vehicles (public)
 router.get('/', async (req, res) => {
     try {
@@ -306,6 +328,14 @@ router.post('/', authenticateToken, requireRole('partner'), async (req, res) => 
             if (!isNaN(offY)) await execute('UPDATE vehicles SET image_offset_y = $1 WHERE id = $2', [offY, newVehicle.id]);
         }
 
+        if (newVehicle) await saveVehicleDescriptions(newVehicle.id, b, newVehicle.description);
+
+        // Georgia-only off-road flag (forced off for non-Georgia vehicles).
+        if (newVehicle && b.offroad_allowed !== undefined) {
+            var off = (String(b.country || 'georgia').toLowerCase() === 'georgia' && b.offroad_allowed) ? 1 : 0;
+            await execute('UPDATE vehicles SET offroad_allowed = $1 WHERE id = $2', [off, newVehicle.id]);
+        }
+
         // Owner alert: a car was added and needs approval (fire-and-forget, never blocks).
         (async () => {
             try {
@@ -408,6 +438,14 @@ router.put('/:id', authenticateToken, requireRole('partner'), async (req, res) =
         if (b.image_offset_y !== undefined && b.image_offset_y !== null) {
             var offY = Math.max(0, Math.min(100, parseFloat(b.image_offset_y)));
             if (!isNaN(offY)) await execute('UPDATE vehicles SET image_offset_y = $1 WHERE id = $2 AND partner_id = $3', [offY, vehicleId, req.user.id]);
+        }
+
+        await saveVehicleDescriptions(vehicleId, b, b.description);
+
+        if (b.offroad_allowed !== undefined) {
+            var offCountry = (b.country !== undefined ? b.country : (existing.country || 'georgia'));
+            var off2 = (String(offCountry).toLowerCase() === 'georgia' && b.offroad_allowed) ? 1 : 0;
+            await execute('UPDATE vehicles SET offroad_allowed = $1 WHERE id = $2 AND partner_id = $3', [off2, vehicleId, req.user.id]);
         }
 
         var updated = await queryOne('SELECT * FROM vehicles WHERE id = $1', [vehicleId]);

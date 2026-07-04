@@ -1348,6 +1348,7 @@
             location_city: getVal('vLocationCity'),
             country: getVal('vCountry') || 'georgia',
             rent_with_driver_only: getChecked('vRentWithDriverOnly'),
+            offroad_allowed: getChecked('vOffroadAllowed'),
             category: getVal('vCategory'),
             year: getInt('vYear'),
             engine: getVal('vEngine'),
@@ -1365,7 +1366,11 @@
             image_url: getVal('vImageUrl') || null,
             image_offset_y: (function () { var s = document.getElementById('vImageOffsetY'); return s ? (parseFloat(s.value) || 50) : 50; })(),
             gallery: uploadedUrls.filter(function (u) { return !u.startsWith('__uploading_'); }),
-            description: getVal('vDescription').trim() || null,
+            description: (getVal('vDescription').trim() || getVal('vDescriptionKa').trim() || getVal('vDescriptionRu').trim() || getVal('vDescriptionHe').trim()) || null,
+            description_en: getVal('vDescription').trim() || null,
+            description_ka: getVal('vDescriptionKa').trim() || null,
+            description_ru: getVal('vDescriptionRu').trim() || null,
+            description_he: getVal('vDescriptionHe').trim() || null,
             tech_passport_front: getVal('vPassportFront') || null,
             tech_passport_back: getVal('vPassportBack') || null,
             registration_number: getVal('vRegNumber').trim(),
@@ -1557,6 +1562,7 @@
 
     function resetVehicleForm() {
         vehicleForm.reset();
+        if (typeof resetDescTabs === 'function') resetDescTabs();
         document.getElementById('vEditId').value = '';
         document.getElementById('addVehicleTitle').textContent = 'Add New Vehicle';
         document.getElementById('submitVehicleBtn').textContent = 'Add Vehicle';
@@ -1670,6 +1676,8 @@
             }
             setVal('vMinAge', v.min_age || 21);
             setVal('vCountry', v.country || 'georgia');
+            var offCb = document.getElementById('vOffroadAllowed'); if (offCb) offCb.checked = !!v.offroad_allowed;
+            if (typeof window.syncOffroadVisibility === 'function') window.syncOffroadVisibility();
             setVal('vLocationCity', v.location_city || '');
             setVal('vRegion', v.region || '');
             if (typeof window.setLocationFields === 'function') {
@@ -1691,13 +1699,23 @@
             setVal('vPrice', v.price_per_day || '');
             setVal('vDeposit', v.deposit_amount || 0);
             setVal('vImageUrl', v.image_url || '');
+            // Per-language descriptions. Seed the current-language tab from the legacy
+            // description if no per-language text exists yet (so nothing is lost).
+            setVal('vDescription', v.description_en || '');
+            setVal('vDescriptionKa', v.description_ka || '');
+            setVal('vDescriptionRu', v.description_ru || '');
+            setVal('vDescriptionHe', v.description_he || '');
+            if (!v.description_en && !v.description_ka && !v.description_ru && !v.description_he && v.description) {
+                var _cl = (localStorage.getItem('lang') || document.documentElement.lang || 'en').slice(0, 2);
+                var _map = { en: 'vDescription', ka: 'vDescriptionKa', ru: 'vDescriptionRu', he: 'vDescriptionHe' };
+                setVal(_map[_cl] || 'vDescription', v.description);
+            }
             // Restore saved main-photo card position (default 50 = centered).
             (function () {
                 var slider = document.getElementById('vImageOffsetY');
                 if (slider) slider.value = (v.image_offset_y === undefined || v.image_offset_y === null) ? 50 : v.image_offset_y;
                 if (v.image_url) updateCardPositionControl(v.image_url);
             })();
-            setVal('vDescription', v.description || '');
             setVal('vRegNumber', v.registration_number || '');
             setVal('vEngineCC', v.engine_cc || '');
             // Populate engine liters from cc
@@ -2737,10 +2755,22 @@
             if (!e.target.closest('.vf-city-group')) hideResults();
         });
 
+        // Off-road driving is a Georgia-only option — show/hide accordingly.
+        function syncOffroadVisibility() {
+            var grp = document.getElementById('vOffroadGroup');
+            if (!grp) return;
+            var isGe = (countrySel.value || 'georgia') === 'georgia';
+            grp.style.display = isGe ? '' : 'none';
+            if (!isGe) { var cb = document.getElementById('vOffroadAllowed'); if (cb) cb.checked = false; }
+        }
+        window.syncOffroadVisibility = syncOffroadVisibility;
+        syncOffroadVisibility();
+
         countrySel.addEventListener('change', function () {
             cityInput.value = '';
             setRegion('');
             hideResults();
+            syncOffroadVisibility();
         });
 
         // Helper used by edit-populate to restore saved values
@@ -3184,6 +3214,35 @@
     }
 
     })();
+
+    // ========================================
+    // PER-LANGUAGE DESCRIPTION TABS (add/edit vehicle)
+    // ========================================
+    (function () {
+        var tabs = document.querySelectorAll('#vDescTabs .vdesc-tab');
+        var areas = document.querySelectorAll('.vdesc-area');
+        if (!tabs.length) return;
+        tabs.forEach(function (t) {
+            t.addEventListener('click', function () {
+                var lang = t.getAttribute('data-lang');
+                tabs.forEach(function (x) { x.classList.remove('active'); x.style.background = 'transparent'; x.style.color = '#EAEAEA'; });
+                t.classList.add('active'); t.style.background = '#C9A84C'; t.style.color = '#1a1400';
+                areas.forEach(function (a) { a.style.display = (a.getAttribute('data-lang') === lang) ? 'block' : 'none'; });
+            });
+        });
+    })();
+    // Reset the description tabs to the English tab (called from resetVehicleForm).
+    function resetDescTabs() {
+        var tabs = document.querySelectorAll('#vDescTabs .vdesc-tab');
+        var areas = document.querySelectorAll('.vdesc-area');
+        tabs.forEach(function (x) {
+            var on = x.getAttribute('data-lang') === 'en';
+            x.classList.toggle('active', on);
+            x.style.background = on ? '#C9A84C' : 'transparent';
+            x.style.color = on ? '#1a1400' : '#EAEAEA';
+        });
+        areas.forEach(function (a) { a.style.display = (a.getAttribute('data-lang') === 'en') ? 'block' : 'none'; });
+    }
 
     // ========================================
     // EDITABLE COMPANY NAME (partner profile)
