@@ -26,6 +26,48 @@ async function saveVehicleDescriptions(vehicleId, b, legacyDescription) {
     }
 }
 
+// Replace a vehicle's extra pickup locations (unlimited) with the given array.
+// No-op when the client doesn't send `locations`, so partial updates are safe.
+async function saveVehicleLocations(vehicleId, locations) {
+    if (locations === undefined) return;
+    if (!Array.isArray(locations)) locations = [];
+    await execute('DELETE FROM vehicle_locations WHERE vehicle_id = $1', [vehicleId]);
+    for (var i = 0; i < locations.length; i++) {
+        var l = locations[i] || {};
+        var city = (l.city == null ? '' : String(l.city)).trim();
+        if (!city) continue; // a location without a city is meaningless — skip it
+        var fee = Math.max(0, parseFloat(l.pickup_fee) || 0);
+        await execute(
+            `INSERT INTO vehicle_locations (vehicle_id, country, city, airport, address, name, pickup_fee, sort_order)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+            [
+                vehicleId,
+                (l.country == null ? '' : String(l.country)).trim() || null,
+                city,
+                (l.airport == null ? '' : String(l.airport)).trim() || null,
+                (l.address == null ? '' : String(l.address)).trim() || null,
+                (l.name == null ? '' : String(l.name)).trim() || null,
+                fee,
+                i,
+            ]
+        );
+    }
+}
+
+// GET /api/vehicles/:id/locations — a vehicle's extra pickup locations (public)
+router.get('/:id/locations', async (req, res) => {
+    try {
+        var rows = await queryAll(
+            'SELECT id, country, city, airport, address, name, pickup_fee, sort_order FROM vehicle_locations WHERE vehicle_id = $1 ORDER BY sort_order ASC, id ASC',
+            [parseInt(req.params.id)]
+        );
+        res.json({ locations: rows });
+    } catch (err) {
+        console.error('Get vehicle locations error:', err);
+        res.status(500).json({ error: 'Failed to load locations' });
+    }
+});
+
 // GET /api/vehicles — list all active vehicles (public)
 router.get('/', async (req, res) => {
     try {
@@ -336,6 +378,8 @@ router.post('/', authenticateToken, requireRole('partner'), async (req, res) => 
             await execute('UPDATE vehicles SET offroad_allowed = $1 WHERE id = $2', [off, newVehicle.id]);
         }
 
+        if (newVehicle) await saveVehicleLocations(newVehicle.id, b.locations);
+
         // Owner alert: a car was added and needs approval (fire-and-forget, never blocks).
         (async () => {
             try {
@@ -447,6 +491,8 @@ router.put('/:id', authenticateToken, requireRole('partner'), async (req, res) =
             var off2 = (String(offCountry).toLowerCase() === 'georgia' && b.offroad_allowed) ? 1 : 0;
             await execute('UPDATE vehicles SET offroad_allowed = $1 WHERE id = $2 AND partner_id = $3', [off2, vehicleId, req.user.id]);
         }
+
+        await saveVehicleLocations(vehicleId, b.locations);
 
         var updated = await queryOne('SELECT * FROM vehicles WHERE id = $1', [vehicleId]);
         res.json({ message: 'Vehicle updated', vehicle: updated });
