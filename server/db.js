@@ -483,6 +483,14 @@ async function initDB() {
         // Vertical crop position (0-100%) for the main photo on cards. 50 = centered
         // (the previous/default behaviour), so existing vehicles are unaffected.
         await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS image_offset_y REAL DEFAULT 50`);
+        // Per-language descriptions. The legacy `description` column stays as the
+        // universal fallback, so existing vehicles keep working with no migration.
+        await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS description_en TEXT`);
+        await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS description_ka TEXT`);
+        await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS description_ru TEXT`);
+        await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS description_he TEXT`);
+        // Georgia-only flag: vehicle may be driven on off-road / mountain routes.
+        await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS offroad_allowed INTEGER DEFAULT 0`);
     } catch (e) { /* columns may already exist or table not yet created */ }
 
     // Audit log for every VIP-wallet movement: topup (card), spend (VIP buy),
