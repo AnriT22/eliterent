@@ -449,15 +449,31 @@ function initCalendar() {
     renderCalendars();
     updateDateInput();
 
-    // "Search for a car" button on home page → City + Category only.
-    // Redirect to vehicles.html applying the selected city (location) and category.
+    // Home search: Country → City (dependent) + Category.
+    const homeCountry = document.getElementById('homeCountry');
+    const homeCity = document.getElementById('homeCity');
+    function populateHomeCities() {
+        if (!homeCity) return;
+        const anyLabel = (typeof I18n !== 'undefined' && I18n.t && I18n.t('hero.any_city') !== 'hero.any_city') ? I18n.t('hero.any_city') : 'All cities';
+        const country = (homeCountry && homeCountry.value) || 'georgia';
+        const data = (window.LOCATION_DATA && window.LOCATION_DATA[country]) ? window.LOCATION_DATA[country].cities : [];
+        let html = '<option value="">' + anyLabel + '</option>';
+        data.forEach(function (c) { html += '<option value="' + c.name.replace(/"/g, '') + '">' + c.name + '</option>'; });
+        homeCity.innerHTML = html;
+    }
+    if (homeCountry) homeCountry.addEventListener('change', populateHomeCities);
+    populateHomeCities();
+
+    // "Search for a car" → vehicles.html with country + city + category applied.
     const heroSearchBtn = document.getElementById('homeSearchBtn');
     if (heroSearchBtn) {
         heroSearchBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            const city = (document.getElementById('homeCity') || {}).value || '';
+            const country = (homeCountry || {}).value || '';
+            const city = (homeCity || {}).value || '';
             const category = (document.getElementById('homeCategory') || {}).value || '';
             const params = new URLSearchParams();
+            if (country) params.set('country', country);
             if (city) params.set('location', city);
             if (category) params.set('category', category);
             window.location.href = 'vehicles.html' + (params.toString() ? '?' + params.toString() : '');
