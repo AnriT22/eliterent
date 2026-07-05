@@ -227,7 +227,7 @@ router.get('/:id', async (req, res) => {
         var vehicle = await queryOne(
             `SELECT v.*,
                     (CASE WHEN v.is_vip = 1 OR v.vip_until > NOW() THEN 1 ELSE 0 END) AS is_vip,
-                    u.full_name as partner_name, pp.company_name, pp.whatsapp, pp.telegram, pp.location as partner_location
+                    u.full_name as partner_name, pp.company_name, pp.location as partner_location
              FROM vehicles v
              JOIN users u ON v.partner_id = u.id
              LEFT JOIN partner_profiles pp ON u.id = pp.user_id

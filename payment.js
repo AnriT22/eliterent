@@ -19,14 +19,22 @@
 
     var payBody = document.getElementById('payBody');
 
+    // Session expired mid-payment → re-login and return to this payment page.
+    function handleSessionExpired() {
+        try { localStorage.removeItem('token'); sessionStorage.removeItem('token'); } catch (e) {}
+        alert((typeof I18n !== 'undefined' && I18n.t && I18n.t('errors.session_expired') !== 'errors.session_expired') ? I18n.t('errors.session_expired') : 'Your session has expired. Please sign in again to complete your payment.');
+        window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
+    }
+
     // 1. Load booking details and payment config
     Promise.all([
-        fetch('/api/bookings/' + bookingId, { headers: { 'Authorization': 'Bearer ' + token } }).then(function (r) { return r.json(); }),
+        fetch('/api/bookings/' + bookingId, { headers: { 'Authorization': 'Bearer ' + token } }).then(function (r) { return r.json().then(function (d) { d.__status = r.status; return d; }, function () { return { __status: r.status }; }); }),
         fetch('/api/payments/config').then(function (r) { return r.json(); })
     ]).then(function (results) {
         var bookingData = results[0];
         var config = results[1];
 
+        if (bookingData.__status === 401 || bookingData.__status === 403) { handleSessionExpired(); return; }
         if (bookingData.error) {
             payBody.innerHTML = '<div class="pay-error">' + bookingData.error + '</div>';
             return;
