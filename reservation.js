@@ -975,6 +975,12 @@
 
     document.getElementById('rvBookBtn').addEventListener('click', function () {
         var btn = this;
+        // Enforce the partner's minimum rental duration before checkout.
+        var _minDays = Math.max(1, parseInt(vehicleData && vehicleData.min_rental_days, 10) || 1);
+        if (getRentalDays() < _minDays) {
+            alert(rvt('reservation.min_rental_days', 'This car is available for rental for {n} days or more').replace('{n}', _minDays));
+            return;
+        }
         // Block until any chosen delivery option has an address entered.
         if (!validateDeliveryAddresses()) return;
         btn.disabled = true;

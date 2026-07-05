@@ -10,6 +10,7 @@
     var vdBlockIntervals = []; // hour-level blocks (buffer already applied): [{startMs, endMs}]
     var vdPickupDate = null;
     var vdDropoffDate = null;
+    var vdMinRentalDays = 1; // partner-defined minimum rental duration
     var vdCalTarget = null; // 'pickup' or 'dropoff'
     var vdCalDisplay = null; // current month in calendar
     var vdTempPickupDate = null;
@@ -305,6 +306,7 @@
         // Description — show it in the visitor's CURRENT language only; fall back to
         // the partner's default text if that language has none (never show another
         // language's text, e.g. Russian on a Georgian page).
+        vdMinRentalDays = Math.max(1, parseInt(v.min_rental_days, 10) || 1);
         var _dlang = ((typeof I18n !== 'undefined' && I18n.lang) ? I18n.lang() : (document.documentElement.lang || 'en')).slice(0, 2);
         var _desc = v['description_' + _dlang] || v.description || '';
         if (_desc) {
@@ -780,6 +782,15 @@
             document.getElementById('vdDropoffBox').style.borderColor = '#ef4444';
             setTimeout(function() { document.getElementById('vdDropoffBox').style.borderColor = ''; }, 2000);
             vdOpenCalendar('dropoff');
+            return;
+        }
+
+        // Enforce the partner's minimum rental duration before proceeding.
+        var _selDays = Math.max(1, Math.round((vdDropoffDate - vdPickupDate) / 86400000));
+        if (_selDays < vdMinRentalDays) {
+            var _msg = ((typeof I18n !== 'undefined' && I18n.t && I18n.t('vehicle_page.min_rental_days') !== 'vehicle_page.min_rental_days')
+                ? I18n.t('vehicle_page.min_rental_days') : 'This car is available for rental for {n} days or more').replace('{n}', vdMinRentalDays);
+            alert(_msg);
             return;
         }
 

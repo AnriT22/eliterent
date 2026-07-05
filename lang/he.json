@@ -1,5 +1,7 @@
 {
     "partner_dashboard": {
+        "min_rental_days": "מינימום ימי השכרה",
+        "min_rental_days_hint": "לקוחות לא יוכלו להזמין פחות ימים מזה. השאירו 1 ללא מינימום.",
         "payout_subtitle": "משוך את יתרת ההפניות שלך",
         "payout_amount": "סכום (USD)",
         "payout_bank": "העברה בנקאית (IBAN)",
@@ -356,6 +358,7 @@
     "country_usa": "ארצות הברית"
   },
   "vehicle_page": {
+    "min_rental_days": "רכב זה זמין להשכרה ל-{n} ימים או יותר",
     "back": "חזרה לרכבים",
     "share": "שתף רכב זה",
     "link_copied": "הקישור הועתק!",
@@ -758,6 +761,7 @@
     "generic": "משהו השתבש. אנא נסו שוב."
   },
   "reservation": {
+    "min_rental_days": "רכב זה זמין להשכרה ל-{n} ימים או יותר",
     "loading": "טוען הזמנה...",
     "delivery_addr_required": "אנא הזן את כתובת המסירה.",
     "view_specs": "צפייה במפרט ובמאפיינים",

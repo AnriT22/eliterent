@@ -383,6 +383,11 @@ router.post('/', authenticateToken, requireRole('partner'), async (req, res) => 
 
         if (newVehicle) await saveVehicleLocations(newVehicle.id, b.locations);
 
+        if (newVehicle && b.min_rental_days !== undefined) {
+            var mrd = Math.max(1, Math.min(365, parseInt(b.min_rental_days, 10) || 1));
+            await execute('UPDATE vehicles SET min_rental_days = $1 WHERE id = $2', [mrd, newVehicle.id]);
+        }
+
         // Owner alert: a car was added and needs approval (fire-and-forget, never blocks).
         (async () => {
             try {
@@ -496,6 +501,11 @@ router.put('/:id', authenticateToken, requireRole('partner'), async (req, res) =
         }
 
         await saveVehicleLocations(vehicleId, b.locations);
+
+        if (b.min_rental_days !== undefined) {
+            var mrd2 = Math.max(1, Math.min(365, parseInt(b.min_rental_days, 10) || 1));
+            await execute('UPDATE vehicles SET min_rental_days = $1 WHERE id = $2 AND partner_id = $3', [mrd2, vehicleId, req.user.id]);
+        }
 
         var updated = await queryOne('SELECT * FROM vehicles WHERE id = $1', [vehicleId]);
         res.json({ message: 'Vehicle updated', vehicle: updated });

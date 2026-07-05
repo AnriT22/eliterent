@@ -289,6 +289,7 @@
     "country_usa": "United States"
   },
   "vehicle_page": {
+    "min_rental_days": "This car is available for rental for {n} days or more",
     "back": "Back to Vehicles",
     "share": "Share this car",
     "link_copied": "Link copied!",
@@ -664,6 +665,8 @@
     "remove": "Remove"
   },
   "partner_dashboard": {
+    "min_rental_days": "Minimum rental days",
+    "min_rental_days_hint": "Customers cannot book fewer days than this. Leave 1 for no minimum.",
     "payout_subtitle": "Withdraw your referral balance",
     "payout_amount": "Amount (USD)",
     "payout_bank": "Bank Transfer (IBAN)",
@@ -1178,6 +1181,7 @@
     "back_home": "← Back to Home"
   },
   "reservation": {
+    "min_rental_days": "This car is available for rental for {n} days or more",
     "loading": "Loading reservation...",
     "delivery_addr_required": "Please enter the delivery address.",
     "view_specs": "View specifications and features",
