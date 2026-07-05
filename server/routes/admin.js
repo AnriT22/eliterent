@@ -733,6 +733,20 @@ router.put('/vehicles/:id/vip', async (req, res) => {
     }
 });
 
+// Mark/unmark a vehicle for the "SUV 6-8 Seats" category: body { suv_6_8: true|false }.
+router.put('/vehicles/:id/suv-6-8', async (req, res) => {
+    try {
+        const vehicleId = parseInt(req.params.id);
+        if (isNaN(vehicleId)) return res.status(400).json({ error: 'Invalid vehicle id' });
+        var flag = req.body.suv_6_8 ? 1 : 0;
+        await execute('UPDATE vehicles SET suv_6_8 = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [flag, vehicleId]);
+        res.json({ message: 'Vehicle SUV 6-8 flag updated', suv_6_8: flag });
+    } catch (err) {
+        console.error('Update vehicle suv_6_8 error:', err);
+        res.status(500).json({ error: 'Failed to update vehicle SUV 6-8 flag' });
+    }
+});
+
 // Set homepage VIP slot for a vehicle (positions 1, 2, 3). Send 0 or null to clear.
 router.put('/vehicles/:id/homepage-vip', async (req, res) => {
     try {

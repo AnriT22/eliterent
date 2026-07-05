@@ -92,7 +92,10 @@ router.get('/', async (req, res) => {
             sql += ' AND LOWER(v.country) = LOWER($' + paramIdx++ + ')';
             params.push(req.query.country);
         }
-        if (req.query.category) {
+        if (req.query.category === 'suv_6_8') {
+            // Virtual "SUV 6-8 Seats" category: admin-flagged OR a 3rd row (6+ seats).
+            sql += ' AND (v.suv_6_8 = 1 OR v.seats >= 6)';
+        } else if (req.query.category) {
             sql += ' AND LOWER(v.category) = LOWER($' + paramIdx++ + ')';
             params.push(req.query.category);
         }
