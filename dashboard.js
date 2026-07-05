@@ -1366,6 +1366,7 @@
             region: getVal('vRegion'),
             price_per_day: getFloat('vPrice'),
             deposit_amount: getFloat('vDeposit'),
+            min_rental_days: Math.max(1, parseInt(getVal('vMinRentalDays'), 10) || 1),
             image_url: getVal('vImageUrl') || null,
             image_offset_y: (function () { var s = document.getElementById('vImageOffsetY'); return s ? (parseFloat(s.value) || 50) : 50; })(),
             gallery: uploadedUrls.filter(function (u) { return !u.startsWith('__uploading_'); }),
@@ -1709,6 +1710,7 @@
             setCheck('vRentWithDriverOnly', v.rent_with_driver_only === 1 || v.rent_with_driver_only === true);
             setVal('vPrice', v.price_per_day || '');
             setVal('vDeposit', v.deposit_amount || 0);
+            setVal('vMinRentalDays', v.min_rental_days || 1);
             setVal('vImageUrl', v.image_url || '');
             // Per-language descriptions. Seed the current-language tab from the legacy
             // description if no per-language text exists yet (so nothing is lost).

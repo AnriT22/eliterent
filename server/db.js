@@ -494,6 +494,8 @@ async function initDB() {
         // Admin flag for the "SUV 6-8 Seats" (3-row) homepage category, so existing
         // cars can be included without partners re-editing their listings.
         await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS suv_6_8 INTEGER DEFAULT 0`);
+        // Partner-defined minimum rental duration (days). 1 = no minimum.
+        await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS min_rental_days INTEGER DEFAULT 1`);
     } catch (e) { /* columns may already exist or table not yet created */ }
 
     // Extra pickup locations per vehicle (unlimited), each with its own fee. This

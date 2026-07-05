@@ -419,6 +419,15 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
       pickup_time,
       dropoff_time,
     );
+    // Enforce the partner's minimum rental duration (authoritative).
+    var minDays = parseInt(vehicle.min_rental_days, 10) || 1;
+    if (days < minDays) {
+      return res.status(400).json({
+        error: "This car is available for rental for " + minDays + " days or more",
+        code: "MIN_RENTAL_DAYS",
+        min_rental_days: minDays,
+      });
+    }
     var dailyPrice = getDailyRateByTier(vehicle, days, pickup_date);
     var rentalTotal = Math.round(days * dailyPrice * 100) / 100;
     var vehicleServices = normalizeVehicleServices(vehicle);
