@@ -22,6 +22,7 @@
         "vip_close": "סגירה",
         "date_format_hint": "בחרו קודם את תאריך <strong>מ־</strong> ואז את תאריך <strong>עד</strong>. התאריכים מוצגים כיום / חודש / שנה, והסיום חייב להיות אחרי ההתחלה.",
         "save_btn": "שמירה",
+        "state": "מדינה",
         "btn_next_cardetails": "הבא: פרטי הרכב →",
         "edit_vehicle": "עריכת רכב",
         "add_new_vehicle": "הוספת רכב חדש",
