@@ -267,11 +267,12 @@
         return arr.map(function (c) { return { name: c[0], region: c[1] }; });
     }
 
+    // Russia is intentionally NOT offered as a location (partners cannot list cars
+    // there). The Russian language and RUB currency remain available site-wide.
     window.LOCATION_DATA = {
         georgia: { label: 'Georgia', cities: toObjs(GEORGIA) },
         armenia: { label: 'Armenia', cities: toObjs(ARMENIA) },
         turkey: { label: 'Turkey', cities: toObjs(TURKEY) },
-        russia: { label: 'Russia', cities: toObjs(RUSSIA) },
         usa: { label: 'United States', cities: toObjs(USA) }
     };
 })();
