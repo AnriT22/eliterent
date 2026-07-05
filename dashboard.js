@@ -2688,10 +2688,38 @@
         var activeIndex = -1;
         var current = [];
 
+        var stateSel = document.getElementById('vState');
+        var stateGroup = document.getElementById('vStateGroup');
+
         function cityList() {
             var c = countrySel.value || 'georgia';
-            return (DATA[c] && DATA[c].cities) ? DATA[c].cities : [];
+            var cities = (DATA[c] && DATA[c].cities) ? DATA[c].cities : [];
+            // USA uses a Country -> State -> City hierarchy: only show cities of the
+            // selected state.
+            if (c === 'usa' && stateSel && stateSel.value) {
+                cities = cities.filter(function (ct) { return ct.region === stateSel.value; });
+            }
+            return cities;
         }
+
+        // Show a State dropdown for the USA and populate it with all states.
+        function syncStateVisibility() {
+            if (!stateSel || !stateGroup) return;
+            var isUsa = (countrySel.value === 'usa');
+            stateGroup.style.display = isUsa ? '' : 'none';
+            if (isUsa && stateSel.options.length === 0) {
+                var states = (DATA.usa && DATA.usa.states) ? DATA.usa.states : [];
+                stateSel.innerHTML = '<option value="">Select state…</option>' +
+                    states.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('');
+            }
+        }
+        window.vfSyncStateVisibility = syncStateVisibility;
+        syncStateVisibility();
+        if (stateSel) stateSel.addEventListener('change', function () {
+            if (cityInput) cityInput.value = '';
+            setRegion(stateSel.value || '');
+            hideResults();
+        });
 
         function setRegion(region) {
             if (regionHidden) regionHidden.value = region || '';
@@ -2782,14 +2810,19 @@
         countrySel.addEventListener('change', function () {
             cityInput.value = '';
             setRegion('');
+            if (stateSel) stateSel.value = '';
             hideResults();
             syncOffroadVisibility();
+            syncStateVisibility();
             if (typeof window.populateLocDatalist === 'function') window.populateLocDatalist();
         });
 
         // Helper used by edit-populate to restore saved values
         window.setLocationFields = function (country, city, region) {
             countrySel.value = (country && DATA[country]) ? country : 'georgia';
+            syncStateVisibility();
+            // For the USA, preselect the saved state (stored in region) so its cities load.
+            if (countrySel.value === 'usa' && stateSel && region) stateSel.value = region;
             cityInput.value = city || '';
             // Prefer the dataset region for the saved city; fall back to stored region
             var match = cityList().filter(function (c) { return c.name.toLowerCase() === (city || '').toLowerCase(); })[0];

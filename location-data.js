@@ -263,6 +263,18 @@
         ['Chelyabinsk', 'Chelyabinsk']
     ];
 
+    // Full list of U.S. states (+ DC) for the Country -> State -> City hierarchy.
+    var US_STATES = [
+        'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut',
+        'Delaware', 'District of Columbia', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois',
+        'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts',
+        'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada',
+        'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota',
+        'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina',
+        'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington',
+        'West Virginia', 'Wisconsin', 'Wyoming'
+    ];
+
     function toObjs(arr) {
         return arr.map(function (c) { return { name: c[0], region: c[1] }; });
     }
@@ -273,6 +285,6 @@
         georgia: { label: 'Georgia', cities: toObjs(GEORGIA) },
         armenia: { label: 'Armenia', cities: toObjs(ARMENIA) },
         turkey: { label: 'Turkey', cities: toObjs(TURKEY) },
-        usa: { label: 'United States', cities: toObjs(USA) }
+        usa: { label: 'United States', cities: toObjs(USA), states: US_STATES }
     };
 })();
