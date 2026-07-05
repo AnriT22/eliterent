@@ -740,6 +740,7 @@
   },
   "errors": {
     "booking_failed": "ההזמנה נכשלה",
+    "session_expired": "פג תוקף החיבור שלך. אנא התחברו שוב כדי להשלים את ההזמנה.",
     "booking_dates_conflict": "כבר קיימת הזמנה לתאריכים אלה",
     "booking_invalid_ref": "רכב או משתמש לא תקין",
     "booking_invalid_data": "נתוני הזמנה לא תקינים",

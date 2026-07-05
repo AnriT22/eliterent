@@ -898,6 +898,13 @@
         });
     }
 
+    // Session expired mid-booking → re-login and return here (don't lose the booking).
+    function handleSessionExpired() {
+        try { localStorage.removeItem('token'); sessionStorage.removeItem('token'); } catch (e) {}
+        alert(rvt('errors.session_expired', 'Your session has expired. Please sign in again to complete your booking.'));
+        window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
+    }
+
     // Submit booking to server
     function submitBooking(payload, bookBtn, onDone) {
         fetch('/api/bookings', {
@@ -905,11 +912,13 @@
             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
             body: JSON.stringify(payload)
         })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
+        .then(function (r) { return r.json().then(function (data) { return { status: r.status, data: data }; }, function () { return { status: r.status, data: {} }; }); })
+        .then(function (res) {
+            var data = res.data;
             bookBtn.disabled = false;
             bookBtn.querySelector('span:nth-child(2)').textContent = (typeof I18n !== 'undefined' ? I18n.t('vehicle_page.book_now') : 'Book now');
             if (onDone) onDone();
+            if (res.status === 401 || res.status === 403) { handleSessionExpired(); return; }
             if (data.error) {
                 var errLabel = (typeof I18n !== 'undefined' ? I18n.t('errors.booking_failed') : 'Booking failed');
                 alert(errLabel + ': ' + data.error);

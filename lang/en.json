@@ -1017,6 +1017,7 @@
   },
   "errors": {
     "booking_failed": "Booking failed",
+    "session_expired": "Your session has expired. Please sign in again to complete your booking.",
     "booking_dates_conflict": "A booking already exists for these dates",
     "booking_invalid_ref": "Invalid vehicle or user reference",
     "booking_invalid_data": "Invalid booking data",
