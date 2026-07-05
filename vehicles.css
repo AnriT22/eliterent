@@ -794,15 +794,15 @@
 .vc-book-btn {
     width: 100%;
     padding: 10px;
-    background: linear-gradient(135deg, #C9A84C, #B8963F);
-    color: #fff;
+    background: #00FF7F;
+    color: #06110a;
     border: none;
     border-radius: 8px;
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 3px 10px rgba(201, 168, 76,0.25);
+    box-shadow: 0 3px 10px rgba(0, 255, 127, 0.25);
     margin-bottom: 6px;
     box-sizing: border-box;
 }

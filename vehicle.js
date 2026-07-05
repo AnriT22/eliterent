@@ -302,10 +302,11 @@
             specsGrid.appendChild(div);
         });
 
-        // Description — show it in the visitor's language, falling back gracefully
-        // to the legacy/default text or any other available translation.
-        var _dlang = (localStorage.getItem('lang') || document.documentElement.lang || 'en').slice(0, 2);
-        var _desc = v['description_' + _dlang] || v.description || v.description_en || v.description_ka || v.description_ru || v.description_he || '';
+        // Description — show it in the visitor's CURRENT language only; fall back to
+        // the partner's default text if that language has none (never show another
+        // language's text, e.g. Russian on a Georgian page).
+        var _dlang = ((typeof I18n !== 'undefined' && I18n.lang) ? I18n.lang() : (document.documentElement.lang || 'en')).slice(0, 2);
+        var _desc = v['description_' + _dlang] || v.description || '';
         if (_desc) {
             document.getElementById('vdDescription').textContent = _desc;
             document.getElementById('vdDescSection').style.display = 'block';
