@@ -412,7 +412,15 @@
             } else if (role === 'partner') {
                 goToVerificationChoice();
             } else {
-                window.location.href = '/index.html';
+                // Guest reservation continuation: resume a saved reservation after
+                // finishing phone verification (e.g. new Google guest).
+                var resume = null;
+                try {
+                    var _r = sessionStorage.getItem('resumeUrl');
+                    if (_r && !/^[a-z][a-z0-9+.\-]*:/i.test(_r) && _r.indexOf('//') !== 0 && _r.charAt(0) !== '/' && _r.indexOf('..') === -1 && /\.html(\?|#|$)/i.test(_r)) resume = _r;
+                } catch (e) { }
+                if (resume) { try { sessionStorage.removeItem('resumeUrl'); } catch (e) { } window.location.href = resume; }
+                else window.location.href = '/index.html';
             }
         }
 
