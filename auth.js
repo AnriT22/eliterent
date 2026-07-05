@@ -4,6 +4,17 @@
 
    ======================================== */
 
+// Guest reservation continuation: when a login/register page is opened with
+// ?redirect=<page>, remember it for after auth. sessionStorage persists across
+// the register -> phone-verify -> success flow, so the selection is never lost.
+(function () {
+    try {
+        var _rd = new URLSearchParams(window.location.search).get('redirect');
+        var ok = (typeof safeInternalRedirect === 'function') ? safeInternalRedirect(_rd) : null;
+        if (ok) sessionStorage.setItem('resumeUrl', ok);
+    } catch (e) { }
+})();
+
 
 
 // ========================================
@@ -206,6 +217,14 @@ async function handleLoginSubmit(e) {
 
         var role = data.user.role || getSelectedLoginRole();
 
+        // Guest reservation continuation: resume a saved reservation (car + dates)
+        // after login. The target survives the multi-step flow via sessionStorage.
+        var _resumeTarget = safeInternalRedirect(
+            new URLSearchParams(window.location.search).get('redirect') ||
+            (function () { try { return sessionStorage.getItem('resumeUrl'); } catch (e) { return null; } })()
+        );
+        if (_resumeTarget) { try { sessionStorage.removeItem('resumeUrl'); } catch (e) { } }
+
         setTimeout(() => {
 
             if (role === 'admin') {
@@ -219,6 +238,10 @@ async function handleLoginSubmit(e) {
             } else if (role === 'partner') {
 
                 window.location.href = 'partner-dashboard.html';
+
+            } else if (_resumeTarget) {
+
+                window.location.href = _resumeTarget;
 
             } else {
 
@@ -1322,7 +1345,9 @@ async function submitRegistration() {
 
 
 
-        setTimeout(function () { window.location.href = 'index.html'; }, 4000);
+        var _regResume = safeInternalRedirect((function () { try { return sessionStorage.getItem('resumeUrl'); } catch (e) { return null; } })());
+        if (_regResume) { try { sessionStorage.removeItem('resumeUrl'); } catch (e) { } }
+        setTimeout(function () { window.location.href = _regResume || 'index.html'; }, _regResume ? 1600 : 4000);
 
 
 
@@ -1960,7 +1985,19 @@ function checkAuthStatus() {
 
 // ========================================
 
-
+// Validate a ?redirect= value so we only ever navigate to a safe, same-site
+// relative page (blocks absolute URLs, protocol/scheme, //host and path traversal).
+function safeInternalRedirect(u) {
+    if (!u) return null;
+    try { u = decodeURIComponent(u); } catch (e) { }
+    if (!u) return null;
+    if (/^[a-z][a-z0-9+.\-]*:/i.test(u)) return null; // has a scheme (http:, javascript:, ...)
+    if (u.indexOf('//') === 0) return null;           // protocol-relative
+    if (u.charAt(0) === '/') return null;             // keep it a same-dir relative page
+    if (u.indexOf('..') !== -1) return null;          // no traversal
+    if (!/\.html(\?|#|$)/i.test(u)) return null;      // must target a page
+    return u;
+}
 
 function redirectToLogin() {
 
