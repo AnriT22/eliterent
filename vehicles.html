@@ -67,12 +67,12 @@
       ]
     }
     </script>
-    <link rel="preload" href="style.css?v=12" as="style">
-    <link rel="stylesheet" href="style.css?v=12">
-    <link rel="preload" href="premium.css?v=6" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="premium.css?v=6"></noscript>
-    <link rel="preload" href="vehicles.css?v=10" as="style">
-    <link rel="stylesheet" href="vehicles.css?v=10">
+    <link rel="preload" href="style.css?v=14" as="style">
+    <link rel="stylesheet" href="style.css?v=14">
+    <link rel="preload" href="premium.css?v=9" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="premium.css?v=9"></noscript>
+    <link rel="preload" href="vehicles.css?v=11" as="style">
+    <link rel="stylesheet" href="vehicles.css?v=11">
     <link rel="preload" href="navbar-auth.css?v=6" as="style">
     <link rel="stylesheet" href="navbar-auth.css?v=6">
     <!-- Critical layout fallback: the .vp-grid display:grid rule lives in vehicles.css.
@@ -260,6 +260,7 @@
                         <label class="vf-checkbox-row"><input type="checkbox" name="category" value="sedan"><span class="vf-custom-checkbox"></span><span data-i18n="filter_options.sedan">Sedan</span></label>
                         <label class="vf-checkbox-row"><input type="checkbox" name="category" value="standard"><span class="vf-custom-checkbox"></span><span data-i18n="filter_options.standard">Standard</span></label>
                         <label class="vf-checkbox-row"><input type="checkbox" name="category" value="suv"><span class="vf-custom-checkbox"></span>SUV</label>
+                        <label class="vf-checkbox-row"><input type="checkbox" name="category" value="suv_6_8"><span class="vf-custom-checkbox"></span><span data-i18n="filter_options.suv_6_8">SUV 6–8 Seats</span></label>
                         <label class="vf-checkbox-row"><input type="checkbox" name="category" value="crossover"><span class="vf-custom-checkbox"></span><span data-i18n="filter_options.crossover">Crossover</span></label>
                         <label class="vf-checkbox-row"><input type="checkbox" name="category" value="minivan"><span class="vf-custom-checkbox"></span><span data-i18n="filter_options.minivan">Minivan</span></label>
                         <label class="vf-checkbox-row"><input type="checkbox" name="category" value="coupe"><span class="vf-custom-checkbox"></span><span data-i18n="filter_options.coupe">Coupe</span></label>
@@ -888,7 +889,13 @@
                     if (yearFilter === '2020' && (year < 2020 || year > 2023)) return false;
                     if (yearFilter === '2016' && (year < 2016 || year > 2019)) return false;
                     if (yearFilter === 'old' && year >= 2016) return false;
-                    if (cats.length && cats.indexOf(cat) === -1) return false;
+                    if (cats.length) {
+                        // "SUV 6-8 Seats" is a virtual category: admin-flagged OR 3rd row (6+ seats).
+                        var catOk = cats.indexOf(cat) !== -1;
+                        if (!catOk && cats.indexOf('suv_6_8') !== -1 &&
+                            (card.dataset.suv68 === '1' || (parseInt(card.dataset.seats, 10) || 0) >= 6)) catOk = true;
+                        if (!catOk) return false;
+                    }
                     if (brands.length && brands.indexOf(brand) === -1) return false;
                     if (engines.length && engines.indexOf(eng) === -1) return false;
                     if (gearboxes.length && gearboxes.indexOf(gear) === -1) return false;
@@ -1699,6 +1706,8 @@
                 card.setAttribute('data-pin-page',     v.pin_page || 0);
                 card.setAttribute('data-pin-position', v.pin_position || 0);
                 card.setAttribute('data-is-vip',      v.is_vip || 0);
+                card.setAttribute('data-seats',       parseInt(v.seats, 10) || 0);
+                card.setAttribute('data-suv68',       v.suv_6_8 ? 1 : 0);
                 card.setAttribute('data-imgurl',    v.image_url  || '');
 
                 card.innerHTML =
@@ -1935,7 +1944,13 @@
             grid.querySelectorAll('.country-card').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     var code = this.getAttribute('data-country');
+                    try { localStorage.setItem('selectedCountry', code); } catch (e) {}
                     sessionStorage.setItem('selectedCountry', code);
+                    // Update the URL query param so it takes precedence and survives refresh
+                    var qp = new URLSearchParams(window.location.search);
+                    qp.set('country', code);
+                    window.history.replaceState({}, '', window.location.pathname + '?' + qp.toString());
+                    window.vcUrlCountry = code;
                     hideCountryModal();
                     updateCountryButton();
                     vcLoadVehicles();

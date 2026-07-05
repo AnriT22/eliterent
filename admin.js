@@ -685,6 +685,7 @@ function escHtml(s) {
                     + '<button class="admin-action-btn" onclick="adminOpenPin(' + v.id + ')">' + ((parseInt(v.pin_page) > 0 && parseInt(v.pin_position) > 0) ? ('\uD83D\uDCCD P' + v.pin_page + '/' + v.pin_position) : 'Pin') + '</button>'
                     + '<button class="admin-action-btn" style="' + (parseInt(v.is_vip) ? 'background:#16a34a;border-color:#16a34a;color:#fff;' : '') + '" onclick="adminToggleVip(' + v.id + ',' + (parseInt(v.is_vip) ? 0 : 1) + ')">' + (parseInt(v.is_vip) ? '\u2605 VIP' : 'VIP') + '</button>'
                     + '<button class="admin-action-btn" style="' + (parseInt(v.homepage_vip_position) ? 'background:#22c55e;border-color:#22c55e;color:#fff;' : '') + '" onclick="adminSetHomepageVip(' + v.id + ',' + (parseInt(v.homepage_vip_position) || 0) + ')" title="Homepage VIP slot">' + (parseInt(v.homepage_vip_position) ? 'Home VIP ' + v.homepage_vip_position : 'Home VIP') + '</button>'
+                    + '<button class="admin-action-btn" style="' + (parseInt(v.suv_6_8) ? 'background:#0ea5e9;border-color:#0ea5e9;color:#fff;' : '') + '" onclick="adminToggleSuv68(' + v.id + ',' + (parseInt(v.suv_6_8) ? 0 : 1) + ')" title="SUV 6-8 Seats category (' + (parseInt(v.seats) || 0) + ' seats)">SUV6-8</button>'
                     + (status === 'pending' ? '<button class="admin-action-btn success" onclick="adminSetVehicleStatus(' + v.id + ',\'active\')">Approve</button>' : '')
                     + (status === 'delete_requested' ? '<button class="admin-action-btn success" onclick="adminApproveDelete(' + v.id + ')">Approve Delete</button>' : '')
                     + (status === 'delete_requested' ? '<button class="admin-action-btn" onclick="adminRejectDelete(' + v.id + ')">Reject Delete</button>' : '')
@@ -763,6 +764,12 @@ function escHtml(s) {
     window.adminToggleVip = function (id, vip) {
         apiPut('/api/admin/vehicles/' + id + '/vip', { vip: !!vip }).then(function () { loadVehicles(); })
             .catch(function () { alert('Failed to update VIP'); });
+    };
+
+    // ---- Mark/unmark a car for the "SUV 6-8 Seats" homepage category ----
+    window.adminToggleSuv68 = function (id, flag) {
+        apiPut('/api/admin/vehicles/' + id + '/suv-6-8', { suv_6_8: !!flag }).then(function () { loadVehicles(); })
+            .catch(function () { alert('Failed to update SUV 6-8'); });
     };
 
     // ---- Set which VIP car appears in a homepage slot (1, 2, or 3) ----
