@@ -72,6 +72,17 @@
                 var isVerified = user.is_verified;
                 var isApproved = user.is_approved;
                 var phoneVerified = user.phone_verified;
+
+                // Guest reservation continuation: resume a saved reservation (car + dates)
+                // after Google sign-in. sessionStorage survives the OAuth round-trip.
+                var resumeUrl = null;
+                try {
+                    var _r = sessionStorage.getItem('resumeUrl');
+                    if (_r && !/^[a-z][a-z0-9+.\-]*:/i.test(_r) && _r.indexOf('//') !== 0 && _r.charAt(0) !== '/' && _r.indexOf('..') === -1 && /\.html(\?|#|$)/i.test(_r)) {
+                        resumeUrl = _r;
+                    }
+                } catch (e) { }
+
                 setTimeout(function() {
                     // Unverified partner → show referral step FIRST, then choice step
                     if (role === 'partner' && !isVerified) {
@@ -85,8 +96,12 @@
                         // Fully verified partner → dashboard
                         window.location.href = '/partner-dashboard.html';
                     } else if ((isNew || !isApproved) && role === 'guest' && !phoneVerified) {
-                        // New or unapproved Google guest without phone verified → phone verification
+                        // New/unapproved Google guest without phone verified → phone verification.
+                        // resumeUrl stays in sessionStorage so verify-phone can honor it after.
                         window.location.href = '/verify-phone.html?v=2';
+                    } else if (resumeUrl) {
+                        try { sessionStorage.removeItem('resumeUrl'); } catch (e) { }
+                        window.location.href = resumeUrl;
                     } else {
                         window.location.href = '/index.html';
                     }
