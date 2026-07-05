@@ -297,14 +297,14 @@
 
 .vd-book-btn {
     width: 100%; padding: 15px;
-    background: #C9A84C; color: #fff;
+    background: #00FF7F; color: #06110a;
     border: none; border-radius: 12px;
     font-size: 17px; font-weight: 700;
     cursor: pointer; transition: background 0.2s;
     margin-bottom: 10px;
     box-sizing: border-box;
 }
-.vd-book-btn:hover { background: #B8963F; }
+.vd-book-btn:hover { background: #00E673; }
 .vd-back-link {
     width: 100%; padding: 10px;
     background: none; color: #D4B86A;

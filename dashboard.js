@@ -650,8 +650,14 @@
     }
 
     // Per-step required fields validation
+    // Step order (Location moved to step 1): 1 Location, 2 Car Details,
+    // 3 Features, 4 Pricing, 5 Photos.
     var stepRequiredFields = {
         1: [
+            { id: 'vCountry', label: 'Country' },
+            { id: 'vLocationCity', label: 'Pickup City' }
+        ],
+        2: [
             { id: 'vName', label: 'Vehicle Name' },
             { id: 'vBrand', label: 'Brand' },
             { id: 'vModel', label: 'Model' },
@@ -663,13 +669,9 @@
             { id: 'vDriveType', label: 'Drive Type' },
             { id: 'vLuggage', label: 'Luggage Capacity' }
         ],
-        2: [], // checkboxes — all optional
-        3: [
-            { id: 'vPrice', label: 'Daily Price' }
-        ],
+        3: [], // checkboxes — all optional
         4: [
-            { id: 'vCountry', label: 'Country' },
-            { id: 'vLocationCity', label: 'Pickup City' }
+            { id: 'vPrice', label: 'Daily Price' }
         ],
         5: [] // validated at submit (photos + passport + reg number)
     };
@@ -1542,17 +1544,21 @@
                 vehicleForVip = { id: editId, name: document.getElementById('vName').value };
             }
 
-            if (vehicleForVip) {
-                setTimeout(function () {
-                    openVipUpgradeModal(vehicleForVip);
-                }, 800);
-            } else {
-                setTimeout(function () {
-                    resetVehicleForm();
-                    switchTab('vehicles');
-                    loadVehicles();
-                }, 1000);
-            }
+            // Return to the vehicles list, then offer VIP via the up-to-date modal
+            // (shows the one-time $10 first-VIP bonus only when the partner is still
+            // eligible; a plain $10 otherwise). Editing an already-VIP car skips it.
+            var vipId = vehicleForVip ? vehicleForVip.id : null;
+            var vipName = vehicleForVip ? (vehicleForVip.name || document.getElementById('vName').value) : '';
+            var vipImg = vehicleForVip ? (vehicleForVip.image_url || document.getElementById('vImageUrl').value || '') : '';
+            var alreadyVip = vehicleForVip && vehicleForVip.vip_until && new Date(vehicleForVip.vip_until) > new Date();
+            setTimeout(function () {
+                resetVehicleForm();
+                switchTab('vehicles');
+                loadVehicles();
+                if (vipId && !alreadyVip && window.openVipCarModal) {
+                    setTimeout(function () { window.openVipCarModal(vipId, vipName, vipImg); }, 500);
+                }
+            }, 900);
         })
         .catch(function (err) {
             submitBtn.disabled = false;
@@ -1566,7 +1572,7 @@
         if (typeof resetDescTabs === 'function') resetDescTabs();
         if (typeof window.resetVehicleLocations === 'function') window.resetVehicleLocations();
         document.getElementById('vEditId').value = '';
-        document.getElementById('addVehicleTitle').textContent = 'Add New Vehicle';
+        document.getElementById('addVehicleTitle').textContent = tOr('partner_dashboard.add_new_vehicle', 'Add New Vehicle');
         document.getElementById('submitVehicleBtn').textContent = 'Add Vehicle';
         // Reset wizard to step 1
         goToWizardStep(1);
@@ -1660,6 +1666,7 @@
             var v = data.vehicle;
             if (!v) return;
 
+            if (typeof goToWizardStep === 'function') goToWizardStep(1); // start editing on step 1 (Location)
             function setVal(id, val) { var el = document.getElementById(id); if (el) el.value = val; }
             function setCheck(id, val) { var el = document.getElementById(id); if (el) el.checked = !!val; }
 
@@ -1710,7 +1717,7 @@
             setVal('vDescriptionRu', v.description_ru || '');
             setVal('vDescriptionHe', v.description_he || '');
             if (!v.description_en && !v.description_ka && !v.description_ru && !v.description_he && v.description) {
-                var _cl = (localStorage.getItem('lang') || document.documentElement.lang || 'en').slice(0, 2);
+                var _cl = ((typeof I18n !== 'undefined' && I18n.lang) ? I18n.lang() : (document.documentElement.lang || 'en')).slice(0, 2);
                 var _map = { en: 'vDescription', ka: 'vDescriptionKa', ru: 'vDescriptionRu', he: 'vDescriptionHe' };
                 setVal(_map[_cl] || 'vDescription', v.description);
             }
@@ -1841,7 +1848,7 @@
                 }
             }
 
-            document.getElementById('addVehicleTitle').textContent = 'Edit Vehicle';
+            document.getElementById('addVehicleTitle').textContent = tOr('partner_dashboard.edit_vehicle', 'Edit Vehicle');
             document.getElementById('submitVehicleBtn').textContent = 'Update Vehicle';
 
             // Populate gallery photos from existing vehicle data

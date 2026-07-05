@@ -217,19 +217,19 @@
 
                 <div class="wz-progress">
 
-                    <div class="wz-step active" data-step="1"><span class="wz-num">1</span><span class="wz-label" data-i18n="partner_dashboard.wz_car_details">Car Details</span></div>
+                    <div class="wz-step active" data-step="1"><span class="wz-num">1</span><span class="wz-label" data-i18n="partner_dashboard.wz_location">Location</span></div>
 
                     <div class="wz-line"></div>
 
-                    <div class="wz-step" data-step="2"><span class="wz-num">2</span><span class="wz-label" data-i18n="partner_dashboard.wz_features">Features</span></div>
+                    <div class="wz-step" data-step="2"><span class="wz-num">2</span><span class="wz-label" data-i18n="partner_dashboard.wz_car_details">Car Details</span></div>
 
                     <div class="wz-line"></div>
 
-                    <div class="wz-step" data-step="3"><span class="wz-num">3</span><span class="wz-label" data-i18n="partner_dashboard.wz_pricing">Pricing</span></div>
+                    <div class="wz-step" data-step="3"><span class="wz-num">3</span><span class="wz-label" data-i18n="partner_dashboard.wz_features">Features</span></div>
 
                     <div class="wz-line"></div>
 
-                    <div class="wz-step" data-step="4"><span class="wz-num">4</span><span class="wz-label" data-i18n="partner_dashboard.wz_location">Location</span></div>
+                    <div class="wz-step" data-step="4"><span class="wz-num">4</span><span class="wz-label" data-i18n="partner_dashboard.wz_pricing">Pricing</span></div>
 
                     <div class="wz-line"></div>
 
@@ -243,9 +243,9 @@
 
 
 
-                    <!-- ===================== STEP 1: CAR DETAILS ===================== -->
+                    <!-- ===================== STEP 2: CAR DETAILS ===================== -->
 
-                    <div class="wz-panel active" data-panel="1">
+                    <div class="wz-panel" data-panel="2">
 
 
 
@@ -629,9 +629,9 @@
 
                         <div class="wz-nav">
 
-                            <div></div>
+                            <button type="button" class="btn btn-secondary wz-btn-prev" data-prev="1" data-i18n="partner_dashboard.btn_back">&larr; Back</button>
 
-                            <button type="button" class="btn btn-primary wz-btn-next" data-next="2" data-i18n="partner_dashboard.btn_next_features">Next: Features &rarr;</button>
+                            <button type="button" class="btn btn-primary wz-btn-next" data-next="3" data-i18n="partner_dashboard.btn_next_features">Next: Features &rarr;</button>
 
                         </div>
 
@@ -639,9 +639,9 @@
 
 
 
-                    <!-- ===================== STEP 2: FEATURES & EQUIPMENT ===================== -->
+                    <!-- ===================== STEP 3: FEATURES & EQUIPMENT ===================== -->
 
-                    <div class="wz-panel" data-panel="2">
+                    <div class="wz-panel" data-panel="3">
 
 
 
@@ -711,9 +711,9 @@
 
                         <div class="wz-nav">
 
-                            <button type="button" class="btn btn-secondary wz-btn-prev" data-prev="1" data-i18n="partner_dashboard.btn_back">&larr; Back</button>
+                            <button type="button" class="btn btn-secondary wz-btn-prev" data-prev="2" data-i18n="partner_dashboard.btn_back">&larr; Back</button>
 
-                            <button type="button" class="btn btn-primary wz-btn-next" data-next="3" data-i18n="partner_dashboard.btn_next_pricing">Next: Pricing &rarr;</button>
+                            <button type="button" class="btn btn-primary wz-btn-next" data-next="4" data-i18n="partner_dashboard.btn_next_pricing">Next: Pricing &rarr;</button>
 
                         </div>
 
@@ -721,9 +721,9 @@
 
 
 
-                    <!-- ===================== STEP 3: PRICING & SERVICES ===================== -->
+                    <!-- ===================== STEP 4: PRICING & SERVICES ===================== -->
 
-                    <div class="wz-panel" data-panel="3">
+                    <div class="wz-panel" data-panel="4">
 
 
 
@@ -1011,9 +1011,9 @@
 
                         <div class="wz-nav">
 
-                            <button type="button" class="btn btn-secondary wz-btn-prev" data-prev="2" data-i18n="partner_dashboard.btn_back">&larr; Back</button>
+                            <button type="button" class="btn btn-secondary wz-btn-prev" data-prev="3" data-i18n="partner_dashboard.btn_back">&larr; Back</button>
 
-                            <button type="button" class="btn btn-primary wz-btn-next" data-next="4" data-i18n="partner_dashboard.btn_next_location">Next: Location &rarr;</button>
+                            <button type="button" class="btn btn-primary wz-btn-next" data-next="5" data-i18n="partner_dashboard.btn_next_photos">Next: Photos &rarr;</button>
 
                         </div>
 
@@ -1021,9 +1021,9 @@
 
 
 
-                    <!-- ===================== STEP 4: LOCATION & SETTINGS ===================== -->
+                    <!-- ===================== STEP 1: LOCATION & SETTINGS ===================== -->
 
-                    <div class="wz-panel" data-panel="4">
+                    <div class="wz-panel active" data-panel="1">
 
 
 
@@ -1203,9 +1203,9 @@
 
                         <div class="wz-nav">
 
-                            <button type="button" class="btn btn-secondary wz-btn-prev" data-prev="3" data-i18n="partner_dashboard.btn_back">&larr; Back</button>
+                            <div></div>
 
-                            <button type="button" class="btn btn-primary wz-btn-next" data-next="5" data-i18n="partner_dashboard.btn_next_photos">Next: Photos &rarr;</button>
+                            <button type="button" class="btn btn-primary wz-btn-next" data-next="2" data-i18n="partner_dashboard.btn_next_cardetails">Next: Car Details &rarr;</button>
 
                         </div>
 
@@ -2192,7 +2192,7 @@
 
     <script src="location-data.js?v=2"></script>
 
-    <script src="dashboard.js?v=24"></script>
+    <script src="dashboard.js?v=25"></script>
 
 <script src="premium-animations.js?v=2"></script>
 
