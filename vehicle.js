@@ -767,11 +767,8 @@
         var user = null;
         try { user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')); } catch(e) {}
 
-        if (!token || !user || user.role !== 'guest') {
-            window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
-            return;
-        }
-
+        // NOTE: date validation happens BEFORE the login check so a logged-out guest
+        // can pick car + dates, and we carry that selection through login (below).
         if (!vdPickupDate) {
             document.getElementById('vdPickupBox').style.borderColor = '#ef4444';
             setTimeout(function() { document.getElementById('vdPickupBox').style.borderColor = ''; }, 2000);
@@ -802,7 +799,16 @@
             + '&dropoff=' + vdFmt(vdDropoffDate)
             + '&pickup_time=' + encodeURIComponent(pickupTime)
             + '&dropoff_time=' + encodeURIComponent(dropoffTime);
-        window.location.href = 'reservation.html?' + params;
+        var resUrl = 'reservation.html?' + params;
+
+        // Not logged in? Send the guest to login/register with the RESERVATION url
+        // (car + dates included) as the return target — so after auth they resume
+        // the same reservation and continue straight to payment.
+        if (!token || !user || user.role !== 'guest') {
+            window.location.href = 'login.html?redirect=' + encodeURIComponent(resUrl);
+            return;
+        }
+        window.location.href = resUrl;
     });
 
     document.getElementById('vdBookingClose').addEventListener('click', function() {
