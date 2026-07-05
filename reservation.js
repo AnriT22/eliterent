@@ -51,6 +51,7 @@
     var pickupDate = new Date(pickupStr + 'T' + pickupTime + ':00');
     var dropoffDate = new Date(dropoffStr + 'T' + dropoffTime + ':00');
     var vehicleData = null;
+    var vehicleLocations = []; // extra pickup locations (phase 2), each with its own fee
     var galleryImages = [];
     var currentImgIdx = 0;
 
@@ -81,6 +82,16 @@
     .catch(function () {
         window.location.href = 'vehicles.html';
     });
+
+    // Load the vehicle's extra pickup locations. If the page already rendered by
+    // the time this resolves, re-render the locations so they appear.
+    fetch('/api/vehicles/' + vehicleId + '/locations')
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+            vehicleLocations = (d && d.locations) ? d.locations : [];
+            if (pageRendered && typeof renderLocations === 'function') { renderLocations(); if (typeof updatePriceSummary === 'function') updatePriceSummary(); }
+        })
+        .catch(function () {});
 
     if (typeof I18n !== 'undefined' && I18n.onReady) {
         I18n.onReady(function() { i18nReady = true; tryRenderReservation(); });
@@ -186,13 +197,13 @@
         return raw;
     }
 
-    function buildLocOption(name, radioName, value, address, price, isFirst) {
+    function buildLocOption(name, radioName, value, address, price, isFirst, locId) {
         var isFree = price === 0;
         var isDelivery = value.indexOf('Delivery') !== -1;
         var badgeClass = isFree ? 'free' : 'paid';
         var badgeText = isFree ? 'Free' : fmtMoney(price);
         return '<label class="rv-loc-option' + (isFirst ? ' selected' : '') + '">'
-            + '<input type="radio" name="' + radioName + '" value="' + value + '" data-fee="' + price + '"' + (isFirst ? ' checked' : '') + '>'
+            + '<input type="radio" name="' + radioName + '" value="' + value + '" data-fee="' + price + '"' + (locId != null ? ' data-loc-id="' + locId + '"' : '') + (isFirst ? ' checked' : '') + '>'
             + '<div class="rv-loc-option-inner">'
             + (!isFirst ? '<span class="rv-loc-plus">+</span>' : '')
             + '<div class="rv-loc-name">' + name + '</div>'
@@ -241,6 +252,24 @@
         // Office (always present)
         pickupHtml += buildLocOption(officeAddr + ' (Office)', 'pickupLoc', officeAddr + ' (Office)', 'Address: ' + officeAddr, 0, true);
         dropoffHtml += buildLocOption(officeAddr + ' (Office)', 'dropoffLoc', officeAddr + ' (Office)', 'Address: ' + officeAddr, 0, true);
+
+        // Phase 2: partner-defined pickup locations. When present, they replace the
+        // legacy airport/delivery options (the office above stays as the free default).
+        if (vehicleLocations && vehicleLocations.length) {
+            vehicleLocations.forEach(function (l) {
+                var label = (l.name && l.name.trim()) ? l.name : l.city;
+                var value = label + (l.city && label !== l.city ? ' — ' + l.city : '');
+                var addr = l.address || '';
+                var fee = parseFloat(l.pickup_fee) || 0;
+                pickupHtml += buildLocOption(value, 'pickupLoc', value, addr, fee, false, l.id);
+                dropoffHtml += buildLocOption(value, 'dropoffLoc', value, addr, fee, false, l.id);
+            });
+            document.getElementById('rvPickupLocations').innerHTML = pickupHtml;
+            document.getElementById('rvDropoffLocations').innerHTML = dropoffHtml;
+            setupLocationRadios('pickupLoc', 'rvPickupCustom');
+            setupLocationRadios('dropoffLoc', 'rvDropoffCustom');
+            return;
+        }
 
         // Airport — one option per airport the partner serves (blank = not offered).
         var af = pf.airport_fees || {};
@@ -801,6 +830,8 @@
             dropoff_time: dropoffTime,
             pickup_location: pickupLocation,
             dropoff_location: dropoffLocation,
+            pickup_location_id: (pickupLoc && pickupLoc.getAttribute('data-loc-id')) || null,
+            dropoff_location_id: (dropoffLoc && dropoffLoc.getAttribute('data-loc-id')) || null,
             selected_extras: getSelectedExtras().map(function (service) { return service.code; }),
             location_fee: getLocationSurcharge('pickupLoc') + getLocationSurcharge('dropoffLoc'),
             guest_notes: document.getElementById('rvNotes').value.trim()

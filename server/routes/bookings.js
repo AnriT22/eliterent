@@ -380,8 +380,19 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
     if (!vehicle)
       return res.status(404).json({ error: "Vehicle not found or inactive" });
 
-    // Compute location_fee server-side from vehicle's pickup_fees config
-    if (vehicle.pickup_fees_enabled) {
+    // Phase 2: if the selected pickup/dropoff are partner-defined pickup locations,
+    // their fee is authoritative — read from the DB, never trusted from the client.
+    var vLocs = await queryAll("SELECT id, pickup_fee FROM vehicle_locations WHERE vehicle_id = $1", [vehicle_id]);
+    if (vLocs.length) {
+      var vLocFee = function (id) {
+        if (id == null || id === "") return 0;
+        var row = vLocs.find(function (l) { return String(l.id) === String(id); });
+        return row ? (parseFloat(row.pickup_fee) || 0) : 0;
+      };
+      location_fee = Math.round((vLocFee(body.pickup_location_id) + vLocFee(body.dropoff_location_id)) * 100) / 100;
+    }
+    // Legacy: compute location_fee from the vehicle's pickup_fees config.
+    else if (vehicle.pickup_fees_enabled) {
       var pf = vehicle.pickup_fees;
       if (typeof pf === 'string') { try { pf = JSON.parse(pf); } catch (e) { pf = {}; } }
       pf = pf || {};
