@@ -2798,13 +2798,23 @@
             if (!e.target.closest('.vf-city-group')) hideResults();
         });
 
-        // Off-road driving is a Georgia-only option — show/hide accordingly.
+        // Off-road driving + the Georgian-airport fee fields are Georgia-only.
         function syncOffroadVisibility() {
-            var grp = document.getElementById('vOffroadGroup');
-            if (!grp) return;
             var isGe = (countrySel.value || 'georgia') === 'georgia';
-            grp.style.display = isGe ? '' : 'none';
-            if (!isGe) { var cb = document.getElementById('vOffroadAllowed'); if (cb) cb.checked = false; }
+            var grp = document.getElementById('vOffroadGroup');
+            if (grp) {
+                grp.style.display = isGe ? '' : 'none';
+                if (!isGe) { var cb = document.getElementById('vOffroadAllowed'); if (cb) cb.checked = false; }
+            }
+            var ga = document.getElementById('georgiaAirportFees');
+            if (ga) {
+                ga.style.display = isGe ? '' : 'none';
+                if (!isGe) {
+                    ['locAirportTbilisi', 'locAirportKutaisi', 'locAirportBatumi'].forEach(function (id) {
+                        var el = document.getElementById(id); if (el) el.value = '';
+                    });
+                }
+            }
         }
         window.syncOffroadVisibility = syncOffroadVisibility;
         syncOffroadVisibility();
