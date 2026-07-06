@@ -380,6 +380,10 @@ router.post('/', authenticateToken, requireRole('partner'), async (req, res) => 
             var off = (String(b.country || 'georgia').toLowerCase() === 'georgia' && b.offroad_allowed) ? 1 : 0;
             await execute('UPDATE vehicles SET offroad_allowed = $1 WHERE id = $2', [off, newVehicle.id]);
         }
+        // "SUV 6-8 Seats" flag — partner can self-mark (admin can also toggle it).
+        if (newVehicle && b.suv_6_8 !== undefined) {
+            await execute('UPDATE vehicles SET suv_6_8 = $1 WHERE id = $2', [b.suv_6_8 ? 1 : 0, newVehicle.id]);
+        }
 
         if (newVehicle) await saveVehicleLocations(newVehicle.id, b.locations);
 
@@ -498,6 +502,9 @@ router.put('/:id', authenticateToken, requireRole('partner'), async (req, res) =
             var offCountry = (b.country !== undefined ? b.country : (existing.country || 'georgia'));
             var off2 = (String(offCountry).toLowerCase() === 'georgia' && b.offroad_allowed) ? 1 : 0;
             await execute('UPDATE vehicles SET offroad_allowed = $1 WHERE id = $2 AND partner_id = $3', [off2, vehicleId, req.user.id]);
+        }
+        if (b.suv_6_8 !== undefined) {
+            await execute('UPDATE vehicles SET suv_6_8 = $1 WHERE id = $2 AND partner_id = $3', [b.suv_6_8 ? 1 : 0, vehicleId, req.user.id]);
         }
 
         await saveVehicleLocations(vehicleId, b.locations);

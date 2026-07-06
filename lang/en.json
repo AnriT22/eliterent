@@ -687,6 +687,7 @@
     "vip_close": "Close",
     "date_format_hint": "Pick the <strong>From</strong> date first, then the <strong>To</strong> date. Dates show as Day / Month / Year, and the end must be after the start.",
     "save_btn": "Save",
+    "suv_6_8": "This is an SUV with 6–8 seats (3 rows)",
     "state": "State",
     "pickup_locations": "Pickup locations & fees",
     "pickup_locations_hint": "Add every place a customer can collect this car (airports, offices, cities) and its fee. Leave empty to use only your main city above.",
