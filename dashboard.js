@@ -1351,6 +1351,7 @@
             country: getVal('vCountry') || 'georgia',
             rent_with_driver_only: getChecked('vRentWithDriverOnly'),
             offroad_allowed: getChecked('vOffroadAllowed'),
+            suv_6_8: getChecked('vSuv68'),
             locations: (typeof window.collectVehicleLocations === 'function') ? window.collectVehicleLocations() : undefined,
             category: getVal('vCategory'),
             year: getInt('vYear'),
@@ -1687,6 +1688,7 @@
             setVal('vMinAge', v.min_age || 21);
             setVal('vCountry', v.country || 'georgia');
             var offCb = document.getElementById('vOffroadAllowed'); if (offCb) offCb.checked = !!v.offroad_allowed;
+            var suvCb = document.getElementById('vSuv68'); if (suvCb) suvCb.checked = !!v.suv_6_8;
             if (typeof window.syncOffroadVisibility === 'function') window.syncOffroadVisibility();
             if (typeof window.populateLocDatalist === 'function') window.populateLocDatalist();
             if (typeof window.loadVehicleLocations === 'function') window.loadVehicleLocations(v.id);
