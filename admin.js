@@ -418,11 +418,24 @@ function escHtml(s) {
                     + '<td>'
                     + approveBtn
                     + suspendBtn
+                    + '<button class="admin-action-btn" onclick="adminRenameUser(' + u.id + ')" title="Change this user\'s name">Rename</button>'
                     + '<button class="admin-action-btn danger" onclick="adminDeleteUser(' + u.id + ')">Delete</button>'
                     + '</td></tr>';
             }).join('');
         });
     }
+
+    window.adminRenameUser = function (id) {
+        var name = prompt('Enter the new name for this user:');
+        if (name === null) return; // cancelled
+        name = name.trim();
+        if (name.length < 1) { alert('Name cannot be empty.'); return; }
+        if (name.length > 100) { alert('Name is too long (max 100).'); return; }
+        apiPut('/api/admin/users/' + id + '/edit', { full_name: name }).then(function (data) {
+            if (data && data.error) { alert('Error: ' + data.error); return; }
+            loadUsers();
+        }).catch(function () { alert('Failed to rename user'); });
+    };
 
     window.adminApproveUser = function (id) {
         if (!confirm('Approve this user?')) return;
@@ -1839,6 +1852,43 @@ function escHtml(s) {
     // ========================================
     // DRIVER REVIEWS MODERATION
     // ========================================
+    // ---- Customer/site reviews (moderation) ----
+    function loadAdminCustomerReviews() {
+        apiGet('/api/admin/reviews').then(function (data) {
+            var reviews = data.reviews || [];
+            var tbody = document.getElementById('customerReviewsTableBody');
+            if (!tbody) return;
+            if (reviews.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#A0A3B0;padding:40px;">No customer reviews yet</td></tr>';
+                return;
+            }
+            tbody.innerHTML = reviews.map(function (r) {
+                var stars = '';
+                for (var i = 1; i <= 5; i++) stars += '<span style="color:' + (i <= r.rating ? '#C9A84C' : '#3A3F4B') + ';">&#9733;</span>';
+                return '<tr>'
+                    + '<td>' + r.id + '</td>'
+                    + '<td>' + esc(r.guest_name || '-') + '<br><span style="font-size:11px;color:#A0A3B0;">' + esc(r.guest_email || '') + '</span></td>'
+                    + '<td>' + esc(r.vehicle_name || '-') + '</td>'
+                    + '<td>' + stars + '</td>'
+                    + '<td style="max-width:300px;font-size:13px;">' + (r.title ? '<strong>' + esc(r.title) + '</strong><br>' : '') + esc((r.body || '').slice(0, 250)) + '</td>'
+                    + '<td>' + (r.created_at ? new Date(r.created_at).toLocaleDateString() : '') + '</td>'
+                    + '<td><button class="admin-action-btn danger" onclick="adminDeleteReview(' + r.id + ')">Delete</button></td>'
+                    + '</tr>';
+            }).join('');
+        }).catch(function () {
+            var tbody = document.getElementById('customerReviewsTableBody');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#ef4444;padding:40px;">Failed to load reviews</td></tr>';
+        });
+    }
+
+    window.adminDeleteReview = function (id) {
+        if (!confirm('Delete this review? This cannot be undone.')) return;
+        apiDelete('/api/admin/reviews/' + id).then(function (d) {
+            if (d && d.error) { alert('Error: ' + d.error); return; }
+            loadAdminCustomerReviews();
+        }).catch(function () { alert('Failed to delete review'); });
+    };
+
     var _adminDriverReviews = [];
 
     function loadAdminDriverReviews() {
@@ -1890,7 +1940,7 @@ function escHtml(s) {
     var reviewsNavItem = document.querySelector('.admin-nav-item[data-tab="reviews"]');
     if (driversNavItem) driversNavItem.addEventListener('click', loadAdminDrivers);
     if (adsNavItem) adsNavItem.addEventListener('click', loadAdminAds);
-    if (reviewsNavItem) reviewsNavItem.addEventListener('click', loadAdminDriverReviews);
+    if (reviewsNavItem) reviewsNavItem.addEventListener('click', function () { loadAdminCustomerReviews(); loadAdminDriverReviews(); });
 
     // Initial load
     loadAnalytics();
