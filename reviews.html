@@ -486,26 +486,28 @@
 
         // Load stats
 
+        // Our real Google Business reviews (verifiable on the Google listing) counted
+        // alongside on-site reviews, so the stats match the "N on Google" badge above
+        // instead of only counting rows in our database. Keep these two in sync with
+        // the badge on line ~386 whenever the Google review count changes.
+        var GOOGLE_REVIEWS = 10;
+        var GOOGLE_AVG = 5.0;
+
         fetch('/api/reviews/stats')
-
         .then(function(r) { return r.json(); })
-
         .then(function(d) {
+            var siteTotal = parseInt(d.total, 10) || 0;
+            var siteSum = (parseFloat(d.avg_rating) || 0) * siteTotal;
+            var total = GOOGLE_REVIEWS + siteTotal;
+            var avg = total > 0 ? ((GOOGLE_AVG * GOOGLE_REVIEWS + siteSum) / total) : 0;
 
-            document.getElementById('statAvgRating').textContent = d.avg_rating ? d.avg_rating + '/5' : '—';
-
-            document.getElementById('statTotal').textContent = d.total || 0;
-
-            document.getElementById('stat5star').textContent = (d.distribution && d.distribution[5]) || 0;
-
+            document.getElementById('statAvgRating').textContent = avg ? (Math.round(avg * 10) / 10) + '/5' : '—';
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('stat5star').textContent = GOOGLE_REVIEWS + ((d.distribution && d.distribution[5]) || 0);
             document.getElementById('statRecentDays').textContent = '—';
 
-            // star display
-
-            var avg = Math.round(d.avg_rating || 0);
-
-            document.getElementById('statStars').textContent = '★'.repeat(avg) + '☆'.repeat(5 - avg);
-
+            var avgRounded = Math.round(avg);
+            document.getElementById('statStars').textContent = '★'.repeat(avgRounded) + '☆'.repeat(5 - avgRounded);
         }).catch(function() {});
 
 
