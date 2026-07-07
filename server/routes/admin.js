@@ -471,6 +471,38 @@ router.put('/users/:id/edit', async (req, res) => {
     }
 });
 
+// GET /api/admin/reviews — list all customer/site reviews (for moderation)
+router.get('/reviews', async (req, res) => {
+    try {
+        var reviews = await queryAll(
+            `SELECT r.id, r.rating, r.title, r.body, r.created_at,
+                    u.full_name AS guest_name, u.email AS guest_email,
+                    v.name AS vehicle_name
+             FROM reviews r
+             LEFT JOIN users u ON r.guest_id = u.id
+             LEFT JOIN vehicles v ON r.vehicle_id = v.id
+             ORDER BY r.created_at DESC LIMIT 500`
+        );
+        res.json({ reviews: reviews });
+    } catch (err) {
+        console.error('Admin list reviews error:', err);
+        res.status(500).json({ error: 'Failed to load reviews' });
+    }
+});
+
+// DELETE /api/admin/reviews/:id — moderate/remove a customer review (spam, fake, abusive)
+router.delete('/reviews/:id', async (req, res) => {
+    try {
+        var id = parseInt(req.params.id);
+        if (!id) return res.status(400).json({ error: 'Invalid review id' });
+        await execute('DELETE FROM reviews WHERE id = $1', [id]);
+        res.json({ message: 'Review deleted' });
+    } catch (err) {
+        console.error('Admin delete review error:', err);
+        res.status(500).json({ error: 'Failed to delete review' });
+    }
+});
+
 // Admin override: mark a user's phone as verified so a partner can add vehicles
 // without going through OTP. Optionally set/replace the phone number in the same call.
 router.put('/users/:id/phone-verify', async (req, res) => {
