@@ -383,7 +383,7 @@
                 <div style="display:flex;align-items:center;gap:14px;">
                     <div style="font-size:30px;line-height:1;">⭐</div>
                     <div>
-                        <div style="font-weight:800;font-size:18px;color:#EAEAEA;">5.0 on Google · 10 reviews</div>
+                        <div style="font-weight:800;font-size:18px;color:#EAEAEA;" id="googleBadgeText">5.0 on Google · 10 reviews</div>
                         <div style="color:#A0A3B0;font-size:13.5px;" data-i18n="reviews_page.google_badge_sub">Rated by our customers on Google Maps</div>
                     </div>
                 </div>
@@ -492,6 +492,14 @@
         // the badge on line ~386 whenever the Google review count changes.
         var GOOGLE_REVIEWS = 10;
         var GOOGLE_AVG = 5.0;
+
+        // Single source of truth: the Google badge text is built from the constants
+        // above, so the badge and the stats can never drift apart. To update the
+        // Google review count, change GOOGLE_REVIEWS / GOOGLE_AVG here only.
+        (function () {
+            var badge = document.getElementById('googleBadgeText');
+            if (badge) badge.textContent = GOOGLE_AVG.toFixed(1) + ' on Google · ' + GOOGLE_REVIEWS + ' reviews';
+        })();
 
         fetch('/api/reviews/stats')
         .then(function(r) { return r.json(); })
