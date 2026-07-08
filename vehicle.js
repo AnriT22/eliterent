@@ -179,6 +179,17 @@
         document.getElementById('vdBreadcrumbName').textContent = name;
         document.getElementById('vdVehicleName').textContent = name;
 
+        // Conversion tracking: a specific car was viewed (funnel entry + retargeting).
+        try {
+            if (typeof gtag === 'function') {
+                gtag('event', 'view_item', {
+                    currency: 'USD',
+                    value: parseFloat(v.price_per_day) || 0,
+                    items: [{ item_id: String(v.id), item_name: name, item_category: v.category || 'car' }]
+                });
+            }
+        } catch (e) {}
+
         // Meta
         var cat = (v.category || 'economy');
         var engine = v.engine || '';

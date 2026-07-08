@@ -956,6 +956,18 @@
                 return;
             }
 
+            // Conversion tracking: a booking request was created (a lead). Ad
+            // platforms optimise toward this + the paid 'purchase' event.
+            try {
+                if (typeof gtag === 'function') {
+                    gtag('event', 'begin_checkout', {
+                        currency: 'USD',
+                        value: parseFloat(data.service_fee) || 0,
+                        items: [{ item_id: String(vehicleId), item_name: (vehicleData && vehicleData.name) || 'Car rental' }]
+                    });
+                }
+            } catch (e) {}
+
             // Show approval modal before redirecting to payment
             if (data.booking_id && (data.payment_required || data.service_fee > 0)) {
                 sessionStorage.setItem('pending_booking_id', data.booking_id);

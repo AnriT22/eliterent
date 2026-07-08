@@ -17,6 +17,23 @@
 
     document.getElementById('payBookingLabel').textContent = 'Booking #' + bookingId;
 
+    // Conversion tracking: the website fee was PAID — this is real revenue and the
+    // conversion ad platforms should optimise toward. Fires once per successful pay.
+    var _purchaseTracked = false;
+    function trackPurchase(bId, fee) {
+        if (_purchaseTracked) return;
+        _purchaseTracked = true;
+        try {
+            if (typeof gtag === 'function') {
+                gtag('event', 'purchase', {
+                    transaction_id: 'booking-' + bId,
+                    currency: 'USD',
+                    value: parseFloat(fee) || 0
+                });
+            }
+        } catch (e) {}
+    }
+
     var payBody = document.getElementById('payBody');
 
     // Session expired mid-payment → re-login and return to this payment page.
@@ -324,6 +341,7 @@
         })
         .then(function (result) {
             if (result.status === 'COMPLETED') {
+                trackPurchase(bookingId, serviceFee);
                 document.getElementById('payBody').innerHTML =
                     '<div class="pay-success">'
                     + '<div class="pay-success-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>'
@@ -393,6 +411,7 @@
                 .then(function (r) { return r.json(); })
                 .then(function (result) {
                     if (result.status === 'COMPLETED') {
+                        trackPurchase(bookingId, serviceFee);
                         payBody.innerHTML =
                             '<div class="pay-success">'
                             + '<div class="pay-success-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>'
