@@ -593,6 +593,55 @@ initDB().then(() => {
     setInterval(runVipExpiryReminders, 12 * 3600 * 1000); // every 12 hours
     setTimeout(runVipExpiryReminders, 30 * 1000); // once shortly after boot
 
+    // Post-rental Google-review request — after a rental ends, email the guest a
+    // one-click link to review us on Google (grows real reviews, the #1 local-SEO
+    // lever). Sent once per booking via review_request_sent. The review link is
+    // configurable: set GOOGLE_REVIEW_URL to the exact "write a review" deep-link
+    // once you have your Place ID; defaults to the public Google listing.
+    const GOOGLE_REVIEW_URL = process.env.GOOGLE_REVIEW_URL || 'https://maps.app.goo.gl/ewpuH6zZRTYNMVV28';
+    const runReviewRequests = async () => {
+        try {
+            const pool = getPool();
+            if (!pool) return;
+            const { sendEmail } = require('./mailer');
+            // Real, finished rentals the guest actually took: accepted/completed,
+            // drop-off date in the past, an email on file, and not yet asked.
+            const rows = (await pool.query(
+                `SELECT b.id, b.dropoff_date, u.email AS guest_email, u.full_name AS guest_name, v.name AS vehicle_name
+                 FROM bookings b
+                 JOIN users u ON b.guest_id = u.id
+                 JOIN vehicles v ON b.vehicle_id = v.id
+                 WHERE b.status IN ('accepted', 'completed')
+                   AND COALESCE(b.review_request_sent, 0) = 0
+                   AND b.dropoff_date < to_char(NOW(), 'YYYY-MM-DD')
+                   AND b.dropoff_date >= to_char(NOW() - INTERVAL '60 days', 'YYYY-MM-DD')
+                   AND u.email IS NOT NULL AND u.email <> ''
+                 LIMIT 100`
+            )).rows;
+            for (const r of rows) {
+                // Mark first so a send failure/restart never emails the guest twice.
+                await pool.query('UPDATE bookings SET review_request_sent = 1 WHERE id = $1', [r.id]);
+                try {
+                    await sendEmail({
+                        to: r.guest_email,
+                        subject: 'How was your rental with EliteAuto.rent?',
+                        text: 'Hello ' + (r.guest_name || 'there') + ',\n\n'
+                            + 'Thank you for renting ' + (r.vehicle_name || 'a car') + ' through EliteAuto.rent! '
+                            + 'We hope you had a great trip in Georgia.\n\n'
+                            + 'Would you take 30 seconds to leave us a review on Google? It genuinely helps other '
+                            + 'travellers find us — and helps us grow.\n\n'
+                            + '⭐ Leave a Google review: ' + GOOGLE_REVIEW_URL + '\n\n'
+                            + 'You can also review your car on our site: https://eliteauto.rent/reviews.html\n\n'
+                            + 'Safe travels,\nThe EliteAuto.rent team'
+                    });
+                } catch (e) { console.error('[Reviews] request email failed for booking ' + r.id + ':', e.message); }
+            }
+            if (rows.length > 0) console.log('[Reviews] Sent ' + rows.length + ' post-rental review request(s)');
+        } catch (e) { console.error('[Reviews] review-request job error:', e.message); }
+    };
+    setInterval(runReviewRequests, 24 * 3600 * 1000); // once a day
+    setTimeout(runReviewRequests, 60 * 1000); // once shortly after boot
+
 }).catch((err) => {
     console.error('Failed to initialize database:', err);
     process.exit(1);

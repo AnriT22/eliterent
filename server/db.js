@@ -321,6 +321,8 @@ async function initDB() {
     // Add payment_expires_at to bookings for the 8-minute payment countdown timer (existing DBs)
     try {
         await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_expires_at TIMESTAMP`);
+        // One-time flag so the post-rental "leave a Google review" request is sent once.
+        await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS review_request_sent INTEGER DEFAULT 0`);
     } catch (e) { /* column may already exist or table not yet created */ }
 
     // Add priority column to vehicles so admin can pin/order vehicles on the page (existing DBs)
