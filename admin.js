@@ -1967,16 +1967,18 @@ function escHtml(s) {
                 var data = await res.json();
                 var rows = data.referrals || [];
                 var totalCars = 0;
-                adminRefTable.innerHTML = '<thead><tr><th>Partner</th><th>Code</th><th>Referred By</th><th>Cars</th><th>Balance</th></tr></thead><tbody id="adminRefTableBody"></tbody>';
+                adminRefTable.innerHTML = '<thead><tr><th>Partner</th><th>Code</th><th>Referred By</th><th>Cars</th><th>Balance</th><th>Actions</th></tr></thead><tbody id="adminRefTableBody"></tbody>';
                 adminRefTableBody = document.getElementById('adminRefTableBody');
                 rows.forEach(function(r) {
                     totalCars += parseInt(r.active_cars || 0, 10);
+                    var partnerLabel = (r.company_name || r.full_name || r.email || '').replace(/'/g, "\\'");
                     html += '<tr>'
                         + '<td>' + (r.company_name || r.full_name || r.email) + '</td>'
                         + '<td>' + (r.referral_code || '-') + '</td>'
                         + '<td>' + (r.referrer_company || r.referrer_name || r.referrer_email || '-') + ' (' + (r.referrer_code || '') + ')</td>'
                         + '<td>' + (r.active_cars || 0) + '</td>'
                         + '<td>$' + parseFloat(r.referral_balance || 0).toFixed(2) + '</td>'
+                        + '<td><button class="admin-action-btn" onclick="reassignReferral(' + r.partner_id + ', \'' + partnerLabel + '\', \'' + (r.referrer_code || '') + '\')">Change</button></td>'
                         + '</tr>';
                 });
                 document.getElementById('adminRefTotalPartners').textContent = rows.length;
@@ -2026,6 +2028,29 @@ function escHtml(s) {
             if (adminRefTableBody) adminRefTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#ef4444;padding:40px;">Failed to load</td></tr>';
         }
     }
+
+    window.reassignReferral = async function(partnerId, partnerLabel, currentCode) {
+        var code = prompt('Redirect "' + partnerLabel + '" to which referrer?\n\nEnter the new referrer\'s referral code (e.g. ELITE777), or leave blank to remove the referrer.', currentCode || '');
+        if (code === null) return; // cancelled
+        code = code.trim();
+        try {
+            var res = await fetch('/api/admin/referrals/' + partnerId + '/reassign', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ referrer_code: code })
+            });
+            var data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed');
+            if (data.referrer) {
+                alert('Referral updated. "' + partnerLabel + '" is now referred by ' + (data.referrer.company_name || data.referrer.full_name || data.referrer.email) + ' (' + (data.referrer.referral_code || '') + ').');
+            } else {
+                alert('Referrer removed from "' + partnerLabel + '".');
+            }
+            loadAdminReferrals();
+        } catch (err) {
+            alert('Failed to reassign referral: ' + err.message);
+        }
+    };
 
     window.processPayout = async function(id, action) {
         try {

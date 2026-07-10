@@ -1355,6 +1355,61 @@ router.get('/referrals', authenticateToken, requireRole('admin'), async (req, re
     }
 });
 
+// POST /api/admin/referrals/:partnerId/reassign — redirect a partner to a different referrer
+// Body: { referrer_code } — a referral code, or empty/null to remove the referrer entirely.
+router.post('/referrals/:partnerId/reassign', authenticateToken, requireRole('admin'), async (req, res) => {
+    try {
+        var partnerId = parseInt(req.params.partnerId, 10);
+        if (!partnerId) return res.status(400).json({ error: 'Invalid partner id' });
+
+        var partner = await queryOne('SELECT user_id, referral_code FROM partner_profiles WHERE user_id = $1', [partnerId]);
+        if (!partner) return res.status(404).json({ error: 'Partner not found' });
+
+        var code = String(req.body.referrer_code || '').trim().toUpperCase();
+
+        // Empty code = remove the referrer entirely.
+        if (!code) {
+            await execute('UPDATE partner_profiles SET referred_by_user_id = NULL WHERE user_id = $1', [partnerId]);
+            return res.json({ success: true, referrer: null });
+        }
+
+        if (partner.referral_code && partner.referral_code.toUpperCase() === code) {
+            return res.status(400).json({ error: 'A partner cannot refer themselves.' });
+        }
+
+        var referrer = await queryOne(
+            'SELECT user_id FROM partner_profiles WHERE UPPER(referral_code) = $1', [code],
+        );
+        if (!referrer) return res.status(404).json({ error: 'Invalid referral code' });
+        if (referrer.user_id === partnerId) {
+            return res.status(400).json({ error: 'A partner cannot refer themselves.' });
+        }
+
+        // Cycle guard: walk up the proposed referrer's chain; if we reach this partner, reject.
+        var cursor = referrer.user_id;
+        var guard = 0;
+        while (cursor && guard < 100) {
+            if (cursor === partnerId) {
+                return res.status(400).json({ error: 'That would create a referral loop.' });
+            }
+            var up = await queryOne('SELECT referred_by_user_id FROM partner_profiles WHERE user_id = $1', [cursor]);
+            cursor = up ? up.referred_by_user_id : null;
+            guard++;
+        }
+
+        await execute('UPDATE partner_profiles SET referred_by_user_id = $1 WHERE user_id = $2', [referrer.user_id, partnerId]);
+
+        var info = await queryOne(
+            'SELECT u.full_name, u.email, pp.company_name, pp.referral_code FROM users u JOIN partner_profiles pp ON pp.user_id = u.id WHERE u.id = $1',
+            [referrer.user_id],
+        );
+        res.json({ success: true, referrer: info });
+    } catch (err) {
+        console.error('Admin referral reassign error:', err);
+        res.status(500).json({ error: 'Failed to reassign referral' });
+    }
+});
+
 // GET /api/admin/referral-commissions — list all commissions
 router.get('/referral-commissions', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
