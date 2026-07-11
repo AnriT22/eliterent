@@ -1,10 +1,10 @@
 {
-    "country_popup": {
-        "button": "Choose Country",
-        "title": "Choose your country",
-        "subtitle": "Where would you like to rent a car?",
-        "soon": "Soon"
-    },
+  "country_popup": {
+    "button": "Choose Country",
+    "title": "Choose your country",
+    "subtitle": "Where would you like to rent a car?",
+    "soon": "Soon"
+  },
   "nav": {
     "home": "Home",
     "vehicles": "Vehicles",
@@ -38,7 +38,8 @@
     "search_btn": "Search",
     "advanced_filters": "Advanced Filters",
     "any_city": "All cities",
-    "any_category": "All categories"
+    "any_category": "All categories",
+    "tagline": "Drive the perfect car for your next adventure with unmatched rates and zero hidden fees."
   },
   "locations": {
     "title": "Explore Georgia's Top Destinations",
