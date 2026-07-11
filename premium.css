@@ -363,6 +363,25 @@ html[lang="ru"] .hero-price-badge {
     font-weight: 400;
 }
 
+/* Hero kicker headline — "Rent It Now" in the space above the tagline */
+.hero-kicker {
+    font-size: 46px;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -1px;
+    margin: 0 0 14px;
+    background: linear-gradient(180deg, #FFFFFF 0%, #ECE7D8 55%, #D4AF37 150%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+html[lang="ka"] .hero-kicker { font-size: 40px; letter-spacing: -0.5px; }
+html[lang="ru"] .hero-kicker { font-size: 42px; }
+@media (max-width: 768px) {
+    .hero-kicker { font-size: 34px; }
+    html[lang="ka"] .hero-kicker { font-size: 30px; }
+}
+
 /* Hero tagline — sits where the old headline was, above the price badge */
 .hero-tagline {
     font-size: 23px;
@@ -378,6 +397,33 @@ html[lang="ru"] .hero-tagline { font-size: 21px; }
 @media (max-width: 768px) {
     .hero-tagline { font-size: 18px; max-width: 100%; margin-bottom: 18px; }
     html[lang="ka"] .hero-tagline { font-size: 16.5px; }
+}
+
+/* Trust bar — staggered entrance + gold hover micro-interactions */
+.trust-item {
+    opacity: 0;
+    animation: trustFadeUp 0.6s var(--ease-out) forwards;
+    transition: color 0.3s var(--ease);
+}
+.trust-item:nth-child(1) { animation-delay: 0.08s; }
+.trust-item:nth-child(2) { animation-delay: 0.18s; }
+.trust-item:nth-child(3) { animation-delay: 0.28s; }
+.trust-item:nth-child(4) { animation-delay: 0.38s; }
+.trust-item:nth-child(5) { animation-delay: 0.48s; }
+@keyframes trustFadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.trust-item:hover { color: #E9C766; }
+.trust-icon { display: inline-block; transition: transform 0.4s var(--ease-bounce), filter 0.3s var(--ease); }
+.trust-item:hover .trust-icon { transform: scale(1.25) rotate(-6deg); filter: drop-shadow(0 0 8px rgba(212,175,55,0.45)); }
+@media (max-width: 768px) {
+    /* Mobile already runs the horizontal marquee — skip the fade-up there. */
+    .trust-item { opacity: 1; animation: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .trust-item { opacity: 1; animation: none; }
+    .trust-icon { transition: none; }
 }
 
 /* Screen-reader / SEO-only content (visually hidden but present for crawlers & AT) */
