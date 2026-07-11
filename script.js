@@ -529,8 +529,9 @@ function loadCarouselWithAvailability() {
                 return;
             }
             
-            // Home page fleet section: exactly 8 tiles = 3 VIP cars + 2 ads + 3 random non-VIP cars.
-            // Insert ads after the VIP block so the layout is 3 VIP cards, 2 ads, 3 random cards.
+            // Home page fleet section: 6 cars (3 VIP + 3 random) + up to 2 admin ads.
+            // Each ad is placed at its admin-set `position` (tile slot); firstBlockLength
+            // is the fallback slot for any ad without a position.
             renderCarousel(vipFeatured.concat(randomCars), homeAds, vipFeatured.length);
         })
         .catch(function (err) {
@@ -635,16 +636,23 @@ function renderCarousel(vehicles, adminAds, firstBlockLength) {
             + '<span class="fleet-ad-card__cta">' + cta + ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></span>'
             + '</div></a>';
     }
-    // Place the first 2 admin ads immediately after the first block of cards.
-    // The homepage layout is: 8 cards, 2 ads, 6 cards (3 VIP + 3 random).
-    adminAds.slice(0, 2).forEach(function (ad) {
-        var children = carouselTrack.children;
-        if (firstBlockLength >= children.length) {
-            carouselTrack.insertAdjacentHTML('beforeend', buildAdCard(ad));
-        } else {
-            children[firstBlockLength].insertAdjacentHTML('beforebegin', buildAdCard(ad));
-        }
-    });
+    // Place admin ads at the slot the admin picked. Each ad's `position` is the
+    // 1-based tile number it should occupy in the grid (e.g. 3 = 3rd card, 4 = 4th).
+    // Insert in ascending position order so every ad lands on its chosen tile.
+    adminAds.slice(0, 2)
+        .sort(function (a, b) {
+            return (parseInt(a.position, 10) || 99) - (parseInt(b.position, 10) || 99);
+        })
+        .forEach(function (ad) {
+            var children = carouselTrack.children;
+            var slot = parseInt(ad.position, 10) || (firstBlockLength + 1);
+            var idx = Math.max(0, slot - 1);
+            if (idx >= children.length) {
+                carouselTrack.insertAdjacentHTML('beforeend', buildAdCard(ad));
+            } else {
+                children[idx].insertAdjacentHTML('beforebegin', buildAdCard(ad));
+            }
+        });
 
     if (typeof I18n !== 'undefined' && I18n.translatePage) I18n.translatePage(carouselTrack);
 

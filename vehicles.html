@@ -69,12 +69,12 @@
     </script>
     <link rel="preload" href="style.css?v=14" as="style">
     <link rel="stylesheet" href="style.css?v=14">
-    <link rel="preload" href="premium.css?v=9" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="premium.css?v=9"></noscript>
-    <link rel="preload" href="vehicles.css?v=11" as="style">
-    <link rel="stylesheet" href="vehicles.css?v=11">
-    <link rel="preload" href="navbar-auth.css?v=6" as="style">
-    <link rel="stylesheet" href="navbar-auth.css?v=6">
+    <link rel="preload" href="premium.css?v=17" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="premium.css?v=17"></noscript>
+    <link rel="preload" href="vehicles.css?v=12" as="style">
+    <link rel="stylesheet" href="vehicles.css?v=12">
+    <link rel="preload" href="navbar-auth.css?v=7" as="style">
+    <link rel="stylesheet" href="navbar-auth.css?v=7">
     <!-- Critical layout fallback: the .vp-grid display:grid rule lives in vehicles.css.
          If that file is ever slow, missing, or stale in a visitor's cache, the car grid
          collapses to a single column (cards are styled by the shared style.css, so they
@@ -448,9 +448,10 @@
 
         <!-- MAIN CONTENT -->
         <main class="vp-main">
-            <header class="vp-page-header">
-                <h1 data-i18n-html="vehicles_page.hero_title">Rent a Car in Georgia <span class="vp-header-accent">Tbilisi, Batumi &amp; Kutaisi</span></h1>
-                <p data-i18n="vehicles_page.hero_subtitle">Compare verified local partners. SUVs, sedans, economy and luxury cars from $25/day with airport pickup.</p>
+            <!-- Visible hero heading & subtitle removed per request. A single H1 is kept
+                 screen-reader/SEO-only so the page still has one H1 in every language. -->
+            <header class="vp-page-header vp-page-header--minimal">
+                <h1 class="sr-only" data-i18n-html="vehicles_page.hero_title">Rent a Car in Georgia — Tbilisi, Batumi &amp; Kutaisi</h1>
             </header>
             <div class="vp-topbar">
                 <div class="vp-topbar-left">
@@ -1613,7 +1614,10 @@
     // Ads that belong on a given results page (admin sets each ad's Page + Position).
     // Capped at 2 per page so a page never fills with ads.
     function vcAdsForPageList(pageNum){
-        return (_vcAdsCache||[]).filter(function(ad){ return (parseInt(ad.page)||1)===pageNum; }).slice(0,2);
+        return (_vcAdsCache||[]).filter(function(ad){
+            var p = parseInt(ad.page, 10); if (isNaN(p)) p = 1;
+            return p === 0 || p === pageNum;   // page 0 = show on every results page
+        }).slice(0,2);
     }
     // How many ad tiles land on a page — pagination subtracts this from the per-page
     // tile budget so cars + ads never exceed VP_PER_PAGE on that page.
@@ -2025,7 +2029,7 @@
     </script>
     <script src="navbar-auth.js?v=4"></script>
     <script src="currency.js?v=4"></script>
-<script src="premium-animations.js?v=2"></script>
+<script src="premium-animations.js?v=3"></script>
 <script src="country-popup.js?v=4"></script>
 </body>
 </html>
