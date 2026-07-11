@@ -1973,6 +1973,94 @@ function escHtml(s) {
         apiDelete('/api/driver-reviews/' + id).then(function () { loadAdminDriverReviews(); });
     };
 
+    // ===== TRUST BAR BADGES =====
+    var _adminTrust = [];
+    function loadAdminTrust() {
+        apiGet('/api/trust-badges/admin/all').then(function (data) {
+            _adminTrust = data.badges || [];
+            renderAdminTrust();
+        }).catch(function () {
+            var tb = document.getElementById('trustTableBody');
+            if (tb) tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ef4444;padding:40px;">Failed to load trust badges</td></tr>';
+        });
+    }
+    function renderAdminTrust() {
+        var tbody = document.getElementById('trustTableBody');
+        if (!tbody) return;
+        if (_adminTrust.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#A0A3B0;padding:40px;">No badges yet</td></tr>'; return; }
+        tbody.innerHTML = _adminTrust.map(function (b) {
+            return '<tr>'
+                + '<td>' + (b.position || 1) + '</td>'
+                + '<td style="font-size:18px;">' + esc(b.icon || '') + '</td>'
+                + '<td>' + esc(b.label || '') + '</td>'
+                + '<td style="font-size:11px;color:#A0A3B0;">' + esc(b.placement || '') + '</td>'
+                + '<td>' + (b.is_active ? '<span style="color:#22c55e;font-size:12px;">Yes</span>' : '<span style="color:#ef4444;font-size:12px;">No</span>') + '</td>'
+                + '<td style="white-space:nowrap;">'
+                + '<button class="admin-action-btn small" onclick="adminEditTrust(' + b.id + ')">Edit</button>'
+                + '<button class="admin-action-btn small danger" onclick="adminDeleteTrust(' + b.id + ')">Delete</button>'
+                + '</td></tr>';
+        }).join('');
+    }
+    var trustFormWrap = document.getElementById('trustFormWrap');
+    function resetTrustForm() {
+        document.getElementById('trustEditId').value = '';
+        document.getElementById('trustFormTitle').textContent = 'New Badge';
+        document.getElementById('trustIcon').value = '';
+        document.getElementById('trustLabel').value = '';
+        document.getElementById('trustLabel_ru').value = '';
+        document.getElementById('trustLabel_ka').value = '';
+        document.getElementById('trustLabel_he').value = '';
+        document.querySelectorAll('.trust-placement-cb').forEach(function (cb) { cb.checked = true; });
+        document.getElementById('trustPosition').value = '1';
+        document.getElementById('trustIsActive').checked = true;
+    }
+    if (document.getElementById('addTrustBtn')) {
+        document.getElementById('addTrustBtn').addEventListener('click', function () { resetTrustForm(); trustFormWrap.style.display = 'block'; });
+        document.getElementById('cancelTrustBtn').addEventListener('click', function () { trustFormWrap.style.display = 'none'; });
+        document.getElementById('saveTrustBtn').addEventListener('click', function () {
+            var payload = {
+                icon: document.getElementById('trustIcon').value || null,
+                label: document.getElementById('trustLabel').value,
+                label_ru: document.getElementById('trustLabel_ru').value || null,
+                label_ka: document.getElementById('trustLabel_ka').value || null,
+                label_he: document.getElementById('trustLabel_he').value || null,
+                placements: Array.prototype.map.call(document.querySelectorAll('.trust-placement-cb:checked'), function (cb) { return cb.value; }),
+                position: parseInt(document.getElementById('trustPosition').value, 10) || 1,
+                is_active: document.getElementById('trustIsActive').checked
+            };
+            if (!payload.label) { alert('Label is required'); return; }
+            if (!payload.placements.length) { alert('Pick at least one page'); return; }
+            var editId = document.getElementById('trustEditId').value;
+            var url = editId ? '/api/trust-badges/admin/' + editId : '/api/trust-badges/admin';
+            apiRequest(url, editId ? 'PUT' : 'POST', payload).then(function () {
+                trustFormWrap.style.display = 'none';
+                loadAdminTrust();
+            }).catch(function (err) { alert('Error saving badge: ' + (err.message || 'Unknown error')); });
+        });
+    }
+    window.adminEditTrust = function (id) {
+        var b = _adminTrust.filter(function (x) { return x.id === id; })[0];
+        if (!b) return;
+        document.getElementById('trustEditId').value = b.id;
+        document.getElementById('trustFormTitle').textContent = 'Edit Badge';
+        document.getElementById('trustIcon').value = b.icon || '';
+        document.getElementById('trustLabel').value = b.label || '';
+        document.getElementById('trustLabel_ru').value = b.label_ru || '';
+        document.getElementById('trustLabel_ka').value = b.label_ka || '';
+        document.getElementById('trustLabel_he').value = b.label_he || '';
+        var pl = String(b.placement || '').split(',').map(function (s) { return s.trim(); });
+        document.querySelectorAll('.trust-placement-cb').forEach(function (cb) { cb.checked = pl.indexOf(cb.value) !== -1; });
+        document.getElementById('trustPosition').value = b.position || 1;
+        document.getElementById('trustIsActive').checked = !!b.is_active;
+        trustFormWrap.style.display = 'block';
+    };
+    window.adminDeleteTrust = function (id) {
+        if (!confirm('Delete this badge?')) return;
+        apiDelete('/api/trust-badges/admin/' + id).then(function () { loadAdminTrust(); });
+    };
+    var trustNavItem = document.querySelector('.admin-nav-item[data-tab="trust"]');
+    if (trustNavItem) trustNavItem.addEventListener('click', loadAdminTrust);
+
     // Wire tab clicks for new tabs
     var driversNavItem = document.querySelector('.admin-nav-item[data-tab="drivers"]');
     var adsNavItem = document.querySelector('.admin-nav-item[data-tab="ads"]');

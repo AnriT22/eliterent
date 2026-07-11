@@ -72,6 +72,10 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                     Ad Cards
                 </button>
+                <button class="admin-nav-item" data-tab="trust">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Trust Bar
+                </button>
                 <button class="admin-nav-item" data-tab="activity">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                     Activity
@@ -588,6 +592,56 @@
                 </div>
             </section>
 
+            <!-- TRUST BAR TAB -->
+            <section class="admin-tab" id="tabTrust">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+                    <h3 style="margin:0;font-size:16px;color:#EAEAEA;">Trust Bar Badges</h3>
+                    <button class="admin-action-btn success" id="addTrustBtn">+ Add Badge</button>
+                </div>
+                <p style="color:#A0A3B0;font-size:13px;margin:0 0 16px;">The strip of trust signals (icon + short text). Choose which pages each badge appears on and its order.</p>
+                <div id="trustFormWrap" style="display:none;background:#1C1E26;border:1px solid #3A3F4B;border-radius:14px;padding:20px;margin-bottom:20px;max-width:600px;">
+                    <h4 id="trustFormTitle" style="margin:0 0 16px;font-size:15px;color:#EAEAEA;">New Badge</h4>
+                    <input type="hidden" id="trustEditId">
+                    <div style="display:flex;flex-direction:column;gap:12px;">
+                        <div style="display:flex;gap:12px;">
+                            <div style="width:110px;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Icon <span style="color:#6b7280;">(emoji)</span></label><input type="text" id="trustIcon" class="db-input" placeholder="🛡️" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;text-align:center;font-size:18px;"></div>
+                            <div style="flex:1;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Label (English) *</label><input type="text" id="trustLabel" class="db-input" placeholder="Full Insurance Included" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
+                        </div>
+                        <details style="border:1px solid #3A3F4B;border-radius:8px;padding:10px 12px;background:#222530;">
+                            <summary style="cursor:pointer;font-size:13px;color:#D4AF37;font-weight:600;">&#127760; Translations (optional)</summary>
+                            <p style="font-size:11px;color:#A0A3B0;margin:8px 0 12px;">Leave blank to fall back to the English label.</p>
+                            <div style="display:flex;flex-direction:column;gap:10px;">
+                                <input type="text" id="trustLabel_ru" class="db-input" placeholder="🇷🇺 Русский" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
+                                <input type="text" id="trustLabel_ka" class="db-input" placeholder="🇬🇪 ქართული" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
+                                <input type="text" id="trustLabel_he" class="db-input" dir="rtl" placeholder="🇮🇱 עברית" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
+                            </div>
+                        </details>
+                        <div>
+                            <label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:6px;">Show on pages <span style="color:#6b7280;">(check every page this badge should appear on)</span></label>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px 18px;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;">
+                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="trust-placement-cb" value="cars" style="width:15px;height:15px;"> Cars (homepage)</label>
+                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="trust-placement-cb" value="drivers" style="width:15px;height:15px;"> Drivers page</label>
+                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="trust-placement-cb" value="vehicles" style="width:15px;height:15px;"> Vehicles page</label>
+                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="trust-placement-cb" value="blog" style="width:15px;height:15px;"> Blog / Explore</label>
+                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="trust-placement-cb" value="checkout" style="width:15px;height:15px;"> Checkout (booking)</label>
+                            </div>
+                        </div>
+                        <div style="width:160px;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Order <span style="color:#6b7280;">(1 = first)</span></label><input type="number" id="trustPosition" class="db-input" value="1" min="1" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
+                        <label style="display:flex;align-items:center;gap:8px;color:#A0A3B0;font-size:13px;"><input type="checkbox" id="trustIsActive" checked style="width:16px;height:16px;"> Active</label>
+                        <div style="display:flex;gap:8px;margin-top:4px;">
+                            <button class="admin-action-btn" id="cancelTrustBtn">Cancel</button>
+                            <button class="admin-action-btn success" id="saveTrustBtn">Save</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead><tr><th>Order</th><th>Icon</th><th>Label</th><th>Pages</th><th>Active</th><th>Actions</th></tr></thead>
+                        <tbody id="trustTableBody"><tr><td colspan="6" style="text-align:center;color:#A0A3B0;padding:40px;">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
+
             <!-- ACTIVITY TAB -->
             <section class="admin-tab" id="tabActivity">
                 <div id="activityFeed" style="max-width:700px;">
@@ -666,7 +720,7 @@
         }
     })();
     </script>
-    <script src="admin.js?v=14"></script>
+    <script src="admin.js?v=15"></script>
 <script src="premium-animations.js?v=3"></script>
 </body>
 </html>
