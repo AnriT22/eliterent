@@ -113,6 +113,23 @@ body > *:not(.header):not(.footer):not(script):not(link):not(style):not(.floatin
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 40px rgba(0,0,0,0.28);
 }
 
+/* Give the bar more room and tighten gaps so the right-side buttons never
+   overflow (longer languages like Georgian were pushing the CTA off-screen). */
+.header .header-content {
+    max-width: 1440px;
+    gap: 22px;
+}
+.header-center .nav-menu { gap: 16px; }
+.header-right { gap: 10px; }
+/* On tighter desktops, drop the secondary currency selector (kept on wide screens)
+   so the nav + CTA always fit before the mobile layout takes over at 768px. */
+@media (max-width: 1300px) {
+    .header-right .selector-group:has(.currency-btn) { display: none; }
+    .header-center .nav-menu { gap: 13px; }
+    .header .header-content { gap: 16px; }
+    .header-center .nav-link { font-size: 12.5px; letter-spacing: 0.2px; }
+}
+
 /* Gradient hairline under the navbar — gold blooms at the centre */
 .header::after {
     content: '';
@@ -234,11 +251,12 @@ body > *:not(.header):not(.footer):not(script):not(link):not(style):not(.floatin
 .partner-btn {
     position: relative;
     overflow: hidden;
-    padding: 10px 26px;
+    padding: 10px 20px;
     border-radius: 999px;
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.3px;
+    white-space: nowrap;
     background: linear-gradient(135deg, #00FF7F 0%, #00E673 100%);
     color: #08130C;
     box-shadow: 0 6px 20px rgba(0,255,127,0.28), inset 0 1px 0 rgba(255,255,255,0.45);
@@ -343,6 +361,23 @@ html[lang="ru"] .hero-price-badge {
     color: rgba(234,234,234,0.7);
     line-height: 1.7;
     font-weight: 400;
+}
+
+/* Hero tagline — sits where the old headline was, above the price badge */
+.hero-tagline {
+    font-size: 23px;
+    line-height: 1.45;
+    font-weight: 500;
+    color: #E7E9EE;
+    max-width: 500px;
+    margin: 0 0 22px;
+    letter-spacing: -0.2px;
+}
+html[lang="ka"] .hero-tagline { font-size: 20px; line-height: 1.5; }
+html[lang="ru"] .hero-tagline { font-size: 21px; }
+@media (max-width: 768px) {
+    .hero-tagline { font-size: 18px; max-width: 100%; margin-bottom: 18px; }
+    html[lang="ka"] .hero-tagline { font-size: 16.5px; }
 }
 
 /* Screen-reader / SEO-only content (visually hidden but present for crawlers & AT) */
