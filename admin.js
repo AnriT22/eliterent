@@ -1740,11 +1740,15 @@ function escHtml(s) {
         document.getElementById('adTargetLink').value = '';
         document.getElementById('adCtaText').value = '';
         document.querySelectorAll('.ad-placement-cb').forEach(function (cb) { cb.checked = (cb.value === 'cars'); });
-        document.getElementById('adPage').value = '1';
-        document.getElementById('adPage').disabled = false;
+        document.getElementById('adPosCars').value = '4';
+        document.getElementById('adPosDrivers').value = '4';
+        document.getElementById('adPosVehicles').value = '6';
+        document.getElementById('adPosBlog').value = '1';
+        document.getElementById('adPosCheckout').value = '1';
+        document.getElementById('adPageVehicles').value = '1';
+        document.getElementById('adPageVehicles').disabled = false;
         var _adPageAllReset = document.getElementById('adPageAll');
         if (_adPageAllReset) _adPageAllReset.checked = false;
-        document.getElementById('adPosition').value = '4';
         document.getElementById('adIsActive').checked = true;
         adTrFields(function (key, id) { var el = document.getElementById(id); if (el) el.value = ''; });
     }
@@ -1795,7 +1799,7 @@ function escHtml(s) {
     var adPageAllCb = document.getElementById('adPageAll');
     if (adPageAllCb) {
         adPageAllCb.addEventListener('change', function () {
-            document.getElementById('adPage').disabled = adPageAllCb.checked;
+            document.getElementById('adPageVehicles').disabled = adPageAllCb.checked;
         });
     }
     document.getElementById('saveAdCardBtn').addEventListener('click', function () {
@@ -1806,8 +1810,18 @@ function escHtml(s) {
             target_link: document.getElementById('adTargetLink').value,
             cta_text: document.getElementById('adCtaText').value || null,
             placements: Array.prototype.map.call(document.querySelectorAll('.ad-placement-cb:checked'), function (cb) { return cb.value; }),
-            page: (function () { var pa = document.getElementById('adPageAll'); return (pa && pa.checked) ? 0 : (parseInt(document.getElementById('adPage').value) || 1); })(),
-            position: parseInt(document.getElementById('adPosition').value) || 4,
+            placement_positions: (function () {
+                var pa = document.getElementById('adPageAll');
+                function v(id, d) { var n = parseInt(document.getElementById(id).value, 10); return isNaN(n) ? d : Math.max(1, n); }
+                return {
+                    cars: v('adPosCars', 4),
+                    drivers: v('adPosDrivers', 4),
+                    vehicles: v('adPosVehicles', 6),
+                    blog: v('adPosBlog', 1),
+                    checkout: v('adPosCheckout', 1),
+                    vehicles_page: (pa && pa.checked) ? 0 : v('adPageVehicles', 1)
+                };
+            })(),
             is_active: document.getElementById('adIsActive').checked
         };
         adTrFields(function (key, id) { var el = document.getElementById(id); payload[key] = (el && el.value) ? el.value : null; });
@@ -1845,12 +1859,24 @@ function escHtml(s) {
         var plList = String(a.placement || 'cars').split(',').map(function (s) { return s.trim(); });
         if (plList.indexOf('both') !== -1) { plList.push('cars', 'drivers'); }   // legacy combined value
         document.querySelectorAll('.ad-placement-cb').forEach(function (cb) { cb.checked = plList.indexOf(cb.value) !== -1; });
-        var _allPages = (parseInt(a.page, 10) === 0);
+        var _cfg = {};
+        try { _cfg = a.placement_positions ? (typeof a.placement_positions === 'string' ? JSON.parse(a.placement_positions) : a.placement_positions) : {}; } catch (e) { _cfg = {}; }
+        var _genPos = a.position || 4;
+        function _setPos(id, key) {
+            document.getElementById(id).value = (_cfg[key] != null ? _cfg[key] : _genPos);
+        }
+        _setPos('adPosCars', 'cars');
+        _setPos('adPosDrivers', 'drivers');
+        _setPos('adPosVehicles', 'vehicles');
+        _setPos('adPosBlog', 'blog');
+        _setPos('adPosCheckout', 'checkout');
+        var _vp = (_cfg.vehicles_page != null ? _cfg.vehicles_page : parseInt(a.page, 10));
+        if (isNaN(_vp)) _vp = 1;
+        var _allPages = (_vp === 0);
         var _adPageAllEdit = document.getElementById('adPageAll');
         if (_adPageAllEdit) _adPageAllEdit.checked = _allPages;
-        document.getElementById('adPage').value = _allPages ? '1' : (a.page || '1');
-        document.getElementById('adPage').disabled = _allPages;
-        document.getElementById('adPosition').value = a.position || '4';
+        document.getElementById('adPageVehicles').value = _allPages ? '1' : _vp;
+        document.getElementById('adPageVehicles').disabled = _allPages;
         document.getElementById('adIsActive').checked = !!a.is_active;
         adTrFields(function (key, id) { var el = document.getElementById(id); if (el) el.value = a[key] || ''; });
         var statusEl = document.getElementById('adCoverUploadStatus');

@@ -363,6 +363,13 @@ async function initDB() {
         await pool.query(`ALTER TABLE ad_cards ADD COLUMN IF NOT EXISTS page INTEGER DEFAULT 1`);
     } catch (e) { /* column may already exist or table not yet created */ }
 
+    // Per-placement slot config (existing DBs): a JSON map letting one ad use a
+    // different Position on each page, e.g. {"cars":3,"drivers":2,"vehicles":6,"vehicles_page":1,"blog":1,"checkout":1}.
+    // Falls back to the generic position/page columns when a page has no entry.
+    try {
+        await pool.query(`ALTER TABLE ad_cards ADD COLUMN IF NOT EXISTS placement_positions TEXT`);
+    } catch (e) { /* column may already exist or table not yet created */ }
+
     // Per-language ad card text (existing DBs): RU / KA / HE for title/description/cta
     try {
         var _adBases = ['title', 'description', 'cta_text'];

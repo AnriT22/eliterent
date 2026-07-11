@@ -45,6 +45,33 @@ function sanitizeAd(b, existing) {
             out[k] = b[k] !== undefined ? (b[k] ? String(b[k]).slice(0, limits[base]) : null) : (existing[k] || null);
         });
     });
+
+    // Per-placement slot config: a different Position per page (+ Vehicles page number).
+    // Shape: { cars, drivers, vehicles, blog, checkout, vehicles_page }
+    var PP_KEYS = ['cars', 'drivers', 'vehicles', 'blog', 'checkout'];
+    var ppOut = null;
+    if (b.placement_positions && typeof b.placement_positions === 'object') {
+        ppOut = {};
+        PP_KEYS.forEach(function (k) {
+            var v = parseInt(b.placement_positions[k], 10);
+            if (!isNaN(v)) ppOut[k] = Math.max(1, v);
+        });
+        var vp = parseInt(b.placement_positions.vehicles_page, 10);
+        if (!isNaN(vp)) ppOut.vehicles_page = Math.max(0, vp);   // 0 = every results page
+    } else if (existing.placement_positions) {
+        try { ppOut = JSON.parse(existing.placement_positions); } catch (e) { ppOut = null; }
+    }
+    out.placement_positions = ppOut ? JSON.stringify(ppOut) : (existing.placement_positions || null);
+    // Keep the generic position/page columns as a sensible fallback for any page
+    // that has no per-placement entry (and for the admin list display).
+    if (ppOut) {
+        var firstPos = ppOut.vehicles != null ? ppOut.vehicles
+            : (ppOut.cars != null ? ppOut.cars
+            : (ppOut.drivers != null ? ppOut.drivers
+            : (ppOut.blog != null ? ppOut.blog : ppOut.checkout)));
+        if (firstPos != null) out.position = firstPos;
+        if (ppOut.vehicles_page != null) out.page = ppOut.vehicles_page;
+    }
     return out;
 }
 
@@ -54,7 +81,7 @@ function sanitizeAd(b, existing) {
 router.get('/', async (req, res) => {
     try {
         var placement = ['cars', 'drivers', 'vehicles', 'blog', 'checkout'].indexOf(req.query.placement) !== -1 ? req.query.placement : null;
-        var sql = 'SELECT id, title, description, cover_url, target_link, cta_text, placement, page, position, title_ru, title_ka, title_he, description_ru, description_ka, description_he, cta_text_ru, cta_text_ka, cta_text_he FROM ad_cards WHERE is_active = 1';
+        var sql = 'SELECT id, title, description, cover_url, target_link, cta_text, placement, page, position, placement_positions, title_ru, title_ka, title_he, description_ru, description_ka, description_he, cta_text_ru, cta_text_ka, cta_text_he FROM ad_cards WHERE is_active = 1';
         var params = [];
         if (placement) {
             // placement is a comma-separated list; match if the requested surface is one
@@ -68,6 +95,18 @@ router.get('/', async (req, res) => {
         }
         sql += ' ORDER BY position ASC, id ASC';
         var rows = await queryAll(sql, params);
+        // Resolve the per-placement slot: if this ad has a Position/Page set for the
+        // requested page, use it; otherwise fall back to the generic position/page.
+        rows.forEach(function (ad) {
+            if (ad.placement_positions) {
+                var cfg = {};
+                try { cfg = JSON.parse(ad.placement_positions) || {}; } catch (e) { cfg = {}; }
+                if (placement && cfg[placement] != null) ad.position = cfg[placement];
+                if (placement === 'vehicles' && cfg.vehicles_page != null) ad.page = cfg.vehicles_page;
+            }
+            delete ad.placement_positions;   // internal only — don't leak to the client
+        });
+        rows.sort(function (a, b) { return (a.position - b.position) || (a.id - b.id); });
         res.json({ ads: rows });
     } catch (err) {
         console.error('List ads error:', err);
@@ -95,10 +134,10 @@ router.post('/admin', authenticateToken, requireRole('admin'), async (req, res) 
         if (!a.target_link) return res.status(400).json({ error: 'Target link is required' });
         await execute(
             `INSERT INTO ad_cards (title, description, cover_url, target_link, cta_text, placement, position, is_active,
-               title_ru, title_ka, title_he, description_ru, description_ka, description_he, cta_text_ru, cta_text_ka, cta_text_he, page)
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)`,
+               title_ru, title_ka, title_he, description_ru, description_ka, description_he, cta_text_ru, cta_text_ka, cta_text_he, page, placement_positions)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
             [a.title, a.description, a.cover_url, a.target_link, a.cta_text, a.placement, a.position, a.is_active,
-             a.title_ru, a.title_ka, a.title_he, a.description_ru, a.description_ka, a.description_he, a.cta_text_ru, a.cta_text_ka, a.cta_text_he, a.page]
+             a.title_ru, a.title_ka, a.title_he, a.description_ru, a.description_ka, a.description_he, a.cta_text_ru, a.cta_text_ka, a.cta_text_he, a.page, a.placement_positions]
         );
         var created = await queryOne('SELECT * FROM ad_cards ORDER BY id DESC LIMIT 1', []);
         res.status(201).json({ message: 'Ad card created', ad: created });
@@ -120,10 +159,10 @@ router.put('/admin/:id', authenticateToken, requireRole('admin'), async (req, re
             `UPDATE ad_cards SET title=$1, description=$2, cover_url=$3, target_link=$4, cta_text=$5,
                placement=$6, position=$7, is_active=$8,
                title_ru=$9, title_ka=$10, title_he=$11, description_ru=$12, description_ka=$13, description_he=$14,
-               cta_text_ru=$15, cta_text_ka=$16, cta_text_he=$17, page=$18,
-               updated_at=CURRENT_TIMESTAMP WHERE id=$19`,
+               cta_text_ru=$15, cta_text_ka=$16, cta_text_he=$17, page=$18, placement_positions=$19,
+               updated_at=CURRENT_TIMESTAMP WHERE id=$20`,
             [a.title, a.description, a.cover_url, a.target_link, a.cta_text, a.placement, a.position, a.is_active,
-             a.title_ru, a.title_ka, a.title_he, a.description_ru, a.description_ka, a.description_he, a.cta_text_ru, a.cta_text_ka, a.cta_text_he, a.page, id]
+             a.title_ru, a.title_ka, a.title_he, a.description_ru, a.description_ka, a.description_he, a.cta_text_ru, a.cta_text_ka, a.cta_text_he, a.page, a.placement_positions, id]
         );
         var updated = await queryOne('SELECT * FROM ad_cards WHERE id = $1', [id]);
         res.json({ message: 'Ad card updated', ad: updated });
