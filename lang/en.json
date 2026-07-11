@@ -31,7 +31,7 @@
     "headline": "Rent a Car in Georgia<br>— Tbilisi, Batumi &<br>Kutaisi Airport Pickup",
     "subtext": "Rent from verified local partners. Save up to <span class=\"discount\">40%</span> on selected cars.",
     "verified_partners": "✓ Verified Partners",
-    "free_cancellation": "✓ Free Cancellation",
+    "free_cancellation": "✓ 24/7 Service",
     "pickup_placeholder": "Pick-up Location *",
     "dropoff_placeholder": "Drop-off Location *",
     "date_placeholder": "Pick-up & Drop-off",
@@ -39,7 +39,8 @@
     "advanced_filters": "Advanced Filters",
     "any_city": "All cities",
     "any_category": "All categories",
-    "tagline": "Drive the perfect car for your next adventure with unmatched rates and zero hidden fees."
+    "tagline": "Experience premium driving without the premium price tag.",
+    "rent_now": "Rent It Now"
   },
   "locations": {
     "title": "Explore Georgia's Top Destinations",
@@ -1271,7 +1272,8 @@
     "airport": "Airport Pickup 24/7",
     "whatsapp": "Instant WhatsApp Support",
     "rating": "Verified Local Partners",
-    "cancellation": "Free Cancellation"
+    "cancellation": "Free Cancellation",
+    "service247": "24/7 Service"
   },
   "faq": {
     "title": "Frequently Asked Questions",
