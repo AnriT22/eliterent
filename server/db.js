@@ -622,6 +622,43 @@ async function initDB() {
         )
     `);
 
+    // Trust badges — the admin-managed strip of trust signals (icon + label) shown on
+    // pages. `placement` (comma list, same surfaces as ads) controls which pages each
+    // badge appears on; `position` orders them.
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS trust_badges (
+            id SERIAL PRIMARY KEY,
+            icon TEXT,
+            label TEXT,
+            label_ru TEXT, label_ka TEXT, label_he TEXT,
+            placement TEXT DEFAULT 'cars,drivers,vehicles,blog,checkout',
+            position INTEGER DEFAULT 1,
+            is_active INTEGER DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    // Seed the current 5 badges once, so nothing is lost when the feature goes live.
+    try {
+        var tbCount = await pool.query('SELECT COUNT(*)::int AS n FROM trust_badges');
+        if (tbCount.rows[0].n === 0) {
+            var seed = [
+                ['🛡️', 'Full Insurance Included', 'Страховка включена', 'სრული დაზღვევა ჩართულია', 'ביטוח מלא כלול'],
+                ['✈️', 'Airport Pickup 24/7', 'Аэропорт 24/7', 'აეროპორტიდან აყვანა 24/7', 'איסוף משדה התעופה 24/7'],
+                ['📱', 'Instant WhatsApp Support', 'WhatsApp поддержка', 'მყისიერი WhatsApp მხარდაჭერა', 'תמיכת וואטסאפ מיידית'],
+                ['✅', 'Verified Local Partners', 'Проверенные местные партнёры', 'შემოწმებული ადგილობრივი პარტნიორები', 'שותפים מקומיים מאומתים'],
+                ['🕐', '24/7 Service', 'Сервис 24/7', '24/7 მომსახურება', 'שירות 24/7']
+            ];
+            for (var s = 0; s < seed.length; s++) {
+                await pool.query(
+                    'INSERT INTO trust_badges (icon, label, label_ru, label_ka, label_he, placement, position, is_active) VALUES ($1,$2,$3,$4,$5,$6,$7,1)',
+                    [seed[s][0], seed[s][1], seed[s][2], seed[s][3], seed[s][4], 'cars,drivers,vehicles,blog,checkout', s + 1]
+                );
+            }
+            console.log('Seeded default trust badges');
+        }
+    } catch (e) { console.error('Trust badge seed error:', e.message); }
+
     // Driver reviews — customer ratings for driver profiles.
     await pool.query(`
         CREATE TABLE IF NOT EXISTS driver_reviews (

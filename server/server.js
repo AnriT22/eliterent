@@ -23,6 +23,7 @@ const contactRoutes = require('./routes/contact');
 const otpRoutes = require('./routes/otp');
 const driversRoutes = require('./routes/drivers');
 const adsRoutes = require('./routes/ads');
+const trustRoutes = require('./routes/trust');
 const driverReviewsRoutes = require('./routes/driver-reviews');
 const partnerRoutes = require('./routes/partner');
 const { initSMS } = require('./services/sms');
@@ -457,6 +458,7 @@ app.use('/api/otp', otpLimiter);
 app.use('/api/otp', otpRoutes);
 app.use('/api/drivers', driversRoutes);
 app.use('/api/ads', adsRoutes);
+app.use('/api/trust-badges', trustRoutes);
 app.use('/api/driver-reviews', driverReviewsRoutes);
 app.use('/api/partner', partnerRoutes);
 
