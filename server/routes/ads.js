@@ -28,7 +28,12 @@ function sanitizeAd(b, existing) {
         target_link: b.target_link !== undefined ? String(b.target_link || '').slice(0, 1000) : (existing.target_link || ''),
         cta_text: b.cta_text !== undefined ? (b.cta_text ? String(b.cta_text).slice(0, 60) : null) : (existing.cta_text || null),
         placement: placement,
-        page: b.page !== undefined ? Math.max(1, parseInt(b.page) || 1) : (existing.page || 1),
+        // page = which Vehicles results page the ad sits on. 0 = show on EVERY results page.
+        page: (function () {
+            if (b.page === undefined) return (existing.page != null ? existing.page : 1);
+            var p = parseInt(b.page, 10);
+            return isNaN(p) ? 1 : Math.max(0, p);
+        })(),
         position: b.position !== undefined ? Math.max(1, parseInt(b.position) || 4) : (existing.position || 4),
         is_active: b.is_active !== undefined ? (b.is_active ? 1 : 0) : (existing.is_active !== undefined ? existing.is_active : 1)
     };

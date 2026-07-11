@@ -262,7 +262,7 @@ body {
 /* Partner Button */
 .partner-btn {
     padding: 8px 24px;
-    background: #D4AF37;
+    background: #00FF7F;
     border: none;
     color: #0B0C10;
     border-radius: var(--radius-sm);
@@ -279,8 +279,8 @@ body {
 }
 
 .partner-btn:hover {
-    background: #FFD970;
-    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+    background: #00E673;
+    box-shadow: 0 6px 20px rgba(0, 255, 127, 0.4);
     transform: translateY(-2px);
 }
 
@@ -538,7 +538,7 @@ body {
 
 .search-btn {
     padding: 12px 32px;
-    background: #D4AF37;
+    background: #00FF7F;
     color: #0B0C10;
     border: none;
     border-radius: var(--radius-sm);
@@ -551,8 +551,8 @@ body {
 }
 
 .search-btn:hover {
-    background: #FFD970;
-    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+    background: #00E673;
+    box-shadow: 0 6px 20px rgba(0, 255, 127, 0.4);
     transform: translateY(-2px);
 }
 
@@ -714,14 +714,14 @@ body {
     padding: 10px 24px;
     border: none;
     border-radius: 8px;
-    background: #D4AF37;
+    background: #00FF7F;
     color: #0B0C10;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
 }
-.btn-apply-filters:hover { background: #FFD970; }
+.btn-apply-filters:hover { background: #00E673; }
 
 /* ========================================
    CALENDAR PICKER MODAL
@@ -984,7 +984,7 @@ body {
 
 .btn-apply {
     padding: 10px 24px;
-    background: #D4AF37;
+    background: #00FF7F;
     color: #0B0C10;
     border: none;
     border-radius: var(--radius-sm);
@@ -996,8 +996,8 @@ body {
 }
 
 .btn-apply:hover {
-    background: var(--gold-hover);
-    box-shadow: 0 6px 20px rgba(201, 168, 76, 0.4);
+    background: #00E673;
+    box-shadow: 0 6px 20px rgba(0, 255, 127, 0.4);
     transform: translateY(-2px);
 }
 
@@ -1182,7 +1182,7 @@ body {
 
 .btn-apply-filters {
     padding: 10px 24px;
-    background: #D4AF37;
+    background: #00FF7F;
     color: #0B0C10;
     border: none;
     border-radius: var(--radius-sm);
@@ -1194,8 +1194,8 @@ body {
 }
 
 .btn-apply-filters:hover {
-    background: var(--gold-hover);
-    box-shadow: 0 6px 20px rgba(201, 168, 76, 0.4);
+    background: #00E673;
+    box-shadow: 0 6px 20px rgba(0, 255, 127, 0.4);
     transform: translateY(-2px);
 }
 
@@ -1280,7 +1280,7 @@ body {
 }
 
 .btn-primary {
-    background: #D4AF37;
+    background: #00FF7F;
     color: #0B0C10;
     box-shadow: var(--shadow-md);
 }
@@ -1631,7 +1631,7 @@ body {
 .fleet-card-btn {
     width: 100%;
     padding: 11px;
-    background: #D4AF37;
+    background: #00FF7F;
     color: #0B0C10;
     border: none;
     border-radius: var(--radius-sm);
@@ -1643,8 +1643,8 @@ body {
 }
 
 .fleet-card-btn:hover {
-    background: #FFD970;
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+    background: #00E673;
+    box-shadow: 0 4px 12px rgba(0, 255, 127, 0.3);
 }
 
 .carousel-footer {
@@ -1928,7 +1928,7 @@ body {
     align-items: center;
     gap: 8px;
     padding: 12px 28px;
-    background: #D4AF37;
+    background: #00FF7F;
     color: #0B0C10;
     border: none;
     border-radius: 30px;
@@ -1938,7 +1938,7 @@ body {
     transition: var(--transition);
 }
 .browse-more-btn:hover {
-    background: #c9a227;
+    background: #00E673;
     transform: translateY(-2px);
 }
 
@@ -2275,7 +2275,7 @@ body {
 }
 
 .partner-cta-card .btn {
-    background: #D4AF37;
+    background: #00FF7F;
     color: #0B0C10;
 }
 
@@ -3061,7 +3061,7 @@ body {
 
 .btn-book {
     padding: 8px 20px;
-    background: #D4AF37;
+    background: #00FF7F;
     color: #0B0C10;
     border: none;
     border-radius: var(--radius-sm);
@@ -3071,7 +3071,7 @@ body {
 }
 
 .btn-book:hover {
-    background: var(--terracotta);
+    background: #00E673;
 }
 
 /* ========================================
@@ -3841,7 +3841,7 @@ body {
     width: 100%;
     text-align: center;
     padding: 12px;
-    background: #D4AF37;
+    background: #00FF7F;
     color: #0B0C10;
     border-radius: 10px;
     text-decoration: none;
@@ -3850,7 +3850,7 @@ body {
     transition: background 0.2s;
     box-sizing: border-box;
 }
-.mobile-nav-footer .partner-btn:hover { background: #FFD970; }
+.mobile-nav-footer .partner-btn:hover { background: #00E673; }
 
 @media (max-width: 768px) {
     .hamburger-btn { display: flex; }
@@ -3981,7 +3981,7 @@ body {
 .rv-submit-btn {
     width: 100%;
     padding: 13px;
-    background: #D4AF37;
+    background: #00FF7F;
     color: #0B0C10;
     border: none;
     border-radius: 10px;
@@ -3991,7 +3991,7 @@ body {
     transition: background 0.2s;
     box-sizing: border-box;
 }
-.rv-submit-btn:hover { background: #FFD970; }
+.rv-submit-btn:hover { background: #00E673; }
 .rv-submit-btn:disabled { background: #8B7A3A; cursor: not-allowed; }
 
 /* ========================================
@@ -4171,11 +4171,11 @@ body {
     transition: all 0.2s ease;
 }
 .mobile-cta-book {
-    background: linear-gradient(135deg, #D4AF37, #B8963F);
+    background: linear-gradient(135deg, #00FF7F, #00CC6A);
     color: #0B0C10;
 }
 .mobile-cta-book:hover {
-    background: linear-gradient(135deg, #FFD970, #D4AF37);
+    background: linear-gradient(135deg, #00E673, #00FF7F);
     transform: translateY(-1px);
 }
 .mobile-cta-whatsapp {

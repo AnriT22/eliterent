@@ -63,21 +63,15 @@
         });
     }
 
-    // Navbar blur on scroll
-    var header = document.querySelector('.header.sticky-header');
+    // Navbar: toggle a .scrolled class so the CSS owns the compact-glass look
+    var header = document.querySelector('.header');
     if (header) {
-        var lastScroll = 0;
-        window.addEventListener('scroll', function () {
+        var applyScrollState = function () {
             var scrollY = window.pageYOffset || document.documentElement.scrollTop;
-            if (scrollY > 50) {
-                header.style.background = 'rgba(15, 23, 42, 0.98)';
-                header.style.boxShadow = '0 4px 30px rgba(0,0,0,0.15)';
-            } else {
-                header.style.background = 'rgba(15, 23, 42, 0.95)';
-                header.style.boxShadow = '';
-            }
-            lastScroll = scrollY;
-        }, { passive: true });
+            header.classList.toggle('scrolled', scrollY > 24);
+        };
+        applyScrollState();
+        window.addEventListener('scroll', applyScrollState, { passive: true });
     }
 
     // Smooth button hover micro-interactions

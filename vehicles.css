@@ -21,6 +21,11 @@
     max-width: 100%;
 }
 
+/* Header now holds only a screen-reader/SEO H1 — collapse its vertical space */
+.vp-page-header--minimal {
+    padding: 4px 24px 0;
+}
+
 .vp-page-header h1 {
     font-size: 32px;
     font-weight: 800;
