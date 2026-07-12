@@ -429,30 +429,36 @@ html[lang="ru"] .hero-tagline { font-size: 21px; }
     html[lang="ka"] .hero-tagline { font-size: 16.5px; }
 }
 
-/* Trust bar — staggered entrance + gold hover micro-interactions */
+/* Trust bar — continuous right-to-left marquee (ticker) on every screen size.
+   Single scrolling line means long languages (Georgian) never wrap. trust-bar.js
+   duplicates the badge set so the loop is seamless (animation runs to -50%). */
+.trust-bar { overflow: hidden; }
+.trust-bar > .container { max-width: 100%; padding: 0; }
+.trust-bar-items {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    width: max-content;
+    gap: 0;
+    animation: trustMarquee 34s linear infinite;
+}
+.trust-bar-items:hover { animation-play-state: paused; }
 .trust-item {
-    opacity: 0;
-    animation: trustFadeUp 0.6s var(--ease-out) forwards;
+    opacity: 1;
+    margin: 0 26px;
+    flex: 0 0 auto;
     transition: color 0.3s var(--ease);
 }
-.trust-item:nth-child(1) { animation-delay: 0.08s; }
-.trust-item:nth-child(2) { animation-delay: 0.18s; }
-.trust-item:nth-child(3) { animation-delay: 0.28s; }
-.trust-item:nth-child(4) { animation-delay: 0.38s; }
-.trust-item:nth-child(5) { animation-delay: 0.48s; }
-@keyframes trustFadeUp {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: translateY(0); }
+@keyframes trustMarquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
 }
 .trust-item:hover { color: #E9C766; }
 .trust-icon { display: inline-block; transition: transform 0.4s var(--ease-bounce), filter 0.3s var(--ease); }
-.trust-item:hover .trust-icon { transform: scale(1.25) rotate(-6deg); filter: drop-shadow(0 0 8px rgba(212,175,55,0.45)); }
-@media (max-width: 768px) {
-    /* Mobile already runs the horizontal marquee — skip the fade-up there. */
-    .trust-item { opacity: 1; animation: none; }
-}
+.trust-item:hover .trust-icon { transform: scale(1.2) rotate(-6deg); filter: drop-shadow(0 0 8px rgba(212,175,55,0.45)); }
 @media (prefers-reduced-motion: reduce) {
-    .trust-item { opacity: 1; animation: none; }
+    /* No motion: fall back to a centered, wrapping row. */
+    .trust-bar-items { animation: none; flex-wrap: wrap; justify-content: center; width: auto; gap: 10px 26px; }
     .trust-icon { transition: none; }
 }
 
