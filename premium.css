@@ -453,9 +453,22 @@ html[lang="ru"] .hero-tagline { font-size: 21px; }
     from { transform: translateX(0); }
     to   { transform: translateX(-50%); }
 }
+.trust-item { text-decoration: none; }
 .trust-item:hover { color: #E9C766; }
+.trust-item--link { cursor: pointer; color: inherit; }
 .trust-icon { display: inline-block; transition: transform 0.4s var(--ease-bounce), filter 0.3s var(--ease); }
 .trust-item:hover .trust-icon { transform: scale(1.2) rotate(-6deg); filter: drop-shadow(0 0 8px rgba(212,175,55,0.45)); }
+/* Advertiser logo inside the ticker */
+.trust-logo {
+    height: 26px;
+    max-width: 130px;
+    width: auto;
+    object-fit: contain;
+    display: inline-block;
+    vertical-align: middle;
+    transition: transform 0.4s var(--ease-bounce);
+}
+.trust-item:hover .trust-logo { transform: scale(1.06); }
 @media (prefers-reduced-motion: reduce) {
     /* No motion: fall back to a centered, wrapping row. */
     .trust-bar-items { animation: none; flex-wrap: wrap; justify-content: center; width: auto; gap: 10px 26px; }

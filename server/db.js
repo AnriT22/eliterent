@@ -629,6 +629,8 @@ async function initDB() {
         CREATE TABLE IF NOT EXISTS trust_badges (
             id SERIAL PRIMARY KEY,
             icon TEXT,
+            image_url TEXT,
+            link_url TEXT,
             label TEXT,
             label_ru TEXT, label_ka TEXT, label_he TEXT,
             placement TEXT DEFAULT 'cars,drivers,vehicles,blog,checkout',
@@ -638,6 +640,12 @@ async function initDB() {
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
+    // Existing DBs: a badge can now carry an uploaded logo image and a click-through
+    // link, so the trust bar can double as an advertisement ticker.
+    try {
+        await pool.query('ALTER TABLE trust_badges ADD COLUMN IF NOT EXISTS image_url TEXT');
+        await pool.query('ALTER TABLE trust_badges ADD COLUMN IF NOT EXISTS link_url TEXT');
+    } catch (e) { /* column may already exist or table not yet created */ }
     // Seed the current 5 badges once, so nothing is lost when the feature goes live.
     try {
         var tbCount = await pool.query('SELECT COUNT(*)::int AS n FROM trust_badges');

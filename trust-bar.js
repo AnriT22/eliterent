@@ -14,8 +14,18 @@
         return (window.I18n && I18n.lang && I18n.lang()) || localStorage.getItem('EliteAuto_lang') || 'en';
     }
     function itemHtml(b, lang) {
-        var icon = b.icon ? '<span class="trust-icon">' + esc(b.icon) + '</span> ' : '';
-        return '<div class="trust-item">' + icon + '<span>' + esc(loc(b, lang)) + '</span></div>';
+        // A logo image takes the place of the emoji icon when present.
+        var visual = b.image_url
+            ? '<img class="trust-logo" src="' + esc(b.image_url) + '" alt="' + esc(loc(b, lang)) + '" loading="lazy"> '
+            : (b.icon ? '<span class="trust-icon">' + esc(b.icon) + '</span> ' : '');
+        var label = loc(b, lang);
+        var text = label ? '<span>' + esc(label) + '</span>' : '';
+        var inner = visual + text;
+        // Clickable when a link is set (advertisement); otherwise a plain item.
+        if (b.link_url) {
+            return '<a class="trust-item trust-item--link" href="' + esc(b.link_url) + '" target="_blank" rel="noopener">' + inner + '</a>';
+        }
+        return '<div class="trust-item">' + inner + '</div>';
     }
     // Wrap a set of items so it repeats seamlessly. display:contents keeps each
     // .trust-item a direct flex child of the container.

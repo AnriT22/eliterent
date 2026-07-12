@@ -9,7 +9,7 @@
     <title>Admin Panel — EliteAuto.rent</title>
     <link rel="icon" type="image/png" href="/images/Lettermark.png">
     <link rel="stylesheet" href="style.css?v=12">
-    <link rel="stylesheet" href="premium.css?v=22">
+    <link rel="stylesheet" href="premium.css?v=23">
     <link rel="stylesheet" href="admin.css?v=5">
     <script src="api-helper.js?v=2"></script>
     <script src="i18n.js?v=6"></script>
@@ -605,8 +605,20 @@
                     <div style="display:flex;flex-direction:column;gap:12px;">
                         <div style="display:flex;gap:12px;">
                             <div style="width:110px;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Icon <span style="color:#6b7280;">(emoji)</span></label><input type="text" id="trustIcon" class="db-input" placeholder="🛡️" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;text-align:center;font-size:18px;"></div>
-                            <div style="flex:1;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Label (English) *</label><input type="text" id="trustLabel" class="db-input" placeholder="Full Insurance Included" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
+                            <div style="flex:1;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Label (English) <span style="color:#6b7280;">(text — optional if you upload a logo)</span></label><input type="text" id="trustLabel" class="db-input" placeholder="Full Insurance Included" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
                         </div>
+                        <div>
+                            <label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Logo image <span style="color:#6b7280;">(optional — use instead of / with an emoji, e.g. an advertiser logo)</span></label>
+                            <input type="file" id="trustLogoFile" accept="image/*" style="display:none;">
+                            <input type="hidden" id="trustLogoUrl">
+                            <div id="trustLogoPreviewWrap" style="display:none;margin-bottom:8px;">
+                                <img id="trustLogoPreview" src="" style="height:44px;max-width:180px;object-fit:contain;border-radius:6px;background:#0B0C10;padding:4px 8px;border:1px solid #3A3F4B;" loading="lazy">
+                                <button type="button" id="trustLogoRemoveBtn" style="margin-left:8px;padding:6px 10px;border:1px solid #3A3F4B;border-radius:6px;background:#262A35;color:#ef4444;cursor:pointer;font-size:12px;">Remove</button>
+                            </div>
+                            <button type="button" id="trustLogoUploadBtn" style="padding:10px 14px;border:1px dashed #3A3F4B;border-radius:8px;background:#262A35;color:#A0A3B0;cursor:pointer;width:100%;box-sizing:border-box;font-size:13px;">+ Upload Logo Image</button>
+                            <div id="trustLogoStatus" style="font-size:12px;color:#A0A3B0;margin-top:4px;"></div>
+                        </div>
+                        <div><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Link <span style="color:#6b7280;">(optional — where it goes when clicked)</span></label><input type="text" id="trustLink" class="db-input" placeholder="https://…" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
                         <details style="border:1px solid #3A3F4B;border-radius:8px;padding:10px 12px;background:#222530;">
                             <summary style="cursor:pointer;font-size:13px;color:#D4AF37;font-weight:600;">&#127760; Translations (optional)</summary>
                             <p style="font-size:11px;color:#A0A3B0;margin:8px 0 12px;">Leave blank to fall back to the English label.</p>
@@ -720,7 +732,7 @@
         }
     })();
     </script>
-    <script src="admin.js?v=15"></script>
+    <script src="admin.js?v=16"></script>
 <script src="premium-animations.js?v=3"></script>
 </body>
 </html>
