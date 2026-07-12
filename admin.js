@@ -1989,10 +1989,14 @@ function escHtml(s) {
         if (!tbody) return;
         if (_adminTrust.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#A0A3B0;padding:40px;">No badges yet</td></tr>'; return; }
         tbody.innerHTML = _adminTrust.map(function (b) {
+            var iconCell = b.image_url
+                ? '<img src="' + esc(b.image_url) + '" style="height:26px;max-width:80px;object-fit:contain;vertical-align:middle;">'
+                : '<span style="font-size:18px;">' + esc(b.icon || '') + '</span>';
+            var labelCell = esc(b.label || '') + (b.link_url ? ' <span style="color:#D4AF37;font-size:11px;">🔗</span>' : '');
             return '<tr>'
                 + '<td>' + (b.position || 1) + '</td>'
-                + '<td style="font-size:18px;">' + esc(b.icon || '') + '</td>'
-                + '<td>' + esc(b.label || '') + '</td>'
+                + '<td>' + iconCell + '</td>'
+                + '<td>' + labelCell + '</td>'
                 + '<td style="font-size:11px;color:#A0A3B0;">' + esc(b.placement || '') + '</td>'
                 + '<td>' + (b.is_active ? '<span style="color:#22c55e;font-size:12px;">Yes</span>' : '<span style="color:#ef4444;font-size:12px;">No</span>') + '</td>'
                 + '<td style="white-space:nowrap;">'
@@ -2010,9 +2014,41 @@ function escHtml(s) {
         document.getElementById('trustLabel_ru').value = '';
         document.getElementById('trustLabel_ka').value = '';
         document.getElementById('trustLabel_he').value = '';
+        document.getElementById('trustLogoUrl').value = '';
+        document.getElementById('trustLink').value = '';
+        document.getElementById('trustLogoPreviewWrap').style.display = 'none';
+        document.getElementById('trustLogoStatus').textContent = '';
         document.querySelectorAll('.trust-placement-cb').forEach(function (cb) { cb.checked = true; });
         document.getElementById('trustPosition').value = '1';
         document.getElementById('trustIsActive').checked = true;
+    }
+    // Trust logo upload (reuses the generic ad-cover image endpoint)
+    var trustLogoFile = document.getElementById('trustLogoFile');
+    if (trustLogoFile) {
+        function setTrustLogo(url) {
+            document.getElementById('trustLogoUrl').value = url || '';
+            var wrap = document.getElementById('trustLogoPreviewWrap');
+            if (url) { document.getElementById('trustLogoPreview').src = url; wrap.style.display = ''; }
+            else { wrap.style.display = 'none'; }
+        }
+        document.getElementById('trustLogoUploadBtn').addEventListener('click', function () { trustLogoFile.click(); });
+        document.getElementById('trustLogoRemoveBtn').addEventListener('click', function () { setTrustLogo(''); document.getElementById('trustLogoStatus').textContent = ''; });
+        trustLogoFile.addEventListener('change', function () {
+            var file = trustLogoFile.files[0];
+            if (!file) return;
+            var statusEl = document.getElementById('trustLogoStatus');
+            statusEl.textContent = 'Uploading...';
+            var fd = new FormData();
+            fd.append('image', file);
+            fetch('/api/upload/ad-cover', { method: 'POST', headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '') }, body: fd })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.url) { setTrustLogo(data.url); statusEl.textContent = 'Uploaded!'; }
+                    else { statusEl.textContent = data.error || 'Upload failed'; }
+                })
+                .catch(function () { statusEl.textContent = 'Upload failed. Try again.'; });
+            trustLogoFile.value = '';
+        });
     }
     if (document.getElementById('addTrustBtn')) {
         document.getElementById('addTrustBtn').addEventListener('click', function () { resetTrustForm(); trustFormWrap.style.display = 'block'; });
@@ -2020,7 +2056,9 @@ function escHtml(s) {
         document.getElementById('saveTrustBtn').addEventListener('click', function () {
             var payload = {
                 icon: document.getElementById('trustIcon').value || null,
-                label: document.getElementById('trustLabel').value,
+                image_url: document.getElementById('trustLogoUrl').value || null,
+                link_url: document.getElementById('trustLink').value || null,
+                label: document.getElementById('trustLabel').value || null,
                 label_ru: document.getElementById('trustLabel_ru').value || null,
                 label_ka: document.getElementById('trustLabel_ka').value || null,
                 label_he: document.getElementById('trustLabel_he').value || null,
@@ -2028,7 +2066,7 @@ function escHtml(s) {
                 position: parseInt(document.getElementById('trustPosition').value, 10) || 1,
                 is_active: document.getElementById('trustIsActive').checked
             };
-            if (!payload.label) { alert('Label is required'); return; }
+            if (!payload.label && !payload.image_url) { alert('Add a label or a logo image'); return; }
             if (!payload.placements.length) { alert('Pick at least one page'); return; }
             var editId = document.getElementById('trustEditId').value;
             var url = editId ? '/api/trust-badges/admin/' + editId : '/api/trust-badges/admin';
@@ -2048,6 +2086,12 @@ function escHtml(s) {
         document.getElementById('trustLabel_ru').value = b.label_ru || '';
         document.getElementById('trustLabel_ka').value = b.label_ka || '';
         document.getElementById('trustLabel_he').value = b.label_he || '';
+        document.getElementById('trustLink').value = b.link_url || '';
+        document.getElementById('trustLogoUrl').value = b.image_url || '';
+        var _tlWrap = document.getElementById('trustLogoPreviewWrap');
+        if (b.image_url) { document.getElementById('trustLogoPreview').src = b.image_url; _tlWrap.style.display = ''; }
+        else { _tlWrap.style.display = 'none'; }
+        document.getElementById('trustLogoStatus').textContent = '';
         var pl = String(b.placement || '').split(',').map(function (s) { return s.trim(); });
         document.querySelectorAll('.trust-placement-cb').forEach(function (cb) { cb.checked = pl.indexOf(cb.value) !== -1; });
         document.getElementById('trustPosition').value = b.position || 1;

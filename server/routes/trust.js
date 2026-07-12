@@ -21,6 +21,8 @@ function sanitizeBadge(b, existing) {
     }
     var out = {
         icon: b.icon !== undefined ? (b.icon ? String(b.icon).slice(0, 16) : null) : (existing.icon || null),
+        image_url: b.image_url !== undefined ? (b.image_url ? String(b.image_url).slice(0, 500) : null) : (existing.image_url || null),
+        link_url: b.link_url !== undefined ? (b.link_url ? String(b.link_url).slice(0, 1000) : null) : (existing.link_url || null),
         label: b.label !== undefined ? (b.label ? String(b.label).slice(0, 120) : null) : (existing.label || null),
         placement: placement,
         position: b.position !== undefined ? Math.max(1, parseInt(b.position, 10) || 1) : (existing.position || 1),
@@ -38,7 +40,7 @@ function sanitizeBadge(b, existing) {
 router.get('/', async (req, res) => {
     try {
         var placement = VALID_PLACEMENTS.indexOf(req.query.placement) !== -1 ? req.query.placement : null;
-        var sql = 'SELECT id, icon, label, label_ru, label_ka, label_he, placement, position FROM trust_badges WHERE is_active = 1';
+        var sql = 'SELECT id, icon, image_url, link_url, label, label_ru, label_ka, label_he, placement, position FROM trust_badges WHERE is_active = 1';
         var params = [];
         if (placement) {
             sql += " AND (',' || COALESCE(placement,'') || ',') LIKE $1";
@@ -67,11 +69,11 @@ router.get('/admin/all', authenticateToken, requireRole('admin'), async (req, re
 router.post('/admin', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         var a = sanitizeBadge(req.body, {});
-        if (!a.label) return res.status(400).json({ error: 'Label is required' });
+        if (!a.label && !a.image_url) return res.status(400).json({ error: 'Add a label or a logo image' });
         await execute(
-            `INSERT INTO trust_badges (icon, label, label_ru, label_ka, label_he, placement, position, is_active)
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-            [a.icon, a.label, a.label_ru, a.label_ka, a.label_he, a.placement, a.position, a.is_active]
+            `INSERT INTO trust_badges (icon, image_url, link_url, label, label_ru, label_ka, label_he, placement, position, is_active)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+            [a.icon, a.image_url, a.link_url, a.label, a.label_ru, a.label_ka, a.label_he, a.placement, a.position, a.is_active]
         );
         var created = await queryOne('SELECT * FROM trust_badges ORDER BY id DESC LIMIT 1', []);
         res.status(201).json({ message: 'Trust badge created', badge: created });
@@ -87,11 +89,11 @@ router.put('/admin/:id', authenticateToken, requireRole('admin'), async (req, re
         var existing = await queryOne('SELECT * FROM trust_badges WHERE id = $1', [id]);
         if (!existing) return res.status(404).json({ error: 'Trust badge not found' });
         var a = sanitizeBadge(req.body, existing);
-        if (!a.label) return res.status(400).json({ error: 'Label is required' });
+        if (!a.label && !a.image_url) return res.status(400).json({ error: 'Add a label or a logo image' });
         await execute(
-            `UPDATE trust_badges SET icon=$1, label=$2, label_ru=$3, label_ka=$4, label_he=$5,
-               placement=$6, position=$7, is_active=$8, updated_at=CURRENT_TIMESTAMP WHERE id=$9`,
-            [a.icon, a.label, a.label_ru, a.label_ka, a.label_he, a.placement, a.position, a.is_active, id]
+            `UPDATE trust_badges SET icon=$1, image_url=$2, link_url=$3, label=$4, label_ru=$5, label_ka=$6, label_he=$7,
+               placement=$8, position=$9, is_active=$10, updated_at=CURRENT_TIMESTAMP WHERE id=$11`,
+            [a.icon, a.image_url, a.link_url, a.label, a.label_ru, a.label_ka, a.label_he, a.placement, a.position, a.is_active, id]
         );
         var updated = await queryOne('SELECT * FROM trust_badges WHERE id = $1', [id]);
         res.json({ message: 'Trust badge updated', badge: updated });
