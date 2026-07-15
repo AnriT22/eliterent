@@ -630,7 +630,9 @@
     "or": "ან",
     "google_signup": "Google-ით რეგისტრაცია",
     "has_account": "უკვე გაქვს ანგარიში? <a href=\"login.html\" class=\"auth-link\">შედი აქ</a>",
-    "want_guest": "გსურთ ავტომობილის გაქირავება? <a href=\"register.html\" class=\"auth-link\">სტუმრად რეგისტრაცია</a>"
+    "want_guest": "გსურთ ავტომობილის გაქირავება? <a href=\"register.html\" class=\"auth-link\">სტუმრად რეგისტრაცია</a>",
+    "step_finish": "დასრულება",
+    "step_verify": "დადასტურება"
   },
   "guest_profile": {
     "title": "ჩემი პროფილი",

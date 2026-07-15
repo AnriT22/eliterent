@@ -95,12 +95,12 @@
                     <div class="progress-line"></div>
                     <div class="progress-step" data-step="3">
                         <span class="progress-number">3</span>
-                        <span class="progress-label" data-i18n="partner_register.step_referral">Referral</span>
+                        <span class="progress-label" data-i18n="partner_register.step_verify">Verify</span>
                     </div>
                     <div class="progress-line"></div>
                     <div class="progress-step" data-step="4">
                         <span class="progress-number">4</span>
-                        <span class="progress-label" data-i18n="partner_register.step_verify">Verify</span>
+                        <span class="progress-label" data-i18n="partner_register.step_finish">Finish</span>
                     </div>
                 </div>
 
@@ -286,9 +286,6 @@
                         <span class="ces-badge" id="choiceEmailBadge">Checking…</span>
                     </div>
 
-                    <div class="choice-step-back" style="text-align:center;margin-bottom:16px;">
-                        <button type="button" class="btn btn-secondary" id="choiceBackToReferralBtn" style="min-width:200px;">← Back to Referral Step</button>
-                    </div>
                     <div class="choice-cards">
                         <!-- Pay $49.99 Card -->
                         <div class="choice-card choice-card-primary" id="choicePayCard">
@@ -306,20 +303,20 @@
                             <button type="button" class="btn btn-primary btn-full" id="choicePayBtn">Pay &amp; Verify Now</button>
                         </div>
 
-                        <!-- Invite Code Card -->
+                        <!-- Referral Code Card (also accepts admin invite codes) -->
                         <div class="choice-card choice-card-secondary" id="choiceInviteCard">
                             <div class="choice-card-header">
                                 <div class="choice-card-icon">🎁</div>
-                                <h3>Free with Invite Code</h3>
+                                <h3>Free with Referral Code</h3>
                             </div>
                             <div class="choice-card-price">$0</div>
-                            <p class="choice-card-desc">Have an invite code from our team? Enter it below for free registration. Admin approval required before listing.</p>
+                            <p class="choice-card-desc">Invited by a partner? Enter their referral code for free registration — admin approval required before listing. It also links your account to whoever referred you.</p>
                             <div class="choice-code-wrap">
-                                <input type="text" id="pChoiceInviteCode" class="form-input" placeholder="ELITE2024" autocomplete="off" maxlength="30" style="text-transform:uppercase;letter-spacing:2px;text-align:center;">
+                                <input type="text" id="pChoiceInviteCode" class="form-input" placeholder="e.g. ELITE777" autocomplete="off" maxlength="30" style="text-transform:uppercase;letter-spacing:2px;text-align:center;">
                             </div>
-                            <button type="button" class="btn btn-secondary btn-full" id="choiceApplyBtn">Apply Code</button>
+                            <button type="button" class="btn btn-secondary btn-full" id="choiceApplyBtn">Apply Code &amp; Register Free</button>
                             <div id="choiceInviteError" class="form-error" style="text-align:center;margin-top:8px;display:none;"></div>
-                            <p class="choice-card-note">No code? Contact us at <a href="mailto:elite.rental25@gmail.com">elite.rental25@gmail.com</a></p>
+                            <p class="choice-card-note">No code? Use the paid option, or contact <a href="mailto:elite.rental25@gmail.com">elite.rental25@gmail.com</a></p>
                         </div>
                     </div>
                 </div>

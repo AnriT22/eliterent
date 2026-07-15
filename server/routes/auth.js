@@ -848,19 +848,24 @@ router.post("/register/partner/apply-invite", authenticateToken, async (req, res
       "SELECT * FROM partner_invite_codes WHERE UPPER(code) = $1",
       [code],
     );
-    // If not found in invite codes, check partner referral codes
+    // If not found among admin invite codes, treat a partner REFERRAL code as a
+    // valid free-signup code and remember the referrer so we can credit them.
+    var referrerUserId = null;
     if (!inviteRow) {
       const referralProfile = await queryOne(
         "SELECT user_id FROM partner_profiles WHERE UPPER(referral_code) = $1",
         [code],
       );
       if (referralProfile) {
-        // Treat referral code as a valid invite code
         inviteRow = { is_active: true, id: null, code: code };
+        referrerUserId = referralProfile.user_id;
       }
     }
     if (!inviteRow || !inviteRow.is_active) {
-      return res.status(400).json({ error: "Invalid or inactive invite code" });
+      return res.status(400).json({ error: "Invalid code. Enter a valid referral or invite code, or choose the paid option." });
+    }
+    if (referrerUserId && referrerUserId === req.user.id) {
+      return res.status(400).json({ error: "You cannot use your own referral code." });
     }
     if (
       inviteRow.max_uses &&
@@ -881,10 +886,26 @@ router.post("/register/partner/apply-invite", authenticateToken, async (req, res
       return res.status(409).json({ error: "You have already applied an invite code" });
     }
 
-    await execute(
-      "UPDATE partner_profiles SET signup_method = $1, invite_code_used = $2 WHERE user_id = $3",
-      ["invite", code, req.user.id],
-    );
+    // Also credit the referrer when a referral code was used — unless the partner
+    // is already linked to a real (non-founder) referrer.
+    var linkReferrer = false;
+    if (referrerUserId) {
+      var founderId = await getOrCreateFounder();
+      if (!profile.referred_by_user_id || profile.referred_by_user_id === founderId) {
+        linkReferrer = true;
+      }
+    }
+    if (linkReferrer) {
+      await execute(
+        "UPDATE partner_profiles SET signup_method = 'invite', invite_code_used = $1, referred_by_user_id = $2 WHERE user_id = $3",
+        [code, referrerUserId, req.user.id],
+      );
+    } else {
+      await execute(
+        "UPDATE partner_profiles SET signup_method = 'invite', invite_code_used = $1 WHERE user_id = $2",
+        [code, req.user.id],
+      );
+    }
     if (inviteRow && inviteRow.id) {
       await execute(
         "UPDATE partner_invite_codes SET used_count = used_count + 1 WHERE id = $1",
@@ -892,7 +913,7 @@ router.post("/register/partner/apply-invite", authenticateToken, async (req, res
       );
     }
 
-    res.json({ message: "Invite code applied successfully", pending_approval: true });
+    res.json({ message: "Code applied successfully", pending_approval: true, referrer_linked: linkReferrer });
   } catch (err) {
     console.error("Apply invite code error:", err);
     res.status(500).json({ error: "Failed to apply invite code" });

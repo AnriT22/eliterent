@@ -21,13 +21,10 @@
         var storedUser = null;
         try { storedUser = JSON.parse(localStorage.getItem('user')); } catch (e) {}
         var googleData = { user: storedUser || {} };
-        if (isGoogleReferral) {
-            googleData.needsReferralSelection = true;
-            googleData.needsPathSelection = true;
-            enterReferralStep(googleData);
-        } else if (isGooglePayment) {
+        if (isGooglePayment) {
             enterPaymentStep();
         } else {
+            // Referral + choice are now one combined step.
             enterChoiceStep(googleData);
         }
     }
@@ -237,24 +234,13 @@
                 localStorage.setItem('isLoggedIn', 'true');
             }
 
-            // New flow: show referral step first, then choice step (Pay $49.99 vs Invite Code)
-            if (data.needsReferralSelection) {
-                enterReferralStep(data);
-                return;
-            }
-            if (data.needsPathSelection) {
-                enterChoiceStep(data);
-                return;
-            }
-
-            // Legacy invite code path (if invite_code was sent directly)
+            // Merged flow: verify phone first, then the single combined step
+            // (Pay $49.99  OR  enter a referral code for free — see ?step=choice).
             if (data.pending_approval) {
                 showPendingApproval();
                 setTimeout(function () { window.location.href = 'verify-phone.html?v=2'; }, 4000);
                 return;
             }
-
-            // Fallback: redirect to verify-phone
             window.location.href = 'verify-phone.html?v=2';
 
         } catch (err) {
@@ -413,7 +399,7 @@
         var btn = document.getElementById('choiceApplyBtn');
 
         if (!code) {
-            errorEl.textContent = 'Please enter an invite code';
+            errorEl.textContent = 'Please enter a referral code';
             errorEl.style.display = 'block';
             return;
         }
@@ -434,7 +420,7 @@
             var data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.error || 'Invalid invite code');
+                throw new Error(data.error || 'Invalid referral code');
             }
 
             // Success — hide choice, show pending approval, then go to dashboard

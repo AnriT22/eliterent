@@ -633,7 +633,9 @@
     "or": "or",
     "google_signup": "Sign up with Google",
     "has_account": "Already have an account? <a href=\"login.html\" class=\"auth-link\">Sign in here</a>",
-    "want_guest": "Want to rent a car instead? <a href=\"register.html\" class=\"auth-link\">Register as Guest</a>"
+    "want_guest": "Want to rent a car instead? <a href=\"register.html\" class=\"auth-link\">Register as Guest</a>",
+    "step_finish": "Finish",
+    "step_verify": "Verify"
   },
   "guest_profile": {
     "title": "My Profile",
