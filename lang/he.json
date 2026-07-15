@@ -889,5 +889,9 @@
     "call": "התקשרו",
     "unit_day": "יום",
     "unit_hour": "שעה"
+  },
+  "partner_register": {
+    "step_finish": "סיום",
+    "step_verify": "אימות"
   }
 }

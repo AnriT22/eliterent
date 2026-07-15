@@ -630,7 +630,9 @@
     "or": "или",
     "google_signup": "Зарегистрироваться через Google",
     "has_account": "Уже есть аккаунт? <a href=\"login.html\" class=\"auth-link\">Войти</a>",
-    "want_guest": "Хотите арендовать авто? <a href=\"register.html\" class=\"auth-link\">Зарегистрируйтесь как гость</a>"
+    "want_guest": "Хотите арендовать авто? <a href=\"register.html\" class=\"auth-link\">Зарегистрируйтесь как гость</a>",
+    "step_finish": "Готово",
+    "step_verify": "Проверка"
   },
   "guest_profile": {
     "title": "Мой профиль",
