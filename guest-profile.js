@@ -254,7 +254,7 @@
                 if (b.status === 'pending') {
                     actionBtn = '<button class="gp-booking-cancel-btn" data-id="' + b.id + '" data-action="cancelled">Cancel</button>';
                     if (payStatus === 'unpaid' && parseFloat(b.service_fee) > 0) {
-                        payBtn = '<a href="payment.html?booking_id=' + b.id + '" class="gp-booking-pay-btn">Pay Service Fee ($' + parseFloat(b.service_fee).toFixed(2) + ')</a>';
+                        payBtn = '<a href="payment.html?booking_id=' + b.id + '" class="gp-booking-pay-btn">Pay now to reserve ($' + parseFloat(b.service_fee).toFixed(2) + ')</a>';
                     }
                 } else if (b.status === 'accepted') {
                     actionBtn = '<button class="gp-booking-cancel-btn gp-booking-cancel-request" data-id="' + b.id + '" data-action="cancel_requested">Request Cancellation</button>';

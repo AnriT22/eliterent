@@ -505,7 +505,7 @@
     "cancel_booking": "Cancel Booking"
   },
   "payment_page": {
-    "title": "Pay Service Fee",
+    "title": "Complete Your Booking",
     "booking_label": "Booking",
     "loading": "Loading booking details...",
     "security_note": "Secured by PayPal. Your card details are handled entirely by PayPal.",
@@ -1211,7 +1211,7 @@
     "edit_dates": "Edit dates & times",
     "car_price": "Car Price",
     "payment_summary": "Payment Summary",
-    "pay_now": "Pay now on website",
+    "pay_now": "Pay now to reserve",
     "pay_pickup": "Pay on pickup",
     "price_breakdown": "Price Breakdown",
     "extras": "Extras & Services",
