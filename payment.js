@@ -77,7 +77,7 @@
                 '<div class="pay-already">'
                 + '<div class="pay-success-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>'
                 + '<h2>Already Paid</h2>'
-                + '<p>The service fee for this booking has been paid on ' + (booking.payment_date || 'N/A') + '.</p>'
+                + '<p>Your reservation payment for this booking was received on ' + (booking.payment_date || 'N/A') + '.</p>'
                 + '<a href="guest-profile.html" class="pay-success-btn">Go to My Bookings</a>'
                 + '</div>';
             return;
@@ -87,7 +87,7 @@
             payBody.innerHTML =
                 '<div class="pay-already">'
                 + '<h2>Payment Refunded</h2>'
-                + '<p>The service fee for this booking has been refunded.</p>'
+                + '<p>Your reservation payment for this booking has been refunded.</p>'
                 + '<a href="guest-profile.html" class="pay-success-btn">Go to My Bookings</a>'
                 + '</div>';
             return;
@@ -106,7 +106,7 @@
         }
 
         if (serviceFee <= 0) {
-            payBody.innerHTML = '<div class="pay-error">No service fee required for this booking.</div>';
+            payBody.innerHTML = '<div class="pay-error">No payment required for this booking.</div>';
             return;
         }
 
@@ -156,9 +156,10 @@
             + '<div class="pay-row"><span class="pay-row-label">Car rental (' + days + ' days)</span><span class="pay-row-value">$' + rentalTotal.toFixed(2) + '</span></div>'
             + (extrasTotal > 0 ? '<div class="pay-row"><span class="pay-row-label">Extras & services</span><span class="pay-row-value">$' + extrasTotal.toFixed(2) + '</span></div>' : '')
             + (locationFee > 0 ? '<div class="pay-row"><span class="pay-row-label">Location fees</span><span class="pay-row-value">$' + locationFee.toFixed(2) + '</span></div>' : '')
-            + '<div class="pay-row"><span class="pay-row-label">Pay at pickup</span><span class="pay-row-value">$' + totalPrice.toFixed(2) + '</span></div>'
+            + '<div class="pay-row"><span class="pay-row-label">Total price</span><span class="pay-row-value">$' + (totalPrice + serviceFee).toFixed(2) + '</span></div>'
             + '<div class="pay-divider"></div>'
-            + '<div class="pay-row pay-total"><span class="pay-row-label">Website fee (pay now)</span><span class="pay-row-value">$' + serviceFee.toFixed(2) + '</span></div>'
+            + '<div class="pay-row pay-total"><span class="pay-row-label">Pay now to reserve</span><span class="pay-row-value">$' + serviceFee.toFixed(2) + '</span></div>'
+            + '<div class="pay-row"><span class="pay-row-label">Pay at pickup</span><span class="pay-row-value">$' + totalPrice.toFixed(2) + '</span></div>'
             + '</div>'
             + '<div class="pay-security">'
             + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
@@ -346,7 +347,7 @@
                     '<div class="pay-success">'
                     + '<div class="pay-success-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>'
                     + '<h2>Payment Successful!</h2>'
-                    + '<p>Service fee of $' + serviceFee.toFixed(2) + ' has been paid.<br>Your booking is now confirmed and awaiting admin approval.</p>'
+                    + '<p>Your reservation payment of $' + serviceFee.toFixed(2) + ' has been received.<br>Your booking is now confirmed and awaiting admin approval.</p>'
                     + '<a href="guest-profile.html" class="pay-success-btn">View My Bookings</a>'
                     + '</div>';
             } else {
@@ -416,7 +417,7 @@
                             '<div class="pay-success">'
                             + '<div class="pay-success-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>'
                             + '<h2>Payment Successful!</h2>'
-                            + '<p>Service fee of $' + serviceFee.toFixed(2) + ' has been paid.<br>Your booking is now confirmed and awaiting admin approval.</p>'
+                            + '<p>Your reservation payment of $' + serviceFee.toFixed(2) + ' has been received.<br>Your booking is now confirmed and awaiting admin approval.</p>'
                             + '<a href="guest-profile.html" class="pay-success-btn">View My Bookings</a>'
                             + '</div>';
                     } else {

@@ -573,7 +573,7 @@
     "cancel_booking": "ביטול הזמנה"
   },
   "payment_page": {
-    "title": "תשלום דמי שירות",
+    "title": "השלימו את ההזמנה",
     "booking_label": "הזמנה",
     "loading": "טוען פרטי הזמנה...",
     "security_note": "מאובטח על ידי PayPal. פרטי הכרטיס שלכם מטופלים כולם דרך PayPal.",
@@ -790,7 +790,7 @@
     "edit_dates": "עריכת תאריכים ושעות",
     "car_price": "מחיר הרכב",
     "payment_summary": "סיכום תשלום",
-    "pay_now": "תשלום עכשיו באתר",
+    "pay_now": "שלמו עכשיו כדי להזמין",
     "pay_pickup": "תשלום באיסוף",
     "price_breakdown": "פירוט מחיר",
     "extras": "תוספות ושירותים",

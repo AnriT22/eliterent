@@ -2610,9 +2610,18 @@
                         return '';
                     })()
                     + (b.guest_notes ? '<div class="db-booking-notes">Note: ' + b.guest_notes + '</div>' : '')
-                    + '<div class="db-booking-price">Total: <strong>$' + (b.total_price || 0) + '</strong>'
-                    + (b.extras_total && parseFloat(b.extras_total) > 0 ? ' <span style="color:#A0A3B0;font-size:12px;">(extras: $' + parseFloat(b.extras_total).toFixed(2) + ')</span>' : '')
-                    + ' &middot; <span style="color:#94a3b8;font-size:12px;">Booked ' + created + '</span></div>'
+                    + (function() {
+                        // total_price = cash you collect at pickup; service_fee = the website's
+                        // share the guest already paid online. The guest's total is the sum.
+                        var atPickup = parseFloat(b.total_price) || 0;
+                        var svcFee = parseFloat(b.service_fee) || 0;
+                        var guestTotal = atPickup + svcFee;
+                        return '<div class="db-booking-price">'
+                            + 'Total price: <strong>$' + guestTotal.toFixed(2) + '</strong>'
+                            + ' &middot; <span style="color:#22c55e;">To collect at pickup: <strong>$' + atPickup.toFixed(2) + '</strong></span>'
+                            + (b.extras_total && parseFloat(b.extras_total) > 0 ? ' <span style="color:#A0A3B0;font-size:12px;">(incl. extras: $' + parseFloat(b.extras_total).toFixed(2) + ')</span>' : '')
+                            + ' &middot; <span style="color:#94a3b8;font-size:12px;">Booked ' + created + '</span></div>';
+                    })()
                     + '</div>';
 
                 if (b.status === 'pending') {

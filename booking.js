@@ -58,7 +58,7 @@
             html += '<div class="bk-summary">'
                 + '<div><p class="lbl">Total</p><p class="val">' + money(total) + '</p></div>'
                 + '<div><p class="lbl">Duration</p><p class="val">' + days + ' day' + (days !== 1 ? 's' : '') + '</p></div>'
-                + '<div><p class="lbl">Reservation fee</p><p class="val sm">' + money(serviceFee) + ' <span style="font-size:11px;opacity:.85;">' + (paid ? 'paid' : 'due') + '</span></p></div>'
+                + '<div><p class="lbl">Pay now to reserve</p><p class="val sm">' + money(serviceFee) + ' <span style="font-size:11px;opacity:.85;">' + (paid ? 'paid' : 'due') + '</span></p></div>'
                 + '<div><p class="lbl">Deposit</p><p class="val sm accent">' + (deposit > 0 ? money(deposit) : 'None') + '</p></div>'
                 + '</div>';
 
@@ -89,13 +89,13 @@
                 + (extras > 0 ? '<div class="bk-row"><span class="k">Extras</span><span>' + money(extras) + '</span></div>' : '')
                 + (locationFee > 0 ? '<div class="bk-row"><span class="k">Pickup / drop-off fee</span><span>' + money(locationFee) + '</span></div>' : '')
                 + '<div class="bk-row" style="border-top:1px solid var(--bk-line);margin-top:6px;padding-top:12px;font-weight:800;"><span>Total</span><span>' + money(total) + '</span></div>'
-                + '<div class="bk-row"><span class="k">Reservation fee (' + (paid ? 'paid online' : 'pay online now') + ')</span><span>' + money(serviceFee) + '</span></div>'
+                + '<div class="bk-row"><span class="k">Pay now to reserve (' + (paid ? 'paid' : 'part of total') + ')</span><span>' + money(serviceFee) + '</span></div>'
                 + (deposit > 0 ? '<div class="bk-row"><span class="k">Refundable deposit (at pickup)</span><span>' + money(deposit) + '</span></div>' : '')
                 + '</div>';
 
             // Pay CTA
             if (!paid && serviceFee > 0 && b.status !== 'cancelled' && b.status !== 'rejected') {
-                html += '<div style="margin-top:18px;text-align:center;"><a class="bk-pay" href="payment.html?booking_id=' + b.id + '">Pay reservation fee &middot; ' + money(serviceFee) + '</a></div>';
+                html += '<div style="margin-top:18px;text-align:center;"><a class="bk-pay" href="payment.html?booking_id=' + b.id + '">Pay now to reserve &middot; ' + money(serviceFee) + '</a></div>';
             }
 
             root.innerHTML = html;

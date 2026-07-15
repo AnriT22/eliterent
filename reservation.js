@@ -1029,7 +1029,7 @@
         var text = 'Hello! I would like to book:\n'
             + '\ud83d\ude97 ' + v.name + driverNote + '\n'
             + '\ud83d\udcc5 ' + fmtDate(pickupDate) + ' ' + pickupTime + ' \u2192 ' + fmtDate(dropoffDate) + ' ' + dropoffTime + ' (' + days + ' days)\n'
-            + '\ud83d\udcb0 ' + fmtMoney((days * effectiveRate) + extrasTotal) + ' + website fee\n'
+            + '\ud83d\udcb0 ' + fmtMoney((days * effectiveRate) + extrasTotal) + '\n'
             + 'Please confirm availability!';
         var phone = (v.whatsapp || '').replace(/[^0-9]/g, '') || '995';
         window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(text), '_blank');
