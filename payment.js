@@ -166,12 +166,12 @@
             + '<div class="pay-row"><span class="pay-row-label">' + (booking.vehicle_name || 'Vehicle') + '</span><span class="pay-row-value">' + days + ' day' + (days !== 1 ? 's' : '') + '</span></div>'
             + '<div class="pay-row"><span class="pay-row-label">Dates</span><span class="pay-row-value">' + pickup + ' → ' + dropoff + '</span></div>'
             + '<div class="pay-divider"></div>'
-            + '<div class="pay-row"><span class="pay-row-label">Car rental (' + days + ' days)</span><span class="pay-row-value">$' + rentalTotal.toFixed(2) + '</span></div>'
+            + '<div class="pay-row"><span class="pay-row-label">Car rental (' + days + ' days)</span><span class="pay-row-value">$' + (rentalTotal + serviceFee).toFixed(2) + '</span></div>'
             + (extrasTotal > 0 ? '<div class="pay-row"><span class="pay-row-label">Extras & services</span><span class="pay-row-value">$' + extrasTotal.toFixed(2) + '</span></div>' : '')
             + (locationFee > 0 ? '<div class="pay-row"><span class="pay-row-label">Location fees</span><span class="pay-row-value">$' + locationFee.toFixed(2) + '</span></div>' : '')
             + '<div class="pay-row"><span class="pay-row-label">Total price</span><span class="pay-row-value">$' + (totalPrice + serviceFee).toFixed(2) + '</span></div>'
             + '<div class="pay-divider"></div>'
-            + '<div class="pay-row pay-total"><span class="pay-row-label">Pay now to reserve</span><span class="pay-row-value">$' + serviceFee.toFixed(2) + '</span></div>'
+            + '<div class="pay-row pay-total"><span class="pay-row-label">Pay now</span><span class="pay-row-value">$' + serviceFee.toFixed(2) + ' only</span></div>'
             + '<div class="pay-row"><span class="pay-row-label">Pay at pickup</span><span class="pay-row-value">$' + totalPrice.toFixed(2) + '</span></div>'
             + '</div>'
             + '<div class="pay-security">'
