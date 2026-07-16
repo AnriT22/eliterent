@@ -28,11 +28,11 @@
     // Price tiers USD/day: Budget <50 | Economy 50-59.99 | Mid 60-69.99 | Premium 70-79.99 | Luxury 80+
     // Duration tiers (days): short 1-4 | medium 5-9 | long 10+
     var FEE_MATRIX = {
-        budget:  { short: 0.15, medium: 0.12, long: 0.10 },
-        economy: { short: 0.12, medium: 0.10, long: 0.08 },
-        mid:     { short: 0.10, medium: 0.08, long: 0.07 },
-        premium: { short: 0.09, medium: 0.07, long: 0.06 },
-        luxury:  { short: 0.08, medium: 0.06, long: 0.05 }
+        budget:  { short: 0.225, medium: 0.18,  long: 0.15  },
+        economy: { short: 0.18,  medium: 0.15,  long: 0.12  },
+        mid:     { short: 0.15,  medium: 0.12,  long: 0.105 },
+        premium: { short: 0.135, medium: 0.105, long: 0.09  },
+        luxury:  { short: 0.12,  medium: 0.09,  long: 0.075 }
     };
     function getReservationFeePercent(dailyPrice, days) {
         var p = parseFloat(dailyPrice) || 0;
@@ -719,7 +719,7 @@
 
         document.getElementById('rvSumPickupLoc').textContent = pickupRadio ? pickupRadio.value : 'Tbilisi';
         document.getElementById('rvSumDropoffLoc').textContent = dropoffRadio ? dropoffRadio.value : 'Tbilisi';
-        document.getElementById('rvSumPayNow').textContent = fmtMoney(payNow);
+        document.getElementById('rvSumPayNow').textContent = fmtMoney(payNow) + ' ' + rvt('reservation.only', 'only');
         document.getElementById('rvSumPayPickup').textContent = fmtMoney(payOnPickup);
         document.getElementById('rvSumRentalTotal').textContent = fmtMoney(carRentalAllIn);
         document.getElementById('rvSumDeposit').textContent = deposit > 0 ? fmtMoney(deposit) : rvt('vehicle_page.val_none', 'None');

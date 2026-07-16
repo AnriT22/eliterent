@@ -16,11 +16,11 @@
     'use strict';
 
     var FEE_MATRIX = {
-        budget:  { short: 0.15, medium: 0.12, long: 0.10 },
-        economy: { short: 0.12, medium: 0.10, long: 0.08 },
-        mid:     { short: 0.10, medium: 0.08, long: 0.07 },
-        premium: { short: 0.09, medium: 0.07, long: 0.06 },
-        luxury:  { short: 0.08, medium: 0.06, long: 0.05 }
+        budget:  { short: 0.225, medium: 0.18,  long: 0.15  },
+        economy: { short: 0.18,  medium: 0.15,  long: 0.12  },
+        mid:     { short: 0.15,  medium: 0.12,  long: 0.105 },
+        premium: { short: 0.135, medium: 0.105, long: 0.09  },
+        luxury:  { short: 0.12,  medium: 0.09,  long: 0.075 }
     };
 
     function feePercent(rawDaily, days) {

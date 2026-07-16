@@ -511,7 +511,9 @@
     "loading": "Loading booking details...",
     "security_note": "Secured by PayPal. Your card details are handled entirely by PayPal.",
     "security_detail": "We never see or store your card number.",
-    "learn_more": "Learn more"
+    "learn_more": "Learn more",
+    "docs_title": "Next step — send your documents",
+    "docs_sub": "Please send these to the car owner on WhatsApp so they can prepare your car:"
   },
   "login_page": {
     "title": "Welcome Back",
@@ -896,7 +898,7 @@
     "airport_tbilisi": "Tbilisi Airport ($)",
     "airport_kutaisi": "Kutaisi Airport ($)",
     "airport_batumi": "Batumi Airport ($)",
-    "delivery_fee": "Delivery Fee ($)",
+    "delivery_fee": "Delivery Fee (Tbilisi)",
     "visibility_title": "Visibility & Settings",
     "visible_search": "Visible in Search Results",
     "block_after_payment": "Block Vehicle After Confirmed Payment",
@@ -1214,7 +1216,7 @@
     "edit_dates": "Edit dates & times",
     "car_price": "Car Price",
     "payment_summary": "Payment Summary",
-    "pay_now": "Pay now to reserve",
+    "pay_now": "Pay now",
     "pay_pickup": "Pay at pickup",
     "price_breakdown": "Price Breakdown",
     "extras": "Extras & Services",
@@ -1242,7 +1244,8 @@
     "verify_desc": "We will send a verification code to",
     "send_code": "Send Code",
     "sending": "Sending...",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "only": "only"
   },
   "reviews_page": {
     "title": "Customer Reviews",
