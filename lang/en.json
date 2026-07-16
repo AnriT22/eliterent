@@ -1208,7 +1208,7 @@
     "days": "days",
     "car_rental": "Car Rental",
     "car_rental_driver": "Car + Driver",
-    "car": "Car",
+    "car": "Car & price",
     "pickup_datetime": "Pick-up date & time",
     "dropoff_datetime": "Drop-off date & time",
     "edit_dates": "Edit dates & times",
