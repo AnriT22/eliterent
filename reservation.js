@@ -700,8 +700,12 @@
             return sum + (service.perDay ? price * days : price);
         }, 0) * 100) / 100;
         var locationFee = getLocationSurcharge('pickupLoc') + getLocationSurcharge('dropoffLoc');
-        // Website fee base includes the delivery/location fee so the platform earns on delivery too (mirrors bookings.js).
-        var websiteFee = Math.round((rentalTotal + locationFee) * getReservationFeePercent(dailyPrice, days) * 100) / 100;
+        // Reservation fee (mirrors bookings.js): admin per-vehicle override wins,
+        // otherwise the matrix fee (base includes delivery) with a $10 minimum.
+        var _cf = vehicleData.custom_service_fee;
+        var websiteFee = (_cf != null && _cf !== '' && !isNaN(parseFloat(_cf)))
+            ? Math.round(parseFloat(_cf) * 100) / 100
+            : Math.max(10, Math.round((rentalTotal + locationFee) * getReservationFeePercent(dailyPrice, days) * 100) / 100);
         var deposit = parseFloat(vehicleData.deposit_amount) || 0;
         var grandTotal = Math.round((rentalTotal + extrasTotal + locationFee + deposit) * 100) / 100;
         var payNow = websiteFee;

@@ -687,6 +687,26 @@ router.put('/vehicles/:id/status', async (req, res) => {
     }
 });
 
+// Admin-only exception: set/clear a custom reservation fee for one vehicle.
+// Empty/null clears the override (back to the matrix fee with the $10 minimum).
+router.put('/vehicles/:id/service-fee', async (req, res) => {
+    try {
+        const vehicleId = parseInt(req.params.id);
+        var raw = req.body ? req.body.custom_service_fee : null;
+        var value = null;
+        if (raw !== null && raw !== undefined && String(raw).trim() !== '') {
+            var n = parseFloat(raw);
+            if (isNaN(n) || n < 0) return res.status(400).json({ error: 'Fee must be a number ≥ 0' });
+            value = Math.round(n * 100) / 100;
+        }
+        await execute('UPDATE vehicles SET custom_service_fee = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [value, vehicleId]);
+        res.json({ message: 'Custom reservation fee updated', custom_service_fee: value });
+    } catch (err) {
+        console.error('Update vehicle service fee error:', err);
+        res.status(500).json({ error: 'Failed to update reservation fee' });
+    }
+});
+
 // Reorder vehicles by drag-and-drop: body { order: [id1, id2, ...] } top-first.
 // Highest position gets the highest priority so it shows first on the page.
 router.put('/vehicles/reorder', async (req, res) => {

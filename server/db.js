@@ -353,6 +353,12 @@ async function initDB() {
         await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS homepage_vip_position INTEGER DEFAULT NULL`);
     } catch (e) { /* column may already exist or table not yet created */ }
 
+    // Admin-only per-vehicle reservation-fee override (exception). NULL = use the
+    // normal matrix fee with the $10 minimum; a value forces exactly that fee.
+    try {
+        await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS custom_service_fee NUMERIC(10,2) DEFAULT NULL`);
+    } catch (e) { /* column may already exist or table not yet created */ }
+
     // Add clicks column to ad_cards for tracking ad engagement (existing DBs)
     try {
         await pool.query(`ALTER TABLE ad_cards ADD COLUMN IF NOT EXISTS clicks INTEGER DEFAULT 0`);

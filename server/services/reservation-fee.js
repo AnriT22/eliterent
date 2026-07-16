@@ -66,7 +66,8 @@ function calculateReservationFee(dailyPrice, days) {
   var d = Math.max(1, Math.floor(Number(days) || 0));
   var feePercent = getReservationFeePercent(p, d);
   var baseRentalCost = Math.round(p * d * 100) / 100;
-  var reservationFee = Math.round(baseRentalCost * feePercent * 100) / 100;
+  // Minimum $10 reservation fee applies in every situation.
+  var reservationFee = Math.max(10, Math.round(baseRentalCost * feePercent * 100) / 100);
   return {
     priceTier: getPriceTier(p),
     durationTier: getDurationTier(d),
