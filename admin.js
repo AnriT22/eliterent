@@ -698,6 +698,7 @@ function escHtml(s) {
                     + '<button class="admin-action-btn" onclick="adminOpenPin(' + v.id + ')">' + ((parseInt(v.pin_page) > 0 && parseInt(v.pin_position) > 0) ? ('\uD83D\uDCCD P' + v.pin_page + '/' + v.pin_position) : 'Pin') + '</button>'
                     + '<button class="admin-action-btn" style="' + (parseInt(v.is_vip) ? 'background:#16a34a;border-color:#16a34a;color:#fff;' : '') + '" onclick="adminToggleVip(' + v.id + ',' + (parseInt(v.is_vip) ? 0 : 1) + ')">' + (parseInt(v.is_vip) ? '\u2605 VIP' : 'VIP') + '</button>'
                     + '<button class="admin-action-btn" style="' + (parseInt(v.homepage_vip_position) ? 'background:#22c55e;border-color:#22c55e;color:#fff;' : '') + '" onclick="adminSetHomepageVip(' + v.id + ',' + (parseInt(v.homepage_vip_position) || 0) + ')" title="Homepage VIP slot">' + (parseInt(v.homepage_vip_position) ? 'Home VIP ' + v.homepage_vip_position : 'Home VIP') + '</button>'
+                    + '<button class="admin-action-btn" style="' + (v.custom_service_fee != null ? 'background:#f59e0b;border-color:#f59e0b;color:#111;' : '') + '" onclick="adminSetServiceFee(' + v.id + ',\'' + (v.custom_service_fee != null ? v.custom_service_fee : '') + '\')" title="Custom reservation fee (admin exception). Blank = normal fee with $10 minimum.">' + (v.custom_service_fee != null ? ('Fee $' + parseFloat(v.custom_service_fee).toFixed(2)) : 'Fee') + '</button>'
                     + '<button class="admin-action-btn" style="' + (parseInt(v.suv_6_8) ? 'background:#0ea5e9;border-color:#0ea5e9;color:#fff;' : '') + '" onclick="adminToggleSuv68(' + v.id + ',' + (parseInt(v.suv_6_8) ? 0 : 1) + ')" title="SUV 6-8 Seats category (' + (parseInt(v.seats) || 0) + ' seats)">SUV6-8</button>'
                     + (status === 'pending' ? '<button class="admin-action-btn success" onclick="adminSetVehicleStatus(' + v.id + ',\'active\')">Approve</button>' : '')
                     + (status === 'delete_requested' ? '<button class="admin-action-btn success" onclick="adminApproveDelete(' + v.id + ')">Approve Delete</button>' : '')
@@ -783,6 +784,20 @@ function escHtml(s) {
     window.adminToggleSuv68 = function (id, flag) {
         apiPut('/api/admin/vehicles/' + id + '/suv-6-8', { suv_6_8: !!flag }).then(function () { loadVehicles(); })
             .catch(function () { alert('Failed to update SUV 6-8'); });
+    };
+
+    // ---- Admin exception: custom reservation fee for one vehicle ----
+    window.adminSetServiceFee = function (id, current) {
+        var input = prompt('Custom reservation fee for this car (admin exception).\n\nLeave blank to use the normal fee (matrix % with a $10 minimum).\nOr type an amount in USD to force exactly that fee:', current || '');
+        if (input === null) return; // cancelled
+        input = String(input).trim();
+        if (input !== '' && (isNaN(parseFloat(input)) || parseFloat(input) < 0)) {
+            alert('Please enter a number of 0 or more, or leave blank.');
+            return;
+        }
+        apiPut('/api/admin/vehicles/' + id + '/service-fee', { custom_service_fee: input === '' ? null : parseFloat(input) })
+            .then(function () { loadVehicles(); })
+            .catch(function (e) { alert('Failed to update fee: ' + (e && e.message || 'error')); });
     };
 
     // ---- Set which VIP car appears in a homepage slot (1, 2, or 3) ----

@@ -444,7 +444,14 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
     // The website fee base includes the delivery/location fee so the platform
     // also earns a commission on delivery charges.
     var feePercent = getReservationFeePercent(dailyPrice, days);
-    var serviceFee = Math.round((rentalTotal + location_fee) * feePercent * 100) / 100;
+    // Reservation fee: an admin per-vehicle override wins; otherwise the matrix fee
+    // with a $10 minimum applied in every situation.
+    var serviceFee;
+    if (vehicle.custom_service_fee != null && vehicle.custom_service_fee !== '' && !isNaN(parseFloat(vehicle.custom_service_fee))) {
+      serviceFee = Math.round(parseFloat(vehicle.custom_service_fee) * 100) / 100;
+    } else {
+      serviceFee = Math.max(10, Math.round((rentalTotal + location_fee) * feePercent * 100) / 100);
+    }
     var total_price =
       Math.round((rentalTotal + extrasTotal + location_fee) * 100) / 100;
 
