@@ -669,11 +669,9 @@
         renderExtraServices();
 
         document.getElementById('rvSumDays').textContent = days + ' ' + rvt('reservation.days', 'days');
-        document.getElementById('rvSumCar').textContent = v.name;
+        document.getElementById('rvSumCar').textContent = v.name;   // price appended in updatePriceSummary()
         document.getElementById('rvSumPickupDate').textContent = fmtDatetime(pickupDate);
         document.getElementById('rvSumDropoffDate').textContent = fmtDatetime(dropoffDate);
-        var effectiveDaily = getDailyRateByTier(days);
-        document.getElementById('rvSumCarPrice').textContent = fmtMoney(effectiveDaily) + rvt('reservation_extras.per_day', '/day');
         document.getElementById('rvSumRentalLabel').textContent = rvt('reservation.car_rental', 'Car Rental') + ' (' + days + ' ' + rvt('reservation.days', 'days') + ')';
         document.getElementById('rvEditDates').href = 'vehicle.html?id=' + vehicleId;
 
@@ -727,10 +725,10 @@
         document.getElementById('rvSumDeposit').textContent = deposit > 0 ? fmtMoney(deposit) : rvt('vehicle_page.val_none', 'None');
 
         // Update car price label to show combined price when driver is mandatory
-        // The customer always sees the all-in rate (partner's rate + website fee).
-        var carPriceLabel = document.getElementById('rvSumCarPrice');
-        if (carPriceLabel) {
-            carPriceLabel.textContent = fmtMoney(allInDaily) + rvt('reservation_extras.per_day', '/day')
+        // "Car & price" — the customer always sees the all-in rate (partner's rate + website fee).
+        var carLabel = document.getElementById('rvSumCar');
+        if (carLabel && vehicleData.name) {
+            carLabel.textContent = vehicleData.name + ' · ' + fmtMoney(allInDaily) + rvt('reservation_extras.per_day', '/day')
                 + ((rentWithDriverOnly && driverPrice > 0) ? ' (' + rvt('fleet.driver_included', 'driver included') + ')' : '');
         }
 
