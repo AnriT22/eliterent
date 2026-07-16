@@ -86,7 +86,8 @@
     "manual": "Manual",
     "driver_only": "Only rent out with driver",
     "rent": "rent",
-    "driver": "driver"
+    "driver": "driver",
+    "driver_included": "driver included"
   },
   "features": {
     "title": "Why Choose EliteAuto?",
@@ -1214,11 +1215,11 @@
     "car_price": "Car Price",
     "payment_summary": "Payment Summary",
     "pay_now": "Pay now to reserve",
-    "pay_pickup": "Pay on pickup",
+    "pay_pickup": "Pay at pickup",
     "price_breakdown": "Price Breakdown",
     "extras": "Extras & Services",
     "location_fees": "Location Fees",
-    "total": "Total",
+    "total": "Total price",
     "deposit_label": "Refundable deposit (cash) · Paid on pickup",
     "deposit": "Refundable Deposit (cash)",
     "deposit_note": "A refundable cash deposit is required at pickup",

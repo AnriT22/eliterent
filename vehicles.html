@@ -1689,7 +1689,11 @@
                     vExtras = vExtras || {};
                     driverPrice = parseFloat(vExtras.driver_service) || 0;
                 }
-                var totalPrice = (parseFloat(price) || 0) + driverPrice;
+                // Customers see the all-in rate (partner's rate + website fee), never the raw rate.
+                var rawDaily = (parseFloat(price) || 0) + driverPrice;
+                var totalPrice = (window.ElitePricing)
+                    ? ElitePricing.allInDaily(rawDaily, 1, v.custom_service_fee)
+                    : rawDaily;
 
                 var card = document.createElement('div');
                 card.className = 'vc-card' + (v.is_vip ? ' vc-vip' : '');
@@ -2028,6 +2032,7 @@
     })();
     </script>
     <script src="navbar-auth.js?v=4"></script>
+    <script src="pricing.js?v=1"></script>
     <script src="currency.js?v=4"></script>
 <script src="premium-animations.js?v=3"></script>
 <script src="country-popup.js?v=4"></script>

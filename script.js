@@ -582,7 +582,11 @@ function renderCarousel(vehicles, adminAds, firstBlockLength) {
             vExtras = vExtras || {};
             driverPrice = parseFloat(vExtras.driver_service) || 0;
         }
-        var totalPrice = basePrice + driverPrice;
+        // Customers see the all-in rate (partner's rate + website fee), never the raw rate.
+        var rawDaily = basePrice + driverPrice;
+        var totalPrice = (window.ElitePricing)
+            ? ElitePricing.allInDaily(rawDaily, 1, v.custom_service_fee)
+            : rawDaily;
 
         html += `
             <div class="fleet-card ${v.is_vip ? 'fleet-card-vip' : ''}" data-category="${(v.category||'').toLowerCase()}" data-engine="${(v.engine||'').toLowerCase()}" data-gearbox="${(v.gearbox||'').toLowerCase()}" data-drivetype="${(v.drive_type||'').toLowerCase()}" data-interior="${(v.interior_type||'').toLowerCase()}" data-steering="${(v.steering_side||'').toLowerCase()}" data-payment="${(v.payment_method||'').toLowerCase()}" onclick="if(!event.target.closest('button'))window.location.href='vehicle.html?id=${v.id}'">
@@ -605,7 +609,7 @@ function renderCarousel(vehicles, adminAds, firstBlockLength) {
                         </div>
                         <span class="fleet-card-year">${v.year || 'N/A'}</span>
                     </div>
-                    ${(driverOnly && driverPrice > 0) ? `<div class="fleet-card-price-breakdown" style="font-size:11px;color:#A0A3B0;margin-top:-4px;margin-bottom:8px;"><span data-price-usd="${basePrice}">$${basePrice}</span> <span data-i18n="fleet.rent">rent</span> + <span data-price-usd="${driverPrice}">$${driverPrice}</span> <span data-i18n="fleet.driver">driver</span></div>` : ''}
+                    ${(driverOnly && driverPrice > 0) ? `<div class="fleet-card-price-breakdown" style="font-size:11px;color:#A0A3B0;margin-top:-4px;margin-bottom:8px;"><span data-i18n="fleet.driver_included">driver included</span></div>` : ''}
                     <button class="fleet-card-btn" onclick="selectVehicle(${v.id})" data-i18n="fleet.select_vehicle">Select Vehicle</button>
                 </div>
             </div>

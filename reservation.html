@@ -211,12 +211,17 @@
 
                 <h3 class="rv-payment-title" data-i18n="reservation.payment_summary">Payment Summary</h3>
 
+                <div class="rv-summary-row rv-grand-total">
+                    <span data-i18n="reservation.total">Total price</span>
+                    <strong id="rvSumGrandTotal">—</strong>
+                </div>
+
                 <div class="rv-summary-row rv-highlight">
                     <span data-i18n="reservation.pay_now">Pay now to reserve</span>
                     <strong id="rvSumPayNow">—</strong>
                 </div>
                 <div class="rv-summary-row">
-                    <span data-i18n="reservation.pay_pickup">Pay on pickup</span>
+                    <span data-i18n="reservation.pay_pickup">Pay at pickup</span>
                     <strong id="rvSumPayPickup">—</strong>
                 </div>
 
@@ -237,10 +242,6 @@
                 <div class="rv-summary-row rv-location-row" id="rvSumLocationRow" style="display:none;">
                     <span data-i18n="reservation.location_fees">Location Fees</span>
                     <strong id="rvSumLocationTotal">$0</strong>
-                </div>
-                <div class="rv-summary-row rv-grand-total">
-                    <span data-i18n="reservation.total">Total</span>
-                    <strong id="rvSumGrandTotal">—</strong>
                 </div>
 
                 <div class="rv-summary-divider"></div>
@@ -370,7 +371,7 @@
     </div>
 
     <script src="otp-modal.js?v=2"></script>
-    <script src="reservation.js?v=10"></script>
+    <script src="reservation.js?v=11"></script>
     <script src="navbar-auth.js?v=4"></script>
     <script src="currency.js?v=4"></script>
 <script src="premium-animations.js?v=3"></script>

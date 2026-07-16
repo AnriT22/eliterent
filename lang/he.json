@@ -157,7 +157,8 @@
     "manual": "ידני",
     "driver_only": "השכרה רק עם נהג",
     "rent": "השכרה",
-    "driver": "נהג"
+    "driver": "נהג",
+    "driver_included": "כולל נהג"
   },
   "features": {
     "title": "למה לבחור ב-EliteAuto?",
@@ -795,7 +796,7 @@
     "price_breakdown": "פירוט מחיר",
     "extras": "תוספות ושירותים",
     "location_fees": "דמי מיקום",
-    "total": "סה\"כ",
+    "total": "מחיר כולל",
     "deposit_label": "פיקדון מוחזר (מזומן) · משולם באיסוף",
     "deposit": "פיקדון מוחזר (מזומן)",
     "deposit_note": "נדרש פיקדון מזומן מוחזר באיסוף",
