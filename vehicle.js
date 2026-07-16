@@ -220,7 +220,11 @@
             vdEx = vdEx || {};
             vdDriverPrice = parseFloat(vdEx.driver_service) || 0;
         }
-        var vdHeadlinePrice = (parseFloat(v.price_per_day) || 0) + vdDriverPrice;
+        // Customers see the all-in rate (partner's rate + website fee), never the raw rate.
+        var vdRawDaily = (parseFloat(v.price_per_day) || 0) + vdDriverPrice;
+        var vdHeadlinePrice = (window.ElitePricing)
+            ? ElitePricing.allInDaily(vdRawDaily, 1, v.custom_service_fee)
+            : vdRawDaily;
         var priceEl = document.getElementById('vdPrice');
         priceEl.setAttribute('data-price-usd', vdHeadlinePrice);
         priceEl.classList.add('vd-price-amount');
@@ -235,9 +239,8 @@
         if (vdPriceBreakdownEl) {
             vdPriceBreakdownEl.style.display = (vdDriverOnly && vdDriverPrice > 0) ? '' : 'none';
             if (vdDriverOnly && vdDriverPrice > 0) {
-                var rentStr = (typeof Currency !== 'undefined') ? Currency.formatPrice(v.price_per_day || 0) : ('$' + (v.price_per_day || 0));
-                var drvStr = (typeof Currency !== 'undefined') ? Currency.formatPrice(vdDriverPrice) : ('$' + vdDriverPrice);
-                vdPriceBreakdownEl.textContent = rentStr + ' ' + vt('fleet.rent', 'rent') + ' + ' + drvStr + ' ' + vt('fleet.driver', 'driver');
+                // All-in pricing: don't expose the partner's raw rate breakdown.
+                vdPriceBreakdownEl.textContent = vt('fleet.driver_included', 'driver included');
             }
         }
 
@@ -301,7 +304,7 @@
             { label: vt('vehicle_page.fuel_policy', 'Fuel Policy'), val: vtVal(v.fuel_policy || 'full_to_full') },
             { label: vt('vehicle_page.deposit', 'Deposit'),   val: v.deposit_amount ? ((typeof Currency !== 'undefined') ? Currency.formatPrice(v.deposit_amount) : ('$' + v.deposit_amount)) : vt('vehicle_page.val_none', 'None') },
             { label: vt('vehicle_page.min_age', 'Min Age'),   val: (v.min_age || 21) + ' ' + vt('vehicle_page.years_suffix', 'years') },
-            { label: vt('vehicle_page.price_day', 'Price/Day'), val: (typeof Currency !== 'undefined') ? Currency.formatPrice(v.price_per_day || 0) : ('$' + (v.price_per_day || 0)) }
+            { label: vt('vehicle_page.price_day', 'Price/Day'), val: (typeof Currency !== 'undefined') ? Currency.formatPrice(vdHeadlinePrice) : ('$' + vdHeadlinePrice) }
         ];
         if (v.fuel_consumption) specs.push({ label: vt('vehicle_page.fuel', 'Fuel'), val: v.fuel_consumption });
         if (v.mileage_limit_enabled && v.mileage_km) specs.push({ label: vt('vehicle_page.mileage_limit', 'Mileage Limit'), val: v.mileage_km + ' km' });
@@ -740,8 +743,13 @@
             var pTime = document.getElementById('vdPickupTime').value || '10:00';
             var dTime = document.getElementById('vdDropoffTime').value || '10:00';
             var days = vdDayCount(vdPickupDate, vdDropoffDate, pTime, dTime);
-            var dailyRate = vdGetDailyRateByTier(days);
-            var total = (days * dailyRate).toFixed(2);
+            // All-in estimate for the chosen dates (matches the reservation page).
+            var vdRawRate = vdGetDailyRateByTier(days);
+            var vdAllInTotal = (window.ElitePricing)
+                ? ElitePricing.allInTotal(vdRawRate, days, vehicleData.custom_service_fee)
+                : (days * vdRawRate);
+            var dailyRate = Math.round((vdAllInTotal / days) * 100) / 100;
+            var total = vdAllInTotal.toFixed(2);
             var fmtTotal = (typeof Currency !== 'undefined') ? Currency.formatPrice(parseFloat(total)) : ('$' + total);
             var fmtDaily = (typeof Currency !== 'undefined') ? Currency.formatPrice(dailyRate) : ('$' + dailyRate.toFixed(2));
             totalAmt.textContent = fmtTotal + ' (' + days + ' day' + (days !== 1 ? 's' : '') + ' × ' + fmtDaily + ')';

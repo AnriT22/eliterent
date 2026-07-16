@@ -707,9 +707,15 @@
             ? Math.round(parseFloat(_cf) * 100) / 100
             : Math.max(10, Math.round((rentalTotal + locationFee) * getReservationFeePercent(dailyPrice, days) * 100) / 100);
         var deposit = parseFloat(vehicleData.deposit_amount) || 0;
-        var grandTotal = Math.round((rentalTotal + extrasTotal + locationFee + deposit) * 100) / 100;
+        // All-in pricing: the website fee is INSIDE the price the customer sees, not added on top.
+        //   carRentalAllIn = partner's rate + fee   ->  shown as the car's price
+        //   grandTotal     = everything the rental costs (the refundable cash deposit is separate)
+        //   payNow         = the fee (a part of grandTotal), payOnPickup = the remainder
+        var carRentalAllIn = Math.round((rentalTotal + websiteFee) * 100) / 100;
+        var grandTotal = Math.round((carRentalAllIn + extrasTotal + locationFee) * 100) / 100;
         var payNow = websiteFee;
-        var payOnPickup = grandTotal;
+        var payOnPickup = Math.round((grandTotal - websiteFee) * 100) / 100;
+        var allInDaily = days > 0 ? Math.round((carRentalAllIn / days) * 100) / 100 : 0;
         var pickupRadio = document.querySelector('input[name="pickupLoc"]:checked');
         var dropoffRadio = document.querySelector('input[name="dropoffLoc"]:checked');
 
@@ -717,17 +723,15 @@
         document.getElementById('rvSumDropoffLoc').textContent = dropoffRadio ? dropoffRadio.value : 'Tbilisi';
         document.getElementById('rvSumPayNow').textContent = fmtMoney(payNow);
         document.getElementById('rvSumPayPickup').textContent = fmtMoney(payOnPickup);
-        document.getElementById('rvSumRentalTotal').textContent = fmtMoney(rentalTotal);
+        document.getElementById('rvSumRentalTotal').textContent = fmtMoney(carRentalAllIn);
         document.getElementById('rvSumDeposit').textContent = deposit > 0 ? fmtMoney(deposit) : rvt('vehicle_page.val_none', 'None');
 
         // Update car price label to show combined price when driver is mandatory
+        // The customer always sees the all-in rate (partner's rate + website fee).
         var carPriceLabel = document.getElementById('rvSumCarPrice');
         if (carPriceLabel) {
-            if (rentWithDriverOnly && driverPrice > 0) {
-                carPriceLabel.textContent = fmtMoney(effectiveDaily) + rvt('reservation_extras.per_day', '/day') + ' (' + fmtMoney(dailyPrice) + ' car + ' + fmtMoney(driverPrice) + ' driver)';
-            } else {
-                carPriceLabel.textContent = fmtMoney(dailyPrice) + rvt('reservation_extras.per_day', '/day');
-            }
+            carPriceLabel.textContent = fmtMoney(allInDaily) + rvt('reservation_extras.per_day', '/day')
+                + ((rentWithDriverOnly && driverPrice > 0) ? ' (' + rvt('fleet.driver_included', 'driver included') + ')' : '');
         }
 
         // Update rental label to note driver inclusion
