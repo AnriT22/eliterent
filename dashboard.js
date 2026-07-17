@@ -3087,6 +3087,40 @@
                 .catch(function () {
                     driversGrid.innerHTML = '<div style="padding:40px;text-align:center;color:#ef4444;">Failed to load drivers.</div>';
                 });
+            loadPartnerDriverReviews();
+        }
+
+        // --- Load reviews customers left for this partner's drivers ---
+        // #partnerDriverReviews existed in the markup but nothing ever filled it,
+        // so it sat on "Loading reviews..." forever.
+        function loadPartnerDriverReviews() {
+            var box = document.getElementById('partnerDriverReviews');
+            if (!box) return;
+            fetch('/api/driver-reviews/partner/mine', { headers: { 'Authorization': 'Bearer ' + token } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    var reviews = (data && data.reviews) || [];
+                    if (!reviews.length) {
+                        box.innerHTML = '<span style="color:#A0A3B0;font-size:13px;">No reviews yet — they\'ll appear here once customers rate your drivers.</span>';
+                        return;
+                    }
+                    box.innerHTML = reviews.map(function (rv) {
+                        var score = Math.max(0, Math.min(5, parseInt(rv.rating_score, 10) || 0));
+                        var stars = '★★★★★'.slice(0, score) + '☆☆☆☆☆'.slice(0, 5 - score);
+                        var when = rv.created_at ? new Date(rv.created_at).toLocaleDateString() : '';
+                        return '<div style="background:#1C1E26;border:1px solid #3A3F4B;border-radius:10px;padding:12px 14px;margin-bottom:10px;">'
+                            + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">'
+                            + '<strong style="color:#EAEAEA;font-size:13px;">' + escapeHtml(rv.driver_name || 'Driver') + '</strong>'
+                            + '<span style="color:#C9A84C;font-size:13px;letter-spacing:1px;">' + stars + '</span>'
+                            + '</div>'
+                            + '<div style="color:#94a3b8;font-size:11px;margin-top:2px;">' + escapeHtml(rv.customer_name || 'Guest') + (when ? ' &middot; ' + when : '') + '</div>'
+                            + (rv.review_text ? '<p style="color:#A0A3B0;font-size:13px;margin:8px 0 0;">' + escapeHtml(rv.review_text) + '</p>' : '')
+                            + '</div>';
+                    }).join('');
+                })
+                .catch(function () {
+                    box.innerHTML = '<span style="color:#ef4444;font-size:13px;">Failed to load reviews.</span>';
+                });
         }
 
         function wireDriverCardActions() {
