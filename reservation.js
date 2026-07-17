@@ -722,6 +722,13 @@
         document.getElementById('rvSumPayNow').textContent = fmtMoney(payNow) + ' ' + rvt('reservation.only', 'only');
         document.getElementById('rvSumPayPickup').textContent = fmtMoney(payOnPickup);
         document.getElementById('rvSumRentalTotal').textContent = fmtMoney(carRentalAllIn);
+        // Only break the price down when there is something to break down — otherwise
+        // "Car Rental" just repeats "Total price".
+        var hasBreakdown = (extrasTotal > 0 || locationFee > 0);
+        ['rvSumBreakdownDivider', 'rvSumBreakdownLabel', 'rvSumRentalRow'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) el.style.display = hasBreakdown ? '' : 'none';
+        });
         document.getElementById('rvSumDeposit').textContent = deposit > 0 ? fmtMoney(deposit) : rvt('vehicle_page.val_none', 'None');
 
         // Update car price label to show combined price when driver is mandatory
