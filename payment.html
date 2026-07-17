@@ -84,8 +84,14 @@
             font-weight: 600;
         }
         .pay-security svg { flex-shrink: 0; }
+        /* PayPal renders its own card form (Billing address, the 18+ notice, etc.)
+           with dark text intended for a light surface. Our page is dark, so keep
+           this container light or that text is unreadable. */
         #paypal-button-container {
             min-height: 50px;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 12px;
         }
         #google-pay-container {
             min-height: 45px;
@@ -232,7 +238,7 @@
 
     <script src="navbar-auth.js?v=4"></script>
     <script src="https://pay.google.com/gp/p/js/pay.js" async></script>
-    <script src="payment.js?v=12"></script>
+    <script src="payment.js?v=13"></script>
 <script src="premium-animations.js?v=3"></script>
 </body>
 </html>
