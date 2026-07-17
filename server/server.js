@@ -360,10 +360,18 @@ if (headInject.isEnabled) {
     });
 }
 
-// Serve static files with caching
+// Serve static files with caching.
+// HTML is never long-cached: pages have no ?v= cache-buster, so a stale copy in
+// the browser is what makes deployed changes "not show up" (e.g. the admin panel).
+// It still revalidates cheaply via ETag (304). Versioned assets keep the 1d cache.
 app.use(express.static(path.join(__dirname, '..'), {
     maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
-    etag: true
+    etag: true,
+    setHeaders: function (res, filePath) {
+        if (filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache');
+        }
+    }
 }));
 
 // Serve uploaded images with caching + security headers
