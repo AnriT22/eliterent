@@ -8,6 +8,7 @@
     var vehicleData = null;
     var blockedDates = {};
     var pastBookings = {}; // past dates that were actually rented — shown as a trust signal
+    var pastBlocked = {};  // past dates the partner manually blocked
     var vdBlockIntervals = []; // hour-level blocks (buffer already applied): [{startMs, endMs}]
     var vdPickupDate = null;
     var vdDropoffDate = null;
@@ -150,8 +151,9 @@
                     var parts = String(entry.date).split('-');
                     var entryDate = new Date(+parts[0], (+parts[1]) - 1, +parts[2]);
                     if (entryDate < today) {
-                        // Only real reservations build trust — not partner-blocked days.
+                        // Real reservations build the most trust; partner-blocked days still show it was in use.
                         if (entry.status === 'booked') pastBookings[entry.date] = true;
+                        else if (entry.status === 'blocked') pastBlocked[entry.date] = true;
                     } else if (entry.status === 'blocked' || entry.status === 'booked') {
                         blockedDates[entry.date] = entry.status;
                     }
@@ -589,10 +591,13 @@
 
             if (date < today) {
                 dayEl.classList.add('past');
-                // Mark days that were actually rented — trust proof that this car gets booked.
+                // Mark days that were in use — trust proof that this car gets booked.
                 if (pastBookings[dateStr]) {
                     dayEl.classList.add('past-booked');
                     dayEl.title = vt('vehicle_page.was_rented', 'Rented on this date');
+                } else if (pastBlocked[dateStr]) {
+                    dayEl.classList.add('past-blocked');
+                    dayEl.title = vt('vehicle_page.was_blocked', 'Unavailable on this date');
                 }
             } else if (blockedDates[dateStr] || vdDateFullyBlocked(dateStr)) {
                 dayEl.classList.add('blocked');
