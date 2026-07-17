@@ -342,6 +342,8 @@
     "hours_unavailable": "Недоступно",
     "legend_available": "Доступно",
     "legend_blocked": "Занято",
+    "legend_rented": "Недавно арендован",
+    "was_rented": "Арендован в этот день",
     "legend_partial": "Ограниченные часы",
     "dropoff_time": "Время возврата",
     "select_date": "Выберите дату",

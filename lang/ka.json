@@ -342,6 +342,8 @@
     "hours_unavailable": "მიუწვდომელია",
     "legend_available": "ხელმისაწვდომი",
     "legend_blocked": "დაკავებული",
+    "legend_rented": "ცოტა ხნის წინ ნაქირავები",
+    "was_rented": "ამ დღეს ნაქირავები იყო",
     "legend_partial": "შეზღუდული საათები",
     "dropoff_time": "დაბრუნების დრო",
     "select_date": "აირჩიეთ თარიღი",
