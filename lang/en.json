@@ -342,6 +342,8 @@
     "hours_unavailable": "Unavailable",
     "legend_available": "Available",
     "legend_blocked": "Unavailable",
+    "legend_rented": "Recently rented",
+    "was_rented": "Rented on this date",
     "legend_partial": "Limited hours",
     "dropoff_time": "Drop-off Time",
     "select_date": "Select date",
