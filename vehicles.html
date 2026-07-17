@@ -1606,8 +1606,8 @@
         var cover = ad.cover_url ? '<div style="height:180px;background:#2A2D3A;background-size:cover;background-position:center;background-image:url('+vcEsc(ad.cover_url)+');"></div>' : '';
         return '<a class="vc-ad-injected" href="'+vcEsc(ad.target_link||'#')+'" target="_blank" rel="noopener" onclick="vcTrackAd('+(ad.id||0)+')" style="display:flex;flex-direction:column;background:#1A1814;border:1px solid #C9A84C;border-radius:16px;overflow:hidden;text-decoration:none;">'
             + cover
-            + '<div style="padding:16px;"><div style="font-size:16px;font-weight:700;color:#EAEAEA;margin:0 0 6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">'+vcEsc(vcAdLoc(ad,'title'))+'</div>'
-            + '<div style="font-size:13px;color:#A0A3B0;margin:0 0 12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">'+vcEsc(vcAdLoc(ad,'description'))+'</div>'
+            + '<div style="padding:16px;"><div style="font-size:16px;font-weight:700;color:#EAEAEA;margin:0 0 6px;">'+vcEsc(vcAdLoc(ad,'title'))+'</div>'
+            + '<div style="font-size:13px;color:#A0A3B0;margin:0 0 12px;">'+vcEsc(vcAdLoc(ad,'description'))+'</div>'
             + '<span style="color:#D4AF37;font-weight:700;font-size:13px;">'+vcEsc(vcAdLoc(ad,'cta_text')||'Learn more')+' &#8594;</span>'
             + '</div></a>';
     }
