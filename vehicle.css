@@ -397,7 +397,6 @@
 .vd-legend-dot.part { background: #fef3c7; border: 1px solid #f59e0b; }
 .vd-legend-dot.block { background: #fdf0f1; border: 1px solid #f59ca0; }
 .vd-legend-dot.rented { background: rgba(220,38,38,0.16); border: 1px solid #dc2626; }
-.vd-legend-dot.past-block { background: rgba(248,113,113,0.10); border: 1px solid #f87171; }
 .vd-cal-footer {
     display: flex; align-items: center; justify-content: space-between;
     margin-top: 26px; padding-top: 18px;

@@ -597,7 +597,6 @@
                     dayEl.title = vt('vehicle_page.was_rented', 'Rented on this date');
                 } else if (pastBlocked[dateStr]) {
                     dayEl.classList.add('past-blocked');
-                    dayEl.title = vt('vehicle_page.was_blocked', 'Unavailable on this date');
                 }
             } else if (blockedDates[dateStr] || vdDateFullyBlocked(dateStr)) {
                 dayEl.classList.add('blocked');
