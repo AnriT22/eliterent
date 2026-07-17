@@ -2703,3 +2703,95 @@ select.db-input option:checked {
         padding: 18px;
     }
 }
+
+/* ========================================
+   MY DRIVERS — cards
+   The markup (.db-drivers-grid / .db-driver-card / -photo / -info / -actions)
+   shipped without any styles, so drivers rendered as raw stacked text and the
+   photo div had no size at all. Matches the booking-card language.
+   ======================================== */
+.db-drivers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+}
+
+.db-driver-card {
+    background: #1A1814;
+    border: 1px solid #2A2520;
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.db-driver-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(201,168,76,0.45);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.35);
+}
+
+/* Photo: was invisible — the div had a background-image but no dimensions. */
+.db-driver-photo {
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background-color: #262A35;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid rgba(201,168,76,0.35);
+}
+
+.db-driver-info { flex: 1; min-width: 0; }
+.db-driver-info h4 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #EAEAEA;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.db-driver-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.db-driver-actions .btn { width: 100%; }
+
+@media (max-width: 560px) {
+    .db-drivers-grid { grid-template-columns: 1fr; }
+    .db-driver-card { flex-wrap: wrap; }
+    .db-driver-actions { flex-direction: row; width: 100%; }
+}
+
+/* Edit / Delete used .btn-text and .btn-danger, which are not defined anywhere,
+   so they fell back to the light default button. Scoped to the driver cards so
+   other pages using these classes are untouched. */
+.db-driver-actions .btn-text {
+    background: #262A35;
+    border: 1px solid #3A3F4B;
+    color: #EAEAEA;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.db-driver-actions .btn-text:hover {
+    border-color: #C9A84C;
+    color: #C9A84C;
+    background: rgba(201,168,76,0.1);
+}
+.db-driver-actions .btn-danger {
+    background: rgba(239,68,68,0.12);
+    border: 1px solid rgba(239,68,68,0.4);
+    color: #ef4444;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+.db-driver-actions .btn-danger:hover { background: #ef4444; color: #fff; }
