@@ -617,6 +617,8 @@
 }
 .rv-book-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201, 168, 76,0.35); }
 .rv-book-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+/* Book now sits first in the summary panel: no gap above, breathing room below. */
+.rv-book-btn--top { margin-top: 0; margin-bottom: 18px; }
 .rv-book-icon { font-size: 18px; }
 .rv-book-price {
     background: rgba(255,255,255,0.2);

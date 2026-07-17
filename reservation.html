@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="style.css?v=14">
     <link rel="stylesheet" href="premium.css?v=23">
     <link rel="stylesheet" href="navbar-auth.css?v=7">
-    <link rel="stylesheet" href="reservation.css?v=6">
+    <link rel="stylesheet" href="reservation.css?v=7">
     <link rel="stylesheet" href="otp-modal.css?v=4">
     <script src="api-helper.js?v=2"></script>
     <script src="i18n.js?v=6"></script>
@@ -170,6 +170,13 @@
         <!-- RIGHT COLUMN — Booking Summary (sticky) -->
         <div class="rv-right">
             <div class="rv-summary-panel">
+                <!-- Book Now — kept first so the CTA is visible without scrolling -->
+                <button class="rv-book-btn rv-book-btn--top" id="rvBookBtn">
+                    <span class="rv-book-icon">📋</span>
+                    <span data-i18n="reservation.book_now">Book now</span>
+                    <span class="rv-book-price" id="rvBookPrice">—</span>
+                </button>
+
                 <h2 class="rv-summary-title" data-i18n="reservation.booking_details">Your booking details</h2>
 
                 <div class="rv-summary-row">
@@ -220,13 +227,13 @@
                     <strong id="rvSumPayPickup">—</strong>
                 </div>
 
-                <div class="rv-summary-divider"></div>
+                <div class="rv-summary-divider" id="rvSumBreakdownDivider"></div>
 
-                <div class="rv-summary-row rv-label">
+                <div class="rv-summary-row rv-label" id="rvSumBreakdownLabel">
                     <span data-i18n="reservation.price_breakdown">Price Breakdown</span>
                     <span></span>
                 </div>
-                <div class="rv-summary-row">
+                <div class="rv-summary-row" id="rvSumRentalRow">
                     <span id="rvSumRentalLabel">Car Rental</span>
                     <strong id="rvSumRentalTotal">—</strong>
                 </div>
@@ -245,13 +252,6 @@
                     <span data-i18n="reservation.deposit_label">Refundable deposit (cash) · Paid on pickup</span>
                     <strong id="rvSumDeposit">—</strong>
                 </div>
-
-                <!-- Book Now Button -->
-                <button class="rv-book-btn" id="rvBookBtn">
-                    <span class="rv-book-icon">📋</span>
-                    <span data-i18n="reservation.book_now">Book now</span>
-                    <span class="rv-book-price" id="rvBookPrice">—</span>
-                </button>
 
                 <div class="rv-or-divider" data-i18n="reservation.or" style="display:none">OR</div>
 
@@ -343,7 +343,7 @@
     </div>
 
     <script src="otp-modal.js?v=2"></script>
-    <script src="reservation.js?v=13"></script>
+    <script src="reservation.js?v=12"></script>
     <script src="navbar-auth.js?v=4"></script>
     <script src="currency.js?v=4"></script>
 <script src="premium-animations.js?v=3"></script>
