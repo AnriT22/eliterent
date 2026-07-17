@@ -161,7 +161,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/vehicles/homepage — structured data for homepage fleet section
-// Homepage fleet section shows exactly 8 tiles: 3 admin-picked VIP cars + 3 random non-VIP cars + 2 admin ads.
+// Homepage fleet section shows 8 tiles: up to 3 admin-picked cars + backfill to 6 cars + 2 admin ads.
 router.get('/homepage', async (req, res) => {
     try {
         var baseSql = `SELECT v.*,
@@ -177,25 +177,29 @@ router.get('/homepage', async (req, res) => {
             params.push(req.query.country);
         }
 
-        // 3 admin-picked VIP cars (homepage_vip_position 1,2,3) — active VIPs only
+        // Admin-picked homepage cars (slots 1, 2, 3). Assigning a slot IS the admin's
+        // intent, so don't also require the separate VIP flag — that made a slot
+        // silently do nothing whenever the picked car wasn't flagged VIP.
         var vipFeatured = await queryAll(
-            baseSql + ` AND (v.is_vip = 1 OR v.vip_until > NOW()) AND v.homepage_vip_position IN (1,2,3)
+            baseSql + ` AND v.homepage_vip_position IN (1,2,3)
                        ORDER BY v.homepage_vip_position ASC, v.created_at DESC
                        LIMIT 3`,
             params
         );
 
-        // Build a list of excluded IDs so VIP featured cars don't repeat in random pool
+        // Build a list of excluded IDs so featured cars don't repeat in the random pool
         var excludedIds = vipFeatured.map(function (v) { return v.id; });
         var excludeClause = excludedIds.length ? ' AND v.id NOT IN (' + excludedIds.join(',') + ')' : '';
 
-        // 3 random non-VIP cars to fill the remaining car slots
-        // Strict non-VIP: not flagged is_vip AND not within an active vip_until window.
-        var randomCars = await queryAll(
+        // Backfill so the fleet section always shows 6 cars. Previously this was a
+        // hard LIMIT 3, so if fewer than 3 homepage slots were filled the grid was
+        // left with empty tiles.
+        var fillCount = Math.max(0, 6 - vipFeatured.length);
+        var randomCars = fillCount > 0 ? await queryAll(
             baseSql + ` AND v.is_vip = 0 AND (v.vip_until IS NULL OR v.vip_until <= NOW())` + excludeClause +
-            ` ORDER BY RANDOM() LIMIT 3`,
+            ` ORDER BY RANDOM() LIMIT ` + parseInt(fillCount, 10),
             params
-        );
+        ) : [];
 
         res.json({
             vipFeatured: vipFeatured,
