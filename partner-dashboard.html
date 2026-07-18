@@ -8,6 +8,7 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4XTKG24HN6"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-4XTKG24HN6');</script>
     <meta charset="UTF-8">
+    <script src="theme.js?v=1"></script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -26,6 +27,7 @@
     <script src="api-helper.js?v=2"></script>
     <script src="i18n.js?v=6"></script>
 
+    <link rel="stylesheet" href="theme.css?v=1">
 </head>
 
 <body>
@@ -613,13 +615,13 @@
                             <div class="db-form-group">
 
                                 <label class="db-label" data-i18n="partner_dashboard.desc_label">Description</label>
-                                <p style="font-size:12px;color:#A0A3B0;margin:0 0 8px;" data-i18n="partner_dashboard.desc_lang_hint">Write it in any language(s). Visitors see their own language when available, otherwise your default text.</p>
+                                <p style="font-size:12px;color:var(--tt-muted, #A0A3B0);margin:0 0 8px;" data-i18n="partner_dashboard.desc_lang_hint">Write it in any language(s). Visitors see their own language when available, otherwise your default text.</p>
 
                                 <div id="vDescTabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-                                    <button type="button" class="vdesc-tab active" data-lang="en" style="padding:5px 12px;border:1px solid #3A3F4B;background:#C9A84C;color:#1a1400;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">EN</button>
-                                    <button type="button" class="vdesc-tab" data-lang="ka" style="padding:5px 12px;border:1px solid #3A3F4B;background:transparent;color:#EAEAEA;border-radius:8px;font-size:12px;cursor:pointer;">ქარ</button>
-                                    <button type="button" class="vdesc-tab" data-lang="ru" style="padding:5px 12px;border:1px solid #3A3F4B;background:transparent;color:#EAEAEA;border-radius:8px;font-size:12px;cursor:pointer;">РУС</button>
-                                    <button type="button" class="vdesc-tab" data-lang="he" style="padding:5px 12px;border:1px solid #3A3F4B;background:transparent;color:#EAEAEA;border-radius:8px;font-size:12px;cursor:pointer;">עב</button>
+                                    <button type="button" class="vdesc-tab active" data-lang="en" style="padding:5px 12px;border:1px solid var(--tb-border, #3A3F4B);background:#C9A84C;color:#1a1400;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">EN</button>
+                                    <button type="button" class="vdesc-tab" data-lang="ka" style="padding:5px 12px;border:1px solid var(--tb-border, #3A3F4B);background:transparent;color:var(--tt-text, #EAEAEA);border-radius:8px;font-size:12px;cursor:pointer;">ქარ</button>
+                                    <button type="button" class="vdesc-tab" data-lang="ru" style="padding:5px 12px;border:1px solid var(--tb-border, #3A3F4B);background:transparent;color:var(--tt-text, #EAEAEA);border-radius:8px;font-size:12px;cursor:pointer;">РУС</button>
+                                    <button type="button" class="vdesc-tab" data-lang="he" style="padding:5px 12px;border:1px solid var(--tb-border, #3A3F4B);background:transparent;color:var(--tt-text, #EAEAEA);border-radius:8px;font-size:12px;cursor:pointer;">עב</button>
                                 </div>
                                 <textarea class="db-input vdesc-area" id="vDescription" data-lang="en" rows="3" placeholder="Description (English)"></textarea>
                                 <textarea class="db-input vdesc-area" id="vDescriptionKa" data-lang="ka" rows="3" placeholder="აღწერა (ქართულად)" style="display:none;"></textarea>
@@ -988,7 +990,7 @@
 
                                 <p><b>TPL:</b> Covers damage to other vehicles. <b>CDW:</b> Covers rented vehicle damage (not tires/glass/interior). <b>Full Coverage:</b> All damages + theft + roadside assistance.</p>
 
-                                <p style="color:#A0A3B0;font-size:12px;" data-i18n="partner_dashboard.insurance_hint">Leave blank if not offered. Enter 0 for free options.</p>
+                                <p style="color:var(--tt-muted, #A0A3B0);font-size:12px;" data-i18n="partner_dashboard.insurance_hint">Leave blank if not offered. Enter 0 for free options.</p>
 
                             </div>
 
@@ -1280,15 +1282,15 @@
                             <input type="hidden" id="vGalleryUrls" value="[]">
 
                             <div id="vCardPositionWrap" style="display:none;margin-top:14px;">
-                                <label style="display:block;font-size:13px;color:#EAEAEA;margin-bottom:4px;font-weight:600;" data-i18n="partner_dashboard.photo_position_label">Position the main photo on the card</label>
-                                <p style="font-size:12px;color:#A0A3B0;margin:0 0 8px;" data-i18n="partner_dashboard.photo_position_hint">For tall (portrait) photos, drag the slider so the important part stays visible on vehicle cards.</p>
+                                <label style="display:block;font-size:13px;color:var(--tt-text, #EAEAEA);margin-bottom:4px;font-weight:600;" data-i18n="partner_dashboard.photo_position_label">Position the main photo on the card</label>
+                                <p style="font-size:12px;color:var(--tt-muted, #A0A3B0);margin:0 0 8px;" data-i18n="partner_dashboard.photo_position_hint">For tall (portrait) photos, drag the slider so the important part stays visible on vehicle cards.</p>
                                 <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
-                                    <div style="width:240px;height:160px;border-radius:10px;overflow:hidden;background:#1C1E26;border:1px solid #3A3F4B;flex-shrink:0;">
+                                    <div style="width:240px;height:160px;border-radius:10px;overflow:hidden;background:var(--th-surface, #1C1E26);border:1px solid var(--tb-border, #3A3F4B);flex-shrink:0;">
                                         <img id="vCardPreviewImg" src="" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 50%;">
                                     </div>
                                     <div style="flex:1;min-width:180px;">
                                         <input type="range" id="vImageOffsetY" min="0" max="100" value="50" step="1" style="width:100%;">
-                                        <div style="display:flex;justify-content:space-between;font-size:11px;color:#A0A3B0;margin-top:2px;">
+                                        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tt-muted, #A0A3B0);margin-top:2px;">
                                             <span data-i18n="partner_dashboard.photo_pos_top">Show top</span>
                                             <span data-i18n="partner_dashboard.photo_pos_bottom">Show bottom</span>
                                         </div>
@@ -1424,8 +1426,8 @@
 
                 <!-- DRIVER REVIEWS (read-only) -->
                 <div style="margin-top:32px;">
-                    <h3 style="font-size:16px;color:#EAEAEA;margin:0 0 12px;">Driver Reviews</h3>
-                    <div id="partnerDriverReviews" style="color:#A0A3B0;font-size:13px;">Loading reviews...</div>
+                    <h3 style="font-size:16px;color:var(--tt-text, #EAEAEA);margin:0 0 12px;">Driver Reviews</h3>
+                    <div id="partnerDriverReviews" style="color:var(--tt-muted, #A0A3B0);font-size:13px;">Loading reviews...</div>
                 </div>
 
             </div>
@@ -1738,13 +1740,13 @@
 
                         <div id="refApplyBox" style="display:none;margin-top:8px;">
 
-                            <input type="text" id="refApplyInput" placeholder="Enter referral code" style="width:100%;padding:8px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#1C1E26;color:#EAEAEA;font-size:13px;box-sizing:border-box;text-transform:uppercase;">
+                            <input type="text" id="refApplyInput" placeholder="Enter referral code" style="width:100%;padding:8px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-surface, #1C1E26);color:var(--tt-text, #EAEAEA);font-size:13px;box-sizing:border-box;text-transform:uppercase;">
 
                             <button class="btn btn-primary btn-small" id="refApplyBtn" style="margin-top:6px;width:100%;" data-i18n="partner_dashboard.apply_referral">Apply Code</button>
 
                             <div id="refApplyError" style="color:#ef4444;font-size:12px;margin-top:4px;display:none;"></div>
 
-                            <div id="refApplySuccess" style="color:#22c55e;font-size:12px;margin-top:4px;display:none;"></div>
+                            <div id="refApplySuccess" style="color:var(--tt-green2, #22c55e);font-size:12px;margin-top:4px;display:none;"></div>
 
                         </div>
 
@@ -1881,11 +1883,11 @@
                     <div class="db-profile-row"><strong data-i18n="partner_dashboard.profile_phone">Phone:</strong> <span id="profilePhone">-</span></div>
 
                     <div class="db-profile-row"><strong data-i18n="partner_dashboard.profile_company">Company:</strong> <span id="profileCompany">-</span>
-                        <button id="editCompanyBtn" type="button" style="margin-left:8px;background:none;border:1px solid #C9A84C;color:#C9A84C;border-radius:6px;padding:2px 10px;font-size:12px;cursor:pointer;" data-i18n="partner_dashboard.edit_btn">Edit</button>
+                        <button id="editCompanyBtn" type="button" style="margin-left:8px;background:none;border:1px solid var(--tb-gold, #C9A84C);color:var(--tt-gold2, #C9A84C);border-radius:6px;padding:2px 10px;font-size:12px;cursor:pointer;" data-i18n="partner_dashboard.edit_btn">Edit</button>
                         <span id="editCompanyBox" style="display:none;margin-top:8px;">
-                            <input type="text" id="editCompanyInput" maxlength="150" style="padding:8px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#1C1E26;color:#EAEAEA;font-size:13px;min-width:200px;">
+                            <input type="text" id="editCompanyInput" maxlength="150" style="padding:8px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-surface, #1C1E26);color:var(--tt-text, #EAEAEA);font-size:13px;min-width:200px;">
                             <button id="saveCompanyBtn" type="button" style="background:#C9A84C;border:none;color:#1a1400;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;margin-left:6px;" data-i18n="partner_dashboard.save_btn">Save</button>
-                            <button id="cancelCompanyBtn" type="button" style="background:none;border:1px solid #3A3F4B;color:#A0A3B0;border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;margin-left:4px;" data-i18n="partner_dashboard.cancel_btn">Cancel</button>
+                            <button id="cancelCompanyBtn" type="button" style="background:none;border:1px solid var(--tb-border, #3A3F4B);color:var(--tt-muted, #A0A3B0);border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;margin-left:4px;" data-i18n="partner_dashboard.cancel_btn">Cancel</button>
                             <span id="editCompanyError" style="color:#ef4444;font-size:12px;display:block;margin-top:4px;"></span>
                         </span>
                     </div>
@@ -1914,7 +1916,7 @@
 
                             <h3 id="ppvTitle" style="margin:0;font-size:15px;font-weight:700;"></h3>
 
-                            <p id="ppvDesc" style="margin:4px 0 0;font-size:13px;color:#A0A3B0;"></p>
+                            <p id="ppvDesc" style="margin:4px 0 0;font-size:13px;color:var(--tt-muted, #A0A3B0);"></p>
 
                         </div>
 
@@ -2010,7 +2012,7 @@
 
                     <p style="margin:0 0 12px;font-size:12px;color:#64748b;" data-i18n="partner_dashboard.hours_hint">Block an exact date &amp; time range for this vehicle. A 2-hour buffer is added automatically after the end time so you can receive, inspect and prepare the car.</p>
 
-                    <div style="margin:0 0 12px;padding:8px 12px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.35);border-radius:8px;font-size:12px;color:#C9A84C;display:flex;align-items:center;gap:6px;">
+                    <div style="margin:0 0 12px;padding:8px 12px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.35);border-radius:8px;font-size:12px;color:var(--tt-gold2, #C9A84C);display:flex;align-items:center;gap:6px;">
                         <span style="font-size:14px;">📅</span>
                         <span data-i18n-html="partner_dashboard.date_format_hint">Pick the <strong>From</strong> date first, then the <strong>To</strong> date. Dates show as Day / Month / Year, and the end must be after the start.</span>
                     </div>
@@ -2200,9 +2202,9 @@
         #vipBonusBanner strong { color:#1a1400; }
         @keyframes vbbPulse { 0%,100%{ box-shadow:0 4px 14px rgba(201,168,76,0.35);} 50%{ box-shadow:0 4px 22px rgba(201,168,76,0.65);} }
         #vipCarBalances { display:flex; gap:12px; margin:14px 0; }
-        .vip-bal-card { flex:1; background:#1C1E26; border:1px solid #2A2E38; border-radius:10px; padding:12px 14px; display:flex; flex-direction:column; gap:4px; }
-        .vip-bal-card span { font-size:11px; color:#A0A3B0; text-transform:uppercase; letter-spacing:0.4px; }
-        .vip-bal-card strong { font-size:20px; color:#C9A84C; }
+        .vip-bal-card { flex:1; background:var(--th-surface, #1C1E26); border:1px solid #2A2E38; border-radius:10px; padding:12px 14px; display:flex; flex-direction:column; gap:4px; }
+        .vip-bal-card span { font-size:11px; color:var(--tt-muted, #A0A3B0); text-transform:uppercase; letter-spacing:0.4px; }
+        .vip-bal-card strong { font-size:20px; color:var(--tt-gold2, #C9A84C); }
         #vipCarActions { display:flex; flex-direction:column; gap:8px; }
         #vipCarActions .btn { width:100%; }
         #vipCarActions .vip-top { width:auto; display:inline-block; }

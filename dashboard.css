@@ -6,7 +6,7 @@
 .db-layout {
     display: flex;
     min-height: calc(100vh - 70px);
-    background: #0F0F0F;
+    background: var(--th-bg3, #0F0F0F);
     max-width: 100vw;
     overflow-x: hidden;
 }
@@ -15,8 +15,8 @@
 .db-sidebar {
     width: 260px;
     min-width: 260px;
-    background: #1A1814;
-    border-right: 1px solid #2A2520;
+    background: var(--tw-surface, #1A1814);
+    border-right: 1px solid var(--tb-borderw, #2A2520);
     padding: 24px 0;
     position: sticky;
     top: 70px;
@@ -28,7 +28,7 @@
 
 .db-sidebar-header {
     padding: 0 20px 20px;
-    border-bottom: 1px solid #2A2520;
+    border-bottom: 1px solid var(--tb-borderw, #2A2520);
     margin-bottom: 12px;
     display: flex;
     align-items: center;
@@ -38,7 +38,7 @@
 .db-sidebar-header h3 {
     font-size: 16px;
     font-weight: 700;
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -55,7 +55,7 @@
 
 .db-badge-partner {
     background: rgba(201,168,76,0.15);
-    color: #C9A84C;
+    color: var(--tt-gold2, #C9A84C);
 }
 
 /* Sidebar Nav */
@@ -74,14 +74,14 @@
     border-radius: 10px;
     font-size: 14px;
     font-weight: 600;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     text-decoration: none;
     transition: all 0.2s;
 }
 
 .db-nav-item:hover {
     background: rgba(201,168,76,0.08);
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
 }
 
 .db-nav-item.active {
@@ -128,7 +128,7 @@
 .db-tab-header h2 {
     font-size: 24px;
     font-weight: 700;
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
     word-break: break-word;
     overflow-wrap: break-word;
 }
@@ -155,20 +155,20 @@
     gap: 12px;
     padding: 60px 20px;
     text-align: center;
-    background: #1A1814;
-    border: 2px dashed #2A2520;
+    background: var(--tw-surface, #1A1814);
+    border: 2px dashed var(--tb-borderw, #2A2520);
     border-radius: 16px;
 }
 
 .db-empty-state h3 {
     font-size: 18px;
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
     margin: 0;
 }
 
 .db-empty-state p {
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     margin: 0;
 }
 
@@ -181,8 +181,8 @@
 
 /* Vehicle Card (dashboard) */
 .db-vehicle-card {
-    background: #1A1814;
-    border: 1px solid #2A2520;
+    background: var(--tw-surface, #1A1814);
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 14px;
     overflow: hidden;
     transition: box-shadow 0.2s;
@@ -196,7 +196,7 @@
     width: 100%;
     height: 160px;
     object-fit: cover;
-    background: #151210;
+    background: var(--tw-bg, #151210);
 }
 
 .db-vehicle-body {
@@ -206,7 +206,7 @@
 .db-vehicle-name {
     font-size: 16px;
     font-weight: 700;
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
     margin-bottom: 6px;
 }
 
@@ -222,21 +222,21 @@
     font-weight: 600;
     padding: 3px 8px;
     border-radius: 6px;
-    background: #2A2520;
-    color: #9A9082;
+    background: var(--tw-raised, #2A2520);
+    color: var(--tt-muted3, #9A9082);
 }
 
 .db-vehicle-price {
     font-size: 20px;
     font-weight: 800;
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
     margin-bottom: 12px;
 }
 
 .db-vehicle-price span {
     font-size: 13px;
     font-weight: 500;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
 }
 
 .db-vehicle-status {
@@ -260,36 +260,36 @@
 
 .db-vehicle-status.pending {
     background: rgba(201,168,76,0.15);
-    color: #C9A84C;
+    color: var(--tt-gold2, #C9A84C);
 }
 
 .db-vehicle-actions {
     display: flex;
     gap: 8px;
-    border-top: 1px solid #2A2520;
+    border-top: 1px solid var(--tb-borderw, #2A2520);
     padding-top: 12px;
 }
 
 .db-vehicle-actions button {
     flex: 1;
     padding: 8px;
-    border: 1px solid #2A2520;
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 8px;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    background: #1A1814;
-    color: #9A9082;
+    background: var(--tw-surface, #1A1814);
+    color: var(--tt-muted3, #9A9082);
 }
 
 .db-vehicle-actions button:hover {
-    background: #2A2520;
+    background: var(--tw-raised, #2A2520);
 }
 
 .db-vehicle-actions .db-btn-edit {
-    color: #C9A84C;
-    border-color: #C9A84C;
+    color: var(--tt-gold2, #C9A84C);
+    border-color: var(--tb-gold, #C9A84C);
 }
 
 .db-vehicle-actions .db-btn-edit:hover {
@@ -310,20 +310,20 @@
    ======================================== */
 
 .db-upload-area {
-    border: 2px dashed #2A2520;
+    border: 2px dashed var(--tb-borderw, #2A2520);
     border-radius: 12px;
     padding: 20px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
-    background: #151210;
+    background: var(--tw-bg, #151210);
     min-height: 120px;
     position: relative;
 }
 
 .db-upload-area:hover,
 .db-upload-area.dragover {
-    border-color: #C9A84C;
+    border-color: var(--tb-gold, #C9A84C);
     background: rgba(201, 168, 76, 0.05);
 }
 
@@ -332,7 +332,7 @@
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     font-size: 14px;
     font-weight: 600;
 }
@@ -356,7 +356,7 @@
     height: 90px;
     border-radius: 10px;
     overflow: hidden;
-    border: 2px solid #2A2520;
+    border: 2px solid var(--tb-borderw, #2A2520);
 }
 
 .db-upload-thumb img {
@@ -388,7 +388,7 @@
 }
 
 .db-upload-thumb.main-photo {
-    border-color: #C9A84C;
+    border-color: var(--tb-gold, #C9A84C);
 }
 
 .db-thumb-main-badge {
@@ -413,7 +413,7 @@
     height: 22px;
     border-radius: 50%;
     background: rgba(0,0,0,0.5);
-    color: #fbbf24;
+    color: var(--tt-amber, #fbbf24);
     border: none;
     font-size: 14px;
     cursor: pointer;
@@ -460,7 +460,7 @@
 .db-label {
     font-size: 13px;
     font-weight: 500;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     text-transform: none;
     letter-spacing: 0;
 }
@@ -468,11 +468,11 @@
 .db-input {
     padding: 12px 0;
     border: none;
-    border-bottom: 1.5px solid #2A2520;
+    border-bottom: 1.5px solid var(--tb-borderw, #2A2520);
     border-radius: 0;
     font-size: 15px;
     font-family: inherit;
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
     background: transparent;
     outline: none;
     transition: border-color 0.2s;
@@ -481,7 +481,7 @@
 }
 
 .db-input:focus {
-    border-bottom-color: #C9A84C;
+    border-bottom-color: var(--tb-gold, #C9A84C);
     box-shadow: none;
     background: transparent;
 }
@@ -503,21 +503,21 @@ select.db-input.vf-invalid {
 }
 
 .db-input::placeholder {
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
 }
 
 textarea.db-input {
     resize: vertical;
     min-height: 60px;
-    border: 1.5px solid #2A2520;
+    border: 1.5px solid var(--tb-borderw, #2A2520);
     border-radius: 10px;
     padding: 10px 14px;
-    background: #151210;
+    background: var(--tw-bg, #151210);
 }
 
 textarea.db-input:focus {
-    border-color: #C9A84C;
-    background: #1A1814;
+    border-color: var(--tb-gold, #C9A84C);
+    background: var(--tw-surface, #1A1814);
 }
 
 select.db-input {
@@ -529,13 +529,13 @@ select.db-input {
     background-repeat: no-repeat;
     background-position: right 4px center;
     padding-right: 24px;
-    background-color: #1A1814;
+    background-color: var(--tw-surface, #1A1814);
 }
 
 select.db-input option,
 select.db-input optgroup {
-    background: #1A1814;
-    color: #F0ECE2;
+    background: var(--tw-surface, #1A1814);
+    color: var(--tt-text2, #F0ECE2);
 }
 
 select.db-input option:checked {
@@ -554,15 +554,15 @@ select.db-input option:checked {
     align-items: center;
     gap: 10px;
     padding: 10px 14px;
-    background: #151210;
-    border: 1.5px solid #2A2520;
+    background: var(--tw-bg, #151210);
+    border: 1.5px solid var(--tb-borderw, #2A2520);
     border-radius: 10px;
     cursor: text;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .brand-search-input:focus-within {
-    border-color: #C9A84C;
+    border-color: var(--tb-gold, #C9A84C);
     box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.08);
 }
 
@@ -571,20 +571,20 @@ select.db-input option:checked {
 }
 
 .brand-search-icon {
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     flex-shrink: 0;
     transition: color 0.2s;
 }
 
 .brand-search-input:focus-within .brand-search-icon {
-    color: #C9A84C;
+    color: var(--tt-gold2, #C9A84C);
 }
 
 .brand-search-field {
     flex: 1;
     border: none;
     background: transparent;
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
     font-size: 14px;
     font-weight: 500;
     outline: none;
@@ -597,14 +597,14 @@ select.db-input option:checked {
 }
 
 .brand-chevron {
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     flex-shrink: 0;
     transition: transform 0.2s, color 0.2s;
 }
 
 .brand-search-wrapper.open .brand-chevron {
     transform: rotate(180deg);
-    color: #C9A84C;
+    color: var(--tt-gold2, #C9A84C);
 }
 
 .brand-dropdown {
@@ -612,8 +612,8 @@ select.db-input option:checked {
     top: calc(100% + 6px);
     left: 0;
     right: 0;
-    background: #1A1814;
-    border: 1.5px solid #2A2520;
+    background: var(--tw-surface, #1A1814);
+    border: 1.5px solid var(--tb-borderw, #2A2520);
     border-radius: 12px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(201, 168, 76, 0.05);
     z-index: 999;
@@ -636,7 +636,7 @@ select.db-input option:checked {
     overflow-y: auto;
     padding: 6px;
     scrollbar-width: thin;
-    scrollbar-color: #3A3520 transparent;
+    scrollbar-color: var(--tw-raised5, #3A3520) transparent;
 }
 
 .brand-dropdown-list::-webkit-scrollbar {
@@ -648,7 +648,7 @@ select.db-input option:checked {
 }
 
 .brand-dropdown-list::-webkit-scrollbar-thumb {
-    background: #3A3520;
+    background: var(--tw-raised5, #3A3520);
     border-radius: 10px;
 }
 
@@ -667,12 +667,12 @@ select.db-input option:checked {
 
 .brand-dropdown-item:hover {
     background: rgba(201, 168, 76, 0.08);
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
 }
 
 .brand-dropdown-item.selected {
     background: rgba(201, 168, 76, 0.12);
-    color: #C9A84C;
+    color: var(--tt-gold2, #C9A84C);
     font-weight: 600;
 }
 
@@ -699,11 +699,11 @@ select.db-input option:checked {
     align-items: center;
     justify-content: center;
     background: rgba(201, 168, 76, 0.06);
-    border: 1px solid #2A2520;
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 6px;
     font-size: 12px;
     font-weight: 700;
-    color: #C9A84C;
+    color: var(--tt-gold2, #C9A84C);
     flex-shrink: 0;
 }
 
@@ -725,7 +725,7 @@ select.db-input option:checked {
     gap: 8px;
     font-size: 13px;
     font-weight: 600;
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
     cursor: pointer;
     padding-top: 20px;
 }
@@ -740,7 +740,7 @@ select.db-input option:checked {
 /* ── Field hint ── */
 .db-field-hint {
     font-size: 12px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     margin: -4px 0 10px;
     line-height: 1.4;
 }
@@ -759,8 +759,8 @@ select.db-input option:checked {
     margin-top: 4px;
     max-height: 280px;
     overflow-y: auto;
-    background: #1C1E26;
-    border: 1px solid #3A3F4B;
+    background: var(--th-surface, #1C1E26);
+    border: 1px solid var(--tb-border, #3A3F4B);
     border-radius: 10px;
     box-shadow: 0 12px 28px rgba(0,0,0,0.4);
     -webkit-overflow-scrolling: touch;
@@ -775,7 +775,7 @@ select.db-input option:checked {
     gap: 12px;
     padding: 10px 14px;
     cursor: pointer;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid var(--tf-05, rgba(255,255,255,0.05));
 }
 .vf-city-item:last-child {
     border-bottom: none;
@@ -786,12 +786,12 @@ select.db-input option:checked {
 }
 .vf-city-name {
     font-size: 14px;
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
     font-weight: 500;
 }
 .vf-city-region {
     font-size: 12px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     white-space: nowrap;
 }
 
@@ -805,9 +805,9 @@ select.db-input option:checked {
     grid-template-columns: 200px 1fr auto;
     gap: 10px;
     padding: 12px 14px;
-    border: 1px solid #2A2520;
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 10px;
-    background: #151210;
+    background: var(--tw-bg, #151210);
     align-items: center;
 }
 .db-loc-enable {
@@ -816,7 +816,7 @@ select.db-input option:checked {
     gap: 8px;
     font-size: 13px;
     font-weight: 700;
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
     white-space: nowrap;
 }
 .db-loc-enable input[type="checkbox"] {
@@ -842,7 +842,7 @@ select.db-input option:checked {
     gap: 4px;
     font-size: 13px;
     font-weight: 600;
-    color: #cbd5e1;
+    color: var(--tt-soft, #cbd5e1);
 }
 .db-loc-price-wrap .db-loc-price {
     width: 80px;
@@ -860,14 +860,14 @@ select.db-input option:checked {
     align-items: center;
     gap: 10px;
     padding: 12px 14px;
-    border: 1px solid #2A2520;
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 10px;
-    background: #151210;
+    background: var(--tw-bg, #151210);
     cursor: pointer;
     transition: all 0.15s;
 }
 .db-pm-option:has(input:checked) {
-    border-color: #C9A84C;
+    border-color: var(--tb-gold, #C9A84C);
     background: rgba(201,168,76,0.1);
 }
 .db-pm-option input[type="checkbox"] {
@@ -878,12 +878,12 @@ select.db-input option:checked {
 .db-pm-option span {
     font-size: 13px;
     font-weight: 700;
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
 }
 .db-pm-option small {
     margin-left: auto;
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
 }
 
 /* ── Insurance Builder ── */
@@ -896,9 +896,9 @@ select.db-input option:checked {
     align-items: center;
     gap: 12px;
     padding: 14px 16px;
-    border: 1px solid #2A2520;
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 10px;
-    background: #151210;
+    background: var(--tw-bg, #151210);
     cursor: pointer;
     transition: all 0.15s;
 }
@@ -917,13 +917,13 @@ select.db-input option:checked {
 }
 .db-ins-info strong {
     font-size: 13px;
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
     display: block;
     margin-bottom: 2px;
 }
 .db-ins-info small {
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     line-height: 1.3;
 }
 .db-ins-badge {
@@ -951,9 +951,9 @@ select.db-input option:checked {
     grid-template-columns: 180px 1fr 140px;
     gap: 10px;
     padding: 14px;
-    border: 1px solid #2A2520;
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 12px;
-    background: #151210;
+    background: var(--tw-bg, #151210);
 }
 
 .db-service-enable {
@@ -962,7 +962,7 @@ select.db-input option:checked {
     gap: 8px;
     font-size: 13px;
     font-weight: 700;
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
 }
 
 .db-service-enable input[type="checkbox"] {
@@ -986,8 +986,8 @@ select.db-input option:checked {
     gap: 0;
     margin-bottom: 28px;
     padding: 20px 24px;
-    background: #1A1814;
-    border: 1px solid #2A2520;
+    background: var(--tw-surface, #1A1814);
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 12px;
 }
 
@@ -1001,14 +1001,14 @@ select.db-input option:checked {
     transition: all 0.2s;
 }
 
-.wz-step:hover { background: #2A2520; }
+.wz-step:hover { background: var(--tw-raised, #2A2520); }
 
 .wz-num {
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: #2A2520;
-    color: #9A9082;
+    background: var(--tw-raised, #2A2520);
+    color: var(--tt-muted3, #9A9082);
     font-size: 13px;
     font-weight: 700;
     display: flex;
@@ -1021,7 +1021,7 @@ select.db-input option:checked {
 .wz-label {
     font-size: 13px;
     font-weight: 600;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     transition: color 0.3s;
     white-space: nowrap;
 }
@@ -1029,7 +1029,7 @@ select.db-input option:checked {
 .wz-line {
     flex: 1;
     height: 2px;
-    background: #2A2520;
+    background: var(--tw-raised, #2A2520);
     margin: 0 4px;
     min-width: 16px;
     max-width: 60px;
@@ -1042,8 +1042,8 @@ select.db-input option:checked {
     color: #fff;
 }
 
-.wz-step.active .wz-label { color: #F0ECE2; }
-.wz-step.completed .wz-label { color: #C9A84C; }
+.wz-step.active .wz-label { color: var(--tt-text2, #F0ECE2); }
+.wz-step.completed .wz-label { color: var(--tt-gold2, #C9A84C); }
 .wz-step.completed .wz-num { background: #22c55e; }
 
 .wz-line.done { background: #22c55e; }
@@ -1088,7 +1088,7 @@ select.db-input option:checked {
     height: 40px;
     border-radius: 50%;
     background: var(--sw-color);
-    border: 3px solid #2A2520;
+    border: 3px solid var(--tb-borderw, #2A2520);
     cursor: pointer;
     position: relative;
     transition: all 0.2s;
@@ -1104,7 +1104,7 @@ select.db-input option:checked {
 }
 
 .color-swatch.selected {
-    border-color: #C9A84C;
+    border-color: var(--tb-gold, #C9A84C);
     box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.3);
     transform: scale(1.1);
 }
@@ -1126,7 +1126,7 @@ select.db-input option:checked {
     margin-top: 10px;
     font-size: 13px;
     font-weight: 600;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
 }
 
 /* ========================================
@@ -1143,7 +1143,7 @@ select.db-input option:checked {
 .upload-progress-bar {
     flex: 1;
     height: 6px;
-    background: #2A2520;
+    background: var(--tw-raised, #2A2520);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -1159,7 +1159,7 @@ select.db-input option:checked {
 .upload-progress-text {
     font-size: 12px;
     font-weight: 600;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     white-space: nowrap;
 }
 
@@ -1199,8 +1199,8 @@ select.db-input option:checked {
    ======================================== */
 
 .vf-section {
-    background: #1A1814;
-    border: 1px solid #2A2520;
+    background: var(--tw-surface, #1A1814);
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 12px;
     padding: 28px 32px;
     margin-bottom: 20px;
@@ -1209,12 +1209,12 @@ select.db-input option:checked {
 .vf-section-title {
     font-size: 15px;
     font-weight: 800;
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     padding-bottom: 12px;
     margin-bottom: 24px;
-    border-bottom: 3px solid #C9A84C;
+    border-bottom: 3px solid var(--tb-gold, #C9A84C);
 }
 
 .vf-sub-section {
@@ -1233,15 +1233,15 @@ select.db-input option:checked {
     display: flex;
     align-items: flex-start;
     gap: 14px;
-    background: #151210;
-    border: 1.5px solid #2A2520;
+    background: var(--tw-bg, #151210);
+    border: 1.5px solid var(--tb-borderw, #2A2520);
     border-radius: 12px;
     padding: 16px 18px;
     transition: border-color 0.2s;
 }
 
 .vf-filter-card:focus-within {
-    border-color: #C9A84C;
+    border-color: var(--tb-gold, #C9A84C);
     background: rgba(201,168,76,0.08);
 }
 
@@ -1254,7 +1254,7 @@ select.db-input option:checked {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    color: #C9A84C;
+    color: var(--tt-gold2, #C9A84C);
 }
 
 .vf-filter-card-body {
@@ -1275,7 +1275,7 @@ select.db-input option:checked {
 .vf-sub-title {
     font-size: 14px;
     font-weight: 700;
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
     margin-bottom: 14px;
 }
 
@@ -1336,7 +1336,7 @@ select.db-input option:checked {
     gap: 12px;
     font-size: 14px;
     font-weight: 600;
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
 }
 
 /* Toggles row (side by side) */
@@ -1358,7 +1358,7 @@ select.db-input option:checked {
     gap: 8px;
     font-size: 14px;
     font-weight: 500;
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
     cursor: pointer;
     padding: 4px 0;
 }
@@ -1384,26 +1384,26 @@ select.db-input option:checked {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    background: #151210;
-    border: 1px solid #2A2520;
+    background: var(--tw-bg, #151210);
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 10px;
     padding: 18px 22px;
 }
 
 /* Info box */
 .vf-info-box {
-    background: #151210;
-    border: 1px solid #2A2520;
+    background: var(--tw-bg, #151210);
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 10px;
     padding: 18px 22px;
     margin-bottom: 20px;
     font-size: 13px;
     line-height: 1.6;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
 }
 
 .vf-info-box strong {
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
     display: block;
     margin-bottom: 8px;
 }
@@ -1463,8 +1463,8 @@ select.db-input option:checked {
 
 /* Profile Card */
 .db-profile-card {
-    background: #1A1814;
-    border: 1px solid #2A2520;
+    background: var(--tw-surface, #1A1814);
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 16px;
     padding: 28px;
     display: flex;
@@ -1477,14 +1477,14 @@ select.db-input option:checked {
     display: flex;
     gap: 12px;
     font-size: 14px;
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
     padding-bottom: 10px;
-    border-bottom: 1px solid #2A2520;
+    border-bottom: 1px solid var(--tb-borderw, #2A2520);
 }
 
 .db-profile-row strong {
     min-width: 120px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     font-weight: 600;
 }
 
@@ -1519,7 +1519,7 @@ select.db-input option:checked {
    ======================================== */
 
 .db-passport-upload {
-    border: 2px dashed #2A2520;
+    border: 2px dashed var(--tb-borderw, #2A2520);
     border-radius: 10px;
     padding: 16px;
     text-align: center;
@@ -1530,11 +1530,11 @@ select.db-input option:checked {
     align-items: center;
     justify-content: center;
     position: relative;
-    background: #151210;
+    background: var(--tw-bg, #151210);
 }
 
 .db-passport-upload:hover {
-    border-color: #C9A84C;
+    border-color: var(--tb-gold, #C9A84C);
     background: rgba(201,168,76,0.05);
 }
 
@@ -1550,7 +1550,7 @@ select.db-input option:checked {
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     font-size: 12px;
     font-weight: 600;
 }
@@ -1610,7 +1610,7 @@ select.db-input option:checked {
 
 .availability-modal-content {
     position: relative;
-    background: #1A1814;
+    background: var(--tw-surface, #1A1814);
     border-radius: 16px;
     width: 90%;
     max-width: 600px;
@@ -1624,14 +1624,14 @@ select.db-input option:checked {
     align-items: center;
     justify-content: space-between;
     padding: 20px 24px;
-    border-bottom: 1px solid #2A2520;
+    border-bottom: 1px solid var(--tb-borderw, #2A2520);
 }
 
 .availability-modal-header h3 {
     margin: 0;
     font-size: 18px;
     font-weight: 700;
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
 }
 
 .availability-modal-close {
@@ -1639,8 +1639,8 @@ select.db-input option:checked {
     height: 32px;
     border-radius: 8px;
     border: none;
-    background: #2A2520;
-    color: #94a3b8;
+    background: var(--tw-raised, #2A2520);
+    color: var(--tt-muted2, #94a3b8);
     font-size: 18px;
     cursor: pointer;
     display: flex;
@@ -1650,8 +1650,8 @@ select.db-input option:checked {
 }
 
 .availability-modal-close:hover {
-    background: #352F28;
-    color: #EAEAEA;
+    background: var(--tw-raised3, #352F28);
+    color: var(--tt-text, #EAEAEA);
 }
 
 .availability-modal-body {
@@ -1671,9 +1671,9 @@ select.db-input option:checked {
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    border: 1px solid #2A2520;
-    background: #1A1814;
-    color: #94a3b8;
+    border: 1px solid var(--tb-borderw, #2A2520);
+    background: var(--tw-surface, #1A1814);
+    color: var(--tt-muted2, #94a3b8);
     font-size: 16px;
     cursor: pointer;
     display: flex;
@@ -1683,7 +1683,7 @@ select.db-input option:checked {
 }
 
 .availability-nav-btn:hover {
-    background: #2A2520;
+    background: var(--tw-raised, #2A2520);
     border-color: rgba(201,168,76,0.3);
 }
 
@@ -1691,7 +1691,7 @@ select.db-input option:checked {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
 }
 
 .availability-calendar-grid {
@@ -1705,15 +1705,15 @@ select.db-input option:checked {
     text-align: center;
     font-size: 12px;
     font-weight: 600;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     padding: 8px 4px;
 }
 
 .availability-day {
     aspect-ratio: 1;
-    border: 1px solid #2A2520;
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 8px;
-    background: #1A1814;
+    background: var(--tw-surface, #1A1814);
     cursor: pointer;
     position: relative;
     display: flex;
@@ -1721,18 +1721,18 @@ select.db-input option:checked {
     justify-content: center;
     font-size: 13px;
     font-weight: 500;
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
     transition: all 0.2s;
 }
 
 .availability-day:hover {
     border-color: rgba(201,168,76,0.3);
-    background: #2A2520;
+    background: var(--tw-raised, #2A2520);
 }
 
 .availability-day.other-month {
     color: #555;
-    background: #141210;
+    background: var(--tw-bg2, #141210);
     cursor: default;
 }
 
@@ -1749,8 +1749,8 @@ select.db-input option:checked {
 }
 
 .availability-day.past {
-    background: #141210;
-    border-color: #1A1814;
+    background: var(--tw-bg2, #141210);
+    border-color: var(--tb-borderw2, #1A1814);
     color: #555;
     cursor: not-allowed;
     pointer-events: none;
@@ -1760,7 +1760,7 @@ select.db-input option:checked {
 .availability-day.booked {
     background: rgba(201,168,76,0.15);
     border-color: rgba(201,168,76,0.3);
-    color: #C9A84C;
+    color: var(--tt-gold2, #C9A84C);
     cursor: not-allowed;
 }
 
@@ -1785,7 +1785,7 @@ select.db-input option:checked {
     gap: 20px;
     margin-bottom: 20px;
     padding: 16px;
-    background: #1A1814;
+    background: var(--tw-surface, #1A1814);
     border-radius: 12px;
 }
 
@@ -1794,14 +1794,14 @@ select.db-input option:checked {
     align-items: center;
     gap: 8px;
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
 }
 
 .legend-color {
     width: 16px;
     height: 16px;
     border-radius: 4px;
-    border: 1px solid #2A2520;
+    border: 1px solid var(--tb-borderw, #2A2520);
 }
 
 .legend-color.available {
@@ -1824,13 +1824,13 @@ select.db-input option:checked {
     gap: 12px;
     justify-content: flex-end;
     padding-top: 16px;
-    border-top: 1px solid #2A2520;
+    border-top: 1px solid var(--tb-borderw, #2A2520);
 }
 
 .btn-secondary {
-    background: #2A2520;
-    color: #9A9082;
-    border: 1px solid #2A2520;
+    background: var(--tw-raised, #2A2520);
+    color: var(--tt-muted3, #9A9082);
+    border: 1px solid var(--tb-borderw, #2A2520);
     padding: 8px 16px;
     border-radius: 8px;
     font-size: 14px;
@@ -1840,8 +1840,8 @@ select.db-input option:checked {
 }
 
 .btn-secondary:hover {
-    background: #3A3530;
-    color: #F0ECE2;
+    background: var(--tw-raised4, #3A3530);
+    color: var(--tt-text2, #F0ECE2);
 }
 
 .btn-primary {
@@ -1887,9 +1887,9 @@ select.db-input option:checked {
 }
 
 .db-booking-card {
-    background: #1A1814;
+    background: var(--tw-surface, #1A1814);
     border-radius: 16px;
-    border: 1px solid #2A2520;
+    border: 1px solid var(--tb-borderw, #2A2520);
     display: flex;
     gap: 16px;
     align-items: flex-start;
@@ -1923,7 +1923,7 @@ select.db-input option:checked {
 .db-booking-vehicle {
     font-size: 16px;
     font-weight: 700;
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
 }
 
 .db-booking-status {
@@ -1936,32 +1936,32 @@ select.db-input option:checked {
 
 .db-booking-guest {
     font-size: 13px;
-    color: #cbd5e1;
+    color: var(--tt-soft, #cbd5e1);
     margin-bottom: 4px;
 }
 
 .db-booking-dates {
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     margin-bottom: 3px;
 }
 
 .db-booking-loc {
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     margin-bottom: 3px;
 }
 
 .db-booking-notes {
     font-size: 12px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     font-style: italic;
     margin-bottom: 3px;
 }
 
 .db-booking-price {
     font-size: 14px;
-    color: #cbd5e1;
+    color: var(--tt-soft, #cbd5e1);
     margin-top: 4px;
 }
 
@@ -2025,7 +2025,7 @@ select.db-input option:checked {
         position: static;
         height: auto;
         border-right: none;
-        border-bottom: 1px solid #2A2520;
+        border-bottom: 1px solid var(--tb-borderw, #2A2520);
         padding: 12px 0 0;
         flex-direction: column;
     }
@@ -2059,7 +2059,7 @@ select.db-input option:checked {
     }
     .db-nav-item.active {
         border-left: none;
-        border-bottom: 3px solid #C9A84C;
+        border-bottom: 3px solid var(--tb-gold, #C9A84C);
         background: rgba(201,168,76,0.1);
     }
     .db-nav-item svg { display: none; }
@@ -2155,8 +2155,8 @@ select.db-input option:checked {
 }
 
 .fin-stat-card {
-    background: #1A1814;
-    border: 1px solid #2A2520;
+    background: var(--tw-surface, #1A1814);
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 12px;
     padding: 20px;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -2176,7 +2176,7 @@ select.db-input option:checked {
 
 .fin-stat-label {
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -2185,7 +2185,7 @@ select.db-input option:checked {
 .fin-stat-value {
     font-size: 32px;
     font-weight: 800;
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
     margin-bottom: 8px;
 }
 
@@ -2198,7 +2198,7 @@ select.db-input option:checked {
 }
 
 .fin-stat-change.positive {
-    color: #22c55e;
+    color: var(--tt-green2, #22c55e);
 }
 
 .fin-stat-change.negative {
@@ -2207,7 +2207,7 @@ select.db-input option:checked {
 
 .fin-stat-subtitle {
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
 }
 
 .fin-charts-row {
@@ -2218,8 +2218,8 @@ select.db-input option:checked {
 }
 
 .fin-chart-card {
-    background: #1A1814;
-    border: 1px solid #2A2520;
+    background: var(--tw-surface, #1A1814);
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 12px;
     padding: 24px;
 }
@@ -2231,7 +2231,7 @@ select.db-input option:checked {
 .fin-chart-header h3 {
     font-size: 16px;
     font-weight: 700;
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
 }
 
 .fin-chart-container {
@@ -2249,7 +2249,7 @@ select.db-input option:checked {
 }
 
 .fin-table thead {
-    background: #1A1814;
+    background: var(--tw-surface, #1A1814);
 }
 
 .fin-table th {
@@ -2257,17 +2257,17 @@ select.db-input option:checked {
     text-align: left;
     font-size: 12px;
     font-weight: 700;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-bottom: 2px solid #2A2520;
+    border-bottom: 2px solid var(--tb-borderw, #2A2520);
 }
 
 .fin-table td {
     padding: 16px;
-    border-bottom: 1px solid #2A2520;
+    border-bottom: 1px solid var(--tb-borderw, #2A2520);
     font-size: 14px;
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
 }
 
 .fin-table tbody tr:hover {
@@ -2289,7 +2289,7 @@ select.db-input option:checked {
 
 .fin-status-active {
     background: rgba(201,168,76,0.15);
-    color: #C9A84C;
+    color: var(--tt-gold2, #C9A84C);
 }
 
 .fin-status-pending {
@@ -2345,8 +2345,8 @@ select.db-input option:checked {
 }
 
 .vip-modal {
-    background: #1A1814;
-    border: 1px solid #2A2520;
+    background: var(--tw-surface, #1A1814);
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 20px;
     width: 100%;
     max-width: 420px;
@@ -2370,8 +2370,8 @@ select.db-input option:checked {
     height: 32px;
     border-radius: 50%;
     border: none;
-    background: rgba(255,255,255,0.08);
-    color: #EAEAEA;
+    background: var(--tf-08, rgba(255,255,255,0.08));
+    color: var(--tt-text, #EAEAEA);
     font-size: 22px;
     line-height: 1;
     cursor: pointer;
@@ -2383,14 +2383,14 @@ select.db-input option:checked {
 }
 
 .vip-modal-close:hover {
-    background: rgba(255,255,255,0.15);
-    color: #fff;
+    background: var(--tf-15, rgba(255,255,255,0.15));
+    color: var(--tt-text, #fff);
 }
 
 .vip-modal-header {
     text-align: center;
     padding: 30px 24px 18px;
-    border-bottom: 1px solid #2A2520;
+    border-bottom: 1px solid var(--tb-borderw, #2A2520);
 }
 
 .vip-modal-icon {
@@ -2409,18 +2409,18 @@ select.db-input option:checked {
 .vip-modal-title {
     font-size: 22px;
     font-weight: 700;
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
     margin: 0 0 6px;
 }
 
 .vip-modal-subtitle {
     font-size: 14px;
-    color: #A0A3B0;
+    color: var(--tt-muted, #A0A3B0);
     margin: 0;
 }
 
 .vip-modal-subtitle strong {
-    color: #22c55e;
+    color: var(--tt-green2, #22c55e);
 }
 
 .vip-modal-body {
@@ -2428,7 +2428,7 @@ select.db-input option:checked {
 }
 
 .vip-preview-card {
-    background: #0F0F0F;
+    background: var(--th-bg3, #0F0F0F);
     border: 1.5px solid #22c55e;
     border-radius: 14px;
     overflow: hidden;
@@ -2471,13 +2471,13 @@ select.db-input option:checked {
 .vip-preview-body h4 {
     margin: 0 0 6px;
     font-size: 16px;
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
 }
 
 .vip-preview-text {
     margin: 0;
     font-size: 12px;
-    color: #A0A3B0;
+    color: var(--tt-muted, #A0A3B0);
     line-height: 1.5;
 }
 
@@ -2488,14 +2488,14 @@ select.db-input option:checked {
     gap: 10px;
     margin-bottom: 18px;
     padding: 14px 16px;
-    background: #0F0F0F;
+    background: var(--th-bg3, #0F0F0F);
     border-radius: 12px;
-    border: 1px solid #2A2520;
+    border: 1px solid var(--tb-borderw, #2A2520);
 }
 
 .vip-price-label {
     font-size: 14px;
-    color: #A0A3B0;
+    color: var(--tt-muted, #A0A3B0);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -2503,12 +2503,12 @@ select.db-input option:checked {
 .vip-price-amount {
     font-size: 24px;
     font-weight: 800;
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
 }
 
 .vip-price-period {
     font-size: 13px;
-    color: #22c55e;
+    color: var(--tt-green2, #22c55e);
     font-weight: 600;
 }
 
@@ -2516,7 +2516,7 @@ select.db-input option:checked {
     margin-top: 12px;
     padding: 10px 12px;
     background: rgba(239, 68, 68, 0.12);
-    color: #fca5a5;
+    color: var(--tt-redsoft2, #fca5a5);
     border-radius: 10px;
     font-size: 13px;
     text-align: center;
@@ -2526,7 +2526,7 @@ select.db-input option:checked {
     margin-top: 12px;
     padding: 12px;
     background: rgba(34, 197, 94, 0.12);
-    color: #86efac;
+    color: var(--tt-green3, #86efac);
     border-radius: 10px;
     font-size: 14px;
     text-align: center;
@@ -2540,8 +2540,8 @@ select.db-input option:checked {
 
 .vip-btn-secondary {
     background: transparent;
-    border: 1px solid #2A2520;
-    color: #A0A3B0;
+    border: 1px solid var(--tb-borderw, #2A2520);
+    color: var(--tt-muted, #A0A3B0);
     padding: 10px 22px;
     border-radius: 10px;
     font-size: 14px;
@@ -2551,7 +2551,7 @@ select.db-input option:checked {
 
 .vip-btn-secondary:hover {
     border-color: #4A4A5A;
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
 }
 
 #vipPayPalContainer {
@@ -2570,8 +2570,8 @@ select.db-input option:checked {
 }
 
 .db-referral-card {
-    background: #1A1814;
-    border: 1px solid #2A2520;
+    background: var(--tw-surface, #1A1814);
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 14px;
     padding: 18px;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -2583,13 +2583,13 @@ select.db-input option:checked {
 }
 
 .db-referral-card.highlight {
-    border-color: #D4AF37;
-    background: linear-gradient(135deg, rgba(212,175,55,0.08) 0%, #1A1814 100%);
+    border-color: var(--tb-gold2, #D4AF37);
+    background: linear-gradient(135deg, rgba(212,175,55,0.08) 0%, var(--tw-surface, #1A1814) 100%);
 }
 
 .drc-label {
     font-size: 12px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 8px;
@@ -2604,7 +2604,7 @@ select.db-input option:checked {
 .drc-code {
     font-size: 22px;
     font-weight: 800;
-    color: #D4AF37;
+    color: var(--tt-gold, #D4AF37);
     letter-spacing: 2px;
     font-family: monospace;
 }
@@ -2612,7 +2612,7 @@ select.db-input option:checked {
 .drc-value {
     font-size: 22px;
     font-weight: 700;
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
 }
 
 .db-referral-actions {
@@ -2630,8 +2630,8 @@ select.db-input option:checked {
 }
 
 .db-referral-stat {
-    background: #1A1814;
-    border: 1px solid #2A2520;
+    background: var(--tw-surface, #1A1814);
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 12px;
     padding: 16px;
     text-align: center;
@@ -2640,20 +2640,20 @@ select.db-input option:checked {
 .db-referral-stat .label {
     display: block;
     font-size: 12px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     margin-bottom: 6px;
 }
 
 .db-referral-stat .value {
     font-size: 20px;
     font-weight: 700;
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
 }
 
 .db-section-title {
     font-size: 18px;
     font-weight: 700;
-    color: #F0ECE2;
+    color: var(--tt-text2, #F0ECE2);
     margin: 24px 0 12px;
 }
 
@@ -2671,11 +2671,11 @@ select.db-input option:checked {
 .db-referral-table td {
     padding: 14px 16px;
     text-align: left;
-    border-bottom: 1px solid #2A2520;
+    border-bottom: 1px solid var(--tb-borderw, #2A2520);
 }
 
 .db-referral-table th {
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     font-weight: 600;
     font-size: 12px;
     text-transform: uppercase;
@@ -2683,7 +2683,7 @@ select.db-input option:checked {
 }
 
 .db-referral-table td {
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
 }
 
 @media (max-width: 768px) {
@@ -2717,8 +2717,8 @@ select.db-input option:checked {
 }
 
 .db-driver-card {
-    background: #1A1814;
-    border: 1px solid #2A2520;
+    background: var(--tw-surface, #1A1814);
+    border: 1px solid var(--tb-borderw, #2A2520);
     border-radius: 16px;
     padding: 16px;
     display: flex;
@@ -2739,7 +2739,7 @@ select.db-input option:checked {
     height: 72px;
     flex-shrink: 0;
     border-radius: 50%;
-    background-color: #262A35;
+    background-color: var(--th-raised, #262A35);
     background-size: cover;
     background-position: center;
     border: 2px solid rgba(201,168,76,0.35);
@@ -2750,7 +2750,7 @@ select.db-input option:checked {
     margin: 0;
     font-size: 15px;
     font-weight: 700;
-    color: #EAEAEA;
+    color: var(--tt-text, #EAEAEA);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2774,16 +2774,16 @@ select.db-input option:checked {
    so they fell back to the light default button. Scoped to the driver cards so
    other pages using these classes are untouched. */
 .db-driver-actions .btn-text {
-    background: #262A35;
-    border: 1px solid #3A3F4B;
-    color: #EAEAEA;
+    background: var(--th-raised, #262A35);
+    border: 1px solid var(--tb-border, #3A3F4B);
+    color: var(--tt-text, #EAEAEA);
     border-radius: 8px;
     cursor: pointer;
     transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
 }
 .db-driver-actions .btn-text:hover {
-    border-color: #C9A84C;
-    color: #C9A84C;
+    border-color: var(--tb-gold, #C9A84C);
+    color: var(--tt-gold2, #C9A84C);
     background: rgba(201,168,76,0.1);
 }
 .db-driver-actions .btn-danger {

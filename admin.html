@@ -5,6 +5,7 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4XTKG24HN6"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-4XTKG24HN6');</script>
     <meta charset="UTF-8">
+    <script src="theme.js?v=1"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel — EliteAuto.rent</title>
     <link rel="icon" type="image/png" href="/images/Lettermark.png">
@@ -13,6 +14,7 @@
     <link rel="stylesheet" href="admin.css?v=6">
     <script src="api-helper.js?v=2"></script>
     <script src="i18n.js?v=6"></script>
+    <link rel="stylesheet" href="theme.css?v=1">
 </head>
 <body class="admin-page">
     <button class="admin-mobile-toggle" id="adminMobileToggle">☰</button>
@@ -106,7 +108,7 @@
                     <!-- Stats cards injected by JS -->
                 </div>
                 <div style="margin-top:24px;">
-                    <h3 style="color:#e2e8f0;font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+                    <h3 style="color:var(--tt-soft2, #e2e8f0);font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         Visitors
                     </h3>
@@ -181,24 +183,24 @@
                 <!-- PARTNER INVITE CODES -->
                 <div style="margin-top:36px;">
                     <div class="admin-toolbar" style="margin-bottom:12px;">
-                        <h3 style="margin:0;color:#EAEAEA;font-size:15px;font-weight:700;">Partner Invite Codes</h3>
+                        <h3 style="margin:0;color:var(--tt-text, #EAEAEA);font-size:15px;font-weight:700;">Partner Invite Codes</h3>
                         <button class="admin-action-btn success" onclick="showInviteCodeForm()" style="margin-left:auto;">+ Create Code</button>
                     </div>
-                    <p style="font-size:13px;color:#A0A3B0;margin:0 0 14px;">Give these codes to trusted partners so they can register free (no $5 fee). Their accounts still need your approval before listing vehicles.</p>
+                    <p style="font-size:13px;color:var(--tt-muted, #A0A3B0);margin:0 0 14px;">Give these codes to trusted partners so they can register free (no $5 fee). Their accounts still need your approval before listing vehicles.</p>
 
-                    <div id="inviteCodeCreateForm" style="display:none;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:20px;margin-bottom:16px;">
+                    <div id="inviteCodeCreateForm" style="display:none;background:var(--tf-04, rgba(255,255,255,0.04));border:1px solid var(--tf-10, rgba(255,255,255,0.1));border-radius:14px;padding:20px;margin-bottom:16px;">
                         <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
                             <div style="flex:1;min-width:130px;">
-                                <label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Code (A-Z 0-9 - _)</label>
-                                <input type="text" id="newInviteCode" maxlength="30" placeholder="ELITE2024" style="width:100%;padding:9px 12px;background:#1C1E26;border:1px solid #3A3F4B;border-radius:8px;color:#EAEAEA;font-size:13px;text-transform:uppercase;letter-spacing:1px;box-sizing:border-box;" oninput="this.value=this.value.toUpperCase()">
+                                <label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:4px;">Code (A-Z 0-9 - _)</label>
+                                <input type="text" id="newInviteCode" maxlength="30" placeholder="ELITE2024" style="width:100%;padding:9px 12px;background:var(--th-surface, #1C1E26);border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;color:var(--tt-text, #EAEAEA);font-size:13px;text-transform:uppercase;letter-spacing:1px;box-sizing:border-box;" oninput="this.value=this.value.toUpperCase()">
                             </div>
                             <div style="flex:2;min-width:160px;">
-                                <label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Note (optional)</label>
-                                <input type="text" id="newInviteNote" maxlength="200" placeholder="For John's fleet" style="width:100%;padding:9px 12px;background:#1C1E26;border:1px solid #3A3F4B;border-radius:8px;color:#EAEAEA;font-size:13px;box-sizing:border-box;">
+                                <label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:4px;">Note (optional)</label>
+                                <input type="text" id="newInviteNote" maxlength="200" placeholder="For John's fleet" style="width:100%;padding:9px 12px;background:var(--th-surface, #1C1E26);border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;color:var(--tt-text, #EAEAEA);font-size:13px;box-sizing:border-box;">
                             </div>
                             <div style="min-width:100px;">
-                                <label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Max uses (0=∞)</label>
-                                <input type="number" id="newInviteMaxUses" min="0" value="1" style="width:100%;padding:9px 12px;background:#1C1E26;border:1px solid #3A3F4B;border-radius:8px;color:#EAEAEA;font-size:13px;box-sizing:border-box;">
+                                <label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:4px;">Max uses (0=∞)</label>
+                                <input type="number" id="newInviteMaxUses" min="0" value="1" style="width:100%;padding:9px 12px;background:var(--th-surface, #1C1E26);border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;color:var(--tt-text, #EAEAEA);font-size:13px;box-sizing:border-box;">
                             </div>
                             <div style="display:flex;gap:8px;flex-shrink:0;">
                                 <button class="admin-action-btn success" onclick="createInviteCode()">Create</button>
@@ -214,7 +216,7 @@
                                 <tr><th>Code</th><th class="hide-mobile">Note</th><th>Uses</th><th>Status</th><th class="hide-mobile">Created</th><th>Actions</th></tr>
                             </thead>
                             <tbody id="inviteCodesTableBody">
-                                <tr><td colspan="6" style="text-align:center;color:#A0A3B0;padding:20px;">Loading…</td></tr>
+                                <tr><td colspan="6" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:20px;">Loading…</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -320,7 +322,7 @@
                 </div>
 
                 <!-- VIP WALLETS -->
-                <h3 style="margin:28px 0 12px;color:#F0ECE2;">VIP Wallets &amp; Revenue</h3>
+                <h3 style="margin:28px 0 12px;color:var(--tt-text2, #F0ECE2);">VIP Wallets &amp; Revenue</h3>
                 <div class="fin-summary-grid" id="vipSummaryGrid">
                     <div class="fin-card fin-card-green">
                         <div class="fin-card-label">VIP Revenue (top-ups)</div>
@@ -341,20 +343,20 @@
                 </div>
                 <div style="display:flex;flex-wrap:wrap;gap:20px;margin-top:8px;">
                     <div style="flex:1;min-width:320px;">
-                        <h4 style="color:#A0A3B0;font-size:13px;margin:8px 0;">Partner balances</h4>
+                        <h4 style="color:var(--tt-muted, #A0A3B0);font-size:13px;margin:8px 0;">Partner balances</h4>
                         <div class="admin-table-wrap">
                             <table class="admin-table">
                                 <thead><tr><th>Partner</th><th>VIP Credit</th><th>Active VIP</th></tr></thead>
-                                <tbody id="vipPartnersBody"><tr><td colspan="3" style="color:#A0A3B0;">Loading…</td></tr></tbody>
+                                <tbody id="vipPartnersBody"><tr><td colspan="3" style="color:var(--tt-muted, #A0A3B0);">Loading…</td></tr></tbody>
                             </table>
                         </div>
                     </div>
                     <div style="flex:1;min-width:320px;">
-                        <h4 style="color:#A0A3B0;font-size:13px;margin:8px 0;">Recent transactions</h4>
+                        <h4 style="color:var(--tt-muted, #A0A3B0);font-size:13px;margin:8px 0;">Recent transactions</h4>
                         <div class="admin-table-wrap">
                             <table class="admin-table">
                                 <thead><tr><th>Partner</th><th>Type</th><th>Amount</th><th class="hide-mobile">When</th></tr></thead>
-                                <tbody id="vipTxBody"><tr><td colspan="4" style="color:#A0A3B0;">Loading…</td></tr></tbody>
+                                <tbody id="vipTxBody"><tr><td colspan="4" style="color:var(--tt-muted, #A0A3B0);">Loading…</td></tr></tbody>
                             </table>
                         </div>
                     </div>
@@ -366,35 +368,35 @@
                     <button class="admin-action-btn success" id="showAddPromoBtn" style="white-space:nowrap;">+ New Promo Code</button>
                 </div>
                 <!-- Add Promo Form (hidden by default) -->
-                <div id="addPromoForm" style="display:none;background:#1C1E26;border:1px solid #3A3F4B;border-radius:12px;padding:20px;margin-bottom:20px;">
-                    <h4 style="margin:0 0 14px;font-size:14px;color:#EAEAEA;">Create Promo Code</h4>
+                <div id="addPromoForm" style="display:none;background:var(--th-surface, #1C1E26);border:1px solid var(--tb-border, #3A3F4B);border-radius:12px;padding:20px;margin-bottom:20px;">
+                    <h4 style="margin:0 0 14px;font-size:14px;color:var(--tt-text, #EAEAEA);">Create Promo Code</h4>
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
                         <div>
-                            <label style="font-size:12px;color:#A0A3B0;font-weight:600;display:block;margin-bottom:4px;">Code</label>
-                            <input type="text" id="promoCode" placeholder="SUMMER20" style="width:100%;padding:8px 12px;border:1px solid #3A3F4B;border-radius:8px;font-size:13px;box-sizing:border-box;background:#262A35;color:#EAEAEA;">
+                            <label style="font-size:12px;color:var(--tt-muted, #A0A3B0);font-weight:600;display:block;margin-bottom:4px;">Code</label>
+                            <input type="text" id="promoCode" placeholder="SUMMER20" style="width:100%;padding:8px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;font-size:13px;box-sizing:border-box;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);">
                         </div>
                         <div>
-                            <label style="font-size:12px;color:#A0A3B0;font-weight:600;display:block;margin-bottom:4px;">Type</label>
-                            <select id="promoType" style="width:100%;padding:8px 12px;border:1px solid #3A3F4B;border-radius:8px;font-size:13px;background:#262A35;color:#EAEAEA;">
+                            <label style="font-size:12px;color:var(--tt-muted, #A0A3B0);font-weight:600;display:block;margin-bottom:4px;">Type</label>
+                            <select id="promoType" style="width:100%;padding:8px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;font-size:13px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);">
                                 <option value="percent">Percentage (%)</option>
                                 <option value="fixed">Fixed ($)</option>
                             </select>
                         </div>
                         <div>
-                            <label style="font-size:12px;color:#A0A3B0;font-weight:600;display:block;margin-bottom:4px;">Value</label>
-                            <input type="number" id="promoValue" placeholder="20" min="0" style="width:100%;padding:8px 12px;border:1px solid #3A3F4B;border-radius:8px;font-size:13px;box-sizing:border-box;background:#262A35;color:#EAEAEA;">
+                            <label style="font-size:12px;color:var(--tt-muted, #A0A3B0);font-weight:600;display:block;margin-bottom:4px;">Value</label>
+                            <input type="number" id="promoValue" placeholder="20" min="0" style="width:100%;padding:8px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;font-size:13px;box-sizing:border-box;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);">
                         </div>
                         <div>
-                            <label style="font-size:12px;color:#A0A3B0;font-weight:600;display:block;margin-bottom:4px;">Min Order ($)</label>
-                            <input type="number" id="promoMinOrder" placeholder="0" min="0" style="width:100%;padding:8px 12px;border:1px solid #3A3F4B;border-radius:8px;font-size:13px;box-sizing:border-box;background:#262A35;color:#EAEAEA;">
+                            <label style="font-size:12px;color:var(--tt-muted, #A0A3B0);font-weight:600;display:block;margin-bottom:4px;">Min Order ($)</label>
+                            <input type="number" id="promoMinOrder" placeholder="0" min="0" style="width:100%;padding:8px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;font-size:13px;box-sizing:border-box;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);">
                         </div>
                         <div>
-                            <label style="font-size:12px;color:#A0A3B0;font-weight:600;display:block;margin-bottom:4px;">Max Uses (0=unlimited)</label>
-                            <input type="number" id="promoMaxUses" placeholder="0" min="0" style="width:100%;padding:8px 12px;border:1px solid #3A3F4B;border-radius:8px;font-size:13px;box-sizing:border-box;background:#262A35;color:#EAEAEA;">
+                            <label style="font-size:12px;color:var(--tt-muted, #A0A3B0);font-weight:600;display:block;margin-bottom:4px;">Max Uses (0=unlimited)</label>
+                            <input type="number" id="promoMaxUses" placeholder="0" min="0" style="width:100%;padding:8px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;font-size:13px;box-sizing:border-box;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);">
                         </div>
                         <div>
-                            <label style="font-size:12px;color:#A0A3B0;font-weight:600;display:block;margin-bottom:4px;">Valid Until</label>
-                            <input type="date" id="promoValidUntil" style="width:100%;padding:8px 12px;border:1px solid #3A3F4B;border-radius:8px;font-size:13px;box-sizing:border-box;background:#262A35;color:#EAEAEA;">
+                            <label style="font-size:12px;color:var(--tt-muted, #A0A3B0);font-weight:600;display:block;margin-bottom:4px;">Valid Until</label>
+                            <input type="date" id="promoValidUntil" style="width:100%;padding:8px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;font-size:13px;box-sizing:border-box;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);">
                         </div>
                     </div>
                     <div style="margin-top:14px;display:flex;gap:8px;">
@@ -415,36 +417,36 @@
             <!-- DRIVERS TAB -->
             <section class="admin-tab" id="tabDrivers">
                 <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;align-items:center;">
-                    <select id="driverStatusFilter" style="padding:8px 12px;border-radius:8px;border:1px solid #3A3F4B;background:#262A35;color:#EAEAEA;font-size:13px;">
+                    <select id="driverStatusFilter" style="padding:8px 12px;border-radius:8px;border:1px solid var(--tb-border, #3A3F4B);background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);font-size:13px;">
                         <option value="">All Status</option>
                         <option value="pending">Pending</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
                     </select>
-                    <input type="text" id="driverSearch" placeholder="Search drivers..." style="padding:8px 12px;border-radius:8px;border:1px solid #3A3F4B;background:#262A35;color:#EAEAEA;font-size:13px;min-width:200px;">
+                    <input type="text" id="driverSearch" placeholder="Search drivers..." style="padding:8px 12px;border-radius:8px;border:1px solid var(--tb-border, #3A3F4B);background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);font-size:13px;min-width:200px;">
                 </div>
                 <div class="admin-table-wrap">
                     <table class="admin-table">
                         <thead><tr><th>ID</th><th>Photo</th><th>Name</th><th>Partner</th><th>City</th><th>Status</th><th>Verified</th><th>Price</th><th>Actions</th></tr></thead>
-                        <tbody id="driversTableBody"><tr><td colspan="9" style="text-align:center;color:#A0A3B0;padding:40px;">Loading...</td></tr></tbody>
+                        <tbody id="driversTableBody"><tr><td colspan="9" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:40px;">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </section>
 
             <!-- REVIEWS TAB -->
             <section class="admin-tab" id="tabReviews">
-                <h3 style="margin:0 0 12px;color:#F0ECE2;">Customer Reviews</h3>
+                <h3 style="margin:0 0 12px;color:var(--tt-text2, #F0ECE2);">Customer Reviews</h3>
                 <div class="admin-table-wrap" style="margin-bottom:28px;">
                     <table class="admin-table">
                         <thead><tr><th>ID</th><th>Customer</th><th>Vehicle</th><th>Rating</th><th>Review</th><th>Date</th><th>Actions</th></tr></thead>
-                        <tbody id="customerReviewsTableBody"><tr><td colspan="7" style="text-align:center;color:#A0A3B0;padding:40px;">Loading...</td></tr></tbody>
+                        <tbody id="customerReviewsTableBody"><tr><td colspan="7" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:40px;">Loading...</td></tr></tbody>
                     </table>
                 </div>
-                <h3 style="margin:0 0 12px;color:#F0ECE2;">Driver Reviews</h3>
+                <h3 style="margin:0 0 12px;color:var(--tt-text2, #F0ECE2);">Driver Reviews</h3>
                 <div class="admin-table-wrap">
                     <table class="admin-table">
                         <thead><tr><th>ID</th><th>Driver</th><th>Customer</th><th>Rating</th><th>Review</th><th>Date</th><th>Hidden</th><th>Actions</th></tr></thead>
-                        <tbody id="driverReviewsTableBody"><tr><td colspan="8" style="text-align:center;color:#A0A3B0;padding:40px;">Loading...</td></tr></tbody>
+                        <tbody id="driverReviewsTableBody"><tr><td colspan="8" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:40px;">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </section>
@@ -453,16 +455,16 @@
             <section class="admin-tab" id="tabReferrals">
                 <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:20px;">
                     <div class="admin-card" style="flex:1;min-width:220px;padding:20px;">
-                        <div style="font-size:12px;color:#A0A3B0;text-transform:uppercase;letter-spacing:0.5px;">Total Referred Partners</div>
-                        <div style="font-size:28px;font-weight:700;color:#F0ECE2;" id="adminRefTotalPartners">0</div>
+                        <div style="font-size:12px;color:var(--tt-muted, #A0A3B0);text-transform:uppercase;letter-spacing:0.5px;">Total Referred Partners</div>
+                        <div style="font-size:28px;font-weight:700;color:var(--tt-text2, #F0ECE2);" id="adminRefTotalPartners">0</div>
                     </div>
                     <div class="admin-card" style="flex:1;min-width:220px;padding:20px;">
-                        <div style="font-size:12px;color:#A0A3B0;text-transform:uppercase;letter-spacing:0.5px;">Total Referral Cars</div>
-                        <div style="font-size:28px;font-weight:700;color:#F0ECE2;" id="adminRefTotalCars">0</div>
+                        <div style="font-size:12px;color:var(--tt-muted, #A0A3B0);text-transform:uppercase;letter-spacing:0.5px;">Total Referral Cars</div>
+                        <div style="font-size:28px;font-weight:700;color:var(--tt-text2, #F0ECE2);" id="adminRefTotalCars">0</div>
                     </div>
                     <div class="admin-card" style="flex:1;min-width:220px;padding:20px;">
-                        <div style="font-size:12px;color:#A0A3B0;text-transform:uppercase;letter-spacing:0.5px;">Pending Payouts</div>
-                        <div style="font-size:28px;font-weight:700;color:#F0ECE2;" id="adminRefPendingPayouts">0</div>
+                        <div style="font-size:12px;color:var(--tt-muted, #A0A3B0);text-transform:uppercase;letter-spacing:0.5px;">Pending Payouts</div>
+                        <div style="font-size:28px;font-weight:700;color:var(--tt-text2, #F0ECE2);" id="adminRefPendingPayouts">0</div>
                     </div>
                 </div>
 
@@ -486,7 +488,7 @@
                             </tr>
                         </thead>
                         <tbody id="adminRefTableBody">
-                            <tr><td colspan="5" style="text-align:center;color:#A0A3B0;padding:40px;">Loading...</td></tr>
+                            <tr><td colspan="5" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:40px;">Loading...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -495,89 +497,89 @@
             <!-- AD CARDS TAB -->
             <section class="admin-tab" id="tabAds">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
-                    <h3 style="margin:0;font-size:16px;color:#EAEAEA;">Promotional Ad Cards</h3>
+                    <h3 style="margin:0;font-size:16px;color:var(--tt-text, #EAEAEA);">Promotional Ad Cards</h3>
                     <button class="admin-action-btn success" id="addAdCardBtn">+ Add Ad Card</button>
                 </div>
-                <div id="adCardFormWrap" style="display:none;background:#1C1E26;border:1px solid #3A3F4B;border-radius:14px;padding:20px;margin-bottom:20px;max-width:600px;">
-                    <h4 id="adCardFormTitle" style="margin:0 0 16px;font-size:15px;color:#EAEAEA;">New Ad Card</h4>
+                <div id="adCardFormWrap" style="display:none;background:var(--th-surface, #1C1E26);border:1px solid var(--tb-border, #3A3F4B);border-radius:14px;padding:20px;margin-bottom:20px;max-width:600px;">
+                    <h4 id="adCardFormTitle" style="margin:0 0 16px;font-size:15px;color:var(--tt-text, #EAEAEA);">New Ad Card</h4>
                     <input type="hidden" id="adCardEditId">
                     <div style="display:flex;flex-direction:column;gap:12px;">
-                        <div><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Title</label><input type="text" id="adTitle" class="db-input" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;text-align:center;"></div>
-                        <div><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Description</label><textarea id="adDescription" rows="2" class="db-input" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></textarea></div>
+                        <div><label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:4px;">Title</label><input type="text" id="adTitle" class="db-input" style="width:100%;padding:10px 14px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;text-align:center;"></div>
+                        <div><label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:4px;">Description</label><textarea id="adDescription" rows="2" class="db-input" style="width:100%;padding:10px 14px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;"></textarea></div>
                         <div>
-                            <label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Cover Image</label>
+                            <label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:4px;">Cover Image</label>
                             <input type="file" id="adCoverFile" accept="image/*" style="display:none;">
                             <input type="hidden" id="adCoverUrl">
                             <div id="adCoverPreviewWrap" style="display:none;margin-bottom:8px;">
-                                <img id="adCoverPreview" src="" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid #3A3F4B;" loading="lazy">
+                                <img id="adCoverPreview" src="" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid var(--tb-border, #3A3F4B);" loading="lazy">
                             </div>
-                            <button type="button" id="adCoverUploadBtn" style="padding:10px 14px;border:1px dashed #3A3F4B;border-radius:8px;background:#262A35;color:#A0A3B0;cursor:pointer;width:100%;box-sizing:border-box;font-size:13px;">
+                            <button type="button" id="adCoverUploadBtn" style="padding:10px 14px;border:1px dashed var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-muted, #A0A3B0);cursor:pointer;width:100%;box-sizing:border-box;font-size:13px;">
                                 + Upload Cover Image
                             </button>
-                            <div id="adCoverUploadStatus" style="font-size:12px;color:#A0A3B0;margin-top:4px;"></div>
+                            <div id="adCoverUploadStatus" style="font-size:12px;color:var(--tt-muted, #A0A3B0);margin-top:4px;"></div>
                         </div>
-                        <div><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Target Link *</label><input type="text" id="adTargetLink" class="db-input" placeholder="https://..." style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
-                        <div><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">CTA Text</label><input type="text" id="adCtaText" class="db-input" placeholder="Learn More" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
-                        <details style="border:1px solid #3A3F4B;border-radius:8px;padding:10px 12px;background:#222530;">
-                            <summary style="cursor:pointer;font-size:13px;color:#D4AF37;font-weight:600;">&#127760; Translations (optional) &mdash; shown when a visitor switches language</summary>
-                            <p style="font-size:11px;color:#A0A3B0;margin:8px 0 12px;">Leave blank to fall back to the English text above.</p>
+                        <div><label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:4px;">Target Link *</label><input type="text" id="adTargetLink" class="db-input" placeholder="https://..." style="width:100%;padding:10px 14px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;"></div>
+                        <div><label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:4px;">CTA Text</label><input type="text" id="adCtaText" class="db-input" placeholder="Learn More" style="width:100%;padding:10px 14px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;"></div>
+                        <details style="border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;padding:10px 12px;background:var(--th-surface2, #222530);">
+                            <summary style="cursor:pointer;font-size:13px;color:var(--tt-gold, #D4AF37);font-weight:600;">&#127760; Translations (optional) &mdash; shown when a visitor switches language</summary>
+                            <p style="font-size:11px;color:var(--tt-muted, #A0A3B0);margin:8px 0 12px;">Leave blank to fall back to the English text above.</p>
                             <div style="display:flex;flex-direction:column;gap:14px;">
                                 <div style="display:flex;flex-direction:column;gap:8px;">
-                                    <div style="font-size:11px;color:#A0A3B0;font-weight:700;letter-spacing:.5px;">&#127479;&#127482; RUSSIAN</div>
-                                    <input type="text" id="adTitle_ru" class="db-input" placeholder="Заголовок (RU)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
-                                    <textarea id="adDescription_ru" rows="2" class="db-input" placeholder="Описание (RU)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;"></textarea>
-                                    <input type="text" id="adCtaText_ru" class="db-input" placeholder="Текст кнопки (RU)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
+                                    <div style="font-size:11px;color:var(--tt-muted, #A0A3B0);font-weight:700;letter-spacing:.5px;">&#127479;&#127482; RUSSIAN</div>
+                                    <input type="text" id="adTitle_ru" class="db-input" placeholder="Заголовок (RU)" style="width:100%;padding:9px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;font-size:13px;">
+                                    <textarea id="adDescription_ru" rows="2" class="db-input" placeholder="Описание (RU)" style="width:100%;padding:9px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;font-size:13px;"></textarea>
+                                    <input type="text" id="adCtaText_ru" class="db-input" placeholder="Текст кнопки (RU)" style="width:100%;padding:9px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;font-size:13px;">
                                 </div>
                                 <div style="display:flex;flex-direction:column;gap:8px;">
-                                    <div style="font-size:11px;color:#A0A3B0;font-weight:700;letter-spacing:.5px;">&#127468;&#127466; GEORGIAN</div>
-                                    <input type="text" id="adTitle_ka" class="db-input" placeholder="სათაური (KA)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
-                                    <textarea id="adDescription_ka" rows="2" class="db-input" placeholder="აღწერა (KA)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;"></textarea>
-                                    <input type="text" id="adCtaText_ka" class="db-input" placeholder="ღილაკის ტექსტი (KA)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
+                                    <div style="font-size:11px;color:var(--tt-muted, #A0A3B0);font-weight:700;letter-spacing:.5px;">&#127468;&#127466; GEORGIAN</div>
+                                    <input type="text" id="adTitle_ka" class="db-input" placeholder="სათაური (KA)" style="width:100%;padding:9px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;font-size:13px;">
+                                    <textarea id="adDescription_ka" rows="2" class="db-input" placeholder="აღწერა (KA)" style="width:100%;padding:9px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;font-size:13px;"></textarea>
+                                    <input type="text" id="adCtaText_ka" class="db-input" placeholder="ღილაკის ტექსტი (KA)" style="width:100%;padding:9px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;font-size:13px;">
                                 </div>
                                 <div style="display:flex;flex-direction:column;gap:8px;" dir="rtl">
-                                    <div style="font-size:11px;color:#A0A3B0;font-weight:700;letter-spacing:.5px;">&#127470;&#127473; HEBREW</div>
-                                    <input type="text" id="adTitle_he" class="db-input" placeholder="כותרת (HE)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
-                                    <textarea id="adDescription_he" rows="2" class="db-input" placeholder="תיאור (HE)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;"></textarea>
-                                    <input type="text" id="adCtaText_he" class="db-input" placeholder="טקסט הכפתור (HE)" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
+                                    <div style="font-size:11px;color:var(--tt-muted, #A0A3B0);font-weight:700;letter-spacing:.5px;">&#127470;&#127473; HEBREW</div>
+                                    <input type="text" id="adTitle_he" class="db-input" placeholder="כותרת (HE)" style="width:100%;padding:9px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;font-size:13px;">
+                                    <textarea id="adDescription_he" rows="2" class="db-input" placeholder="תיאור (HE)" style="width:100%;padding:9px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;font-size:13px;"></textarea>
+                                    <input type="text" id="adCtaText_he" class="db-input" placeholder="טקסט הכפתור (HE)" style="width:100%;padding:9px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;font-size:13px;">
                                 </div>
                             </div>
                         </details>
                         <div>
-                            <label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:6px;">Placement <span style="color:#6b7280;">(check every page this ad should appear on)</span></label>
-                            <div id="adPlacementBoxes" style="display:flex;flex-wrap:wrap;gap:8px 18px;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;">
-                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="ad-placement-cb" value="cars" style="width:15px;height:15px;"> Cars (homepage)</label>
-                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="ad-placement-cb" value="drivers" style="width:15px;height:15px;"> Drivers page</label>
-                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="ad-placement-cb" value="vehicles" style="width:15px;height:15px;"> Vehicles page</label>
-                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="ad-placement-cb" value="blog" style="width:15px;height:15px;"> Blog / Explore</label>
-                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="ad-placement-cb" value="checkout" style="width:15px;height:15px;"> Checkout (booking)</label>
+                            <label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:6px;">Placement <span style="color:#6b7280;">(check every page this ad should appear on)</span></label>
+                            <div id="adPlacementBoxes" style="display:flex;flex-wrap:wrap;gap:8px 18px;padding:10px 14px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);">
+                                <label style="display:flex;align-items:center;gap:6px;color:var(--tt-text, #EAEAEA);font-size:13px;cursor:pointer;"><input type="checkbox" class="ad-placement-cb" value="cars" style="width:15px;height:15px;"> Cars (homepage)</label>
+                                <label style="display:flex;align-items:center;gap:6px;color:var(--tt-text, #EAEAEA);font-size:13px;cursor:pointer;"><input type="checkbox" class="ad-placement-cb" value="drivers" style="width:15px;height:15px;"> Drivers page</label>
+                                <label style="display:flex;align-items:center;gap:6px;color:var(--tt-text, #EAEAEA);font-size:13px;cursor:pointer;"><input type="checkbox" class="ad-placement-cb" value="vehicles" style="width:15px;height:15px;"> Vehicles page</label>
+                                <label style="display:flex;align-items:center;gap:6px;color:var(--tt-text, #EAEAEA);font-size:13px;cursor:pointer;"><input type="checkbox" class="ad-placement-cb" value="blog" style="width:15px;height:15px;"> Blog / Explore</label>
+                                <label style="display:flex;align-items:center;gap:6px;color:var(--tt-text, #EAEAEA);font-size:13px;cursor:pointer;"><input type="checkbox" class="ad-placement-cb" value="checkout" style="width:15px;height:15px;"> Checkout (booking)</label>
                             </div>
                         </div>
-                        <div id="adSlotsSection" style="border:1px solid #3A3F4B;border-radius:8px;background:#262A35;padding:12px 14px;">
-                            <label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:10px;">Position on each page <span style="color:#6b7280;">(slot number — a separate slot per page; only used for the pages ticked above)</span></label>
+                        <div id="adSlotsSection" style="border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);padding:12px 14px;">
+                            <label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:10px;">Position on each page <span style="color:#6b7280;">(slot number — a separate slot per page; only used for the pages ticked above)</span></label>
                             <div style="display:grid;grid-template-columns:150px 1fr;gap:9px 14px;align-items:center;">
-                                <span style="color:#EAEAEA;font-size:13px;">Cars (homepage)</span>
-                                <input type="number" class="ad-pos" id="adPosCars" value="4" min="1" style="width:90px;padding:8px 10px;border:1px solid #3A3F4B;border-radius:6px;background:#1C1E26;color:#EAEAEA;box-sizing:border-box;">
+                                <span style="color:var(--tt-text, #EAEAEA);font-size:13px;">Cars (homepage)</span>
+                                <input type="number" class="ad-pos" id="adPosCars" value="4" min="1" style="width:90px;padding:8px 10px;border:1px solid var(--tb-border, #3A3F4B);border-radius:6px;background:var(--th-surface, #1C1E26);color:var(--tt-text, #EAEAEA);box-sizing:border-box;">
 
-                                <span style="color:#EAEAEA;font-size:13px;">Drivers page</span>
-                                <input type="number" class="ad-pos" id="adPosDrivers" value="4" min="1" style="width:90px;padding:8px 10px;border:1px solid #3A3F4B;border-radius:6px;background:#1C1E26;color:#EAEAEA;box-sizing:border-box;">
+                                <span style="color:var(--tt-text, #EAEAEA);font-size:13px;">Drivers page</span>
+                                <input type="number" class="ad-pos" id="adPosDrivers" value="4" min="1" style="width:90px;padding:8px 10px;border:1px solid var(--tb-border, #3A3F4B);border-radius:6px;background:var(--th-surface, #1C1E26);color:var(--tt-text, #EAEAEA);box-sizing:border-box;">
 
-                                <span style="color:#EAEAEA;font-size:13px;">Vehicles page</span>
+                                <span style="color:var(--tt-text, #EAEAEA);font-size:13px;">Vehicles page</span>
                                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                                     <span style="color:#6b7280;font-size:12px;">page</span>
-                                    <input type="number" id="adPageVehicles" value="1" min="1" title="Which results page" style="width:64px;padding:8px 10px;border:1px solid #3A3F4B;border-radius:6px;background:#1C1E26;color:#EAEAEA;box-sizing:border-box;">
-                                    <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#A0A3B0;cursor:pointer;white-space:nowrap;"><input type="checkbox" id="adPageAll" style="width:14px;height:14px;"> every page</label>
+                                    <input type="number" id="adPageVehicles" value="1" min="1" title="Which results page" style="width:64px;padding:8px 10px;border:1px solid var(--tb-border, #3A3F4B);border-radius:6px;background:var(--th-surface, #1C1E26);color:var(--tt-text, #EAEAEA);box-sizing:border-box;">
+                                    <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--tt-muted, #A0A3B0);cursor:pointer;white-space:nowrap;"><input type="checkbox" id="adPageAll" style="width:14px;height:14px;"> every page</label>
                                     <span style="color:#6b7280;font-size:12px;margin-left:6px;">slot</span>
-                                    <input type="number" class="ad-pos" id="adPosVehicles" value="6" min="1" title="Slot on the page" style="width:64px;padding:8px 10px;border:1px solid #3A3F4B;border-radius:6px;background:#1C1E26;color:#EAEAEA;box-sizing:border-box;">
+                                    <input type="number" class="ad-pos" id="adPosVehicles" value="6" min="1" title="Slot on the page" style="width:64px;padding:8px 10px;border:1px solid var(--tb-border, #3A3F4B);border-radius:6px;background:var(--th-surface, #1C1E26);color:var(--tt-text, #EAEAEA);box-sizing:border-box;">
                                 </div>
 
-                                <span style="color:#EAEAEA;font-size:13px;">Blog / Explore</span>
-                                <input type="number" class="ad-pos" id="adPosBlog" value="1" min="1" style="width:90px;padding:8px 10px;border:1px solid #3A3F4B;border-radius:6px;background:#1C1E26;color:#EAEAEA;box-sizing:border-box;">
+                                <span style="color:var(--tt-text, #EAEAEA);font-size:13px;">Blog / Explore</span>
+                                <input type="number" class="ad-pos" id="adPosBlog" value="1" min="1" style="width:90px;padding:8px 10px;border:1px solid var(--tb-border, #3A3F4B);border-radius:6px;background:var(--th-surface, #1C1E26);color:var(--tt-text, #EAEAEA);box-sizing:border-box;">
 
-                                <span style="color:#EAEAEA;font-size:13px;">Checkout (booking)</span>
-                                <input type="number" class="ad-pos" id="adPosCheckout" value="1" min="1" style="width:90px;padding:8px 10px;border:1px solid #3A3F4B;border-radius:6px;background:#1C1E26;color:#EAEAEA;box-sizing:border-box;">
+                                <span style="color:var(--tt-text, #EAEAEA);font-size:13px;">Checkout (booking)</span>
+                                <input type="number" class="ad-pos" id="adPosCheckout" value="1" min="1" style="width:90px;padding:8px 10px;border:1px solid var(--tb-border, #3A3F4B);border-radius:6px;background:var(--th-surface, #1C1E26);color:var(--tt-text, #EAEAEA);box-sizing:border-box;">
                             </div>
                         </div>
-                        <label style="display:flex;align-items:center;gap:8px;color:#A0A3B0;font-size:13px;"><input type="checkbox" id="adIsActive" checked style="width:16px;height:16px;"> Active</label>
+                        <label style="display:flex;align-items:center;gap:8px;color:var(--tt-muted, #A0A3B0);font-size:13px;"><input type="checkbox" id="adIsActive" checked style="width:16px;height:16px;"> Active</label>
                         <div style="display:flex;gap:8px;margin-top:4px;">
                             <button class="admin-action-btn" id="cancelAdCardBtn">Cancel</button>
                             <button class="admin-action-btn success" id="saveAdCardBtn">Save</button>
@@ -587,7 +589,7 @@
                 <div class="admin-table-wrap">
                     <table class="admin-table">
                         <thead><tr><th>ID</th><th>Title</th><th>Placement</th><th>Position</th><th>Clicks</th><th>Active</th><th>Actions</th></tr></thead>
-                        <tbody id="adsTableBody"><tr><td colspan="7" style="text-align:center;color:#A0A3B0;padding:40px;">Loading...</td></tr></tbody>
+                        <tbody id="adsTableBody"><tr><td colspan="7" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:40px;">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </section>
@@ -595,51 +597,51 @@
             <!-- TRUST BAR TAB -->
             <section class="admin-tab" id="tabTrust">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
-                    <h3 style="margin:0;font-size:16px;color:#EAEAEA;">Trust Bar Badges</h3>
+                    <h3 style="margin:0;font-size:16px;color:var(--tt-text, #EAEAEA);">Trust Bar Badges</h3>
                     <button class="admin-action-btn success" id="addTrustBtn">+ Add Badge</button>
                 </div>
-                <p style="color:#A0A3B0;font-size:13px;margin:0 0 16px;">The strip of trust signals (icon + short text). Choose which pages each badge appears on and its order.</p>
-                <div id="trustFormWrap" style="display:none;background:#1C1E26;border:1px solid #3A3F4B;border-radius:14px;padding:20px;margin-bottom:20px;max-width:600px;">
-                    <h4 id="trustFormTitle" style="margin:0 0 16px;font-size:15px;color:#EAEAEA;">New Badge</h4>
+                <p style="color:var(--tt-muted, #A0A3B0);font-size:13px;margin:0 0 16px;">The strip of trust signals (icon + short text). Choose which pages each badge appears on and its order.</p>
+                <div id="trustFormWrap" style="display:none;background:var(--th-surface, #1C1E26);border:1px solid var(--tb-border, #3A3F4B);border-radius:14px;padding:20px;margin-bottom:20px;max-width:600px;">
+                    <h4 id="trustFormTitle" style="margin:0 0 16px;font-size:15px;color:var(--tt-text, #EAEAEA);">New Badge</h4>
                     <input type="hidden" id="trustEditId">
                     <div style="display:flex;flex-direction:column;gap:12px;">
                         <div style="display:flex;gap:12px;">
-                            <div style="width:110px;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Icon <span style="color:#6b7280;">(emoji)</span></label><input type="text" id="trustIcon" class="db-input" placeholder="🛡️" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;text-align:center;font-size:18px;"></div>
-                            <div style="flex:1;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Label (English) <span style="color:#6b7280;">(text — optional if you upload a logo)</span></label><input type="text" id="trustLabel" class="db-input" placeholder="Full Insurance Included" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
+                            <div style="width:110px;"><label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:4px;">Icon <span style="color:#6b7280;">(emoji)</span></label><input type="text" id="trustIcon" class="db-input" placeholder="🛡️" style="width:100%;padding:10px 14px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;text-align:center;font-size:18px;"></div>
+                            <div style="flex:1;"><label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:4px;">Label (English) <span style="color:#6b7280;">(text — optional if you upload a logo)</span></label><input type="text" id="trustLabel" class="db-input" placeholder="Full Insurance Included" style="width:100%;padding:10px 14px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;"></div>
                         </div>
                         <div>
-                            <label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Logo image <span style="color:#6b7280;">(optional — use instead of / with an emoji, e.g. an advertiser logo)</span></label>
+                            <label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:4px;">Logo image <span style="color:#6b7280;">(optional — use instead of / with an emoji, e.g. an advertiser logo)</span></label>
                             <input type="file" id="trustLogoFile" accept="image/*" style="display:none;">
                             <input type="hidden" id="trustLogoUrl">
                             <div id="trustLogoPreviewWrap" style="display:none;margin-bottom:8px;">
-                                <img id="trustLogoPreview" src="" style="height:44px;max-width:180px;object-fit:contain;border-radius:6px;background:#0B0C10;padding:4px 8px;border:1px solid #3A3F4B;" loading="lazy">
-                                <button type="button" id="trustLogoRemoveBtn" style="margin-left:8px;padding:6px 10px;border:1px solid #3A3F4B;border-radius:6px;background:#262A35;color:#ef4444;cursor:pointer;font-size:12px;">Remove</button>
+                                <img id="trustLogoPreview" src="" style="height:44px;max-width:180px;object-fit:contain;border-radius:6px;background:var(--th-bg, #0B0C10);padding:4px 8px;border:1px solid var(--tb-border, #3A3F4B);" loading="lazy">
+                                <button type="button" id="trustLogoRemoveBtn" style="margin-left:8px;padding:6px 10px;border:1px solid var(--tb-border, #3A3F4B);border-radius:6px;background:var(--th-raised, #262A35);color:#ef4444;cursor:pointer;font-size:12px;">Remove</button>
                             </div>
-                            <button type="button" id="trustLogoUploadBtn" style="padding:10px 14px;border:1px dashed #3A3F4B;border-radius:8px;background:#262A35;color:#A0A3B0;cursor:pointer;width:100%;box-sizing:border-box;font-size:13px;">+ Upload Logo Image</button>
-                            <div id="trustLogoStatus" style="font-size:12px;color:#A0A3B0;margin-top:4px;"></div>
+                            <button type="button" id="trustLogoUploadBtn" style="padding:10px 14px;border:1px dashed var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-muted, #A0A3B0);cursor:pointer;width:100%;box-sizing:border-box;font-size:13px;">+ Upload Logo Image</button>
+                            <div id="trustLogoStatus" style="font-size:12px;color:var(--tt-muted, #A0A3B0);margin-top:4px;"></div>
                         </div>
-                        <div><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Link <span style="color:#6b7280;">(optional — where it goes when clicked)</span></label><input type="text" id="trustLink" class="db-input" placeholder="https://…" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
-                        <details style="border:1px solid #3A3F4B;border-radius:8px;padding:10px 12px;background:#222530;">
-                            <summary style="cursor:pointer;font-size:13px;color:#D4AF37;font-weight:600;">&#127760; Translations (optional)</summary>
-                            <p style="font-size:11px;color:#A0A3B0;margin:8px 0 12px;">Leave blank to fall back to the English label.</p>
+                        <div><label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:4px;">Link <span style="color:#6b7280;">(optional — where it goes when clicked)</span></label><input type="text" id="trustLink" class="db-input" placeholder="https://…" style="width:100%;padding:10px 14px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;"></div>
+                        <details style="border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;padding:10px 12px;background:var(--th-surface2, #222530);">
+                            <summary style="cursor:pointer;font-size:13px;color:var(--tt-gold, #D4AF37);font-weight:600;">&#127760; Translations (optional)</summary>
+                            <p style="font-size:11px;color:var(--tt-muted, #A0A3B0);margin:8px 0 12px;">Leave blank to fall back to the English label.</p>
                             <div style="display:flex;flex-direction:column;gap:10px;">
-                                <input type="text" id="trustLabel_ru" class="db-input" placeholder="🇷🇺 Русский" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
-                                <input type="text" id="trustLabel_ka" class="db-input" placeholder="🇬🇪 ქართული" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
-                                <input type="text" id="trustLabel_he" class="db-input" dir="rtl" placeholder="🇮🇱 עברית" style="width:100%;padding:9px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;font-size:13px;">
+                                <input type="text" id="trustLabel_ru" class="db-input" placeholder="🇷🇺 Русский" style="width:100%;padding:9px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;font-size:13px;">
+                                <input type="text" id="trustLabel_ka" class="db-input" placeholder="🇬🇪 ქართული" style="width:100%;padding:9px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;font-size:13px;">
+                                <input type="text" id="trustLabel_he" class="db-input" dir="rtl" placeholder="🇮🇱 עברית" style="width:100%;padding:9px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;font-size:13px;">
                             </div>
                         </details>
                         <div>
-                            <label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:6px;">Show on pages <span style="color:#6b7280;">(check every page this badge should appear on)</span></label>
-                            <div style="display:flex;flex-wrap:wrap;gap:8px 18px;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;">
-                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="trust-placement-cb" value="cars" style="width:15px;height:15px;"> Cars (homepage)</label>
-                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="trust-placement-cb" value="drivers" style="width:15px;height:15px;"> Drivers page</label>
-                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="trust-placement-cb" value="vehicles" style="width:15px;height:15px;"> Vehicles page</label>
-                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="trust-placement-cb" value="blog" style="width:15px;height:15px;"> Blog / Explore</label>
-                                <label style="display:flex;align-items:center;gap:6px;color:#EAEAEA;font-size:13px;cursor:pointer;"><input type="checkbox" class="trust-placement-cb" value="checkout" style="width:15px;height:15px;"> Checkout (booking)</label>
+                            <label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:6px;">Show on pages <span style="color:#6b7280;">(check every page this badge should appear on)</span></label>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px 18px;padding:10px 14px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);">
+                                <label style="display:flex;align-items:center;gap:6px;color:var(--tt-text, #EAEAEA);font-size:13px;cursor:pointer;"><input type="checkbox" class="trust-placement-cb" value="cars" style="width:15px;height:15px;"> Cars (homepage)</label>
+                                <label style="display:flex;align-items:center;gap:6px;color:var(--tt-text, #EAEAEA);font-size:13px;cursor:pointer;"><input type="checkbox" class="trust-placement-cb" value="drivers" style="width:15px;height:15px;"> Drivers page</label>
+                                <label style="display:flex;align-items:center;gap:6px;color:var(--tt-text, #EAEAEA);font-size:13px;cursor:pointer;"><input type="checkbox" class="trust-placement-cb" value="vehicles" style="width:15px;height:15px;"> Vehicles page</label>
+                                <label style="display:flex;align-items:center;gap:6px;color:var(--tt-text, #EAEAEA);font-size:13px;cursor:pointer;"><input type="checkbox" class="trust-placement-cb" value="blog" style="width:15px;height:15px;"> Blog / Explore</label>
+                                <label style="display:flex;align-items:center;gap:6px;color:var(--tt-text, #EAEAEA);font-size:13px;cursor:pointer;"><input type="checkbox" class="trust-placement-cb" value="checkout" style="width:15px;height:15px;"> Checkout (booking)</label>
                             </div>
                         </div>
-                        <div style="width:160px;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Order <span style="color:#6b7280;">(1 = first)</span></label><input type="number" id="trustPosition" class="db-input" value="1" min="1" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>
-                        <label style="display:flex;align-items:center;gap:8px;color:#A0A3B0;font-size:13px;"><input type="checkbox" id="trustIsActive" checked style="width:16px;height:16px;"> Active</label>
+                        <div style="width:160px;"><label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:4px;">Order <span style="color:#6b7280;">(1 = first)</span></label><input type="number" id="trustPosition" class="db-input" value="1" min="1" style="width:100%;padding:10px 14px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;"></div>
+                        <label style="display:flex;align-items:center;gap:8px;color:var(--tt-muted, #A0A3B0);font-size:13px;"><input type="checkbox" id="trustIsActive" checked style="width:16px;height:16px;"> Active</label>
                         <div style="display:flex;gap:8px;margin-top:4px;">
                             <button class="admin-action-btn" id="cancelTrustBtn">Cancel</button>
                             <button class="admin-action-btn success" id="saveTrustBtn">Save</button>
@@ -649,7 +651,7 @@
                 <div class="admin-table-wrap">
                     <table class="admin-table">
                         <thead><tr><th>Order</th><th>Icon</th><th>Label</th><th>Pages</th><th>Active</th><th>Actions</th></tr></thead>
-                        <tbody id="trustTableBody"><tr><td colspan="6" style="text-align:center;color:#A0A3B0;padding:40px;">Loading...</td></tr></tbody>
+                        <tbody id="trustTableBody"><tr><td colspan="6" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:40px;">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </section>
@@ -657,7 +659,7 @@
             <!-- ACTIVITY TAB -->
             <section class="admin-tab" id="tabActivity">
                 <div id="activityFeed" style="max-width:700px;">
-                    <p style="color:#A0A3B0;text-align:center;padding:40px;">Loading activity...</p>
+                    <p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:40px;">Loading activity...</p>
                 </div>
             </section>
 
@@ -665,20 +667,20 @@
             <section class="admin-tab" id="tabSettings">
                 <div style="max-width:500px;">
                     <div class="admin-card" style="padding:24px;">
-                        <h3 style="margin:0 0 20px;font-size:16px;color:#EAEAEA;">Change Admin Password</h3>
+                        <h3 style="margin:0 0 20px;font-size:16px;color:var(--tt-text, #EAEAEA);">Change Admin Password</h3>
                         <div id="settingsPwMsg" style="display:none;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;"></div>
                         <div style="display:flex;flex-direction:column;gap:14px;">
                             <div>
-                                <label style="font-size:12px;color:#A0A3B0;font-weight:600;display:block;margin-bottom:4px;">Current Password</label>
-                                <input type="password" id="settingsCurrentPw" placeholder="Enter current password" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;font-size:13px;box-sizing:border-box;background:#262A35;color:#EAEAEA;">
+                                <label style="font-size:12px;color:var(--tt-muted, #A0A3B0);font-weight:600;display:block;margin-bottom:4px;">Current Password</label>
+                                <input type="password" id="settingsCurrentPw" placeholder="Enter current password" style="width:100%;padding:10px 14px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;font-size:13px;box-sizing:border-box;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);">
                             </div>
                             <div>
-                                <label style="font-size:12px;color:#A0A3B0;font-weight:600;display:block;margin-bottom:4px;">New Password</label>
-                                <input type="password" id="settingsNewPw" placeholder="Min 8 chars, uppercase, number, special" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;font-size:13px;box-sizing:border-box;background:#262A35;color:#EAEAEA;">
+                                <label style="font-size:12px;color:var(--tt-muted, #A0A3B0);font-weight:600;display:block;margin-bottom:4px;">New Password</label>
+                                <input type="password" id="settingsNewPw" placeholder="Min 8 chars, uppercase, number, special" style="width:100%;padding:10px 14px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;font-size:13px;box-sizing:border-box;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);">
                             </div>
                             <div>
-                                <label style="font-size:12px;color:#A0A3B0;font-weight:600;display:block;margin-bottom:4px;">Confirm New Password</label>
-                                <input type="password" id="settingsConfirmPw" placeholder="Re-enter new password" style="width:100%;padding:10px 14px;border:1px solid #3A3F4B;border-radius:8px;font-size:13px;box-sizing:border-box;background:#262A35;color:#EAEAEA;">
+                                <label style="font-size:12px;color:var(--tt-muted, #A0A3B0);font-weight:600;display:block;margin-bottom:4px;">Confirm New Password</label>
+                                <input type="password" id="settingsConfirmPw" placeholder="Re-enter new password" style="width:100%;padding:10px 14px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;font-size:13px;box-sizing:border-box;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);">
                             </div>
                             <button class="admin-action-btn success" onclick="adminChangePassword()" style="align-self:flex-start;padding:10px 24px;font-size:13px;">Change Password</button>
                         </div>
@@ -690,23 +692,23 @@
 
     <!-- User/Partner Detail Modal -->
     <div id="userDetailModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);overflow-y:auto;-webkit-overflow-scrolling:touch;backdrop-filter:blur(4px);">
-        <div style="max-width:800px;margin:40px auto;background:#1C1E26;border-radius:16px;border:1px solid #3A3F4B;box-shadow:0 24px 48px rgba(0,0,0,0.2);width:calc(100% - 32px);margin-bottom:40px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #3A3F4B;background:#262A35;position:sticky;top:0;z-index:10;border-radius:16px 16px 0 0;">
-                <h3 style="margin:0;font-size:18px;font-weight:700;color:#EAEAEA;" id="udTitle">User Details</h3>
-                <button onclick="document.getElementById('userDetailModal').style.display='none'" style="background:none;border:none;font-size:24px;cursor:pointer;color:#A0A3B0;padding:8px;">&times;</button>
+        <div style="max-width:800px;margin:40px auto;background:var(--th-surface, #1C1E26);border-radius:16px;border:1px solid var(--tb-border, #3A3F4B);box-shadow:0 24px 48px rgba(0,0,0,0.2);width:calc(100% - 32px);margin-bottom:40px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--tb-border, #3A3F4B);background:var(--th-raised, #262A35);position:sticky;top:0;z-index:10;border-radius:16px 16px 0 0;">
+                <h3 style="margin:0;font-size:18px;font-weight:700;color:var(--tt-text, #EAEAEA);" id="udTitle">User Details</h3>
+                <button onclick="document.getElementById('userDetailModal').style.display='none'" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--tt-muted, #A0A3B0);padding:8px;">&times;</button>
             </div>
             <div id="udContent" style="padding:24px;">
-                <p style="color:#A0A3B0;text-align:center;padding:40px;">Loading...</p>
+                <p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:40px;">Loading...</p>
             </div>
         </div>
     </div>
 
     <!-- Vehicle Detail Modal -->
     <div id="vehicleDetailModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);overflow-y:auto;-webkit-overflow-scrolling:touch;">
-        <div style="max-width:720px;margin:40px auto;background:#1C1E26;border-radius:16px;border:1px solid #3A3F4B;box-shadow:0 24px 48px rgba(0,0,0,0.2);width:calc(100% - 32px);margin-bottom:40px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #3A3F4B;background:#262A35;position:sticky;top:0;z-index:10;border-radius:16px 16px 0 0;">
-                <h3 style="margin:0;font-size:18px;font-weight:700;color:#EAEAEA;" id="vdTitle">Vehicle Details</h3>
-                <button onclick="document.getElementById('vehicleDetailModal').style.display='none'" style="background:none;border:none;font-size:24px;cursor:pointer;color:#A0A3B0;padding:8px;">&times;</button>
+        <div style="max-width:720px;margin:40px auto;background:var(--th-surface, #1C1E26);border-radius:16px;border:1px solid var(--tb-border, #3A3F4B);box-shadow:0 24px 48px rgba(0,0,0,0.2);width:calc(100% - 32px);margin-bottom:40px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--tb-border, #3A3F4B);background:var(--th-raised, #262A35);position:sticky;top:0;z-index:10;border-radius:16px 16px 0 0;">
+                <h3 style="margin:0;font-size:18px;font-weight:700;color:var(--tt-text, #EAEAEA);" id="vdTitle">Vehicle Details</h3>
+                <button onclick="document.getElementById('vehicleDetailModal').style.display='none'" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--tt-muted, #A0A3B0);padding:8px;">&times;</button>
             </div>
             <div id="vdContent" style="padding:24px;"></div>
         </div>

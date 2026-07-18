@@ -5,6 +5,7 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4XTKG24HN6"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-4XTKG24HN6');</script>
     <meta charset="UTF-8">
+    <script src="theme.js?v=1"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rent a Car in Georgia — From $25/day | EliteAuto</title>
     <meta name="description" content="Browse rental cars in Georgia — SUVs for mountain roads, sedans, economy and luxury vehicles. No deposit options, airport pickup, insurance included. From $25/day.">
@@ -88,17 +89,17 @@
         /* Country selector modal - inlined to guarantee rendering */
         .country-modal { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
         .country-modal-overlay { position: absolute; inset: 0; background: rgba(11, 12, 16, 0.92); backdrop-filter: blur(6px); }
-        .country-modal-content { position: relative; background: #1C1E26; border: 1px solid #3A3F4B; border-radius: 20px; padding: 36px 28px; max-width: 480px; width: 100%; box-shadow: 0 24px 60px rgba(0,0,0,0.5); text-align: center; z-index: 1; }
-        .country-modal-header h2 { font-size: 22px; font-weight: 800; color: #F5F5F5; margin: 0 0 6px; }
-        .country-modal-header p { font-size: 14px; color: #A0A3B0; margin: 0 0 24px; }
+        .country-modal-content { position: relative; background: var(--th-surface, #1C1E26); border: 1px solid var(--tb-border, #3A3F4B); border-radius: 20px; padding: 36px 28px; max-width: 480px; width: 100%; box-shadow: 0 24px 60px rgba(0,0,0,0.5); text-align: center; z-index: 1; }
+        .country-modal-header h2 { font-size: 22px; font-weight: 800; color: var(--tt-text3, #F5F5F5); margin: 0 0 6px; }
+        .country-modal-header p { font-size: 14px; color: var(--tt-muted, #A0A3B0); margin: 0 0 24px; }
         .country-grid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
-        .country-card { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 8px !important; padding: 20px 12px !important; background: #262A35 !important; border: 1.5px solid #3A3F4B !important; border-radius: 14px !important; cursor: pointer !important; transition: background 0.18s, border-color 0.18s, transform 0.18s !important; color: #EAEAEA !important; font-size: 14px !important; font-weight: 600 !important; }
-        .country-card:hover { background: #2E3340 !important; border-color: #C9A84C !important; transform: translateY(-2px) !important; }
+        .country-card { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 8px !important; padding: 20px 12px !important; background: var(--th-raised, #262A35) !important; border: 1.5px solid var(--tb-border, #3A3F4B) !important; border-radius: 14px !important; cursor: pointer !important; transition: background 0.18s, border-color 0.18s, transform 0.18s !important; color: var(--tt-text, #EAEAEA) !important; font-size: 14px !important; font-weight: 600 !important; }
+        .country-card:hover { background: var(--th-raised4, #2E3340) !important; border-color: var(--tb-gold, #C9A84C) !important; transform: translateY(-2px) !important; }
         .country-card-flag { font-size: 32px; line-height: 1; }
-        .country-card-name { font-size: 13px; font-weight: 600; color: #EAEAEA; }
+        .country-card-name { font-size: 13px; font-weight: 600; color: var(--tt-text, #EAEAEA); }
         .vp-topbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .vp-country-btn { display: none; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(201, 168, 76, 0.1); border: 1px solid rgba(201, 168, 76, 0.35); border-radius: 24px; color: #C9A84C; font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
-        .vp-country-btn:hover { background: rgba(201, 168, 76, 0.18); border-color: #C9A84C; }
+        .vp-country-btn { display: none; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(201, 168, 76, 0.1); border: 1px solid rgba(201, 168, 76, 0.35); border-radius: 24px; color: var(--tt-gold2, #C9A84C); font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+        .vp-country-btn:hover { background: rgba(201, 168, 76, 0.18); border-color: var(--tb-gold, #C9A84C); }
         .vp-country-flag { font-size: 14px; line-height: 1; }
         .vp-country-label { text-transform: capitalize; }
         @media (max-width: 540px) {
@@ -112,6 +113,7 @@
     <script src="site-config.js?v=1"></script>
     <script src="api-helper.js?v=2" defer></script>
     <script src="i18n.js?v=6" defer></script>
+    <link rel="stylesheet" href="theme.css?v=1">
 </head>
 <body>
 
@@ -288,7 +290,7 @@
                         <span data-i18n="vehicles_page.see_all">See all</span>
                     </button>
                     <div class="vf-checkbox-grid" id="brandCheckboxList">
-                        <p style="font-size:12px;color:#A0A3B0;margin:0;">—</p>
+                        <p style="font-size:12px;color:var(--tt-muted, #A0A3B0);margin:0;">—</p>
                     </div>
                     <div class="vf-divider"></div>
                     <button class="vf-check-all" data-group="brand" data-i18n="filter_options.check_all">Check all</button>
@@ -429,7 +431,7 @@
                 </div>
             </div>
 
-            <button id="vpResetFilters" style="width:100%;padding:12px;background:#262A35;border:1px solid #3A3F4B;border-radius:10px;color:#A0A3B0;font-weight:600;font-size:13px;cursor:pointer;margin-top:12px;transition:all 0.2s;" onmouseover="this.style.background='#3A3F4B'" onmouseout="this.style.background='#262A35'" data-i18n="vehicles_page.reset_all">Reset All Filters</button>
+            <button id="vpResetFilters" style="width:100%;padding:12px;background:var(--th-raised, #262A35);border:1px solid var(--tb-border, #3A3F4B);border-radius:10px;color:var(--tt-muted, #A0A3B0);font-weight:600;font-size:13px;cursor:pointer;margin-top:12px;transition:all 0.2s;" onmouseover="this.style.background='#3A3F4B'" onmouseout="this.style.background='#262A35'" data-i18n="vehicles_page.reset_all">Reset All Filters</button>
 
             <!-- STICKY SIDEBAR AD — Travel Essentials -->
             <div class="sticky-sidebar" style="margin-top:24px;">
@@ -492,12 +494,12 @@
             <div class="vp-grid" id="vpGrid">
                 <!-- SEO_PRERENDER_VEHICLES -->
                 <!-- Loading placeholder — vehicles loaded from API -->
-                <div id="vpLoadingState" style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#A0A3B0;">
+                <div id="vpLoadingState" style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--tt-muted, #A0A3B0);">
                     <p style="font-size:16px;font-weight:600;" data-i18n="vehicles_page.loading">Loading vehicles...</p>
                 </div>
-                <div id="vpEmptyState" style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#A0A3B0;display:none;">
+                <div id="vpEmptyState" style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--tt-muted, #A0A3B0);display:none;">
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#A0A3B0" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                    <h3 style="margin:12px 0 4px;color:#EAEAEA;" data-i18n="vehicles_page.no_vehicles_title">No vehicles yet</h3>
+                    <h3 style="margin:12px 0 4px;color:var(--tt-text, #EAEAEA);" data-i18n="vehicles_page.no_vehicles_title">No vehicles yet</h3>
                     <p data-i18n="vehicles_page.no_vehicles_desc">Partners can add vehicles from their dashboard</p>
                 </div>
             </div><!-- end vp-grid -->
@@ -549,7 +551,7 @@
                 <h4 data-i18n="footer.contact_title">Contact</h4>
                 <p>📧 elite.rental25@gmail.com</p>
                 <p>📞 +995 591 522 299</p>
-                <p>📍 <span data-i18n="footer.address">13 University St, Tbilisi, Georgia</span></p>
+                
             </div>
         </div>
         <div class="footer-bottom">
@@ -559,25 +561,25 @@
 
     <!-- Contact Modal -->
     <div id="contactModal" onclick="if(event.target===this)this.style.display='none';" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-        <div style="background:#1C1E26; border:1px solid #3A3F4B; border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.5); text-align:center;">
-            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#A0A3B0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='none'">✕</button>
+        <div style="background:var(--th-surface, #1C1E26); border:1px solid var(--tb-border, #3A3F4B); border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.5); text-align:center;">
+            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:var(--tt-muted, #A0A3B0); width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='none'">✕</button>
             <div style="width:64px; height:64px; background:linear-gradient(135deg,#D4AF37,#B8963F); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px;">📞</div>
-            <h2 style="font-size:24px; font-weight:800; color:#EAEAEA; margin-bottom:8px;">Contact Us</h2>
-            <p style="font-size:14px; color:#A0A3B0; margin-bottom:28px;">We're here to help! Reach us anytime.</p>
-            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#262A35; border:1px solid #3A3F4B; border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#D4AF37'" onmouseout="this.style.borderColor='#3A3F4B'">
+            <h2 style="font-size:24px; font-weight:800; color:var(--tt-text, #EAEAEA); margin-bottom:8px;">Contact Us</h2>
+            <p style="font-size:14px; color:var(--tt-muted, #A0A3B0); margin-bottom:28px;">We're here to help! Reach us anytime.</p>
+            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:var(--th-raised, #262A35); border:1px solid var(--tb-border, #3A3F4B); border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#D4AF37'" onmouseout="this.style.borderColor='#3A3F4B'">
                 <div style="width:44px; height:44px; background:rgba(212,175,55,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">📧</div>
                 <div style="text-align:left;">
-                    <div style="font-size:12px; color:#A0A3B0; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div>
-                    <div style="font-size:15px; color:#EAEAEA; font-weight:600;">elite.rental25@gmail.com</div>
+                    <div style="font-size:12px; color:var(--tt-muted, #A0A3B0); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div>
+                    <div style="font-size:15px; color:var(--tt-text, #EAEAEA); font-weight:600;">elite.rental25@gmail.com</div>
                 </div>
             </a>
-            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#262A35; border:1px solid #3A3F4B; border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#3A3F4B'">
+            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:var(--th-raised, #262A35); border:1px solid var(--tb-border, #3A3F4B); border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#3A3F4B'">
                 <div style="width:44px; height:44px; background:rgba(34,197,94,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="#22c55e"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.616l4.573-1.47A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.326-.694-6.047-1.874l-.424-.294-2.893.93.957-2.834-.32-.458A9.958 9.958 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
                 </div>
                 <div style="text-align:left;">
-                    <div style="font-size:12px; color:#A0A3B0; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div>
-                    <div style="font-size:15px; color:#EAEAEA; font-weight:600;">+995 591 522 299</div>
+                    <div style="font-size:12px; color:var(--tt-muted, #A0A3B0); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div>
+                    <div style="font-size:15px; color:var(--tt-text, #EAEAEA); font-weight:600;">+995 591 522 299</div>
                 </div>
             </a>
         </div>
@@ -830,10 +832,10 @@
             function btn(label, page, active, disabled) {
                 var s = 'min-width:42px;height:42px;padding:0 12px;border-radius:10px;font-size:15px;font-weight:700;transition:all .15s;'
                     + (active
-                        ? 'background:#D4AF37;color:#0B0C10;border:1px solid #D4AF37;cursor:default;'
+                        ? 'background:#D4AF37;color:#0B0C10;border:1px solid var(--tb-gold2, #D4AF37);cursor:default;'
                         : disabled
-                            ? 'background:transparent;color:#454a55;border:1px solid #2A2D38;cursor:default;'
-                            : 'background:transparent;color:#EAEAEA;border:1px solid #2A2D38;cursor:pointer;');
+                            ? 'background:transparent;color:#454a55;border:1px solid var(--tb-border2, #2A2D38);cursor:default;'
+                            : 'background:transparent;color:var(--tt-text, #EAEAEA);border:1px solid var(--tb-border2, #2A2D38);cursor:pointer;');
                 return '<button class="vp-page-btn" style="' + s + '"'
                     + (active || disabled ? ' disabled' : ' onclick="window.vpGoToPage(' + page + ')"')
                     + '>' + label + '</button>';
@@ -983,13 +985,13 @@
                 if (!noMatch) {
                     noMatch = document.createElement('div');
                     noMatch.id = 'vpNoMatch';
-                    noMatch.style.cssText = 'grid-column:1/-1;text-align:center;padding:60px 20px;color:#A0A3B0;';
+                    noMatch.style.cssText = 'grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--tt-muted, #A0A3B0);';
                     grid.appendChild(noMatch);
                 }
                 if (visible.length === 0) {
                     var nmT = function (k, f) { return (typeof I18n !== 'undefined' && I18n.t && I18n.t(k) !== k) ? I18n.t(k) : f; };
                     noMatch.innerHTML = '<div style="font-size:48px;">🔍</div>'
-                        + '<h3 style="color:#EAEAEA;margin:12px 0 4px;">' + nmT('vehicles_page.no_match_title', 'No vehicles found') + '</h3>'
+                        + '<h3 style="color:var(--tt-text, #EAEAEA);margin:12px 0 4px;">' + nmT('vehicles_page.no_match_title', 'No vehicles found') + '</h3>'
                         + '<p>' + nmT('vehicles_page.no_match_desc', 'No vehicles found matching your selected city and category.') + '</p>';
                     noMatch.style.display = '';
                 } else {
@@ -1560,9 +1562,9 @@
                 var nmT2 = function (k, f) { return (typeof I18n !== 'undefined' && I18n.t && I18n.t(k) !== k) ? I18n.t(k) : f; };
                 if (grid) {
                     if (hasCityOrCat) {
-                        grid.innerHTML = '<div style="padding:60px;text-align:center;grid-column:1/-1;"><div style="font-size:48px;">🔍</div><h3 style="color:#EAEAEA;margin:12px 0 4px;">' + nmT2('vehicles_page.no_match_title', 'No vehicles found') + '</h3><p style="color:#A0A3B0;">' + nmT2('vehicles_page.no_match_desc', 'No vehicles found matching your selected city and category.') + '</p></div>';
+                        grid.innerHTML = '<div style="padding:60px;text-align:center;grid-column:1/-1;"><div style="font-size:48px;">🔍</div><h3 style="color:var(--tt-text, #EAEAEA);margin:12px 0 4px;">' + nmT2('vehicles_page.no_match_title', 'No vehicles found') + '</h3><p style="color:var(--tt-muted, #A0A3B0);">' + nmT2('vehicles_page.no_match_desc', 'No vehicles found matching your selected city and category.') + '</p></div>';
                     } else {
-                        grid.innerHTML = '<div style="padding:60px;text-align:center;grid-column:1/-1;"><div style="font-size:48px;">🚫</div><h3 style="color:#dc2626;">No Vehicles Available</h3><p style="color:#A0A3B0;">All vehicles are blocked for the selected dates. Try different dates.</p></div>';
+                        grid.innerHTML = '<div style="padding:60px;text-align:center;grid-column:1/-1;"><div style="font-size:48px;">🚫</div><h3 style="color:#dc2626;">No Vehicles Available</h3><p style="color:var(--tt-muted, #A0A3B0);">All vehicles are blocked for the selected dates. Try different dates.</p></div>';
                     }
                 }
                 return;
@@ -1603,12 +1605,12 @@
     function vcAdLoc(ad,b){ var lang=(window.I18n&&I18n.lang&&I18n.lang())||localStorage.getItem('EliteAuto_lang')||'en'; return (lang&&lang!=='en'&&ad[b+'_'+lang])?ad[b+'_'+lang]:(ad[b]||''); }
     window.vcTrackAd = function(id){ if(id) fetch('/api/ads/'+id+'/click',{method:'POST'}).catch(function(){}); };
     function vcAdCardHtml(ad){
-        var cover = ad.cover_url ? '<div style="height:180px;background:#2A2D3A;background-size:cover;background-position:center;background-image:url('+vcEsc(ad.cover_url)+');"></div>' : '';
-        return '<a class="vc-ad-injected" href="'+vcEsc(ad.target_link||'#')+'" target="_blank" rel="noopener" onclick="vcTrackAd('+(ad.id||0)+')" style="display:flex;flex-direction:column;background:#1A1814;border:1px solid #C9A84C;border-radius:16px;overflow:hidden;text-decoration:none;">'
+        var cover = ad.cover_url ? '<div style="height:180px;background:var(--th-raised3, #2A2D3A);background-size:cover;background-position:center;background-image:url('+vcEsc(ad.cover_url)+');"></div>' : '';
+        return '<a class="vc-ad-injected" href="'+vcEsc(ad.target_link||'#')+'" target="_blank" rel="noopener" onclick="vcTrackAd('+(ad.id||0)+')" style="display:flex;flex-direction:column;background:var(--tw-surface, #1A1814);border:1px solid var(--tb-gold, #C9A84C);border-radius:16px;overflow:hidden;text-decoration:none;">'
             + cover
-            + '<div style="padding:16px;"><div style="font-size:16px;font-weight:700;color:#EAEAEA;margin:0 0 6px;">'+vcEsc(vcAdLoc(ad,'title'))+'</div>'
-            + '<div style="font-size:13px;color:#A0A3B0;margin:0 0 12px;">'+vcEsc(vcAdLoc(ad,'description'))+'</div>'
-            + '<span style="color:#D4AF37;font-weight:700;font-size:13px;">'+vcEsc(vcAdLoc(ad,'cta_text')||'Learn more')+' &#8594;</span>'
+            + '<div style="padding:16px;"><div style="font-size:16px;font-weight:700;color:var(--tt-text, #EAEAEA);margin:0 0 6px;">'+vcEsc(vcAdLoc(ad,'title'))+'</div>'
+            + '<div style="font-size:13px;color:var(--tt-muted, #A0A3B0);margin:0 0 12px;">'+vcEsc(vcAdLoc(ad,'description'))+'</div>'
+            + '<span style="color:var(--tt-gold, #D4AF37);font-weight:700;font-size:13px;">'+vcEsc(vcAdLoc(ad,'cta_text')||'Learn more')+' &#8594;</span>'
             + '</div></a>';
     }
     // Ads that belong on a given results page (admin sets each ad's Page + Position).
@@ -1734,10 +1736,10 @@
                     + '<span class="vc-spec">' + seats + ' <span data-i18n="fleet.seats">Seats</span></span>'
                     + '<span class="vc-spec">' + vtVal(drive) + '</span>'
                     + '</div>'
-                    + '<div class="vc-location" style="font-size:12px;color:#A0A3B0;margin-top:4px;display:flex;align-items:center;gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + (v.location_city || v.region || 'Tbilisi') + '</div>'
+                    + '<div class="vc-location" style="font-size:12px;color:var(--tt-muted, #A0A3B0);margin-top:4px;display:flex;align-items:center;gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + (v.location_city || v.region || 'Tbilisi') + '</div>'
                     + '<div class="vc-price-section">'
                     + '<div class="vc-price-row"><span class="vc-price-label" data-i18n="vehicles.price_per_day">Price per day:</span><span class="vc-price-amount" data-price-usd="' + totalPrice + '">$' + totalPrice + '</span><span class="vc-price-unit" data-i18n="fleet.per_day">/day</span></div>'
-                    + (driverOnly && driverPrice > 0 ? '<div class="vc-price-breakdown" style="font-size:11px;color:#A0A3B0;margin-top:-2px;margin-bottom:6px;"><span data-price-usd="' + price + '">$' + price + '</span> <span data-i18n="fleet.rent">rent</span> + <span data-price-usd="' + driverPrice + '">$' + driverPrice + '</span> <span data-i18n="fleet.driver">driver</span></div>' : '')
+                    + (driverOnly && driverPrice > 0 ? '<div class="vc-price-breakdown" style="font-size:11px;color:var(--tt-muted, #A0A3B0);margin-top:-2px;margin-bottom:6px;"><span data-price-usd="' + price + '">$' + price + '</span> <span data-i18n="fleet.rent">rent</span> + <span data-price-usd="' + driverPrice + '">$' + driverPrice + '</span> <span data-i18n="fleet.driver">driver</span></div>' : '')
                     + '<button class="vc-book-btn" data-i18n="fleet.book_now">Book Now</button>'
                     + (v.company_name ? '<div class="vc-partner-name">by ' + v.company_name + '</div>' : '')
                     + '</div>'

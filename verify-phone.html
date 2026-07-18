@@ -5,6 +5,7 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4XTKG24HN6"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-4XTKG24HN6');</script>
     <meta charset="UTF-8">
+    <script src="theme.js?v=1"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Force browser to always fetch fresh copy of this page -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -22,14 +23,14 @@
             align-items: center; justify-content: center;
         }
         .vp-card {
-            background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(15, 23, 42, 0.8); border: 1px solid var(--tf-08, rgba(255,255,255,0.08));
             border-radius: 16px; padding: 36px 32px; width: 100%;
             backdrop-filter: blur(20px); box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
         .vp-logo { text-align: center; margin-bottom: 24px; }
-        .vp-logo svg { width: 40px; height: 40px; color: #D4AF37; }
+        .vp-logo svg { width: 40px; height: 40px; color: var(--tt-gold, #D4AF37); }
         .vp-title { font-size: 22px; font-weight: 700; color: #fff; text-align: center; margin: 0 0 6px; }
-        .vp-subtitle { font-size: 14px; color: #A0A3B0; text-align: center; margin: 0 0 28px; line-height: 1.5; }
+        .vp-subtitle { font-size: 14px; color: var(--tt-muted, #A0A3B0); text-align: center; margin: 0 0 28px; line-height: 1.5; }
         .vp-user-info {
             display: flex; align-items: center; gap: 12px;
             background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.15);
@@ -45,27 +46,27 @@
             color: #fff; font-weight: 700; font-size: 14px;
         }
         .vp-user-name { font-size: 14px; font-weight: 600; color: #fff; }
-        .vp-user-email { font-size: 12px; color: #A0A3B0; }
-        .vp-label { display: block; font-size: 13px; font-weight: 600; color: #A0A3B0; margin-bottom: 6px; }
+        .vp-user-email { font-size: 12px; color: var(--tt-muted, #A0A3B0); }
+        .vp-label { display: block; font-size: 13px; font-weight: 600; color: var(--tt-muted, #A0A3B0); margin-bottom: 6px; }
         .vp-input {
-            width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.12); border-radius: 10px;
+            width: 100%; padding: 12px 14px; background: var(--tf-06, rgba(255,255,255,0.06));
+            border: 1px solid var(--tf-12, rgba(255,255,255,0.12)); border-radius: 10px;
             color: #fff; font-size: 15px; outline: none; box-sizing: border-box;
             transition: border-color 0.2s;
         }
-        .vp-input:focus { border-color: #D4AF37; }
-        .vp-input::placeholder { color: #A0A3B0; }
+        .vp-input:focus { border-color: var(--tb-gold2, #D4AF37); }
+        .vp-input::placeholder { color: var(--tt-muted, #A0A3B0); }
         .vp-input:disabled { opacity: 0.5; cursor: not-allowed; }
         .vp-otp-row {
             display: flex; gap: 6px; margin-bottom: 16px; width: 100%; max-width: 100%;
         }
         .vp-otp-input {
             flex: 1; min-width: 0; text-align: center; padding: 12px 4px;
-            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+            background: var(--tf-06, rgba(255,255,255,0.06)); border: 1px solid var(--tf-12, rgba(255,255,255,0.12));
             border-radius: 10px; color: #fff; font-size: 20px; font-weight: 700;
             letter-spacing: 0; outline: none; box-sizing: border-box;
         }
-        .vp-otp-input:focus { border-color: #D4AF37; }
+        .vp-otp-input:focus { border-color: var(--tb-gold2, #D4AF37); }
         .vp-btn {
             width: 100%; padding: 13px; border: none; border-radius: 10px;
             font-size: 15px; font-weight: 600; cursor: pointer;
@@ -78,20 +79,21 @@
         .vp-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(212,175,55,0.3); }
         .vp-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
         .vp-btn-ghost {
-            background: transparent; color: #A0A3B0; border: 1px solid rgba(255,255,255,0.08);
+            background: transparent; color: var(--tt-muted, #A0A3B0); border: 1px solid var(--tf-08, rgba(255,255,255,0.08));
         }
-        .vp-btn-ghost:hover { color: #fff; border-color: rgba(255,255,255,0.2); }
-        .vp-error { color: #f87171; font-size: 13px; margin-top: 8px; display: none; }
-        .vp-success { color: #4ade80; font-size: 13px; margin-top: 8px; display: none; }
-        .vp-timer { color: #A0A3B0; font-size: 12px; text-align: center; margin-top: 10px; }
-        .vp-resend { color: #D4AF37; cursor: pointer; font-size: 13px; text-align: center; margin-top: 10px; display: none; }
+        .vp-btn-ghost:hover { color: #fff; border-color: var(--tf-20, rgba(255,255,255,0.2)); }
+        .vp-error { color: var(--tt-redsoft, #f87171); font-size: 13px; margin-top: 8px; display: none; }
+        .vp-success { color: var(--tt-green, #4ade80); font-size: 13px; margin-top: 8px; display: none; }
+        .vp-timer { color: var(--tt-muted, #A0A3B0); font-size: 12px; text-align: center; margin-top: 10px; }
+        .vp-resend { color: var(--tt-gold, #D4AF37); cursor: pointer; font-size: 13px; text-align: center; margin-top: 10px; display: none; }
         .vp-resend:hover { text-decoration: underline; }
         .vp-step { display: none; }
         .vp-step.active { display: block; }
-        .vp-hint { font-size: 12px; color: #A0A3B0; margin-top: 6px; }
+        .vp-hint { font-size: 12px; color: var(--tt-muted, #A0A3B0); margin-top: 6px; }
     </style>
     <script src="api-helper.js?v=2"></script>
     <script src="i18n.js?v=6"></script>
+    <link rel="stylesheet" href="theme.css?v=1">
 </head>
 <body class="auth-page">
     <div class="vp-container">

@@ -41,9 +41,9 @@
     function docsNoticeHtml() {
         var t = function (k, d) { return (typeof I18n !== 'undefined' && I18n.t && I18n.t(k) !== k) ? I18n.t(k) : d; };
         return '<div style="text-align:left;background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.35);border-radius:10px;padding:14px 16px;margin:16px 0;">'
-            + '<p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#D4AF37;">&#128196; ' + t('payment_page.docs_title', 'Next step — send your documents') + '</p>'
-            + '<p style="margin:0 0 8px;font-size:12px;color:#A0A3B0;">' + t('payment_page.docs_sub', 'Please send these to the car owner on WhatsApp so they can prepare your car:') + '</p>'
-            + '<ul style="margin:0;padding-left:18px;color:#A0A3B0;font-size:12px;line-height:1.7;">'
+            + '<p style="margin:0 0 6px;font-size:13px;font-weight:700;color:var(--tt-gold, #D4AF37);">&#128196; ' + t('payment_page.docs_title', 'Next step — send your documents') + '</p>'
+            + '<p style="margin:0 0 8px;font-size:12px;color:var(--tt-muted, #A0A3B0);">' + t('payment_page.docs_sub', 'Please send these to the car owner on WhatsApp so they can prepare your car:') + '</p>'
+            + '<ul style="margin:0;padding-left:18px;color:var(--tt-muted, #A0A3B0);font-size:12px;line-height:1.7;">'
             + '<li>' + t('reservation.doc_license', "Driver's license (both sides)") + '</li>'
             + '<li>' + t('reservation.doc_passport', 'Passport photo page') + '</li>'
             + '</ul></div>';
@@ -112,7 +112,7 @@
                 '<div class="pay-error" style="text-align:center;padding:32px;">'
                 + '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="margin:0 auto 16px;display:block;"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>'
                 + '<h2 style="color:#ef4444;margin-bottom:8px;">Reservation Expired</h2>'
-                + '<p style="color:#A0A3B0;">Your payment window has expired and the reservation has been cancelled. Please create a new booking.</p>'
+                + '<p style="color:var(--tt-muted, #A0A3B0);">Your payment window has expired and the reservation has been cancelled. Please create a new booking.</p>'
                 + '<a href="vehicles.html" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#C9A84C;color:#1C1E26;border-radius:10px;text-decoration:none;font-weight:700;">Browse Vehicles</a>'
                 + '</div>';
             return;
@@ -132,7 +132,7 @@
                 '<div class="pay-error" style="text-align:center;padding:32px;">'
                 + '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="margin:0 auto 16px;display:block;"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>'
                 + '<h2 style="color:#ef4444;margin-bottom:8px;">Payment Time Expired</h2>'
-                + '<p style="color:#A0A3B0;">Your 8-minute payment window has expired. The reservation will be cancelled automatically. Please create a new booking.</p>'
+                + '<p style="color:var(--tt-muted, #A0A3B0);">Your 8-minute payment window has expired. The reservation will be cancelled automatically. Please create a new booking.</p>'
                 + '<a href="vehicles.html" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#C9A84C;color:#1C1E26;border-radius:10px;text-decoration:none;font-weight:700;">Browse Vehicles</a>'
                 + '</div>';
             return;
@@ -155,7 +155,7 @@
                 + '<span style="color:#ef4444;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Complete payment within</span>'
                 + '</div>'
                 + '<div id="payCountdown" style="font-size:32px;font-weight:800;color:#ef4444;font-family:monospace;letter-spacing:2px;">--:--</div>'
-                + '<div style="color:#A0A3B0;font-size:12px;margin-top:4px;">Reservation will be cancelled if not paid in time</div>'
+                + '<div style="color:var(--tt-muted, #A0A3B0);font-size:12px;margin-top:4px;">Reservation will be cancelled if not paid in time</div>'
                 + '</div>';
         }
 
@@ -196,7 +196,7 @@
                         '<div style="text-align:center;padding:32px;">'
                         + '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="margin:0 auto 16px;display:block;"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>'
                         + '<h2 style="color:#ef4444;margin-bottom:8px;">Time Expired</h2>'
-                        + '<p style="color:#A0A3B0;">Your payment window has expired. The reservation has been cancelled.</p>'
+                        + '<p style="color:var(--tt-muted, #A0A3B0);">Your payment window has expired. The reservation has been cancelled.</p>'
                         + '<a href="vehicles.html" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#C9A84C;color:#1C1E26;border-radius:10px;text-decoration:none;font-weight:700;">Browse Vehicles</a>'
                         + '</div>';
                     return;
@@ -448,7 +448,7 @@
                 // Customer closed PayPal popup without paying
                 var container = document.getElementById('paypal-button-container');
                 container.innerHTML =
-                    '<div style="text-align:center;padding:16px;color:#f59e0b;font-size:14px;font-weight:600;">'
+                    '<div style="text-align:center;padding:16px;color:var(--tt-amber2, #f59e0b);font-size:14px;font-weight:600;">'
                     + 'Payment cancelled. You can try again below.'
                     + '</div>';
                 setTimeout(function () {

@@ -216,7 +216,7 @@
     function loadBookings() {
         var tab = document.getElementById('tab-bookings');
         if (!tab) return;
-        tab.innerHTML = '<div class="gp-tab-header"><h2>My Bookings</h2></div><div style="padding:40px;text-align:center;color:#A0A3B0;">Loading...</div>';
+        tab.innerHTML = '<div class="gp-tab-header"><h2>My Bookings</h2></div><div style="padding:40px;text-align:center;color:var(--tt-muted, #A0A3B0);">Loading...</div>';
 
         fetch('/api/bookings/my', { headers: { 'Authorization': 'Bearer ' + token } })
         .then(function(r) { return r.json(); })
@@ -280,9 +280,9 @@
                     + '<div class="gp-booking-dates">' + pickup + ' ' + pickupTime + ' &rarr; ' + dropoff + ' ' + dropoffTime + ' &middot; ' + days + ' day' + (days!==1?'s':'') + '</div>'
                     + (b.pickup_location ? '<div class="gp-booking-loc">&#128205; ' + b.pickup_location + '</div>' : '')
                     + '<div class="gp-booking-price">Total: <strong>$' + (b.total_price || 0) + '</strong>' + payBadge
-                    + (b.partner_company ? ' &middot; <span style="color:#A0A3B0;">' + b.partner_company + '</span>' : '') + '</div>'
+                    + (b.partner_company ? ' &middot; <span style="color:var(--tt-muted, #A0A3B0);">' + b.partner_company + '</span>' : '') + '</div>'
                     + '</div>'
-                    + '<div class="gp-booking-actions"><a class="gp-booking-detail-link" href="booking.html?id=' + b.id + '" style="color:#D4AF37;text-decoration:none;font-size:13px;font-weight:600;align-self:center;">View details &rarr;</a>' + payBtn + actionBtn + '</div>'
+                    + '<div class="gp-booking-actions"><a class="gp-booking-detail-link" href="booking.html?id=' + b.id + '" style="color:var(--tt-gold, #D4AF37);text-decoration:none;font-size:13px;font-weight:600;align-self:center;">View details &rarr;</a>' + payBtn + actionBtn + '</div>'
                     + '</div>';
             });
             html += '</div>';

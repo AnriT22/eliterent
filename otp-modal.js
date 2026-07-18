@@ -70,7 +70,7 @@
 
                     <button class="otp-verify-btn" id="otpVerifyBtn" disabled>Verify Code</button>
 
-                    <button class="otp-skip-btn" id="otpSkipBtn" style="display:none;background:transparent;border:1px solid rgba(255,255,255,0.12);color:#94a3b8;padding:10px 20px;border-radius:10px;cursor:pointer;font-size:14px;width:100%;margin-top:8px;transition:all 0.2s;">Skip for now</button>
+                    <button class="otp-skip-btn" id="otpSkipBtn" style="display:none;background:transparent;border:1px solid var(--tf-12, rgba(255,255,255,0.12));color:var(--tt-muted2, #94a3b8);padding:10px 20px;border-radius:10px;cursor:pointer;font-size:14px;width:100%;margin-top:8px;transition:all 0.2s;">Skip for now</button>
 
                     <div class="otp-attempts" id="otpAttempts"></div>
                 </div>

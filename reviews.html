@@ -8,6 +8,7 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4XTKG24HN6"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-4XTKG24HN6');</script>
     <meta charset="UTF-8">
+    <script src="theme.js?v=1"></script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -56,6 +57,7 @@
     <script src="api-helper.js?v=2"></script>
     <script src="i18n.js?v=6"></script>
 
+    <link rel="stylesheet" href="theme.css?v=1">
 </head>
 
 <body>
@@ -328,7 +330,7 @@
 
                         <span class="rv-star-btn" data-v="5">★</span>
 
-                        <span id="rvRatingLabel" style="font-size:13px;color:#A0A3B0;margin-left:8px;" data-i18n="reviews_page.select_rating">Select rating</span>
+                        <span id="rvRatingLabel" style="font-size:13px;color:var(--tt-muted, #A0A3B0);margin-left:8px;" data-i18n="reviews_page.select_rating">Select rating</span>
 
                     </div>
 
@@ -379,12 +381,12 @@
 
 
             <!-- Verified Google rating — links to our real Google Business listing -->
-            <div class="google-reviews-badge" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;background:#1C1E26;border:1px solid #3A3F4B;border-radius:14px;padding:18px 22px;margin:0 0 20px;">
+            <div class="google-reviews-badge" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;background:var(--th-surface, #1C1E26);border:1px solid var(--tb-border, #3A3F4B);border-radius:14px;padding:18px 22px;margin:0 0 20px;">
                 <div style="display:flex;align-items:center;gap:14px;">
                     <div style="font-size:30px;line-height:1;">⭐</div>
                     <div>
-                        <div style="font-weight:800;font-size:18px;color:#EAEAEA;" id="googleBadgeText">5.0 on Google · 10 reviews</div>
-                        <div style="color:#A0A3B0;font-size:13.5px;" data-i18n="reviews_page.google_badge_sub">Rated by our customers on Google Maps</div>
+                        <div style="font-weight:800;font-size:18px;color:var(--tt-text, #EAEAEA);" id="googleBadgeText">5.0 on Google · 10 reviews</div>
+                        <div style="color:var(--tt-muted, #A0A3B0);font-size:13.5px;" data-i18n="reviews_page.google_badge_sub">Rated by our customers on Google Maps</div>
                     </div>
                 </div>
                 <a href="https://maps.app.goo.gl/ewpuH6zZRTYNMVV28" target="_blank" rel="noopener" style="display:inline-block;background:linear-gradient(135deg,#D4AF37,#C9A84C);color:#0B0C10;font-weight:700;font-size:14px;padding:10px 22px;border-radius:10px;text-decoration:none;" data-i18n="reviews_page.google_badge_btn">Read our Google reviews →</a>
@@ -398,7 +400,7 @@
                             <div class="reviewer-avatar">SG</div>
                             <div><h4>Syed Gibraeil</h4><span class="reviewer-location">🟢 Google review</span></div>
                         </div>
-                        <div class="review-rating" style="color:#f59e0b;font-size:18px;">★★★★★</div>
+                        <div class="review-rating" style="color:var(--tt-amber2, #f59e0b);font-size:18px;">★★★★★</div>
                     </div>
                     <p class="review-text">I was extremely pleased with the pick-up and drop-off service. They speak English and Georgian, are professional, and their price is good. The vehicles are also quite satisfactory. I recommend!</p>
                     <div class="review-date">3 months ago</div>
@@ -409,7 +411,7 @@
                             <div class="reviewer-avatar">AA</div>
                             <div><h4>Anar Agayarov</h4><span class="reviewer-location">🟢 Google review</span></div>
                         </div>
-                        <div class="review-rating" style="color:#f59e0b;font-size:18px;">★★★★★</div>
+                        <div class="review-rating" style="color:var(--tt-amber2, #f59e0b);font-size:18px;">★★★★★</div>
                     </div>
                     <p class="review-text">I was so happy when I used their service. Multilingual and very professional staff, budget-friendly options and pretty good cars. Definitely recommend!</p>
                     <div class="review-date">4 months ago</div>
@@ -420,9 +422,9 @@
                             <div class="reviewer-avatar">SB</div>
                             <div><h4>Shorena Bolqvadze</h4><span class="reviewer-location">🟢 Google review</span></div>
                         </div>
-                        <div class="review-rating" style="color:#f59e0b;font-size:18px;">★★★★★</div>
+                        <div class="review-rating" style="color:var(--tt-amber2, #f59e0b);font-size:18px;">★★★★★</div>
                     </div>
-                    <p class="review-text">საუკეთესო ავტომობილები 👍 <span style="color:#A0A3B0;">(The best cars!)</span></p>
+                    <p class="review-text">საუკეთესო ავტომობილები 👍 <span style="color:var(--tt-muted, #A0A3B0);">(The best cars!)</span></p>
                     <div class="review-date">9 months ago</div>
                 </div>
             </div>
@@ -430,7 +432,7 @@
             <!-- SEO_PRERENDER_REVIEWS -->
             <div class="reviews-list" id="reviewsList">
 
-                <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#A0A3B0;">
+                <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--tt-muted, #A0A3B0);">
 
                     <p style="font-size:16px;" data-i18n="reviews_page.loading">Loading reviews...</p>
 
@@ -538,9 +540,9 @@
 
                     + '<div style="font-size:48px;margin-bottom:16px;">💬</div>'
 
-                    + '<h3 style="color:#A0A3B0;">No reviews yet</h3>'
+                    + '<h3 style="color:var(--tt-muted, #A0A3B0);">No reviews yet</h3>'
 
-                    + '<p style="color:#A0A3B0;">Be the first to leave a review!</p></div>';
+                    + '<p style="color:var(--tt-muted, #A0A3B0);">Be the first to leave a review!</p></div>';
 
                 return;
 
@@ -570,7 +572,7 @@
 
                     + '</div>'
 
-                    + '<div class="review-rating" style="color:#f59e0b;font-size:18px;">' + stars + '</div>'
+                    + '<div class="review-rating" style="color:var(--tt-amber2, #f59e0b);font-size:18px;">' + stars + '</div>'
 
                     + '</div>'
 
@@ -876,7 +878,7 @@
 
                 <p>📞 +995 591 522 299</p>
 
-                <p>📍 <span data-i18n="footer.address">13 University St, Tbilisi, Georgia</span></p>
+                
 
             </div>
 
@@ -896,31 +898,31 @@
 
     <div id="contactModal" onclick="if(event.target===this)this.style.display='none';" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
 
-        <div style="background:#1C1E26; border:1px solid #3A3F4B; border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.5); text-align:center;">
+        <div style="background:var(--th-surface, #1C1E26); border:1px solid var(--tb-border, #3A3F4B); border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.5); text-align:center;">
 
-            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#A0A3B0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='none'">✕</button>
+            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:var(--tt-muted, #A0A3B0); width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='none'">✕</button>
 
             <div style="width:64px; height:64px; background:linear-gradient(135deg,#D4AF37,#B8963F); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px;">📞</div>
 
-            <h2 style="font-size:24px; font-weight:800; color:#EAEAEA; margin-bottom:8px;">Contact Us</h2>
+            <h2 style="font-size:24px; font-weight:800; color:var(--tt-text, #EAEAEA); margin-bottom:8px;">Contact Us</h2>
 
-            <p style="font-size:14px; color:#A0A3B0; margin-bottom:28px;">We're here to help! Reach us anytime.</p>
+            <p style="font-size:14px; color:var(--tt-muted, #A0A3B0); margin-bottom:28px;">We're here to help! Reach us anytime.</p>
 
-            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#262A35; border:1px solid #3A3F4B; border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#D4AF37'" onmouseout="this.style.borderColor='#3A3F4B'">
+            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:var(--th-raised, #262A35); border:1px solid var(--tb-border, #3A3F4B); border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#D4AF37'" onmouseout="this.style.borderColor='#3A3F4B'">
 
                 <div style="width:44px; height:44px; background:rgba(212,175,55,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">📧</div>
 
                 <div style="text-align:left;">
 
-                    <div style="font-size:12px; color:#A0A3B0; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div>
+                    <div style="font-size:12px; color:var(--tt-muted, #A0A3B0); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div>
 
-                    <div style="font-size:15px; color:#EAEAEA; font-weight:600;">elite.rental25@gmail.com</div>
+                    <div style="font-size:15px; color:var(--tt-text, #EAEAEA); font-weight:600;">elite.rental25@gmail.com</div>
 
                 </div>
 
             </a>
 
-            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#262A35; border:1px solid #3A3F4B; border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#3A3F4B'">
+            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:var(--th-raised, #262A35); border:1px solid var(--tb-border, #3A3F4B); border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#3A3F4B'">
 
                 <div style="width:44px; height:44px; background:rgba(34,197,94,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
 
@@ -930,9 +932,9 @@
 
                 <div style="text-align:left;">
 
-                    <div style="font-size:12px; color:#A0A3B0; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div>
+                    <div style="font-size:12px; color:var(--tt-muted, #A0A3B0); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div>
 
-                    <div style="font-size:15px; color:#EAEAEA; font-weight:600;">+995 591 522 299</div>
+                    <div style="font-size:15px; color:var(--tt-text, #EAEAEA); font-weight:600;">+995 591 522 299</div>
 
                 </div>
 

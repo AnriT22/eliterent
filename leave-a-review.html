@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script src="theme.js?v=1"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex,follow">
     <title>Leave a Review — EliteAuto.rent</title>
@@ -26,8 +27,9 @@
       var REVIEW_URL = "https://maps.app.goo.gl/ewpuH6zZRTYNMVV28";
       var FALLBACK_URL = "https://maps.app.goo.gl/ewpuH6zZRTYNMVV28";
     </script>
+    <link rel="stylesheet" href="theme.css?v=1">
 </head>
-<body style="background:#0B0C10;">
+<body style="background:var(--th-bg, #0B0C10);">
     <header class="header sticky-header">
         <div class="container header-content">
             <div class="header-left">
@@ -37,19 +39,19 @@
     </header>
 
     <section style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:48px 20px;">
-        <div style="max-width:520px;width:100%;background:#15171F;border:1px solid #2A2D38;border-radius:18px;padding:40px 32px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4);">
+        <div style="max-width:520px;width:100%;background:var(--th-panel, #15171F);border:1px solid var(--tb-border2, #2A2D38);border-radius:18px;padding:40px 32px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4);">
             <div style="font-size:40px;letter-spacing:4px;color:#FFC53D;line-height:1;">★★★★★</div>
-            <h1 style="font-size:26px;font-weight:900;color:#EAEAEA;margin:18px 0 8px;">How was your rental?</h1>
-            <p style="color:#A0A3B0;font-size:16px;margin:0 0 24px;">Thanks for choosing EliteAuto.rent! A quick Google review takes about 30 seconds and helps other travelers find a trusted car in Georgia. We read every one.</p>
+            <h1 style="font-size:26px;font-weight:900;color:var(--tt-text, #EAEAEA);margin:18px 0 8px;">How was your rental?</h1>
+            <p style="color:var(--tt-muted, #A0A3B0);font-size:16px;margin:0 0 24px;">Thanks for choosing EliteAuto.rent! A quick Google review takes about 30 seconds and helps other travelers find a trusted car in Georgia. We read every one.</p>
 
             <a id="reviewBtn" href="#" target="_blank" rel="noopener" class="cl-cta-btn" style="display:inline-block;margin:0 0 28px;">Leave a Google Review &#8594;</a>
 
-            <div style="border-top:1px solid #2A2D38;padding-top:24px;">
+            <div style="border-top:1px solid var(--tb-border2, #2A2D38);padding-top:24px;">
                 <p style="color:#7A7E8A;font-size:13px;margin:0 0 14px;text-transform:uppercase;letter-spacing:.08em;">Or scan to review on your phone</p>
                 <img id="qr" alt="Scan to leave a Google review" width="180" height="180" style="background:#fff;padding:10px;border-radius:12px;" loading="lazy">
             </div>
 
-            <p style="color:#7A7E8A;font-size:13px;margin:24px 0 0;">Something wrong with your rental first? <a href="contact.html" style="color:#D4AF37;">Tell us directly</a> — we'll make it right.</p>
+            <p style="color:#7A7E8A;font-size:13px;margin:24px 0 0;">Something wrong with your rental first? <a href="contact.html" style="color:var(--tt-gold, #D4AF37);">Tell us directly</a> — we'll make it right.</p>
         </div>
     </section>
 

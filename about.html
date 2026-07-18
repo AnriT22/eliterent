@@ -8,6 +8,7 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4XTKG24HN6"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-4XTKG24HN6');</script>
     <meta charset="UTF-8">
+    <script src="theme.js?v=1"></script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -30,7 +31,6 @@
       "priceRange": "$$",
       "address": {
         "@type": "PostalAddress",
-        "streetAddress": "13 University St",
         "addressLocality": "Tbilisi",
         "addressCountry": "GE"
       },
@@ -98,6 +98,7 @@
 
     <script src="i18n.js?v=6"></script>
 
+    <link rel="stylesheet" href="theme.css?v=1">
 </head>
 
 <body>
@@ -715,7 +716,7 @@
 
                 <p>📞 +995 591 522 299</p>
 
-                <p>📍 <span data-i18n="footer.address">13 University St, Tbilisi, Georgia</span></p>
+                
 
             </div>
 
@@ -735,31 +736,31 @@
 
     <div id="contactModal" onclick="if(event.target===this)this.style.display='none';" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
 
-        <div style="background:#1C1E26; border:1px solid #3A3F4B; border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.5); text-align:center;">
+        <div style="background:var(--th-surface, #1C1E26); border:1px solid var(--tb-border, #3A3F4B); border-radius:20px; padding:40px; max-width:440px; width:90%; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.5); text-align:center;">
 
-            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#A0A3B0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='none'">✕</button>
+            <button onclick="document.getElementById('contactModal').style.display='none';" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:var(--tt-muted, #A0A3B0); width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='none'">✕</button>
 
             <div style="width:64px; height:64px; background:linear-gradient(135deg,#D4AF37,#B8963F); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px;">📞</div>
 
-            <h2 style="font-size:24px; font-weight:800; color:#EAEAEA; margin-bottom:8px;">Contact Us</h2>
+            <h2 style="font-size:24px; font-weight:800; color:var(--tt-text, #EAEAEA); margin-bottom:8px;">Contact Us</h2>
 
-            <p style="font-size:14px; color:#A0A3B0; margin-bottom:28px;">We're here to help! Reach us anytime.</p>
+            <p style="font-size:14px; color:var(--tt-muted, #A0A3B0); margin-bottom:28px;">We're here to help! Reach us anytime.</p>
 
-            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#262A35; border:1px solid #3A3F4B; border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#D4AF37'" onmouseout="this.style.borderColor='#D4AF37'">
+            <a href="https://mail.google.com/mail/?view=cm&to=elite.rental25@gmail.com" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:var(--th-raised, #262A35); border:1px solid var(--tb-border, #3A3F4B); border-radius:14px; text-decoration:none; margin-bottom:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#D4AF37'" onmouseout="this.style.borderColor='#D4AF37'">
 
                 <div style="width:44px; height:44px; background:rgba(212,175,55,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">📧</div>
 
                 <div style="text-align:left;">
 
-                    <div style="font-size:12px; color:#A0A3B0; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div>
+                    <div style="font-size:12px; color:var(--tt-muted, #A0A3B0); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Email</div>
 
-                    <div style="font-size:15px; color:#EAEAEA; font-weight:600;">elite.rental25@gmail.com</div>
+                    <div style="font-size:15px; color:var(--tt-text, #EAEAEA); font-weight:600;">elite.rental25@gmail.com</div>
 
                 </div>
 
             </a>
 
-            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:#262A35; border:1px solid #3A3F4B; border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#D4AF37'" onmouseout="this.style.borderColor='#D4AF37'">
+            <a href="https://wa.me/995591522299" target="_blank" style="display:flex; align-items:center; gap:14px; padding:16px 20px; background:var(--th-raised, #262A35); border:1px solid var(--tb-border, #3A3F4B); border-radius:14px; text-decoration:none; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#D4AF37'" onmouseout="this.style.borderColor='#D4AF37'">
 
                 <div style="width:44px; height:44px; background:rgba(212,175,55,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
 
@@ -769,9 +770,9 @@
 
                 <div style="text-align:left;">
 
-                    <div style="font-size:12px; color:#A0A3B0; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div>
+                    <div style="font-size:12px; color:var(--tt-muted, #A0A3B0); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">WhatsApp</div>
 
-                    <div style="font-size:15px; color:#EAEAEA; font-weight:600;">+995 591 522 299</div>
+                    <div style="font-size:15px; color:var(--tt-text, #EAEAEA); font-weight:600;">+995 591 522 299</div>
 
                 </div>
 

@@ -1,0 +1,960 @@
+/* ============================================================
+   THEME SYSTEM — design tokens for Dark (default) & Light mode.
+
+   HOW IT WORKS
+   • Components reference tokens as var(--token, <original-dark-hex>).
+     The fallback equals the exact original dark value, so Dark Mode is
+     pixel-identical even if this file ever fails to load.
+   • :root defines the same dark values (source of truth).
+   • html[data-theme="light"] redefines every token for Light Mode.
+   • theme.js sets data-theme before first paint (no FOUC) and injects
+     the Sun/Moon toggle.
+
+   TOKEN PREFIXES
+   --th-*  cool dark surfaces/backgrounds     --tw-*  warm dark surfaces
+   --tt-*  text colors                        --tb-*  border colors
+   --tf-*  white-alpha fills                  --tn-*  neutral greys
+   ============================================================ */
+
+:root {
+    color-scheme: dark;
+
+    /* surfaces (cool) */
+    --th-bg: #0B0C10;        --th-bg2: #0C1117;      --th-bg3: #0F0F0F;
+    --th-bg4: #0A0A0A;       --th-bg5: #111111;      --th-bg6: #0E0F14;
+    --th-navy: #0D1B2A;      --th-navy2: #0F172A;    --th-navy3: #111827;
+    --th-panel: #15171F;     --th-surface: #1C1E26;  --th-surface2: #222530;
+    --th-raised: #262A35;    --th-raised2: #2A2F3A;  --th-raised3: #2A2D3A;
+    --th-raised4: #2E3340;   --th-borderfill: #3A3F4B; --th-chip: #EAEAEA;
+
+    /* surfaces (warm — vehicles/drivers pages) */
+    --tw-bg: #151210;        --tw-bg2: #141210;      --tw-surface: #1A1814;
+    --tw-raised: #2A2520;    --tw-raised2: #2A2318;  --tw-raised3: #352F28;
+    --tw-raised4: #3A3530;   --tw-raised5: #3A3520;  --tn-raised: #2A2A2A;
+
+    /* text */
+    --tt-text: #EAEAEA;      --tt-text2: #F0ECE2;    --tt-text3: #F5F5F5;
+    --tt-muted: #A0A3B0;     --tt-muted2: #94A3B8;   --tt-muted3: #9A9082;
+    --tt-soft: #CBD5E1;      --tt-soft2: #E2E8F0;    --tt-soft3: #C0C0C0;
+    --tt-soft4: #B0B0B0;     --tt-soft5: #D1D5DB;    --tt-warmsoft: #C4BAA8;
+    --tt-bluesoft: #BDDDFC;  --tt-blue: #88BDF2;
+    --tt-gold: #D4AF37;      --tt-gold2: #C9A84C;    --tt-gold3: #D4B86A;
+    --tt-gold4: #E9C766;     --tt-gold5: #F4E3B2;    --tt-gold6: #B8963F;
+    --tt-gold7: #C8A961;     --tt-gold8: #FFD970;
+    --tt-green: #4ADE80;     --tt-green2: #22C55E;   --tt-green3: #86EFAC;
+    --tt-redsoft: #F87171;   --tt-redsoft2: #FCA5A5;
+    --tt-amber: #FBBF24;     --tt-amber2: #F59E0B;   --tt-amber3: #FCD34D;
+
+    /* borders */
+    --tb-border: #3A3F4B;    --tb-border2: #2A2D38;  --tb-border3: #2A2F3A;
+    --tb-border4: #3A3A3A;   --tb-border5: #262A35;  --tb-border6: #1C1E26;
+    --tb-borderw: #2A2520;   --tb-borderw2: #1A1814;
+    --tb-gold: #C9A84C;      --tb-gold2: #D4AF37;    --tb-blue: #88BDF2;
+
+    /* white-alpha fills */
+    --tf-03: rgba(255,255,255,0.03); --tf-04: rgba(255,255,255,0.04);
+    --tf-05: rgba(255,255,255,0.05); --tf-06: rgba(255,255,255,0.06);
+    --tf-07: rgba(255,255,255,0.07); --tf-08: rgba(255,255,255,0.08);
+    --tf-10: rgba(255,255,255,0.1);  --tf-12: rgba(255,255,255,0.12);
+    --tf-15: rgba(255,255,255,0.15); --tf-20: rgba(255,255,255,0.2);
+}
+
+/* ============================================================
+   LIGHT MODE PALETTE
+   ============================================================ */
+html[data-theme="light"] {
+    color-scheme: light;
+
+    /* surfaces (cool) */
+    --th-bg: #F6F5F1;        --th-bg2: #F6F5F1;      --th-bg3: #F3F2ED;
+    --th-bg4: #F3F2ED;       --th-bg5: #F3F2ED;      --th-bg6: #F6F5F1;
+    --th-navy: #ECEEF2;      --th-navy2: #ECEEF2;    --th-navy3: #ECEEF2;
+    --th-panel: #FBFAF7;     --th-surface: #FFFFFF;  --th-surface2: #F8F7F3;
+    --th-raised: #F0EFE9;    --th-raised2: #ECEAE3;  --th-raised3: #ECEAE3;
+    --th-raised4: #E9E7E0;   --th-borderfill: #DEDBD1; --th-chip: #E5E2DA;
+
+    /* surfaces (warm) */
+    --tw-bg: #F6F5F1;        --tw-bg2: #F6F5F1;      --tw-surface: #FFFFFF;
+    --tw-raised: #F1EFE8;    --tw-raised2: #F0EDE4;  --tw-raised3: #EBE8DF;
+    --tw-raised4: #E7E4DB;   --tw-raised5: #E7E4DB;  --tn-raised: #EDECEA;
+
+    /* text */
+    --tt-text: #000000;      --tt-text2: #000000;    --tt-text3: #000000;
+    --tt-muted: #000000;     --tt-muted2: #000000;   --tt-muted3: #000000;
+    --tt-soft: #000000;      --tt-soft2: #000000;    --tt-soft3: #000000;
+    --tt-soft4: #000000;     --tt-soft5: #000000;    --tt-warmsoft: #000000;
+    --tt-bluesoft: #2563EB;  --tt-blue: #1D4ED8;
+    --tt-gold: #9C7E14;      --tt-gold2: #91751A;    --tt-gold3: #8F7519;
+    --tt-gold4: #8A6E12;     --tt-gold5: #6E5716;    --tt-gold6: #8A6E12;
+    --tt-gold7: #8F7418;     --tt-gold8: #8A6E12;
+    --tt-green: #16803C;     --tt-green2: #15803D;   --tt-green3: #16803C;
+    --tt-redsoft: #DC2626;   --tt-redsoft2: #DC2626;
+    --tt-amber: #B45309;     --tt-amber2: #B45309;   --tt-amber3: #B45309;
+
+    /* borders */
+    --tb-border: #DCD8CE;    --tb-border2: #E3E0D7;  --tb-border3: #E3E0D7;
+    --tb-border4: #DDDAD3;   --tb-border5: #E6E3DB;  --tb-border6: #E9E6DE;
+    --tb-borderw: #E4E1D6;   --tb-borderw2: #EAE7DE;
+    --tb-gold: #C1A045;      --tb-gold2: #C9A227;    --tb-blue: #7FA8D9;
+
+    /* white-alpha fills become soft black-alpha fills */
+    --tf-03: rgba(20,20,30,0.02); --tf-04: rgba(20,20,30,0.03);
+    --tf-05: rgba(20,20,30,0.035); --tf-06: rgba(20,20,30,0.04);
+    --tf-07: rgba(20,20,30,0.045); --tf-08: rgba(20,20,30,0.05);
+    --tf-10: rgba(20,20,30,0.06);  --tf-12: rgba(20,20,30,0.075);
+    --tf-15: rgba(20,20,30,0.09);  --tf-20: rgba(20,20,30,0.12);
+
+    /* ---- legacy variables defined in style.css (dark values) ---- */
+    --sage-grey: #F6F5F1;
+    --forest-green: #ECEEF2;
+    --terracotta: #B08A1E;
+    --gold: #B08A1E;
+    --gold-hover: #9A7817;
+    --gold-active: #85670F;
+    --gold-light: #F0EFE9;
+    --gold-soft: #FFFFFF;
+    --gold-bg: #FFFFFF;
+    --text-dark: #000000;
+    --text-light: #000000;
+    --border-light: #DCD8CE;
+    --card-white: #FFFFFF;
+    --shadow-sm: 0 2px 8px rgba(25, 25, 35, 0.08);
+    --shadow-md: 0 8px 24px rgba(25, 25, 35, 0.10);
+    --shadow-lg: 0 16px 48px rgba(25, 25, 35, 0.14);
+
+    /* ---- legacy variables defined in premium.css (dark values) ---- */
+    --primary: #F6F5F1;
+    --primary-light: #ECEEF2;
+    --accent: #00A86B;
+    --accent-hover: #00915C;
+    --accent-glow: rgba(0, 150, 95, 0.14);
+    --gold-input: #F0EFE9;
+    --surface: #FFFFFF;
+    --surface-2: #F6F5F1;
+    --surface-3: #F0EFE9;
+    --text-primary: #000000;
+    --text-secondary: #000000;
+    --text-muted: #000000;
+    --text-on-card: #000000;
+    --border: #DCD8CE;
+    --border-hover: #C9A227;
+    --shadow-xs: 0 1px 2px rgba(25,25,35,0.06);
+    --shadow-accent: 0 4px 24px rgba(176,138,30,0.20);
+    --shadow-xl: 0 16px 48px rgba(25,25,35,0.15);
+    --card-shadow: 0 8px 32px rgba(25,25,35,0.10);
+}
+
+/* ============================================================
+   LIGHT MODE COMPONENT OVERRIDES
+   (only cases the token pass cannot express)
+   ============================================================ */
+
+/* Glass navbar: dark gradient -> light glass */
+html[data-theme="light"] .header {
+    background: linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(250,249,246,0.80) 100%);
+    border-bottom: 1px solid rgba(30,32,38,0.08);
+    padding: 8px 0;
+}
+html[data-theme="light"] .header.scrolled,
+html[data-theme="light"] .sticky-header {
+    background: linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(250,249,246,0.88) 100%);
+}
+/* Nav links: ensure full black for accessibility */
+html[data-theme="light"] .nav-link {
+    color: #000000;
+}
+html[data-theme="light"] .nav-link:hover,
+html[data-theme="light"] .nav-link.active {
+    color: var(--tt-gold, #9C7E14);
+}
+html[data-theme="light"] .nav-link::after {
+    background: var(--tt-gold, #9C7E14);
+}
+/* Logo text: black */
+html[data-theme="light"] .header-left .logo {
+    color: #000000;
+}
+html[data-theme="light"] .header-left .logo:hover {
+    color: var(--tt-gold, #9C7E14);
+}
+
+/* White text that sits on now-light surfaces */
+html[data-theme="light"] .selector-btn,
+html[data-theme="light"] .mobile-nav-header .logo,
+html[data-theme="light"] .mobile-nav-close,
+html[data-theme="light"] .db-user-name,
+html[data-theme="light"] .footer-section h4,
+html[data-theme="light"] .rv-section-header,
+html[data-theme="light"] .admin-logo,
+html[data-theme="light"] .vd-back-btn {
+    color: var(--tt-text, #1E2026);
+}
+
+/* Footer: keep it a shade deeper than the page for separation */
+html[data-theme="light"] .footer {
+    background: #ECEBE5;
+    border-top: 1px solid #DCD8CE;
+}
+
+/* Text selection */
+html[data-theme="light"] ::selection {
+    background: #B08A1E;
+    color: #FFFFFF;
+}
+
+/* Custom scrollbars that were tuned for dark panels */
+html[data-theme="light"] .vp-sidebar::-webkit-scrollbar-thumb,
+html[data-theme="light"] .brand-dropdown-list::-webkit-scrollbar-thumb {
+    background: #C9C5BA;
+}
+html[data-theme="light"] .vp-sidebar::-webkit-scrollbar-track,
+html[data-theme="light"] .brand-dropdown-list::-webkit-scrollbar-track {
+    background: #EFEEE8;
+}
+
+/* Images / logos: the round site logo has its own image; no invert needed. */
+
+/* ============================================================
+   HERO SECTION — light mode
+   The hero uses a dark overlay over a dark bg in dark mode.
+   In light mode we use a light overlay and dark text.
+   ============================================================ */
+html[data-theme="light"] .hero-overlay {
+    background: linear-gradient(135deg, rgba(255,255,255,0.82) 0%, rgba(246,245,241,0.72) 100%);
+}
+html[data-theme="light"] .hero-left {
+    color: #000000;
+}
+/* Hero kicker: was white→gold gradient text (invisible on light).
+   Use solid black with a gold underline for contrast. */
+html[data-theme="light"] .hero-kicker {
+    background: none;
+    -webkit-text-fill-color: #000000;
+    color: #000000;
+}
+/* Hero tagline: was light gray #E7E9EE (invisible on light). */
+html[data-theme="light"] .hero-tagline {
+    color: #000000;
+}
+/* Hero subtext: was rgba(234,234,234,0.7) (invisible on light). */
+html[data-theme="light"] .hero-subtext {
+    color: #000000;
+}
+/* Price badge: soften the dark shadow for light mode. */
+html[data-theme="light"] .hero-price-badge {
+    background: rgba(176,138,30,0.08);
+    border: 1px solid rgba(176,138,30,0.30);
+    box-shadow: 0 4px 16px rgba(25,25,35,0.08), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+html[data-theme="light"] .hero-price-badge .price-from {
+    color: #000000;
+}
+html[data-theme="light"] .hero-price-badge .price-amount {
+    color: var(--tt-gold, #9C7E14);
+}
+html[data-theme="light"] .hero-price-badge .price-period {
+    color: #000000;
+}
+html[data-theme="light"] .hero-price-badge .price-separator {
+    color: #999;
+}
+html[data-theme="light"] .hero-price-badge .price-feature {
+    color: var(--tt-green, #16803C);
+}
+/* Rating section badges & divider */
+html[data-theme="light"] .rating-section .badge,
+html[data-theme="light"] .rating-source {
+    color: #000000;
+}
+html[data-theme="light"] .rating-section .divider {
+    color: #999;
+}
+/* Discount text */
+html[data-theme="light"] .discount {
+    color: var(--tt-gold, #9C7E14);
+}
+/* Car image: lighten the drop shadow for light mode. */
+html[data-theme="light"] .car-image {
+    filter: drop-shadow(0 16px 32px rgba(25,25,35,0.18));
+}
+/* Hero content: move up slightly for better balance. */
+html[data-theme="light"] .hero-main {
+    padding: 20px 0 24px;
+}
+/* Reduce gap between tagline and price badge. */
+html[data-theme="light"] .hero-tagline {
+    margin-bottom: 16px;
+}
+
+/* ============================================================
+   SECTION BACKGROUNDS & CARDS — light mode overrides
+   Handles hardcoded dark backgrounds that can't use tokens
+   because they were written as literal hex values.
+   ============================================================ */
+
+/* Trust bar (benefit strip under search) — was #141922→#1a2233 gradient */
+html[data-theme="light"] .trust-bar {
+    background: linear-gradient(135deg, #ECEEF2 0%, #E4E7ED 100%);
+    border-top: 1px solid rgba(176,138,30,0.18);
+    border-bottom: 1px solid rgba(176,138,30,0.18);
+}
+
+/* Page hero (reviews, drivers, etc.) — dark overlay → light overlay */
+html[data-theme="light"] .page-hero {
+    background: var(--th-navy, #ECEEF2);
+}
+html[data-theme="light"] .page-hero-overlay {
+    background: linear-gradient(135deg, rgba(236,238,242,0.85) 0%, rgba(246,245,241,0.70) 100%);
+}
+
+/* Legal hero (TOS, Privacy) — was dark gradient with white text */
+html[data-theme="light"] .legal-hero {
+    background: linear-gradient(135deg, var(--th-surface, #FFFFFF) 0%, var(--th-navy2, #ECEEF2) 100%);
+    color: #000000;
+}
+html[data-theme="light"] .legal-hero h1 {
+    color: #000000;
+}
+html[data-theme="light"] .legal-hero p {
+    color: #000000;
+}
+
+/* Features section (bento grid) — soften shadows */
+html[data-theme="light"] .features-section {
+    background: var(--th-raised, #F0EFE9);
+}
+html[data-theme="light"] .bento-tile {
+    box-shadow: 0 4px 16px rgba(25,25,35,0.06);
+}
+html[data-theme="light"] .bento-tile:hover {
+    box-shadow: 0 8px 24px rgba(25,25,35,0.10);
+}
+
+/* FAQ section — was var(--bg-secondary) fallback */
+html[data-theme="light"] .faq-section {
+    background: var(--th-navy3, #ECEEF2);
+}
+
+/* CTA section */
+html[data-theme="light"] .cta-section {
+    background: var(--th-navy, #ECEEF2);
+    border-top: 1px solid var(--tb-border, #DCD8CE);
+}
+
+/* Testimonials / How it works / Carousel sections */
+html[data-theme="light"] .testimonials-section,
+html[data-theme="light"] .how-it-works,
+html[data-theme="light"] .carousel-section {
+    background: var(--th-bg, #F6F5F1);
+}
+
+/* Write review section */
+html[data-theme="light"] .write-review-section {
+    background: var(--th-raised, #F0EFE9);
+}
+
+/* Footer — ensure text is readable */
+html[data-theme="light"] .footer {
+    background: #ECEBE5;
+    border-top: 1px solid #DCD8CE;
+    color: #000000;
+}
+html[data-theme="light"] .footer-column h4 {
+    color: #000000;
+}
+html[data-theme="light"] .footer-column p {
+    color: #000000;
+    opacity: 0.85;
+}
+html[data-theme="light"] .footer-column ul li a {
+    color: #000000;
+    opacity: 0.85;
+}
+html[data-theme="light"] .footer-column ul li a:hover {
+    color: var(--tt-gold, #9C7E14);
+    opacity: 1;
+}
+html[data-theme="light"] .footer-bottom {
+    color: #000000;
+    opacity: 0.7;
+    border-top: 1px solid #DCD8CE;
+}
+
+/* Dropdown menus — ensure text contrast on light surface */
+html[data-theme="light"] .dropdown-menu {
+    background: var(--th-surface, #FFFFFF);
+    border: 1px solid var(--tb-border, #DCD8CE);
+    box-shadow: 0 8px 24px rgba(25,25,35,0.12);
+}
+html[data-theme="light"] .dropdown-header {
+    background: var(--tf-03, rgba(20,20,30,0.02));
+    color: #000000;
+    border-bottom: 1px solid var(--tb-border, #DCD8CE);
+}
+html[data-theme="light"] .dropdown-item {
+    color: #000000;
+}
+html[data-theme="light"] .dropdown-item:hover {
+    background: rgba(176,138,30,0.08);
+    color: var(--tt-gold, #9C7E14);
+}
+
+/* City landing hero overlay — was dark gradient over image */
+html[data-theme="light"] .cl-hero-bg {
+    background: linear-gradient(135deg, rgba(246,245,241,0.82), rgba(236,238,242,0.88)) !important;
+}
+
+/* Search button — was #00FF7F with dark text, keep green but adjust */
+html[data-theme="light"] .search-btn {
+    color: #FFFFFF;
+}
+
+/* ============================================================
+   HERO HEADLINE — gradient text clip (premium.css)
+   .hero-headline uses var(--th-chip)→#D4AF37 gradient with
+   -webkit-text-fill-color: transparent. In light mode --th-chip
+   is #E5E2DA (cream), making the text invisible on cream bg.
+   ============================================================ */
+html[data-theme="light"] .hero-headline {
+    background: none;
+    -webkit-text-fill-color: #000000;
+    color: #000000;
+}
+
+/* ============================================================
+   SEARCH CONTAINER — premium.css overrides with hardcoded
+   dark gradient (#1E212B→#1A1C24) and gold border accent.
+   ============================================================ */
+html[data-theme="light"] .booking-form-container {
+    background: #FFFFFF;
+    border: 1px solid #DDDAD3;
+    box-shadow: 0 8px 32px rgba(25,25,35,0.10);
+    backdrop-filter: none;
+}
+html[data-theme="light"] .booking-form-container::before {
+    background: linear-gradient(90deg, transparent, rgba(176,138,30,0.40), transparent);
+}
+/* Booking form labels — was var(--tt-muted) which is #000000 in light,
+   but the label is small text that should be slightly lighter */
+html[data-theme="light"] .booking-form-container .form-group label {
+    color: #444444;
+}
+/* Booking inputs — transparent bg inherits white container, text is black.
+   Placeholder was #6B7280 which is fine on light. */
+html[data-theme="light"] .booking-input {
+    color: #000000;
+}
+html[data-theme="light"] .booking-input::placeholder {
+    color: #888888;
+}
+/* Select option dropdowns — native <option> elements need explicit bg */
+html[data-theme="light"] .booking-input option,
+html[data-theme="light"] .home-filter-select option {
+    background: #FFFFFF;
+    color: #000000;
+}
+
+/* ============================================================
+   MOBILE NAV DRAWER — premium.css overrides .mobile-nav-panel
+   with rgba(13,27,42,0.98) hardcoded dark. Also style.css
+   has color:#fff on header logo and close button.
+   ============================================================ */
+html[data-theme="light"] .mobile-nav-panel {
+    background: #FFFFFF;
+    backdrop-filter: none;
+    box-shadow: -8px 0 40px rgba(25,25,35,0.12);
+    border-left: 1px solid #DDDAD3;
+}
+/* Mobile nav header */
+html[data-theme="light"] .mobile-nav-header {
+    border-bottom: 1px solid #DDDAD3;
+}
+html[data-theme="light"] .mobile-nav-header .logo {
+    color: #1A1A2E;
+}
+/* Close button — was color:#fff on rgba(255,255,255,0.12) bg */
+html[data-theme="light"] .mobile-nav-close {
+    background: #F0EFE9;
+    border: 1px solid #DDDAD3;
+    color: #000000;
+}
+html[data-theme="light"] .mobile-nav-close:hover,
+html[data-theme="light"] .mobile-nav-close:active {
+    background: #E3E0D7;
+}
+/* Mobile nav links — was var(--tt-soft2) which is #000000 in light */
+html[data-theme="light"] .mobile-nav-links a {
+    color: #000000;
+    border-left: 3px solid transparent;
+}
+html[data-theme="light"] .mobile-nav-links a:hover,
+html[data-theme="light"] .mobile-nav-links a.active {
+    background: rgba(176,138,30,0.08);
+    color: var(--tt-gold, #9C7E14);
+    border-left-color: var(--tt-gold, #9C7E14);
+}
+/* Mobile nav footer divider */
+html[data-theme="light"] .mobile-nav-footer {
+    border-top: 1px solid #DDDAD3;
+}
+/* Hamburger button — was rgba(255,255,255,0.06) bg */
+html[data-theme="light"] .hamburger-btn {
+    background: #F0EFE9;
+    border: 1px solid #DDDAD3;
+}
+html[data-theme="light"] .hamburger-btn:hover {
+    background: #E3E0D7;
+}
+html[data-theme="light"] .hamburger-btn span {
+    background: #000000;
+}
+
+/* ============================================================
+   VEHICLE PAGES — vehicles.css & vehicle.css hardcoded colors
+   ============================================================ */
+
+/* "N cars available" badge — was color:#E7C66B (pale gold, invisible on cream) */
+html[data-theme="light"] .vp-count-badge {
+    color: #000000;
+    background: rgba(201, 168, 76, 0.08);
+    border-color: rgba(201, 168, 76, 0.20);
+}
+
+/* Time select dropdown options — was background:#000000 */
+html[data-theme="light"] .vd-time-select option {
+    background: #FFFFFF;
+    color: #000000;
+}
+html[data-theme="light"] .vd-time-select option:disabled {
+    color: #DC2626;
+}
+
+/* Vehicle detail page — booking panel time select itself */
+html[data-theme="light"] .vd-time-select {
+    background: #F8F7F3;
+    border-color: #DDDAD3;
+}
+
+/* ============================================================
+   BRANDING TEXT — logo wordmark & footer brand
+   premium.css uses white→gold gradient text clip; invisible
+   on light backgrounds. Override to solid dark color.
+   ============================================================ */
+
+/* Header logo wordmark "EliteAuto.rent" */
+html[data-theme="light"] .header-left .logo .logo-text {
+    background: none;
+    -webkit-text-fill-color: #1A1A2E;
+    color: #1A1A2E;
+}
+html[data-theme="light"] .header-left .logo:hover .logo-text {
+    background: none;
+    -webkit-text-fill-color: var(--tt-gold, #9C7E14);
+    color: var(--tt-gold, #9C7E14);
+}
+
+/* Footer brand "EliteAuto.rent" (first column h4) */
+html[data-theme="light"] .footer-column:first-child h4 {
+    background: none;
+    -webkit-text-fill-color: #1A1A2E;
+    color: #1A1A2E;
+}
+
+/* Footer background — premium.css uses dark radial+linear gradient */
+html[data-theme="light"] .footer {
+    background: #ECEBE5;
+}
+html[data-theme="light"] .footer::before {
+    background: linear-gradient(90deg, transparent 0%, rgba(176,138,30,0.30) 50%, transparent 100%);
+}
+html[data-theme="light"] .footer-bottom {
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.03));
+}
+html[data-theme="light"] .footer-bottom::before {
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.08) 50%, transparent);
+}
+html[data-theme="light"] .footer-bottom p {
+    color: #555555;
+}
+/* Footer column h4 headings (categories, legal, etc.) */
+html[data-theme="light"] .footer-column h4,
+html[data-theme="light"] .footer-section h4 {
+    color: var(--tt-gold, #9C7E14);
+}
+html[data-theme="light"] .footer-column h4::after,
+html[data-theme="light"] .footer-section h4::after {
+    background: linear-gradient(90deg, #C9A227, #91751A);
+}
+/* Footer body text — premium.css hardcodes #9BA0AD and #B0B4C0 */
+html[data-theme="light"] .footer-column p {
+    color: #444444;
+}
+html[data-theme="light"] .footer-column:last-child p {
+    color: #444444;
+}
+html[data-theme="light"] .footer-column ul li a,
+html[data-theme="light"] .footer-section a {
+    color: #444444;
+}
+html[data-theme="light"] .footer-column ul li a::before {
+    background: linear-gradient(90deg, #91751A, #C9A227);
+}
+html[data-theme="light"] .footer-column ul li a:hover,
+html[data-theme="light"] .footer-section a:hover {
+    color: var(--tt-gold, #9C7E14);
+}
+
+/* ============================================================
+   VEHICLE CARD BORDERS — remove residual gold outline
+   premium.css .fleet-card:hover sets border-color to gold;
+   in light mode this looks like a jarring yellow halo.
+   ============================================================ */
+html[data-theme="light"] .fleet-card {
+    border: 1px solid var(--tb-border, #DCD8CE);
+    box-shadow: 0 2px 8px rgba(25,25,35,0.06);
+}
+html[data-theme="light"] .fleet-card:hover {
+    border-color: #C5C2B8;
+    box-shadow: 0 8px 24px rgba(25,25,35,0.10);
+}
+/* vehicles.css .vc-card — same treatment */
+html[data-theme="light"] .vc-card {
+    border: 1px solid var(--tb-border, #DCD8CE);
+}
+html[data-theme="light"] .vc-card:hover {
+    border-color: #C5C2B8;
+    box-shadow: 0 8px 24px rgba(25,25,35,0.10);
+}
+
+/* ============================================================
+   AUTH PAGES — auth-luxury.css has hardcoded dark backgrounds
+   and white text that don't respond to theme tokens.
+   ============================================================ */
+
+/* Page background */
+html[data-theme="light"] body.auth-page {
+    background: var(--th-bg, #F6F5F1);
+    color: #000000;
+}
+html[data-theme="light"] body.auth-page::before {
+    background: radial-gradient(circle, rgba(136,189,242,0.04) 0%, rgba(136,189,242,0.02) 40%, transparent 70%);
+}
+
+/* Main card container — was rgba(17,24,33,0.9) hardcoded dark */
+html[data-theme="light"] body.auth-page .auth-right-panel {
+    background: #FFFFFF;
+    border: 1px solid #E3E0D7;
+    box-shadow: 0 8px 32px rgba(25,25,35,0.10);
+    backdrop-filter: none;
+}
+
+/* Form header heading — was color: #ffffff */
+html[data-theme="light"] body.auth-page .auth-form-header h2 {
+    color: #000000;
+}
+html[data-theme="light"] body.auth-page .auth-form-header p {
+    color: #444444;
+}
+
+/* Role tabs */
+html[data-theme="light"] body.auth-page .login-role-tabs {
+    background: rgba(136,189,242,0.04);
+    border: 1px solid rgba(136,189,242,0.12);
+}
+html[data-theme="light"] body.auth-page .login-role-tab {
+    color: #444444;
+}
+html[data-theme="light"] body.auth-page .login-role-tab:hover:not(.active) {
+    color: #000000;
+    background: rgba(136,189,242,0.06);
+}
+html[data-theme="light"] body.auth-page .login-role-tab.active {
+    background: var(--tt-blue, #1D4ED8);
+    color: #FFFFFF;
+}
+html[data-theme="light"] body.auth-page .login-role-tab.active svg {
+    stroke: #FFFFFF;
+}
+
+/* Form labels */
+html[data-theme="light"] body.auth-page .form-group label,
+html[data-theme="light"] body.auth-page .form-label {
+    color: #000000;
+}
+
+/* Form inputs — was rgba(136,189,242,0.06) on dark; needs light bg */
+html[data-theme="light"] body.auth-page .form-input,
+html[data-theme="light"] body.auth-page .form-group input,
+html[data-theme="light"] body.auth-page .form-group select,
+html[data-theme="light"] body.auth-page .form-group textarea {
+    background: #F8F7F3;
+    border: 1.5px solid #DDDAD3;
+    color: #000000;
+}
+html[data-theme="light"] body.auth-page .form-input::placeholder {
+    color: #888888;
+}
+html[data-theme="light"] body.auth-page .form-input:focus,
+html[data-theme="light"] body.auth-page .form-group input:focus,
+html[data-theme="light"] body.auth-page .form-group select:focus {
+    border-color: var(--tt-blue, #1D4ED8);
+    box-shadow: 0 0 0 3px rgba(29,78,216,0.10);
+    background: #FFFFFF;
+}
+
+/* Select dropdown options — was background: #111824 */
+html[data-theme="light"] body.auth-page select.form-input option {
+    background: #FFFFFF;
+    color: #000000;
+}
+html[data-theme="light"] body.auth-page input[type="date"].form-input {
+    color-scheme: light;
+}
+
+/* Form icons — was stroke: #64748b (ok on light, but darken slightly) */
+html[data-theme="light"] body.auth-page .form-icon svg {
+    stroke: #64748B;
+}
+html[data-theme="light"] body.auth-page .form-input-wrapper:focus-within .form-icon svg {
+    stroke: var(--tt-blue, #1D4ED8);
+}
+
+/* Password toggle */
+html[data-theme="light"] body.auth-page .form-toggle-password svg {
+    stroke: #64748B;
+}
+html[data-theme="light"] body.auth-page .form-toggle-password:hover {
+    background: rgba(29,78,216,0.08);
+}
+html[data-theme="light"] body.auth-page .form-toggle-password:hover svg {
+    stroke: var(--tt-blue, #1D4ED8);
+}
+
+/* Checkbox */
+html[data-theme="light"] body.auth-page .checkbox-input {
+    border: 1.5px solid #CCC9C0;
+    background: #F8F7F3;
+}
+html[data-theme="light"] body.auth-page .checkbox-input:checked {
+    background: var(--tt-blue, #1D4ED8);
+    border-color: var(--tt-blue, #1D4ED8);
+}
+html[data-theme="light"] body.auth-page .checkbox-input:checked::after {
+    border-color: #FFFFFF;
+}
+html[data-theme="light"] body.auth-page .checkbox-label {
+    color: #000000;
+}
+
+/* Buttons */
+html[data-theme="light"] body.auth-page .btn-primary {
+    background: var(--tt-blue, #1D4ED8);
+    color: #FFFFFF;
+}
+html[data-theme="light"] body.auth-page .btn-primary:hover {
+    background: #1E40AF;
+    box-shadow: 0 4px 20px rgba(29,78,216,0.20);
+}
+html[data-theme="light"] body.auth-page .btn-secondary {
+    background: rgba(29,78,216,0.08);
+    color: var(--tt-blue, #1D4ED8);
+    border: 1px solid rgba(29,78,216,0.15);
+}
+html[data-theme="light"] body.auth-page .btn-secondary:hover {
+    background: rgba(29,78,216,0.12);
+}
+
+/* Divider — was rgba(136,189,242,0.12) on dark */
+html[data-theme="light"] body.auth-page .auth-divider::before,
+html[data-theme="light"] body.auth-page .auth-divider::after {
+    background: #DDDAD3;
+}
+html[data-theme="light"] body.auth-page .auth-divider span {
+    color: #888888;
+}
+
+/* Social buttons */
+html[data-theme="light"] body.auth-page .social-btn {
+    background: #F8F7F3;
+    border: 1.5px solid #DDDAD3;
+    color: #000000;
+}
+html[data-theme="light"] body.auth-page .social-btn:hover {
+    background: #F0EFE9;
+    border-color: #C5C2B8;
+}
+
+/* Auth footer */
+html[data-theme="light"] body.auth-page .auth-footer {
+    border-top: 1px solid #DDDAD3;
+}
+html[data-theme="light"] body.auth-page .auth-footer p {
+    color: #444444;
+}
+html[data-theme="light"] body.auth-page .auth-link {
+    color: var(--tt-blue, #1D4ED8);
+}
+html[data-theme="light"] body.auth-page .auth-link:hover {
+    color: #1E40AF;
+}
+html[data-theme="light"] body.auth-page .auth-footer-sep {
+    color: #888888;
+}
+
+/* Form error */
+html[data-theme="light"] body.auth-page .form-error {
+    color: #DC2626;
+}
+
+/* ============================================================
+   MULTI-STEP PROGRESS INDICATOR (registration wizard)
+   ============================================================ */
+html[data-theme="light"] body.auth-page .progress-number {
+    background: #F0EFE9;
+    border: 2px solid #DDDAD3;
+    color: #888888;
+}
+html[data-theme="light"] body.auth-page .progress-step.active .progress-number {
+    background: var(--tt-blue, #1D4ED8);
+    border-color: var(--tt-blue, #1D4ED8);
+    color: #FFFFFF;
+    box-shadow: 0 0 16px rgba(29,78,216,0.20);
+}
+html[data-theme="light"] body.auth-page .progress-label {
+    color: #666666;
+}
+html[data-theme="light"] body.auth-page .progress-step.active .progress-label {
+    color: var(--tt-blue, #1D4ED8);
+}
+html[data-theme="light"] body.auth-page .progress-line {
+    background: #DDDAD3;
+}
+
+/* Success message — was color: #fff */
+html[data-theme="light"] body.auth-page .success-message h3 {
+    color: #000000;
+}
+html[data-theme="light"] body.auth-page .success-message p {
+    color: #444444;
+}
+html[data-theme="light"] body.auth-page .success-icon {
+    background: var(--tt-blue, #1D4ED8);
+}
+
+/* License options */
+html[data-theme="light"] body.auth-page .license-option {
+    background: #F8F7F3;
+    border: 1.5px solid #DDDAD3;
+}
+html[data-theme="light"] body.auth-page .license-option:hover {
+    border-color: rgba(29,78,216,0.25);
+}
+html[data-theme="light"] body.auth-page .license-label {
+    color: #000000;
+}
+
+/* Password strength bar */
+html[data-theme="light"] body.auth-page .password-strength {
+    background: #E3E0D7;
+}
+
+/* Floating support button */
+html[data-theme="light"] body.auth-page .support-btn {
+    background: #FFFFFF;
+    border: 1px solid #DDDAD3;
+    box-shadow: 0 4px 16px rgba(25,25,35,0.10);
+}
+
+/* ============================================================
+   PARTNER REGISTRATION — pending-approval box & choice cards
+   ============================================================ */
+
+/* Pending approval box — was olive/dark-gold bg with muddy text */
+html[data-theme="light"] .pending-approval-box {
+    background: rgba(212,175,55,0.06);
+    border: 1px solid rgba(176,138,30,0.20);
+}
+html[data-theme="light"] .pending-approval-box h3 {
+    color: var(--tt-gold, #9C7E14);
+}
+html[data-theme="light"] .pending-approval-box p {
+    color: #444444;
+}
+
+/* Choice cards (pricing tiers) — use th-panel which flips to #FBFAF7 */
+html[data-theme="light"] .choice-card {
+    background: #FFFFFF;
+    border: 1px solid #DDDAD3;
+    box-shadow: 0 2px 8px rgba(25,25,35,0.04);
+}
+html[data-theme="light"] .choice-card:hover {
+    border-color: #C5C2B8;
+    box-shadow: 0 4px 16px rgba(25,25,35,0.08);
+}
+html[data-theme="light"] .choice-card-primary:hover {
+    border-color: rgba(176,138,30,0.30);
+}
+html[data-theme="light"] .choice-card h3 {
+    color: #000000;
+}
+html[data-theme="light"] .choice-card-desc {
+    color: #444444;
+}
+html[data-theme="light"] .choice-card-list li {
+    color: #000000;
+}
+html[data-theme="light"] .choice-card-note {
+    color: #666666;
+}
+/* Invite code input inside choice card */
+html[data-theme="light"] .choice-code-wrap .form-input {
+    background: #F8F7F3;
+    border-color: #DDDAD3;
+    color: #000000;
+}
+
+/* ============================================================
+   THEME TOGGLE BUTTON (injected by theme.js)
+   ============================================================ */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid var(--tb-border, #3A3F4B);
+    background: var(--tf-06, rgba(255,255,255,0.06));
+    color: var(--tt-gold2, #C9A84C);
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    flex: 0 0 auto;
+}
+.theme-toggle:hover { border-color: var(--tb-gold, #C9A84C); transform: scale(1.06); }
+.theme-toggle:focus-visible { outline: 2px solid var(--tb-gold, #C9A84C); outline-offset: 2px; }
+.theme-toggle svg { width: 18px; height: 18px; display: block; }
+.theme-toggle .tt-sun { display: none; }
+.theme-toggle .tt-moon { display: block; }
+html[data-theme="light"] .theme-toggle .tt-sun { display: block; }
+html[data-theme="light"] .theme-toggle .tt-moon { display: none; }
+
+/* Floating fallback position (pages without a navbar slot) */
+.theme-toggle--floating {
+    position: fixed;
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    left: 18px;
+    z-index: 10070;
+    width: 44px;
+    height: 44px;
+    background: var(--th-surface, #1C1E26);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+}
+html[data-theme="light"] .theme-toggle--floating { box-shadow: 0 6px 20px rgba(25,25,35,0.18); }
+
+/* Smooth cross-fade while switching themes (added briefly by theme.js) */
+html.theme-switching, html.theme-switching *, html.theme-switching *::before, html.theme-switching *::after {
+    transition: background-color 0.25s ease, background 0.25s ease, color 0.25s ease,
+                border-color 0.25s ease, fill 0.25s ease, stroke 0.25s ease, box-shadow 0.25s ease !important;
+}

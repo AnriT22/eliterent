@@ -501,7 +501,7 @@ function loadCarouselWithAvailability() {
         return;
     }
     
-    carouselTrack.innerHTML = '<div style="padding:40px;text-align:center;color:#A0A3B0;grid-column:1/-1;">Loading vehicles...</div>';
+    carouselTrack.innerHTML = '<div style="padding:40px;text-align:center;color:var(--tt-muted, #A0A3B0);grid-column:1/-1;">Loading vehicles...</div>';
     
     // Note: date filtering is not applied to the homepage structured endpoint;
     // VIP featured cars are fixed by admin. Visitor can use the full fleet page for date filtering.
@@ -525,7 +525,7 @@ function loadCarouselWithAvailability() {
             var homeAds = (adData.ads || []).slice(0, 2);
             
             if (vipFeatured.length === 0 && randomCars.length === 0) {
-                carouselTrack.innerHTML = '<div style="padding:40px;text-align:center;color:#EAEAEA;grid-column:1/-1;"><p style="font-size:18px;">No vehicles available yet.</p></div>';
+                carouselTrack.innerHTML = '<div style="padding:40px;text-align:center;color:var(--tt-text, #EAEAEA);grid-column:1/-1;"><p style="font-size:18px;">No vehicles available yet.</p></div>';
                 return;
             }
             
@@ -609,7 +609,7 @@ function renderCarousel(vehicles, adminAds, firstBlockLength) {
                         </div>
                         <span class="fleet-card-year">${v.year || 'N/A'}</span>
                     </div>
-                    ${(driverOnly && driverPrice > 0) ? `<div class="fleet-card-price-breakdown" style="font-size:11px;color:#A0A3B0;margin-top:-4px;margin-bottom:8px;"><span data-i18n="fleet.driver_included">driver included</span></div>` : ''}
+                    ${(driverOnly && driverPrice > 0) ? `<div class="fleet-card-price-breakdown" style="font-size:11px;color:var(--tt-muted, #A0A3B0);margin-top:-4px;margin-bottom:8px;"><span data-i18n="fleet.driver_included">driver included</span></div>` : ''}
                     <button class="fleet-card-btn" onclick="selectVehicle(${v.id})" data-i18n="fleet.select_vehicle">Select Vehicle</button>
                 </div>
             </div>
@@ -1323,7 +1323,7 @@ function applyHomeFilters() {
         if (!noMatch && track) {
             const msg = document.createElement('div');
             msg.className = 'no-filter-match';
-            msg.style.cssText = 'padding:40px;text-align:center;color:#EAEAEA;grid-column:1/-1;background-color:#0B0C10;';
+            msg.style.cssText = 'padding:40px;text-align:center;color:var(--tt-text, #EAEAEA);grid-column:1/-1;background-color:var(--th-bg, #0B0C10);';
             msg.innerHTML = '<p style="font-size:18px;margin-bottom:8px;">No vehicles match your filters.</p><button onclick="document.querySelectorAll(\'.filter-options input[type=checkbox]\').forEach(c=>c.checked=false);applyHomeFilters();" style="padding:8px 20px;background:#D4AF37;color:#0B0C10;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;">Clear Filters</button>';
             track.appendChild(msg);
         }
