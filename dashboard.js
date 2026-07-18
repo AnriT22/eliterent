@@ -35,7 +35,7 @@
         var statusEl = document.getElementById('dbVerificationStatus');
         if (!statusEl) return;
         if (verified) {
-            statusEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(34,197,94,0.15);color:#22c55e;border-radius:20px;font-size:12px;font-weight:600;margin-top:6px;">'
+            statusEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(34,197,94,0.15);color:var(--tt-green2, #22c55e);border-radius:20px;font-size:12px;font-weight:600;margin-top:6px;">'
                 + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>'
                 + '<span data-i18n="partner_dashboard.verified">Verified</span></span>';
         } else {
@@ -56,7 +56,7 @@
         banner.style.cssText = 'background:linear-gradient(135deg,rgba(249,115,22,0.1),rgba(249,115,22,0.05));border:1px solid rgba(249,115,22,0.3);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;';
         banner.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
             + '<div><p style="margin:0;color:#f97316;font-weight:600;font-size:14px;">' + (typeof I18n !== 'undefined' ? I18n.t('partner_dashboard.pending_title') : 'Your account is pending verification') + '</p>'
-            + '<p style="margin:4px 0 0;color:#94a3b8;font-size:13px;">' + (typeof I18n !== 'undefined' ? I18n.t('partner_dashboard.pending_desc') : 'An admin will review and verify your account. Until verified, you cannot add vehicles or receive bookings. This page updates automatically.') + '</p></div>';
+            + '<p style="margin:4px 0 0;color:var(--tt-muted2, #94a3b8);font-size:13px;">' + (typeof I18n !== 'undefined' ? I18n.t('partner_dashboard.pending_desc') : 'An admin will review and verify your account. Until verified, you cannot add vehicles or receive bookings. This page updates automatically.') + '</p></div>';
         var dbMain = document.querySelector('.db-main');
         if (dbMain) dbMain.insertBefore(banner, dbMain.firstChild);
     }
@@ -99,8 +99,8 @@
             banner.id = 'phoneVerifyBanner';
             banner.style.cssText = 'background:linear-gradient(135deg,rgba(201,168,76,0.1),rgba(201,168,76,0.05));border:1px solid rgba(201,168,76,0.3);border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px;';
             banner.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" style="flex-shrink:0;"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>'
-                + '<div style="flex:1;"><p style="margin:0;color:#C9A84C;font-weight:600;font-size:14px;">Phone verification required</p>'
-                + '<p style="margin:4px 0 0;color:#94a3b8;font-size:13px;">Verify your phone number so customers and our team can reach you about bookings.</p></div>'
+                + '<div style="flex:1;"><p style="margin:0;color:var(--tt-gold2, #C9A84C);font-weight:600;font-size:14px;">Phone verification required</p>'
+                + '<p style="margin:4px 0 0;color:var(--tt-muted2, #94a3b8);font-size:13px;">Verify your phone number so customers and our team can reach you about bookings.</p></div>'
                 + '<button id="phoneVerifyBtn" style="flex-shrink:0;padding:8px 20px;background:#C9A84C;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;">Verify Now</button>';
 
             var dbMain = document.querySelector('.db-main');
@@ -135,19 +135,19 @@
             + '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>'
             + '</div>'
             + '<h3 style="margin:0 0 4px;font-size:18px;color:#1e293b;">Verify Your Phone</h3>'
-            + '<p style="margin:0;color:#A0A3B0;font-size:13px;">Enter your phone number to receive a verification code</p>'
+            + '<p style="margin:0;color:var(--tt-muted, #A0A3B0);font-size:13px;">Enter your phone number to receive a verification code</p>'
             + '</div>'
             // Step 1: Phone input
             + '<div id="pvStep1">'
             + '<label style="display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:4px;">Phone Number</label>'
             + '<input type="tel" id="pvPhoneInput" value="' + (existingPhone || '') + '" placeholder="+995 5XX XXX XXX" style="width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;box-sizing:border-box;margin-bottom:4px;">'
-            + '<p style="margin:0 0 12px;color:#94a3b8;font-size:11px;">International format with country code</p>'
+            + '<p style="margin:0 0 12px;color:var(--tt-muted2, #94a3b8);font-size:11px;">International format with country code</p>'
             + '<div id="pvPhoneErr" style="color:#ef4444;font-size:12px;font-weight:600;margin-bottom:8px;display:none;"></div>'
             + '<button id="pvSendBtn" style="width:100%;padding:10px;background:#C9A84C;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Send Code</button>'
             + '</div>'
             // Step 2: OTP input
             + '<div id="pvStep2" style="display:none;">'
-            + '<p id="pvSentMsg" style="color:#A0A3B0;font-size:13px;text-align:center;margin-bottom:12px;"></p>'
+            + '<p id="pvSentMsg" style="color:var(--tt-muted, #A0A3B0);font-size:13px;text-align:center;margin-bottom:12px;"></p>'
             + '<div id="pvOtpRow" style="display:flex;gap:6px;justify-content:center;margin-bottom:12px;">'
             + '<input type="text" class="pv-otp" maxlength="1" inputmode="numeric" style="width:42px;height:48px;text-align:center;border:1px solid #e2e8f0;border-radius:8px;font-size:20px;font-weight:700;">'
             + '<input type="text" class="pv-otp" maxlength="1" inputmode="numeric" style="width:42px;height:48px;text-align:center;border:1px solid #e2e8f0;border-radius:8px;font-size:20px;font-weight:700;">'
@@ -159,11 +159,11 @@
             + '<div id="pvOtpErr" style="color:#ef4444;font-size:12px;font-weight:600;text-align:center;margin-bottom:8px;display:none;"></div>'
             + '<div id="pvOtpSuccess" style="color:#16a34a;font-size:12px;font-weight:600;text-align:center;margin-bottom:8px;display:none;"></div>'
             + '<button id="pvVerifyBtn" style="width:100%;padding:10px;background:#C9A84C;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;margin-bottom:8px;">Verify</button>'
-            + '<div style="text-align:center;"><span id="pvResendLink" style="color:#C9A84C;font-size:12px;cursor:pointer;text-decoration:underline;">Resend code</span>'
-            + ' &middot; <span id="pvChangePhone" style="color:#A0A3B0;font-size:12px;cursor:pointer;text-decoration:underline;">Change number</span></div>'
+            + '<div style="text-align:center;"><span id="pvResendLink" style="color:var(--tt-gold2, #C9A84C);font-size:12px;cursor:pointer;text-decoration:underline;">Resend code</span>'
+            + ' &middot; <span id="pvChangePhone" style="color:var(--tt-muted, #A0A3B0);font-size:12px;cursor:pointer;text-decoration:underline;">Change number</span></div>'
             + '</div>'
             // Cancel
-            + '<button id="pvCloseBtn" style="width:100%;padding:8px;background:none;border:none;color:#94a3b8;font-size:12px;cursor:pointer;margin-top:12px;">Cancel</button>';
+            + '<button id="pvCloseBtn" style="width:100%;padding:8px;background:none;border:none;color:var(--tt-muted2, #94a3b8);font-size:12px;cursor:pointer;margin-top:12px;">Cancel</button>';
 
         overlay.appendChild(modal);
         overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
@@ -348,7 +348,7 @@
         popup.innerHTML = '<div style="width:64px;height:64px;background:rgba(34,197,94,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">'
             + '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>'
             + '<h3 style="margin:0 0 8px;font-size:20px;color:#1e293b;">Account Verified!</h3>'
-            + '<p style="margin:0 0 20px;color:#A0A3B0;font-size:14px;">Congratulations! Your partner account has been verified. You can now add vehicles and receive bookings.</p>'
+            + '<p style="margin:0 0 20px;color:var(--tt-muted, #A0A3B0);font-size:14px;">Congratulations! Your partner account has been verified. You can now add vehicles and receive bookings.</p>'
             + '<button onclick="this.closest(\'div[style]\').parentElement.remove();" style="padding:10px 32px;background:#22c55e;color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-size:14px;">Got it!</button>';
         overlay.appendChild(popup);
         overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.remove(); });
@@ -397,7 +397,7 @@
         popup.innerHTML = '<div style="width:64px;height:64px;background:rgba(249,115,22,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">'
             + '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>'
             + '<h3 style="margin:0 0 8px;font-size:20px;color:#1e293b;">Account Not Verified</h3>'
-            + '<p style="margin:0 0 20px;color:#A0A3B0;font-size:14px;">You cannot add vehicles until your account is verified by an admin. This page updates automatically once approved.</p>'
+            + '<p style="margin:0 0 20px;color:var(--tt-muted, #A0A3B0);font-size:14px;">You cannot add vehicles until your account is verified by an admin. This page updates automatically once approved.</p>'
             + '<button onclick="this.closest(\'div[style]\').parentElement.remove();" style="padding:10px 32px;background:#f97316;color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-size:14px;">OK, I understand</button>';
         overlay.appendChild(popup);
         overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.remove(); });
@@ -540,7 +540,7 @@
             if (!query) return text;
             var idx = text.toLowerCase().indexOf(query);
             if (idx === -1) return text;
-            return text.slice(0, idx) + '<strong style="color:#C9A84C;">' + text.slice(idx, idx + query.length) + '</strong>' + text.slice(idx + query.length);
+            return text.slice(0, idx) + '<strong style="color:var(--tt-gold2, #C9A84C);">' + text.slice(idx, idx + query.length) + '</strong>' + text.slice(idx + query.length);
         }
 
         function openDropdown() {
@@ -1262,14 +1262,14 @@
             // Verification badge
             var verBadge = '';
             if (statusClass === 'active') {
-                verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(34,197,94,0.15);color:#22c55e;border-radius:12px;font-size:11px;font-weight:600;">'
+                verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(34,197,94,0.15);color:var(--tt-green2, #22c55e);border-radius:12px;font-size:11px;font-weight:600;">'
                     + '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Verified</span>';
             } else if (statusClass === 'pending') {
                 verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(249,115,22,0.15);color:#f97316;border-radius:12px;font-size:11px;font-weight:600;">Unverified</span>';
             } else if (statusClass === 'delete_requested') {
                 verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(239,68,68,0.15);color:#ef4444;border-radius:12px;font-size:11px;font-weight:600;">Delete Requested</span>';
             } else {
-                verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(100,116,139,0.15);color:#A0A3B0;border-radius:12px;font-size:11px;font-weight:600;">' + statusClass.toUpperCase() + '</span>';
+                verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(100,116,139,0.15);color:var(--tt-muted, #A0A3B0);border-radius:12px;font-size:11px;font-weight:600;">' + statusClass.toUpperCase() + '</span>';
             }
 
             html += '<div class="db-vehicle-card" data-id="' + v.id + '">';
@@ -1286,7 +1286,7 @@
             html += verBadge;
             var vipActive = v.vip_until && new Date(v.vip_until) > new Date();
             if (vipActive) {
-                html += '<div style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;margin-left:6px;background:rgba(201,168,76,0.18);color:#C9A84C;border-radius:12px;font-size:11px;font-weight:700;">⭐ VIP</div>';
+                html += '<div style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;margin-left:6px;background:rgba(201,168,76,0.18);color:var(--tt-gold2, #C9A84C);border-radius:12px;font-size:11px;font-weight:700;">⭐ VIP</div>';
             }
             html += '<div class="db-vehicle-actions">';
             if (statusClass !== 'delete_requested') {
@@ -2441,7 +2441,7 @@
             renderCalendar();
             if (!list) return;
             if (!blocks.length) {
-                list.innerHTML = '<p style="font-size:12px;color:#94a3b8;margin:0;">No hour blocks yet.</p>';
+                list.innerHTML = '<p style="font-size:12px;color:var(--tt-muted2, #94a3b8);margin:0;">No hour blocks yet.</p>';
                 return;
             }
             list.innerHTML = blocks.map(function (b) {
@@ -2450,7 +2450,7 @@
                 return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:6px;background:#f8fafc;">'
                     + '<div style="font-size:13px;color:#334155;">'
                     + '<b>' + tbFmt(b.start) + '</b> &rarr; <b>' + tbFmt(b.end) + '</b>'
-                    + '<span style="color:#94a3b8;"> (+' + bufLabel + ' buffer &rarr; ' + tbFmt(b.effective_end) + ')</span>'
+                    + '<span style="color:var(--tt-muted2, #94a3b8);"> (+' + bufLabel + ' buffer &rarr; ' + tbFmt(b.effective_end) + ')</span>'
                     + '</div>'
                     + '<button type="button" onclick="deleteTimeBlock(' + b.id + ')" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:13px;font-weight:600;">Remove</button>'
                     + '</div>';
@@ -2550,7 +2550,7 @@
         var tab = document.getElementById('tab-bookings');
         if (!tab) return;
         tab.innerHTML = '<div class="db-tab-header"><h2>Bookings</h2></div>'
-            + '<div style="padding:40px;text-align:center;color:#94a3b8;">Loading...</div>';
+            + '<div style="padding:40px;text-align:center;color:var(--tt-muted2, #94a3b8);">Loading...</div>';
 
         fetch('/api/bookings/partner', { headers: { 'Authorization': 'Bearer ' + token } })
         .then(function(r) { return r.json(); })
@@ -2592,7 +2592,7 @@
                     + '</div>'
                     + '<div class="db-booking-guest"><strong>' + (b.guest_name || 'Guest') + '</strong>'
                     + (b.guest_phone ? ' &middot; ' + b.guest_phone : '')
-                    + ' &middot; <a href="mailto:' + (b.guest_email||'') + '" style="color:#C9A84C;">' + (b.guest_email||'') + '</a></div>'
+                    + ' &middot; <a href="mailto:' + (b.guest_email||'') + '" style="color:var(--tt-gold2, #C9A84C);">' + (b.guest_email||'') + '</a></div>'
                     + '<div class="db-booking-dates">' + pickup + ' &rarr; ' + dropoff + ' &middot; ' + days + ' day' + (days!==1?'s':'') + '</div>'
                     + (b.pickup_location ? '<div class="db-booking-loc">&#128205; ' + b.pickup_location + (b.dropoff_location && b.dropoff_location !== b.pickup_location ? ' &rarr; ' + b.dropoff_location : '') + '</div>' : '')
                     + (function() {
@@ -2603,7 +2603,7 @@
                             return '<div style="margin:6px 0;display:flex;gap:6px;flex-wrap:wrap;">'
                                 + extrasArr.map(function(ex) {
                                     var price = parseFloat(ex.price) || 0;
-                                    return '<span style="padding:3px 8px;background:rgba(201,168,76,0.12);color:#C9A84C;border-radius:6px;font-size:11px;font-weight:600;">'
+                                    return '<span style="padding:3px 8px;background:rgba(201,168,76,0.12);color:var(--tt-gold2, #C9A84C);border-radius:6px;font-size:11px;font-weight:600;">'
                                         + (ex.name || ex.code || 'Extra') + (price > 0 ? ' $' + price : '') + '</span>';
                                 }).join('') + '</div>';
                         }
@@ -2618,9 +2618,9 @@
                         var guestTotal = atPickup + svcFee;
                         return '<div class="db-booking-price">'
                             + 'Total price: <strong>$' + guestTotal.toFixed(2) + '</strong>'
-                            + ' &middot; <span style="color:#22c55e;">To collect at pickup: <strong>$' + atPickup.toFixed(2) + '</strong></span>'
-                            + (b.extras_total && parseFloat(b.extras_total) > 0 ? ' <span style="color:#A0A3B0;font-size:12px;">(incl. extras: $' + parseFloat(b.extras_total).toFixed(2) + ')</span>' : '')
-                            + ' &middot; <span style="color:#94a3b8;font-size:12px;">Booked ' + created + '</span></div>';
+                            + ' &middot; <span style="color:var(--tt-green2, #22c55e);">To collect at pickup: <strong>$' + atPickup.toFixed(2) + '</strong></span>'
+                            + (b.extras_total && parseFloat(b.extras_total) > 0 ? ' <span style="color:var(--tt-muted, #A0A3B0);font-size:12px;">(incl. extras: $' + parseFloat(b.extras_total).toFixed(2) + ')</span>' : '')
+                            + ' &middot; <span style="color:var(--tt-muted2, #94a3b8);font-size:12px;">Booked ' + created + '</span></div>';
                     })()
                     + '</div>';
 
@@ -3046,7 +3046,7 @@
         // --- Load drivers ---
         function loadDrivers() {
             if (!driversGrid) return;
-            driversGrid.innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8;">Loading...</div>';
+            driversGrid.innerHTML = '<div style="padding:40px;text-align:center;color:var(--tt-muted2, #94a3b8);">Loading...</div>';
             fetch('/api/drivers/mine', { headers: { 'Authorization': 'Bearer ' + token } })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
@@ -3065,15 +3065,15 @@
                             '<span style="background:#ef4444;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px;">Rejected</span>';
                         var photo = d.photo_url || 'images/default-driver.png';
                         var langs = (typeof d.languages === 'string') ? JSON.parse(d.languages || '[]') : (d.languages || []);
-                        var langTags = langs.slice(0, 4).map(function (l) { return '<span style="font-size:11px;background:rgba(201,168,76,0.15);color:#C9A84C;padding:2px 6px;border-radius:6px;">' + l + '</span>'; }).join(' ');
+                        var langTags = langs.slice(0, 4).map(function (l) { return '<span style="font-size:11px;background:rgba(201,168,76,0.15);color:var(--tt-gold2, #C9A84C);padding:2px 6px;border-radius:6px;">' + l + '</span>'; }).join(' ');
                         html += '<div class="db-driver-card" data-id="' + d.id + '">'
                             + '<div class="db-driver-photo" style="background-image:url(' + photo + ')"></div>'
                             + '<div class="db-driver-info">'
                             + '<h4>' + escapeHtml(d.full_name) + '</h4>'
-                            + '<div style="margin:4px 0;">' + statusBadge + (d.is_verified ? ' <span style="font-size:11px;color:#22c55e;">&#10003; Verified</span>' : '') + '</div>'
+                            + '<div style="margin:4px 0;">' + statusBadge + (d.is_verified ? ' <span style="font-size:11px;color:var(--tt-green2, #22c55e);">&#10003; Verified</span>' : '') + '</div>'
                             + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0;">' + langTags + '</div>'
-                            + '<p style="font-size:13px;color:#A0A3B0;margin:4px 0;">' + (d.experience_years || 0) + ' years experience</p>'
-                            + '<p style="font-size:14px;color:#C9A84C;font-weight:600;">' + (d.price_amount || 0) + '$ / ' + (d.price_unit || 'day') + '</p>'
+                            + '<p style="font-size:13px;color:var(--tt-muted, #A0A3B0);margin:4px 0;">' + (d.experience_years || 0) + ' years experience</p>'
+                            + '<p style="font-size:14px;color:var(--tt-gold2, #C9A84C);font-weight:600;">' + (d.price_amount || 0) + '$ / ' + (d.price_unit || 'day') + '</p>'
                             + '</div>'
                             + '<div class="db-driver-actions">'
                             + '<button class="btn btn-small btn-text edit-driver" data-id="' + d.id + '">Edit</button>'
@@ -3101,20 +3101,20 @@
                 .then(function (data) {
                     var reviews = (data && data.reviews) || [];
                     if (!reviews.length) {
-                        box.innerHTML = '<span style="color:#A0A3B0;font-size:13px;">No reviews yet — they\'ll appear here once customers rate your drivers.</span>';
+                        box.innerHTML = '<span style="color:var(--tt-muted, #A0A3B0);font-size:13px;">No reviews yet — they\'ll appear here once customers rate your drivers.</span>';
                         return;
                     }
                     box.innerHTML = reviews.map(function (rv) {
                         var score = Math.max(0, Math.min(5, parseInt(rv.rating_score, 10) || 0));
                         var stars = '★★★★★'.slice(0, score) + '☆☆☆☆☆'.slice(0, 5 - score);
                         var when = rv.created_at ? new Date(rv.created_at).toLocaleDateString() : '';
-                        return '<div style="background:#1C1E26;border:1px solid #3A3F4B;border-radius:10px;padding:12px 14px;margin-bottom:10px;">'
+                        return '<div style="background:var(--th-surface, #1C1E26);border:1px solid var(--tb-border, #3A3F4B);border-radius:10px;padding:12px 14px;margin-bottom:10px;">'
                             + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">'
-                            + '<strong style="color:#EAEAEA;font-size:13px;">' + escapeHtml(rv.driver_name || 'Driver') + '</strong>'
-                            + '<span style="color:#C9A84C;font-size:13px;letter-spacing:1px;">' + stars + '</span>'
+                            + '<strong style="color:var(--tt-text, #EAEAEA);font-size:13px;">' + escapeHtml(rv.driver_name || 'Driver') + '</strong>'
+                            + '<span style="color:var(--tt-gold2, #C9A84C);font-size:13px;letter-spacing:1px;">' + stars + '</span>'
                             + '</div>'
-                            + '<div style="color:#94a3b8;font-size:11px;margin-top:2px;">' + escapeHtml(rv.customer_name || 'Guest') + (when ? ' &middot; ' + when : '') + '</div>'
-                            + (rv.review_text ? '<p style="color:#A0A3B0;font-size:13px;margin:8px 0 0;">' + escapeHtml(rv.review_text) + '</p>' : '')
+                            + '<div style="color:var(--tt-muted2, #94a3b8);font-size:11px;margin-top:2px;">' + escapeHtml(rv.customer_name || 'Guest') + (when ? ' &middot; ' + when : '') + '</div>'
+                            + (rv.review_text ? '<p style="color:var(--tt-muted, #A0A3B0);font-size:13px;margin:8px 0 0;">' + escapeHtml(rv.review_text) + '</p>' : '')
                             + '</div>';
                     }).join('');
                 })
@@ -3324,7 +3324,7 @@
         var list = document.getElementById('vLocationsList');
         var addBtn = document.getElementById('vAddLocationBtn');
         if (!list || !addBtn) return;
-        var btnStyle = 'width:30px;height:34px;border:1px solid #3A3F4B;background:transparent;color:#EAEAEA;border-radius:8px;cursor:pointer;flex-shrink:0;';
+        var btnStyle = 'width:30px;height:34px;border:1px solid var(--tb-border, #3A3F4B);background:transparent;color:var(--tt-text, #EAEAEA);border-radius:8px;cursor:pointer;flex-shrink:0;';
 
         window.addVehicleLocationRow = function (d) {
             d = d || {};
@@ -3612,7 +3612,7 @@
 
     function renderVipTopup() {
         var a = document.getElementById('vipCarActions');
-        a.innerHTML = '<div style="font-size:13px;margin-bottom:8px;color:#A0A3B0;">' + tOr('partner_dashboard.vip_topup_choose', 'Choose amount to add to your VIP wallet:') + '</div>' +
+        a.innerHTML = '<div style="font-size:13px;margin-bottom:8px;color:var(--tt-muted, #A0A3B0);">' + tOr('partner_dashboard.vip_topup_choose', 'Choose amount to add to your VIP wallet:') + '</div>' +
             [10, 20, 30, 50].map(function (x) { return '<button class="btn btn-secondary vip-top" data-amt="' + x + '" style="margin:0 6px 6px 0;">$' + x + '</button>'; }).join('') +
             '<div><button class="btn btn-text" id="vipTopBack">' + tOr('partner_dashboard.vip_back', '← Back') + '</button></div>';
         document.getElementById('vipTopBack').addEventListener('click', function () { if (_vipWallet) renderVipActions(_vipWallet); });

@@ -134,7 +134,7 @@
     "whatsapp_label": "WhatsApp",
     "contact_us": "Contact Us",
     "contact_help": "We're here to help! Reach us anytime.",
-    "address": "13 University St, Tbilisi, Georgia",
+    "address": "",
     "rights": "All rights reserved.",
     "copyright": "© 2026 EliteAuto.rent. All rights reserved."
   },
@@ -202,7 +202,7 @@
     "email_title": "Email",
     "phone_title": "Phone / WhatsApp",
     "address_title": "Address",
-    "address_text": "University Street 13<br>Tbilisi, Georgia",
+    "address_text": "",
     "hours_title": "Working Hours",
     "hours_text": "Monday - Sunday: 9:00 AM - 9:00 PM<br>24/7 WhatsApp Support Available",
     "map_title": "Find Us on the Map",

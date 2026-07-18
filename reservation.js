@@ -907,14 +907,14 @@
         };
 
         var html = '<div id="sendCodeOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);">'
-            + '<div style="background:#1C1E26;border:1px solid #3A3F4B;border-radius:20px;padding:40px;max-width:400px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);">'
+            + '<div style="background:var(--th-surface, #1C1E26);border:1px solid var(--tb-border, #3A3F4B);border-radius:20px;padding:40px;max-width:400px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);">'
             + '<div style="width:64px;height:64px;background:linear-gradient(135deg,#D4AF37,#B8963F);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px;">'
             + '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>'
             + '</div>'
-            + '<h2 style="color:#EAEAEA;font-size:20px;font-weight:700;margin-bottom:8px;">' + t('reservation.verify_title', 'Verify Your Phone') + '</h2>'
-            + '<p style="color:#A0A3B0;font-size:14px;margin-bottom:24px;">' + t('reservation.verify_desc', 'We will send a verification code to') + '<br><strong style="color:#D4AF37;font-size:16px;">' + maskedPhone + '</strong></p>'
+            + '<h2 style="color:var(--tt-text, #EAEAEA);font-size:20px;font-weight:700;margin-bottom:8px;">' + t('reservation.verify_title', 'Verify Your Phone') + '</h2>'
+            + '<p style="color:var(--tt-muted, #A0A3B0);font-size:14px;margin-bottom:24px;">' + t('reservation.verify_desc', 'We will send a verification code to') + '<br><strong style="color:var(--tt-gold, #D4AF37);font-size:16px;">' + maskedPhone + '</strong></p>'
             + '<button id="sendCodeBtn" style="width:100%;padding:14px;background:linear-gradient(135deg,#C9A84C,#B8963F);border:none;border-radius:12px;color:#1C1E26;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.2s;margin-bottom:12px;">' + t('reservation.send_code', 'Send Code') + '</button>'
-            + '<button id="sendCodeCancel" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:#A0A3B0;font-size:14px;cursor:pointer;transition:all 0.2s;">' + t('reservation.cancel', 'Cancel') + '</button>'
+            + '<button id="sendCodeCancel" style="width:100%;padding:12px;background:transparent;border:1px solid var(--tf-12, rgba(255,255,255,0.12));border-radius:12px;color:var(--tt-muted, #A0A3B0);font-size:14px;cursor:pointer;transition:all 0.2s;">' + t('reservation.cancel', 'Cancel') + '</button>'
             + '</div></div>';
 
         document.body.insertAdjacentHTML('beforeend', html);

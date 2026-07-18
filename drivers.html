@@ -4,6 +4,7 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4XTKG24HN6"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-4XTKG24HN6');</script>
     <meta charset="UTF-8">
+    <script src="theme.js?v=1"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional Drivers in Georgia — EliteAuto</title>
     <meta name="description" content="Hire verified professional drivers in Georgia, Armenia and USA. Experienced chauffeurs with own vehicles or fleet partners.">
@@ -15,22 +16,22 @@
     <script src="api-helper.js?v=2"></script>
     <script src="i18n.js?v=6"></script>
     <style>
-        .drivers-page { min-height: 100vh; background: #12141D; padding: 24px 0 60px; }
+        .drivers-page { min-height: 100vh; background: var(--th-bg, #12141D); padding: 24px 0 60px; }
         .drivers-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         .drivers-header { text-align: center; padding: 32px 0 24px; }
-        .drivers-header h1 { font-size: 28px; font-weight: 700; color: #EAEAEA; margin: 0 0 8px; }
-        .drivers-header p { font-size: 15px; color: #A0A3B0; margin: 0; }
+        .drivers-header h1 { font-size: 28px; font-weight: 700; color: var(--tt-text, #EAEAEA); margin: 0 0 8px; }
+        .drivers-header p { font-size: 15px; color: var(--tt-muted, #A0A3B0); margin: 0; }
         .drivers-filter-bar {
             display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
-            background: #1C1E26; border: 1px solid #3A3F4B; border-radius: 14px;
+            background: var(--th-surface, #1C1E26); border: 1px solid var(--tb-border, #3A3F4B); border-radius: 14px;
             padding: 16px; margin-bottom: 24px;
         }
         .drivers-filter-bar select, .drivers-filter-bar input[type="text"], .drivers-filter-bar input[type="number"] {
-            background: #262A35; border: 1px solid #3A3F4B; border-radius: 10px;
-            color: #EAEAEA; padding: 10px 14px; font-size: 14px; min-width: 140px;
+            background: var(--th-raised, #262A35); border: 1px solid var(--tb-border, #3A3F4B); border-radius: 10px;
+            color: var(--tt-text, #EAEAEA); padding: 10px 14px; font-size: 14px; min-width: 140px;
         }
-        .drivers-filter-bar select:focus, .drivers-filter-bar input:focus { outline: none; border-color: #C9A84C; }
-        .drivers-filter-bar label { display: flex; align-items: center; gap: 8px; color: #A0A3B0; font-size: 14px; cursor: pointer; }
+        .drivers-filter-bar select:focus, .drivers-filter-bar input:focus { outline: none; border-color: var(--tb-gold, #C9A84C); }
+        .drivers-filter-bar label { display: flex; align-items: center; gap: 8px; color: var(--tt-muted, #A0A3B0); font-size: 14px; cursor: pointer; }
         .drivers-filter-bar button {
             background: #C9A84C; color: #0F1117; border: none; border-radius: 10px;
             padding: 10px 22px; font-weight: 600; font-size: 14px; cursor: pointer; transition: opacity 0.2s;
@@ -40,12 +41,12 @@
             display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;
         }
         .driver-card {
-            background: #1C1E26; border: 1px solid #3A3F4B; border-radius: 16px; overflow: hidden;
+            background: var(--th-surface, #1C1E26); border: 1px solid var(--tb-border, #3A3F4B); border-radius: 16px; overflow: hidden;
             display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;
         }
         .driver-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
         .driver-photo {
-            height: 180px; background-size: cover; background-position: center; background-color: #2A2D3A;
+            height: 180px; background-size: cover; background-position: center; background-color: var(--th-raised3, #2A2D3A);
             position: relative;
         }
         .driver-photo .verified-badge {
@@ -54,31 +55,31 @@
             padding: 3px 8px; border-radius: 8px;
         }
         .driver-info { padding: 16px; flex: 1; }
-        .driver-info h3 { margin: 0 0 6px; font-size: 17px; color: #EAEAEA; }
+        .driver-info h3 { margin: 0 0 6px; font-size: 17px; color: var(--tt-text, #EAEAEA); }
         .driver-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
         .driver-meta span {
-            font-size: 12px; background: rgba(201,168,76,0.12); color: #C9A84C;
+            font-size: 12px; background: rgba(201,168,76,0.12); color: var(--tt-gold2, #C9A84C);
             padding: 3px 8px; border-radius: 8px;
         }
-        .driver-price { font-size: 18px; font-weight: 700; color: #C9A84C; margin: 8px 0 0; }
+        .driver-price { font-size: 18px; font-weight: 700; color: var(--tt-gold2, #C9A84C); margin: 8px 0 0; }
         .driver-contact {
             display: flex; gap: 8px; padding: 0 16px 16px;
         }
         .driver-contact a {
-            flex: 1; text-align: center; background: #262A35; border: 1px solid #3A3F4B;
-            color: #EAEAEA; text-decoration: none; border-radius: 10px; padding: 10px 0;
+            flex: 1; text-align: center; background: var(--th-raised, #262A35); border: 1px solid var(--tb-border, #3A3F4B);
+            color: var(--tt-text, #EAEAEA); text-decoration: none; border-radius: 10px; padding: 10px 0;
             font-size: 13px; font-weight: 600; transition: all 0.2s;
         }
-        .driver-contact a:hover { background: #C9A84C; color: #0F1117; border-color: #C9A84C; }
+        .driver-contact a:hover { background: #C9A84C; color: #0F1117; border-color: var(--tb-gold, #C9A84C); }
         .ad-card {
-            background: linear-gradient(135deg, #1C1E26 0%, #262A35 100%);
-            border: 1px solid #C9A84C; border-radius: 16px; overflow: hidden;
+            background: linear-gradient(135deg, var(--th-surface, #1C1E26) 0%, var(--th-raised, #262A35) 100%);
+            border: 1px solid var(--tb-gold, #C9A84C); border-radius: 16px; overflow: hidden;
             display: flex; flex-direction: column; grid-column: span 1;
         }
-        .ad-card-cover { height: 180px; background-size: cover; background-position: center; background-color: #2A2D3A; }
+        .ad-card-cover { height: 180px; background-size: cover; background-position: center; background-color: var(--th-raised3, #2A2D3A); }
         .ad-card-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
-        .ad-card-body h4 { margin: 0 0 6px; font-size: 16px; color: #EAEAEA; text-align: center; }
-        .ad-card-body p { margin: 0 0 12px; font-size: 13px; color: #A0A3B0; flex: 1; }
+        .ad-card-body h4 { margin: 0 0 6px; font-size: 16px; color: var(--tt-text, #EAEAEA); text-align: center; }
+        .ad-card-body p { margin: 0 0 12px; font-size: 13px; color: var(--tt-muted, #A0A3B0); flex: 1; }
         .ad-card-cta {
             display: inline-block; background: #C9A84C; color: #0F1117; text-decoration: none;
             border-radius: 10px; padding: 10px 16px; font-size: 13px; font-weight: 600;
@@ -89,62 +90,63 @@
             text-align: center; margin-top: 32px;
         }
         .drivers-load-more button {
-            background: transparent; border: 1px solid #3A3F4B; color: #A0A3B0;
+            background: transparent; border: 1px solid var(--tb-border, #3A3F4B); color: var(--tt-muted, #A0A3B0);
             border-radius: 10px; padding: 12px 32px; font-size: 14px; cursor: pointer; transition: all 0.2s;
         }
-        .drivers-load-more button:hover { border-color: #C9A84C; color: #C9A84C; }
-        .star-rating { display: inline-flex; align-items: center; gap: 2px; font-size: 13px; color: #C9A84C; }
+        .drivers-load-more button:hover { border-color: var(--tb-gold, #C9A84C); color: var(--tt-gold2, #C9A84C); }
+        .star-rating { display: inline-flex; align-items: center; gap: 2px; font-size: 13px; color: var(--tt-gold2, #C9A84C); }
         .star-rating .star { color: #3A3F4B; }
-        .star-rating .star.filled { color: #C9A84C; }
-        .star-rating .star.half { background: linear-gradient(90deg, #C9A84C 50%, #3A3F4B 50%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-        .star-rating .count { color: #A0A3B0; font-size: 12px; margin-left: 4px; }
+        .star-rating .star.filled { color: var(--tt-gold2, #C9A84C); }
+        .star-rating .star.half { background: linear-gradient(90deg, #C9A84C 50%, var(--th-borderfill, #3A3F4B) 50%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .star-rating .count { color: var(--tt-muted, #A0A3B0); font-size: 12px; margin-left: 4px; }
         .driver-card .driver-stars { margin: 4px 0 0; }
         .drivers-empty {
-            grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #A0A3B0;
+            grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--tt-muted, #A0A3B0);
         }
         .driver-detail-modal {
             display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.6);
             overflow-y: auto; -webkit-overflow-scrolling: touch; backdrop-filter: blur(4px);
         }
         .driver-detail-modal .modal-box {
-            max-width: 720px; margin: 40px auto; background: #1C1E26; border: 1px solid #3A3F4B;
+            max-width: 720px; margin: 40px auto; background: var(--th-surface, #1C1E26); border: 1px solid var(--tb-border, #3A3F4B);
             border-radius: 16px; box-shadow: 0 24px 48px rgba(0,0,0,0.3); width: calc(100% - 32px); margin-bottom: 40px;
         }
         .driver-detail-modal .modal-header {
             display: flex; justify-content: space-between; align-items: center; padding: 20px 24px;
-            border-bottom: 1px solid #3A3F4B; background: #262A35; position: sticky; top: 0; z-index: 10;
+            border-bottom: 1px solid var(--tb-border, #3A3F4B); background: var(--th-raised, #262A35); position: sticky; top: 0; z-index: 10;
             border-radius: 16px 16px 0 0;
         }
-        .driver-detail-modal .modal-header h3 { margin: 0; font-size: 18px; font-weight: 700; color: #EAEAEA; }
-        .driver-detail-modal .modal-header button { background: none; border: none; font-size: 24px; cursor: pointer; color: #A0A3B0; padding: 8px; }
+        .driver-detail-modal .modal-header h3 { margin: 0; font-size: 18px; font-weight: 700; color: var(--tt-text, #EAEAEA); }
+        .driver-detail-modal .modal-header button { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--tt-muted, #A0A3B0); padding: 8px; }
         .driver-detail-modal .modal-body { padding: 24px; }
-        .driver-detail-photo { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #3A3F4B; }
-        .review-item { padding: 14px 0; border-bottom: 1px solid #3A3F4B; }
+        .driver-detail-photo { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--tb-border, #3A3F4B); }
+        .review-item { padding: 14px 0; border-bottom: 1px solid var(--tb-border, #3A3F4B); }
         .review-item:last-child { border-bottom: none; }
-        .review-item .reviewer-name { font-size: 13px; font-weight: 600; color: #EAEAEA; }
-        .review-item .review-date { font-size: 11px; color: #A0A3B0; margin-left: 8px; }
-        .review-item .review-text { font-size: 13px; color: #A0A3B0; margin-top: 4px; }
+        .review-item .reviewer-name { font-size: 13px; font-weight: 600; color: var(--tt-text, #EAEAEA); }
+        .review-item .review-date { font-size: 11px; color: var(--tt-muted, #A0A3B0); margin-left: 8px; }
+        .review-item .review-text { font-size: 13px; color: var(--tt-muted, #A0A3B0); margin-top: 4px; }
         .review-modal {
             display: none; position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.6);
             overflow-y: auto; -webkit-overflow-scrolling: touch; backdrop-filter: blur(4px);
         }
         .review-modal .modal-box {
-            max-width: 480px; margin: 80px auto; background: #1C1E26; border: 1px solid #3A3F4B;
+            max-width: 480px; margin: 80px auto; background: var(--th-surface, #1C1E26); border: 1px solid var(--tb-border, #3A3F4B);
             border-radius: 16px; padding: 24px; width: calc(100% - 32px);
         }
         .star-selector { display: flex; gap: 6px; font-size: 28px; cursor: pointer; }
         .star-selector .star { color: #3A3F4B; transition: color 0.15s; }
-        .star-selector .star:hover, .star-selector .star.active { color: #C9A84C; }
+        .star-selector .star:hover, .star-selector .star.active { color: var(--tt-gold2, #C9A84C); }
         .review-modal textarea {
-            width: 100%; min-height: 80px; padding: 12px; border: 1px solid #3A3F4B;
-            border-radius: 10px; background: #262A35; color: #EAEAEA; font-size: 14px; resize: vertical; box-sizing: border-box;
+            width: 100%; min-height: 80px; padding: 12px; border: 1px solid var(--tb-border, #3A3F4B);
+            border-radius: 10px; background: var(--th-raised, #262A35); color: var(--tt-text, #EAEAEA); font-size: 14px; resize: vertical; box-sizing: border-box;
         }
-        .review-modal textarea:focus { outline: none; border-color: #C9A84C; }
+        .review-modal textarea:focus { outline: none; border-color: var(--tb-gold, #C9A84C); }
         @media (max-width: 640px) {
             .drivers-grid { grid-template-columns: 1fr; }
             .drivers-filter-bar { flex-direction: column; align-items: stretch; }
         }
     </style>
+    <link rel="stylesheet" href="theme.css?v=1">
 </head>
 <body>
     <header class="header sticky-header">
@@ -296,16 +298,16 @@
                 <h3 id="ddTitle">Driver Details</h3>
                 <button onclick="closeDriverDetail()">&times;</button>
             </div>
-            <div class="modal-body" id="ddContent"><p style="color:#A0A3B0;text-align:center;padding:40px;">Loading...</p></div>
+            <div class="modal-body" id="ddContent"><p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:40px;">Loading...</p></div>
         </div>
     </div>
 
     <!-- LEAVE REVIEW MODAL -->
     <div class="review-modal" id="reviewModal">
         <div class="modal-box">
-            <h3 style="margin:0 0 16px;font-size:16px;color:#EAEAEA;">Leave a Review</h3>
+            <h3 style="margin:0 0 16px;font-size:16px;color:var(--tt-text, #EAEAEA);">Leave a Review</h3>
             <input type="hidden" id="reviewDriverId">
-            <div style="margin-bottom:12px;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:8px;">Rating</label>
+            <div style="margin-bottom:12px;"><label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:8px;">Rating</label>
                 <div class="star-selector" id="starSelector">
                     <span data-val="1" class="star">&#9733;</span>
                     <span data-val="2" class="star">&#9733;</span>
@@ -314,7 +316,7 @@
                     <span data-val="5" class="star">&#9733;</span>
                 </div>
             </div>
-            <div style="margin-bottom:16px;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:8px;">Your Review (optional)</label>
+            <div style="margin-bottom:16px;"><label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:8px;">Your Review (optional)</label>
                 <textarea id="reviewText" placeholder="Share your experience..."></textarea>
             </div>
             <div id="reviewMsg" style="display:none;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px;"></div>
@@ -377,7 +379,7 @@
             var photo = d.photo_url || 'images/default-driver.png';
             var langs = (typeof d.languages === 'string') ? JSON.parse(d.languages || '[]') : (d.languages || []);
             var langTags = langs.slice(0, 3).map(function(l) { return '<span>' + esc(l) + '</span>'; }).join('');
-            var vehicleInfo = d.has_own_vehicle && d.vehicle_info ? '<p style="font-size:12px;color:#A0A3B0;margin:4px 0;">' + esc(d.vehicle_info) + '</p>' : '';
+            var vehicleInfo = d.has_own_vehicle && d.vehicle_info ? '<p style="font-size:12px;color:var(--tt-muted, #A0A3B0);margin:4px 0;">' + esc(d.vehicle_info) + '</p>' : '';
             var rating = parseFloat(d.rating) || 0;
             var rc = d.reviews_count || 0;
             var starsHtml = renderStars(rating) + (rc > 0 ? '<span class="count">' + rating + ' (' + rc + ')</span>' : '<span class="count">' + dt('drivers_page.no_reviews','No reviews') + '</span>');
@@ -409,7 +411,7 @@
             var content = document.getElementById('ddContent');
             var title = document.getElementById('ddTitle');
             modal.style.display = 'block';
-            content.innerHTML = '<p style="color:#A0A3B0;text-align:center;padding:40px;">Loading...</p>';
+            content.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:40px;">Loading...</p>';
             fetch('/api/drivers/' + id)
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
@@ -424,7 +426,7 @@
 
                     var reviewsHtml = '';
                     if (reviews.length) {
-                        reviewsHtml = '<h4 style="margin:20px 0 12px;font-size:15px;color:#EAEAEA;">Reviews (' + rc + ')</h4>'
+                        reviewsHtml = '<h4 style="margin:20px 0 12px;font-size:15px;color:var(--tt-text, #EAEAEA);">Reviews (' + rc + ')</h4>'
                             + reviews.map(function(r) {
                                 return '<div class="review-item">'
                                     + '<div>' + renderStars(r.rating_score) + '</div>'
@@ -433,27 +435,27 @@
                                     + '</div>';
                             }).join('');
                     } else {
-                        reviewsHtml = '<p style="color:#A0A3B0;text-align:center;padding:20px;">No reviews yet</p>';
+                        reviewsHtml = '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:20px;">No reviews yet</p>';
                     }
 
                     content.innerHTML = '<div style="display:flex;gap:16px;flex-wrap:wrap;">'
                         + '<img src="' + photo + '" class="driver-detail-photo" alt="" loading="lazy">'
                         + '<div style="flex:1;min-width:200px;">'
-                        + '<div style="font-size:20px;font-weight:700;color:#EAEAEA;margin-bottom:4px;">' + esc(d.full_name) + '</div>'
+                        + '<div style="font-size:20px;font-weight:700;color:var(--tt-text, #EAEAEA);margin-bottom:4px;">' + esc(d.full_name) + '</div>'
                         + '<div style="margin-bottom:8px;">' + renderStars(rating) + (rc > 0 ? '<span class="count">' + rating + ' (' + rc + ')</span>' : '') + '</div>'
-                        + (d.is_verified ? '<span style="display:inline-block;background:rgba(34,197,94,0.15);color:#22c55e;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600;">&#10003; Verified</span>' : '')
+                        + (d.is_verified ? '<span style="display:inline-block;background:rgba(34,197,94,0.15);color:var(--tt-green2, #22c55e);padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600;">&#10003; Verified</span>' : '')
                         + '</div></div>'
                         + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:16px;">'
-                        + (d.experience_years ? '<div><span style="font-size:11px;color:#A0A3B0;">Experience</span><br><b style="color:#EAEAEA;">' + d.experience_years + ' years</b></div>' : '')
-                        + (langStr ? '<div><span style="font-size:11px;color:#A0A3B0;">Languages</span><br><b style="color:#EAEAEA;">' + esc(langStr) + '</b></div>' : '')
-                        + (d.location_city ? '<div><span style="font-size:11px;color:#A0A3B0;">Location</span><br><b style="color:#EAEAEA;">' + esc(d.location_city) + '</b></div>' : '')
-                        + (d.vehicle_info ? '<div><span style="font-size:11px;color:#A0A3B0;">Vehicle</span><br><b style="color:#EAEAEA;">' + esc(d.vehicle_info) + '</b></div>' : '')
+                        + (d.experience_years ? '<div><span style="font-size:11px;color:var(--tt-muted, #A0A3B0);">Experience</span><br><b style="color:var(--tt-text, #EAEAEA);">' + d.experience_years + ' years</b></div>' : '')
+                        + (langStr ? '<div><span style="font-size:11px;color:var(--tt-muted, #A0A3B0);">Languages</span><br><b style="color:var(--tt-text, #EAEAEA);">' + esc(langStr) + '</b></div>' : '')
+                        + (d.location_city ? '<div><span style="font-size:11px;color:var(--tt-muted, #A0A3B0);">Location</span><br><b style="color:var(--tt-text, #EAEAEA);">' + esc(d.location_city) + '</b></div>' : '')
+                        + (d.vehicle_info ? '<div><span style="font-size:11px;color:var(--tt-muted, #A0A3B0);">Vehicle</span><br><b style="color:var(--tt-text, #EAEAEA);">' + esc(d.vehicle_info) + '</b></div>' : '')
                         + '</div>'
-                        + (d.bio ? '<p style="color:#A0A3B0;font-size:14px;margin-top:16px;line-height:1.5;">' + esc(d.bio) + '</p>' : '')
+                        + (d.bio ? '<p style="color:var(--tt-muted, #A0A3B0);font-size:14px;margin-top:16px;line-height:1.5;">' + esc(d.bio) + '</p>' : '')
                         + '<div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;">'
                         + (d.phone ? '<a href="tel:' + esc(d.phone) + '" style="flex:1;text-align:center;background:#C9A84C;color:#0F1117;text-decoration:none;border-radius:10px;padding:10px 0;font-size:13px;font-weight:600;">Call</a>' : '')
                         + (d.whatsapp ? '<a href="https://wa.me/' + esc(d.whatsapp.replace(/[^0-9+]/g, '')) + '" target="_blank" style="flex:1;text-align:center;background:#22c55e;color:#fff;text-decoration:none;border-radius:10px;padding:10px 0;font-size:13px;font-weight:600;">WhatsApp</a>' : '')
-                        + '<button onclick="openReviewModal(' + d.id + ')" style="flex:1;text-align:center;background:#262A35;border:1px solid #3A3F4B;color:#EAEAEA;border-radius:10px;padding:10px 0;font-size:13px;font-weight:600;cursor:pointer;">Leave a Review</button>'
+                        + '<button onclick="openReviewModal(' + d.id + ')" style="flex:1;text-align:center;background:var(--th-raised, #262A35);border:1px solid var(--tb-border, #3A3F4B);color:var(--tt-text, #EAEAEA);border-radius:10px;padding:10px 0;font-size:13px;font-weight:600;cursor:pointer;">Leave a Review</button>'
                         + '</div>'
                         + reviewsHtml;
                 })

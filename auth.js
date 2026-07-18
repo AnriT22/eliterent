@@ -1127,7 +1127,7 @@ function initLiveAvailabilityCheck(inputId, fieldName, errorId) {
 
                                 if (data.available) {
 
-                                    el.innerHTML = '<span style="color:#22c55e;font-weight:700;">&#10003;</span>';
+                                    el.innerHTML = '<span style="color:var(--tt-green2, #22c55e);font-weight:700;">&#10003;</span>';
 
                                     clearError(errorId);
 
@@ -1169,7 +1169,7 @@ function initLiveAvailabilityCheck(inputId, fieldName, errorId) {
 
                         if (data.available) {
 
-                            el.innerHTML = '<span style="color:#22c55e;font-weight:700;">&#10003;</span>';
+                            el.innerHTML = '<span style="color:var(--tt-green2, #22c55e);font-weight:700;">&#10003;</span>';
 
                             clearError(errorId);
 
@@ -1331,9 +1331,9 @@ async function submitRegistration() {
 
                 + '<h3 style="color:#fff;">Welcome to EliteAuto!</h3>'
 
-                + '<p style="color:#94a3b8;margin-bottom:12px;">Your account has been created successfully.</p>'
+                + '<p style="color:var(--tt-muted2, #94a3b8);margin-bottom:12px;">Your account has been created successfully.</p>'
 
-                + '<p style="color:#A0A3B0;font-size:12px;">Redirecting to homepage...</p>';
+                + '<p style="color:var(--tt-muted, #A0A3B0);font-size:12px;">Redirecting to homepage...</p>';
 
             successEl.style.display = 'flex';
 

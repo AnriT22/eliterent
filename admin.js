@@ -123,9 +123,9 @@ function escHtml(s) {
             if (data.botStats) {
                 var total = data.botStats.bots + data.botStats.humans;
                 var botPct = total > 0 ? Math.round(data.botStats.bots / total * 100) : 0;
-                botIndicator = '<div style="font-size:11px;color:#A0A3B0;margin-top:4px;">'
+                botIndicator = '<div style="font-size:11px;color:var(--tt-muted, #A0A3B0);margin-top:4px;">'
                     + '<span style="color:#ef4444;font-weight:600;">' + data.botStats.bots + '</span> suspected bots / '
-                    + '<span style="color:#22c55e;font-weight:600;">' + data.botStats.humans + '</span> humans this month</div>';
+                    + '<span style="color:var(--tt-green2, #22c55e);font-weight:600;">' + data.botStats.humans + '</span> humans this month</div>';
             }
 
             vGrid.innerHTML = ''
@@ -141,7 +141,7 @@ function escHtml(s) {
             renderTopPages('topPagesTable', data.topPages);
         }).catch(function () {
             var vGrid = document.getElementById('visitorStatsGrid');
-            if (vGrid) vGrid.innerHTML = '<p style="color:#A0A3B0;font-size:13px;">Visitor tracking will appear after some traffic</p>';
+            if (vGrid) vGrid.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);font-size:13px;">Visitor tracking will appear after some traffic</p>';
         });
 
         loadRecentVisitors();
@@ -157,7 +157,7 @@ function escHtml(s) {
             var ipLabel = document.getElementById('recentVisitorsCallerIp');
             if (ipLabel && callerIp) {
                 ipLabel.innerHTML = 'Your IP: ' + callerIp + ' (highlighted)'
-                    + ' &nbsp;|&nbsp; <label style="cursor:pointer;font-size:12px;color:#EAEAEA;">'
+                    + ' &nbsp;|&nbsp; <label style="cursor:pointer;font-size:12px;color:var(--tt-text, #EAEAEA);">'
                     + '<input type="checkbox" id="excludeBotsToggle" ' + (_excludeBots ? 'checked' : '') + ' style="vertical-align:middle;margin-right:4px;">'
                     + 'Hide suspected bots</label>';
                 var toggle = document.getElementById('excludeBotsToggle');
@@ -169,7 +169,7 @@ function escHtml(s) {
                 }
             }
             if (visitors.length === 0) {
-                el.innerHTML = '<p style="color:#94a3b8;font-size:13px;padding:12px;">No visitors yet</p>';
+                el.innerHTML = '<p style="color:var(--tt-muted2, #94a3b8);font-size:13px;padding:12px;">No visitors yet</p>';
                 return;
             }
             function detectDevice(ua) {
@@ -226,7 +226,7 @@ function escHtml(s) {
             el.innerHTML = html;
         }).catch(function () {
             var el = document.getElementById('recentVisitorsTable');
-            if (el) el.innerHTML = '<p style="color:#94a3b8;font-size:13px;padding:12px;">Failed to load visitor log</p>';
+            if (el) el.innerHTML = '<p style="color:var(--tt-muted2, #94a3b8);font-size:13px;padding:12px;">Failed to load visitor log</p>';
         });
     }
 
@@ -234,7 +234,7 @@ function escHtml(s) {
         var el = document.getElementById(containerId);
         if (!el) return;
         if (!data || data.length === 0) {
-            el.innerHTML = '<p style="color:#A0A3B0;font-size:13px;margin:auto;">No data yet — visitor tracking just started</p>';
+            el.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);font-size:13px;margin:auto;">No data yet — visitor tracking just started</p>';
             return;
         }
 
@@ -303,21 +303,21 @@ function escHtml(s) {
         var el = document.getElementById(containerId);
         if (!el) return;
         if (!pages || pages.length === 0) {
-            el.innerHTML = '<p style="color:#A0A3B0;font-size:13px;">No data yet</p>';
+            el.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);font-size:13px;">No data yet</p>';
             return;
         }
         var html = '<table style="width:100%;border-collapse:collapse;font-size:13px;">'
-            + '<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.1);">'
-            + '<th style="text-align:left;padding:8px;color:#A0A3B0;font-weight:600;">Page</th>'
-            + '<th style="text-align:right;padding:8px;color:#A0A3B0;font-weight:600;">Views</th>'
-            + '<th style="text-align:right;padding:8px;color:#A0A3B0;font-weight:600;">Unique</th>'
+            + '<thead><tr style="border-bottom:1px solid var(--tf-10, rgba(255,255,255,0.1));">'
+            + '<th style="text-align:left;padding:8px;color:var(--tt-muted, #A0A3B0);font-weight:600;">Page</th>'
+            + '<th style="text-align:right;padding:8px;color:var(--tt-muted, #A0A3B0);font-weight:600;">Views</th>'
+            + '<th style="text-align:right;padding:8px;color:var(--tt-muted, #A0A3B0);font-weight:600;">Unique</th>'
             + '</tr></thead><tbody>';
         pages.forEach(function (p) {
             var pageName = p.page === '/' ? 'Homepage' : p.page.replace(/^\//, '').replace(/\.html$/, '');
-            html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">'
-                + '<td style="padding:8px;color:#e2e8f0;">' + escHtml(pageName) + '</td>'
-                + '<td style="padding:8px;color:#C9A84C;text-align:right;font-weight:600;">' + (parseInt(p.views) || 0) + '</td>'
-                + '<td style="padding:8px;color:#94a3b8;text-align:right;">' + (parseInt(p.unique_visitors) || 0) + '</td>'
+            html += '<tr style="border-bottom:1px solid var(--tf-05, rgba(255,255,255,0.05));">'
+                + '<td style="padding:8px;color:var(--tt-soft2, #e2e8f0);">' + escHtml(pageName) + '</td>'
+                + '<td style="padding:8px;color:var(--tt-gold2, #C9A84C);text-align:right;font-weight:600;">' + (parseInt(p.views) || 0) + '</td>'
+                + '<td style="padding:8px;color:var(--tt-muted2, #94a3b8);text-align:right;">' + (parseInt(p.unique_visitors) || 0) + '</td>'
                 + '</tr>';
         });
         html += '</tbody></table>';
@@ -340,7 +340,7 @@ function escHtml(s) {
         var el = document.getElementById(containerId);
         if (!el) return;
         if (!data || data.length === 0) {
-            el.innerHTML = '<p style="color:#A0A3B0;font-size:13px;margin:auto;">No data yet</p>';
+            el.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);font-size:13px;margin:auto;">No data yet</p>';
             return;
         }
         var maxVal = Math.max.apply(null, data.map(function (d) { return d[valueKey] || 0; }));
@@ -380,7 +380,7 @@ function escHtml(s) {
             var tbody = document.getElementById('usersTableBody');
             var users = data.users || [];
             if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#A0A3B0;padding:30px;">No users found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:30px;">No users found</td></tr>';
                 return;
             }
             tbody.innerHTML = users.map(function (u) {
@@ -409,7 +409,7 @@ function escHtml(s) {
                     : '<button class="admin-action-btn success" onclick="adminUnsuspendUser(' + u.id + ')">Unsuspend</button>';
                 return '<tr>'
                     + '<td>' + u.id + '</td>'
-                    + '<td><strong><a href="#" onclick="adminViewUser(' + u.id + ');return false;" style="color:#C9A84C;text-decoration:none;">' + escHtml(u.full_name || '-') + '</a></strong>' + googleBadge + '</td>'
+                    + '<td><strong><a href="#" onclick="adminViewUser(' + u.id + ');return false;" style="color:var(--tt-gold2, #C9A84C);text-decoration:none;">' + escHtml(u.full_name || '-') + '</a></strong>' + googleBadge + '</td>'
                     + '<td class="hide-mobile">' + escHtml(u.email || '-') + '</td>'
                     + '<td class="hide-mobile">' + escHtml(u.phone || '-') + '</td>'
                     + '<td><span class="admin-status ' + u.role + '">' + u.role + '</span>' + verifiedBadge + phoneVerBadge + emailVerBadge + '</td>'
@@ -494,7 +494,7 @@ function escHtml(s) {
             var tbody = document.getElementById('partnersTableBody');
             var partners = data.partners || [];
             if (partners.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#A0A3B0;padding:30px;">No partners found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:30px;">No partners found</td></tr>';
                 return;
             }
             window._adminPartners = partners;
@@ -509,14 +509,14 @@ function escHtml(s) {
                     : '<button class="admin-action-btn success" onclick="adminVerifyPartner(' + p.id + ')">Verify</button>';
                 var signupMethod = p.signup_method || 'paid';
                 var typeBadge = signupMethod === 'invite'
-                    ? '<span class="admin-status" style="background:rgba(212,175,55,0.15);color:#D4AF37;font-size:10px;" title="Free signup with referral/invite code' + (p.invite_code_used ? ': ' + escHtml(p.invite_code_used) : '') + ' — needs admin approval">Free' + (p.invite_code_used ? ' · ' + escHtml(p.invite_code_used) : '') + '</span>'
+                    ? '<span class="admin-status" style="background:rgba(212,175,55,0.15);color:var(--tt-gold, #D4AF37);font-size:10px;" title="Free signup with referral/invite code' + (p.invite_code_used ? ': ' + escHtml(p.invite_code_used) : '') + ' — needs admin approval">Free' + (p.invite_code_used ? ' · ' + escHtml(p.invite_code_used) : '') + '</span>'
                     : (p.signup_paid
-                        ? '<span class="admin-status" style="background:rgba(34,197,94,0.12);color:#22c55e;font-size:10px;" title="Paid $49.99 verification fee">Paid $49.99</span>'
-                        : '<span class="admin-status" style="background:rgba(148,163,184,0.12);color:#94a3b8;font-size:10px;" title="Opened PayPal but has not completed payment">Unpaid</span>');
+                        ? '<span class="admin-status" style="background:rgba(34,197,94,0.12);color:var(--tt-green2, #22c55e);font-size:10px;" title="Paid $49.99 verification fee">Paid $49.99</span>'
+                        : '<span class="admin-status" style="background:rgba(148,163,184,0.12);color:var(--tt-muted2, #94a3b8);font-size:10px;" title="Opened PayPal but has not completed payment">Unpaid</span>');
                 return '<tr>'
                     + '<td>' + p.id + '</td>'
-                    + '<td><strong><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:#C9A84C;text-decoration:none;">' + escHtml(p.full_name || '-') + '</a></strong></td>'
-                    + '<td class="hide-mobile"><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:#C9A84C;text-decoration:none;">' + escHtml(p.company_name || '-') + '</a></td>'
+                    + '<td><strong><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:var(--tt-gold2, #C9A84C);text-decoration:none;">' + escHtml(p.full_name || '-') + '</a></strong></td>'
+                    + '<td class="hide-mobile"><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:var(--tt-gold2, #C9A84C);text-decoration:none;">' + escHtml(p.company_name || '-') + '</a></td>'
                     + '<td class="hide-mobile">' + escHtml(p.email || '-') + '</td>'
                     + '<td class="hide-mobile">' + escHtml(p.phone || '-') + pPhoneBadge + '</td>'
                     + '<td><span class="admin-status ' + verified + '">' + verified + '</span></td>'
@@ -585,7 +585,7 @@ function escHtml(s) {
         apiGet('/api/admin/partner-invite-codes').then(function (data) {
             var codes = data.codes || [];
             if (codes.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#A0A3B0;padding:20px;">No invite codes yet. Create one above.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:20px;">No invite codes yet. Create one above.</td></tr>';
                 return;
             }
             tbody.innerHTML = codes.map(function (c) {
@@ -596,7 +596,7 @@ function escHtml(s) {
                     : '<span class="admin-status unverified" style="font-size:11px;">Inactive</span>';
                 var toggleLabel = c.is_active ? 'Disable' : 'Enable';
                 return '<tr>'
-                    + '<td><strong style="font-family:monospace;letter-spacing:1px;color:#D4AF37;">' + escHtml(c.code) + '</strong></td>'
+                    + '<td><strong style="font-family:monospace;letter-spacing:1px;color:var(--tt-gold, #D4AF37);">' + escHtml(c.code) + '</strong></td>'
                     + '<td class="hide-mobile">' + escHtml(c.note || '—') + '</td>'
                     + '<td>' + usesText + '</td>'
                     + '<td>' + statusBadge + '</td>'
@@ -671,13 +671,13 @@ function escHtml(s) {
             var vehicles = data.vehicles || [];
             _adminVehicles = vehicles;
             if (vehicles.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#A0A3B0;padding:30px;">No vehicles found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:30px;">No vehicles found</td></tr>';
                 return;
             }
             tbody.innerHTML = vehicles.map(function (v) {
                 var date = v.created_at ? new Date(v.created_at).toLocaleDateString() : '-';
                 var imgSrc = v.image_url || '';
-                var imgTag = imgSrc ? '<img src="' + imgSrc + '" class="vehicle-thumb">' : '<div class="vehicle-thumb" style="display:inline-flex;align-items:center;justify-content:center;background:#262A35;font-size:14px;">-</div>';
+                var imgTag = imgSrc ? '<img src="' + imgSrc + '" class="vehicle-thumb">' : '<div class="vehicle-thumb" style="display:inline-flex;align-items:center;justify-content:center;background:var(--th-raised, #262A35);font-size:14px;">-</div>';
                 var status = v.status || 'active';
                 var locParts = [];
                 if (v.location_city) locParts.push(v.location_city);
@@ -688,10 +688,10 @@ function escHtml(s) {
                     + '<td class="hide-mobile">' + imgTag + '</td>'
                     + '<td><strong>' + escHtml(v.name || '-') + '</strong></td>'
                     + '<td class="hide-mobile">' + escHtml(v.company_name || v.partner_name || '-') + '</td>'
-                    + '<td class="hide-mobile"><span style="font-size:12px;color:#A0A3B0;">' + escHtml(locLabel) + '</span></td>'
+                    + '<td class="hide-mobile"><span style="font-size:12px;color:var(--tt-muted, #A0A3B0);">' + escHtml(locLabel) + '</span></td>'
                     + '<td>$' + (v.price_per_day || 0) + '</td>'
                     + '<td><span class="admin-status ' + status + '">' + status + '</span></td>'
-                    + '<td class="drag-handle" style="text-align:center;color:#A0A3B0;cursor:grab;font-size:20px;user-select:none;" title="Drag to reorder">\u2059</td>'
+                    + '<td class="drag-handle" style="text-align:center;color:var(--tt-muted, #A0A3B0);cursor:grab;font-size:20px;user-select:none;" title="Drag to reorder">\u2059</td>'
                     + '<td class="hide-mobile">' + date + '</td>'
                     + '<td>'
                     + '<button class="admin-action-btn primary" onclick="adminViewVehicle(' + v.id + ')">View</button>'
@@ -823,12 +823,12 @@ function escHtml(s) {
             overlay.id = 'vehiclePinModal';
             overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9999;';
             overlay.innerHTML =
-                '<div style="background:#1C1E26;border:1px solid #3A3F4B;border-radius:14px;padding:24px;width:340px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,0.5);">'
-                + '<h3 style="margin:0 0 6px;font-size:17px;color:#EAEAEA;">Pin vehicle on page</h3>'
-                + '<p id="pinVehName" style="margin:0 0 16px;font-size:13px;color:#A0A3B0;"></p>'
+                '<div style="background:var(--th-surface, #1C1E26);border:1px solid var(--tb-border, #3A3F4B);border-radius:14px;padding:24px;width:340px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,0.5);">'
+                + '<h3 style="margin:0 0 6px;font-size:17px;color:var(--tt-text, #EAEAEA);">Pin vehicle on page</h3>'
+                + '<p id="pinVehName" style="margin:0 0 16px;font-size:13px;color:var(--tt-muted, #A0A3B0);"></p>'
                 + '<div style="display:flex;gap:12px;margin-bottom:8px;">'
-                + '<div style="flex:1;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Page</label><input type="number" min="1" id="pinPageInput" style="width:100%;padding:10px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>'
-                + '<div style="flex:1;"><label style="font-size:12px;color:#A0A3B0;display:block;margin-bottom:4px;">Position (1-12)</label><input type="number" min="1" max="12" id="pinPositionInput" style="width:100%;padding:10px 12px;border:1px solid #3A3F4B;border-radius:8px;background:#262A35;color:#EAEAEA;box-sizing:border-box;"></div>'
+                + '<div style="flex:1;"><label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:4px;">Page</label><input type="number" min="1" id="pinPageInput" style="width:100%;padding:10px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;"></div>'
+                + '<div style="flex:1;"><label style="font-size:12px;color:var(--tt-muted, #A0A3B0);display:block;margin-bottom:4px;">Position (1-12)</label><input type="number" min="1" max="12" id="pinPositionInput" style="width:100%;padding:10px 12px;border:1px solid var(--tb-border, #3A3F4B);border-radius:8px;background:var(--th-raised, #262A35);color:var(--tt-text, #EAEAEA);box-sizing:border-box;"></div>'
                 + '</div>'
                 + '<p style="font-size:11px;color:#6b7280;margin:0 0 16px;">12 cards per page. Position 1 = top-left of that page. Leave blank to unpin.</p>'
                 + '<div style="display:flex;gap:8px;justify-content:flex-end;">'
@@ -886,12 +886,12 @@ function escHtml(s) {
         if (allImages.length > 0) {
             imgHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:20px;">'
                 + allImages.map(function(url, i) {
-                    return '<img src="' + url + '" style="width:100%;height:180px;object-fit:cover;border-radius:10px;cursor:pointer;border:1px solid #3A3F4B;" onclick="window.open(this.src)">';
+                    return '<img src="' + url + '" style="width:100%;height:180px;object-fit:cover;border-radius:10px;cursor:pointer;border:1px solid var(--tb-border, #3A3F4B);" onclick="window.open(this.src)">';
                 }).join('')
                 + '</div>';
         }
 
-        var row = function(label, val) { return val ? '<tr><td style="padding:6px 12px 6px 0;color:#A0A3B0;font-weight:600;white-space:nowrap;">' + label + '</td><td style="padding:6px 0;">' + val + '</td></tr>' : ''; };
+        var row = function(label, val) { return val ? '<tr><td style="padding:6px 12px 6px 0;color:var(--tt-muted, #A0A3B0);font-weight:600;white-space:nowrap;">' + label + '</td><td style="padding:6px 0;">' + val + '</td></tr>' : ''; };
 
         var specHtml = '<table style="width:100%;font-size:13px;border-collapse:collapse;">'
             + row('Category', v.category)
@@ -910,12 +910,12 @@ function escHtml(s) {
         // Price tiers
         var tierHtml = '';
         if (priceTiers.price_1_3 || priceTiers.price_4_7 || priceTiers.price_8_14 || priceTiers.price_15_30) {
-            tierHtml = '<h4 style="margin:16px 0 8px;font-size:14px;color:#EAEAEA;">Price Tiers</h4>'
+            tierHtml = '<h4 style="margin:16px 0 8px;font-size:14px;color:var(--tt-text, #EAEAEA);">Price Tiers</h4>'
                 + '<div style="display:flex;gap:12px;flex-wrap:wrap;">'
-                + (priceTiers.price_1_3 ? '<span style="padding:4px 12px;background:#262A35;border-radius:6px;font-size:12px;color:#A0A3B0;">1-3d: $' + priceTiers.price_1_3 + '</span>' : '')
-                + (priceTiers.price_4_7 ? '<span style="padding:4px 12px;background:#262A35;border-radius:6px;font-size:12px;color:#A0A3B0;">4-7d: $' + priceTiers.price_4_7 + '</span>' : '')
-                + (priceTiers.price_8_14 ? '<span style="padding:4px 12px;background:#262A35;border-radius:6px;font-size:12px;color:#A0A3B0;">8-14d: $' + priceTiers.price_8_14 + '</span>' : '')
-                + (priceTiers.price_15_30 ? '<span style="padding:4px 12px;background:#262A35;border-radius:6px;font-size:12px;color:#A0A3B0;">15-30d: $' + priceTiers.price_15_30 + '</span>' : '')
+                + (priceTiers.price_1_3 ? '<span style="padding:4px 12px;background:var(--th-raised, #262A35);border-radius:6px;font-size:12px;color:var(--tt-muted, #A0A3B0);">1-3d: $' + priceTiers.price_1_3 + '</span>' : '')
+                + (priceTiers.price_4_7 ? '<span style="padding:4px 12px;background:var(--th-raised, #262A35);border-radius:6px;font-size:12px;color:var(--tt-muted, #A0A3B0);">4-7d: $' + priceTiers.price_4_7 + '</span>' : '')
+                + (priceTiers.price_8_14 ? '<span style="padding:4px 12px;background:var(--th-raised, #262A35);border-radius:6px;font-size:12px;color:var(--tt-muted, #A0A3B0);">8-14d: $' + priceTiers.price_8_14 + '</span>' : '')
+                + (priceTiers.price_15_30 ? '<span style="padding:4px 12px;background:var(--th-raised, #262A35);border-radius:6px;font-size:12px;color:var(--tt-muted, #A0A3B0);">15-30d: $' + priceTiers.price_15_30 + '</span>' : '')
                 + '</div>';
         }
 
@@ -923,7 +923,7 @@ function escHtml(s) {
         var featKeys = Object.keys(features).filter(function(k) { return features[k]; });
         var featHtml = '';
         if (featKeys.length) {
-            featHtml = '<h4 style="margin:16px 0 8px;font-size:14px;color:#EAEAEA;">Features</h4>'
+            featHtml = '<h4 style="margin:16px 0 8px;font-size:14px;color:var(--tt-text, #EAEAEA);">Features</h4>'
                 + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
                 + featKeys.map(function(k) { return '<span style="padding:4px 10px;background:#dcfce7;color:#16a34a;border-radius:6px;font-size:11px;font-weight:600;">' + k.replace(/_/g, ' ') + '</span>'; }).join('')
                 + '</div>';
@@ -933,13 +933,13 @@ function escHtml(s) {
         var extKeys = Object.keys(extras).filter(function(k) { return !k.endsWith('_available') && extras[k] && extras[k] !== '0'; });
         var extHtml = '';
         if (extKeys.length) {
-            extHtml = '<h4 style="margin:16px 0 8px;font-size:14px;color:#EAEAEA;">Extras</h4>'
+            extHtml = '<h4 style="margin:16px 0 8px;font-size:14px;color:var(--tt-text, #EAEAEA);">Extras</h4>'
                 + '<div style="display:flex;gap:8px;flex-wrap:wrap;">'
                 + extKeys.map(function(k) {
                     var val = extras[k];
                     var label = k.replace(/_/g, ' ');
-                    if (val === true || val === 1) return '<span style="padding:4px 10px;background:rgba(201,168,76,0.12);color:#C9A84C;border-radius:6px;font-size:11px;font-weight:600;">' + label + '</span>';
-                    return '<span style="padding:4px 10px;background:rgba(201,168,76,0.12);color:#C9A84C;border-radius:6px;font-size:11px;font-weight:600;">' + label + ': $' + val + '</span>';
+                    if (val === true || val === 1) return '<span style="padding:4px 10px;background:rgba(201,168,76,0.12);color:var(--tt-gold2, #C9A84C);border-radius:6px;font-size:11px;font-weight:600;">' + label + '</span>';
+                    return '<span style="padding:4px 10px;background:rgba(201,168,76,0.12);color:var(--tt-gold2, #C9A84C);border-radius:6px;font-size:11px;font-weight:600;">' + label + ': $' + val + '</span>';
                 }).join('')
                 + '</div>';
         }
@@ -947,20 +947,20 @@ function escHtml(s) {
         // Tech Passport Photos
         var tpHtml = '';
         if (v.tech_passport_front || v.tech_passport_back) {
-            tpHtml = '<h4 style="margin:20px 0 10px;font-size:14px;color:#EAEAEA;">Tech Passport</h4>'
+            tpHtml = '<h4 style="margin:20px 0 10px;font-size:14px;color:var(--tt-text, #EAEAEA);">Tech Passport</h4>'
                 + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
             if (v.tech_passport_front) {
-                tpHtml += '<div><p style="font-size:11px;color:#A0A3B0;margin:0 0 4px;font-weight:600;">Front</p>'
-                    + '<img src="' + v.tech_passport_front + '" style="width:100%;border-radius:8px;border:1px solid #3A3F4B;cursor:pointer;" onclick="window.open(this.src)"></div>';
+                tpHtml += '<div><p style="font-size:11px;color:var(--tt-muted, #A0A3B0);margin:0 0 4px;font-weight:600;">Front</p>'
+                    + '<img src="' + v.tech_passport_front + '" style="width:100%;border-radius:8px;border:1px solid var(--tb-border, #3A3F4B);cursor:pointer;" onclick="window.open(this.src)"></div>';
             }
             if (v.tech_passport_back) {
-                tpHtml += '<div><p style="font-size:11px;color:#A0A3B0;margin:0 0 4px;font-weight:600;">Back</p>'
-                    + '<img src="' + v.tech_passport_back + '" style="width:100%;border-radius:8px;border:1px solid #3A3F4B;cursor:pointer;" onclick="window.open(this.src)"></div>';
+                tpHtml += '<div><p style="font-size:11px;color:var(--tt-muted, #A0A3B0);margin:0 0 4px;font-weight:600;">Back</p>'
+                    + '<img src="' + v.tech_passport_back + '" style="width:100%;border-radius:8px;border:1px solid var(--tb-border, #3A3F4B);cursor:pointer;" onclick="window.open(this.src)"></div>';
             }
             tpHtml += '</div>';
         } else {
-            tpHtml = '<h4 style="margin:20px 0 10px;font-size:14px;color:#EAEAEA;">Tech Passport</h4>'
-                + '<p style="color:#A0A3B0;font-size:13px;">No tech passport photos uploaded.</p>';
+            tpHtml = '<h4 style="margin:20px 0 10px;font-size:14px;color:var(--tt-text, #EAEAEA);">Tech Passport</h4>'
+                + '<p style="color:var(--tt-muted, #A0A3B0);font-size:13px;">No tech passport photos uploaded.</p>';
         }
 
         content.innerHTML = imgHtml + specHtml + tierHtml + featHtml + extHtml + tpHtml;
@@ -989,7 +989,7 @@ function escHtml(s) {
             var tbody = document.getElementById('bookingsTableBody');
             var bookings = data.bookings || [];
             if (bookings.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#A0A3B0;padding:30px;">No bookings found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:30px;">No bookings found</td></tr>';
                 return;
             }
             tbody.innerHTML = bookings.map(function (b) {
@@ -1112,8 +1112,8 @@ function escHtml(s) {
             var partners = data.partners || [];
             pb.innerHTML = partners.length ? partners.map(function(p) {
                 var nm = escHtml(p.company_name || p.full_name || p.email || '—');
-                return '<tr><td>' + nm + '</td><td><strong style="color:#C9A84C;">' + money(p.vip_balance) + '</strong></td><td>' + (parseInt(p.active_vip_cars,10)||0) + '</td></tr>';
-            }).join('') : '<tr><td colspan="3" style="color:#A0A3B0;">No VIP wallet activity yet</td></tr>';
+                return '<tr><td>' + nm + '</td><td><strong style="color:var(--tt-gold2, #C9A84C);">' + money(p.vip_balance) + '</strong></td><td>' + (parseInt(p.active_vip_cars,10)||0) + '</td></tr>';
+            }).join('') : '<tr><td colspan="3" style="color:var(--tt-muted, #A0A3B0);">No VIP wallet activity yet</td></tr>';
 
             var tb = document.getElementById('vipTxBody');
             var txs = data.transactions || [];
@@ -1129,7 +1129,7 @@ function escHtml(s) {
                 var nm = escHtml(x.partner_name || x.partner_email || '—');
                 var when = x.created_at ? new Date(x.created_at).toLocaleDateString() : '';
                 return '<tr><td>' + nm + '</td><td>' + txLabel(x.type, x.source) + '</td><td style="color:' + color + ';font-weight:600;">' + (amt >= 0 ? '+' : '') + '$' + Math.abs(amt).toFixed(2) + '</td><td class="hide-mobile">' + when + '</td></tr>';
-            }).join('') : '<tr><td colspan="4" style="color:#A0A3B0;">No transactions yet</td></tr>';
+            }).join('') : '<tr><td colspan="4" style="color:var(--tt-muted, #A0A3B0);">No transactions yet</td></tr>';
         }).catch(function() {
             var pb = document.getElementById('vipPartnersBody'); if (pb) pb.innerHTML = '<tr><td colspan="3" style="color:#ef4444;">Failed to load</td></tr>';
         });
@@ -1186,7 +1186,7 @@ function escHtml(s) {
         var tbody = document.getElementById('finTableBody');
         tbody.innerHTML = '';
         if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#A0A3B0;">No financial records found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--tt-muted, #A0A3B0);">No financial records found</td></tr>';
             return;
         }
         filtered.forEach(function(r) {
@@ -1204,7 +1204,7 @@ function escHtml(s) {
                 '<td class="hide-mobile">$' + r.extras_total.toFixed(2) + '</td>' +
                 '<td><strong>$' + r.service_fee.toFixed(2) + '</strong></td>' +
                 '<td>$' + r.total_price.toFixed(2) + '</td>' +
-                '<td class="hide-mobile"><span class="' + payCls + '" style="' + (payCls ? '' : 'color:#A0A3B0;font-size:11px;') + '">' + payLabel + '</span></td>' +
+                '<td class="hide-mobile"><span class="' + payCls + '" style="' + (payCls ? '' : 'color:var(--tt-muted, #A0A3B0);font-size:11px;') + '">' + payLabel + '</span></td>' +
                 '<td><span class="' + statusCls + '">' + statusLabel + '</span></td>';
             if (!r.is_active) tr.style.opacity = '0.6';
             tbody.appendChild(tr);
@@ -1261,7 +1261,7 @@ function escHtml(s) {
             var tbody = document.getElementById('promosTableBody');
             var codes = data.codes || [];
             if (codes.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#A0A3B0;padding:30px;">No promo codes yet</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:30px;">No promo codes yet</td></tr>';
                 return;
             }
             tbody.innerHTML = codes.map(function (c) {
@@ -1329,7 +1329,7 @@ function escHtml(s) {
             var feed = document.getElementById('activityFeed');
             var activities = data.activities || [];
             if (activities.length === 0) {
-                feed.innerHTML = '<p style="color:#A0A3B0;text-align:center;padding:40px;">No recent activity</p>';
+                feed.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:40px;">No recent activity</p>';
                 return;
             }
             var iconMap = {
@@ -1373,14 +1373,14 @@ function escHtml(s) {
     function udStatCard(label, value, color) {
         return '<div style="background:' + color + '10;border:1px solid ' + color + '30;border-radius:10px;padding:12px 14px;text-align:center;">'
             + '<div style="font-size:18px;font-weight:700;color:' + color + ';">' + value + '</div>'
-            + '<div style="font-size:11px;color:#A0A3B0;margin-top:2px;">' + label + '</div></div>';
+            + '<div style="font-size:11px;color:var(--tt-muted, #A0A3B0);margin-top:2px;">' + label + '</div></div>';
     }
 
     window.adminViewUser = function (id) {
         var modal = document.getElementById('userDetailModal');
         var title = document.getElementById('udTitle');
         var content = document.getElementById('udContent');
-        content.innerHTML = '<p style="color:#A0A3B0;text-align:center;padding:40px;">Loading...</p>';
+        content.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:40px;">Loading...</p>';
         modal.style.display = 'block';
         title.textContent = 'User Details';
 
@@ -1421,26 +1421,26 @@ function escHtml(s) {
                 ? '<img src="' + u.avatar_url + '" style="width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display=\'none\'">'
                 : '<div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#C9A84C,#A6832E);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;flex-shrink:0;">' + initials + '</div>';
 
-            var html = '<div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid #3A3F4B;">'
+            var html = '<div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--tb-border, #3A3F4B);">'
                 + avatarHtml
                 + '<div style="flex:1;">'
                 + '<h4 style="margin:0 0 4px;font-size:16px;">' + escHtml(u.full_name || '-') + '</h4>'
-                + '<p style="margin:0 0 6px;color:#A0A3B0;font-size:13px;">' + escHtml(u.email || '-') + (u.phone ? ' &middot; ' + escHtml(u.phone) : '') + '</p>'
+                + '<p style="margin:0 0 6px;color:var(--tt-muted, #A0A3B0);font-size:13px;">' + escHtml(u.email || '-') + (u.phone ? ' &middot; ' + escHtml(u.phone) : '') + '</p>'
                 + '<div style="display:flex;gap:6px;flex-wrap:wrap;">' + roleBadge + ' ' + approvedBadge + googleBadge + verifiedBadge + emailVerBadge + phoneVerBadge + '</div>'
-                + (pp && pp.location ? '<p style="margin:6px 0 0;color:#A0A3B0;font-size:12px;">📍 ' + escHtml(pp.location) + '</p>' : '')
-                + (pp && pp.description ? '<p style="margin:4px 0 0;color:#A0A3B0;font-size:12px;">' + escHtml(pp.description) + '</p>' : '')
-                + (pp && pp.whatsapp ? '<p style="margin:4px 0 0;color:#A0A3B0;font-size:12px;">WhatsApp: ' + escHtml(pp.whatsapp) + '</p>' : '')
-                + (pp && pp.telegram ? '<p style="margin:4px 0 0;color:#A0A3B0;font-size:12px;">Telegram: ' + escHtml(pp.telegram) + '</p>' : '')
-                + '<p style="margin:6px 0 0;color:#A0A3B0;font-size:11px;">Joined: ' + (u.created_at ? new Date(u.created_at).toLocaleDateString() : '-') + (u.updated_at ? ' &middot; Updated: ' + new Date(u.updated_at).toLocaleDateString() : '') + '</p>'
+                + (pp && pp.location ? '<p style="margin:6px 0 0;color:var(--tt-muted, #A0A3B0);font-size:12px;">📍 ' + escHtml(pp.location) + '</p>' : '')
+                + (pp && pp.description ? '<p style="margin:4px 0 0;color:var(--tt-muted, #A0A3B0);font-size:12px;">' + escHtml(pp.description) + '</p>' : '')
+                + (pp && pp.whatsapp ? '<p style="margin:4px 0 0;color:var(--tt-muted, #A0A3B0);font-size:12px;">WhatsApp: ' + escHtml(pp.whatsapp) + '</p>' : '')
+                + (pp && pp.telegram ? '<p style="margin:4px 0 0;color:var(--tt-muted, #A0A3B0);font-size:12px;">Telegram: ' + escHtml(pp.telegram) + '</p>' : '')
+                + '<p style="margin:6px 0 0;color:var(--tt-muted, #A0A3B0);font-size:11px;">Joined: ' + (u.created_at ? new Date(u.created_at).toLocaleDateString() : '-') + (u.updated_at ? ' &middot; Updated: ' + new Date(u.updated_at).toLocaleDateString() : '') + '</p>'
                 + '</div></div>';
 
             // Legal & Contact Information
-            var infoStyle = 'padding:6px 0;border-bottom:1px solid #3A3F4B;display:flex;justify-content:space-between;font-size:12px;';
-            var labelStyle = 'color:#A0A3B0;font-weight:600;';
-            var valueStyle = 'color:#EAEAEA;text-align:right;';
-            var sectionTitle = 'margin:0 0 10px;font-size:14px;color:#EAEAEA;';
+            var infoStyle = 'padding:6px 0;border-bottom:1px solid var(--tb-border, #3A3F4B);display:flex;justify-content:space-between;font-size:12px;';
+            var labelStyle = 'color:var(--tt-muted, #A0A3B0);font-weight:600;';
+            var valueStyle = 'color:var(--tt-text, #EAEAEA);text-align:right;';
+            var sectionTitle = 'margin:0 0 10px;font-size:14px;color:var(--tt-text, #EAEAEA);';
 
-            html += '<div style="background:#262A35;border:1px solid #3A3F4B;border-radius:12px;padding:16px 20px;margin-bottom:20px;">'
+            html += '<div style="background:var(--th-raised, #262A35);border:1px solid var(--tb-border, #3A3F4B);border-radius:12px;padding:16px 20px;margin-bottom:20px;">'
                 + '<h4 style="' + sectionTitle + '">Legal & Contact Information</h4>'
                 + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">Full Name</span><span style="' + valueStyle + '">' + escHtml(u.full_name || '-') + '</span></div>'
                 + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">Email</span><span style="' + valueStyle + '">' + escHtml(u.email || '-') + '</span></div>'
@@ -1454,7 +1454,7 @@ function escHtml(s) {
                 + '<div style="' + infoStyle + 'border:none;"><span style="' + labelStyle + '">User ID</span><span style="' + valueStyle + '">#' + u.id + '</span></div>';
 
             if (pp) {
-                html += '<div style="border-top:1px solid #3A3F4B;margin-top:8px;padding-top:8px;">'
+                html += '<div style="border-top:1px solid var(--tb-border, #3A3F4B);margin-top:8px;padding-top:8px;">'
                     + '<h4 style="' + sectionTitle + 'margin-top:4px;">Partner Business Info</h4>'
                     + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">Company Name</span><span style="' + valueStyle + '">' + escHtml(pp.company_name || '-') + '</span></div>'
                     + '<div style="' + infoStyle + '"><span style="' + labelStyle + '">Location</span><span style="' + valueStyle + '">' + escHtml(pp.location || 'Not provided') + '</span></div>'
@@ -1480,12 +1480,12 @@ function escHtml(s) {
 
             // Vehicles (partner)
             if (vehicles.length > 0) {
-                html += '<h4 style="margin:0 0 10px;font-size:14px;color:#EAEAEA;">Vehicles (' + vehicles.length + ')</h4>'
+                html += '<h4 style="margin:0 0 10px;font-size:14px;color:var(--tt-text, #EAEAEA);">Vehicles (' + vehicles.length + ')</h4>'
                     + '<div style="overflow-x:auto;margin-bottom:20px;"><table style="width:100%;border-collapse:collapse;font-size:12px;">'
-                    + '<thead><tr style="background:#262A35;"><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Image</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Name</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Category</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Price/Day</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Year</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Status</th></tr></thead><tbody>';
+                    + '<thead><tr style="background:var(--th-raised, #262A35);"><th style="padding:8px 10px;text-align:left;color:var(--tt-muted, #A0A3B0);border-bottom:1px solid var(--tb-border, #3A3F4B);">Image</th><th style="padding:8px 10px;text-align:left;color:var(--tt-muted, #A0A3B0);border-bottom:1px solid var(--tb-border, #3A3F4B);">Name</th><th style="padding:8px 10px;text-align:left;color:var(--tt-muted, #A0A3B0);border-bottom:1px solid var(--tb-border, #3A3F4B);">Category</th><th style="padding:8px 10px;text-align:left;color:var(--tt-muted, #A0A3B0);border-bottom:1px solid var(--tb-border, #3A3F4B);">Price/Day</th><th style="padding:8px 10px;text-align:left;color:var(--tt-muted, #A0A3B0);border-bottom:1px solid var(--tb-border, #3A3F4B);">Year</th><th style="padding:8px 10px;text-align:left;color:var(--tt-muted, #A0A3B0);border-bottom:1px solid var(--tb-border, #3A3F4B);">Status</th></tr></thead><tbody>';
                 vehicles.forEach(function (v) {
-                    var img = v.image_url ? '<img src="' + v.image_url + '" style="width:48px;height:32px;object-fit:cover;border-radius:4px;">' : '<span style="color:#A0A3B0;">—</span>';
-                    html += '<tr style="border-bottom:1px solid #3A3F4B;">'
+                    var img = v.image_url ? '<img src="' + v.image_url + '" style="width:48px;height:32px;object-fit:cover;border-radius:4px;">' : '<span style="color:var(--tt-muted, #A0A3B0);">—</span>';
+                    html += '<tr style="border-bottom:1px solid var(--tb-border, #3A3F4B);">'
                         + '<td style="padding:6px 10px;">' + img + '</td>'
                         + '<td style="padding:6px 10px;font-weight:600;">' + (v.name || '-') + '</td>'
                         + '<td style="padding:6px 10px;">' + (v.category || '-') + '</td>'
@@ -1499,13 +1499,13 @@ function escHtml(s) {
 
             // Bookings
             if (bookings.length > 0) {
-                html += '<h4 style="margin:0 0 10px;font-size:14px;color:#EAEAEA;">Bookings (' + bookings.length + ')</h4>'
+                html += '<h4 style="margin:0 0 10px;font-size:14px;color:var(--tt-text, #EAEAEA);">Bookings (' + bookings.length + ')</h4>'
                     + '<div style="overflow-x:auto;margin-bottom:20px;"><table style="width:100%;border-collapse:collapse;font-size:12px;">'
-                    + '<thead><tr style="background:#262A35;"><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">#</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Vehicle</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">' + (u.role === 'partner' ? 'Guest' : 'Partner') + '</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Dates</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Total</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Status</th><th style="padding:8px 10px;text-align:left;color:#A0A3B0;border-bottom:1px solid #3A3F4B;">Payment</th></tr></thead><tbody>';
+                    + '<thead><tr style="background:var(--th-raised, #262A35);"><th style="padding:8px 10px;text-align:left;color:var(--tt-muted, #A0A3B0);border-bottom:1px solid var(--tb-border, #3A3F4B);">#</th><th style="padding:8px 10px;text-align:left;color:var(--tt-muted, #A0A3B0);border-bottom:1px solid var(--tb-border, #3A3F4B);">Vehicle</th><th style="padding:8px 10px;text-align:left;color:var(--tt-muted, #A0A3B0);border-bottom:1px solid var(--tb-border, #3A3F4B);">' + (u.role === 'partner' ? 'Guest' : 'Partner') + '</th><th style="padding:8px 10px;text-align:left;color:var(--tt-muted, #A0A3B0);border-bottom:1px solid var(--tb-border, #3A3F4B);">Dates</th><th style="padding:8px 10px;text-align:left;color:var(--tt-muted, #A0A3B0);border-bottom:1px solid var(--tb-border, #3A3F4B);">Total</th><th style="padding:8px 10px;text-align:left;color:var(--tt-muted, #A0A3B0);border-bottom:1px solid var(--tb-border, #3A3F4B);">Status</th><th style="padding:8px 10px;text-align:left;color:var(--tt-muted, #A0A3B0);border-bottom:1px solid var(--tb-border, #3A3F4B);">Payment</th></tr></thead><tbody>';
                 bookings.forEach(function (b) {
                     var otherParty = u.role === 'partner' ? (b.guest_name || b.guest_email || '-') : (b.partner_company || '-');
-                    var payBadge = b.payment_status === 'paid' ? '<span style="color:#16a34a;font-weight:600;">Paid</span>' : (b.payment_status === 'refunded' ? '<span style="color:#d97706;">Refunded</span>' : '<span style="color:#A0A3B0;">Unpaid</span>');
-                    html += '<tr style="border-bottom:1px solid #3A3F4B;">'
+                    var payBadge = b.payment_status === 'paid' ? '<span style="color:#16a34a;font-weight:600;">Paid</span>' : (b.payment_status === 'refunded' ? '<span style="color:#d97706;">Refunded</span>' : '<span style="color:var(--tt-muted, #A0A3B0);">Unpaid</span>');
+                    html += '<tr style="border-bottom:1px solid var(--tb-border, #3A3F4B);">'
                         + '<td style="padding:6px 10px;">' + b.id + '</td>'
                         + '<td style="padding:6px 10px;font-weight:600;">' + (b.vehicle_name || '-') + '</td>'
                         + '<td style="padding:6px 10px;">' + otherParty + '</td>'
@@ -1517,44 +1517,44 @@ function escHtml(s) {
                 });
                 html += '</tbody></table></div>';
             } else {
-                html += '<p style="color:#A0A3B0;font-size:13px;margin-bottom:16px;">No bookings yet.</p>';
+                html += '<p style="color:var(--tt-muted, #A0A3B0);font-size:13px;margin-bottom:16px;">No bookings yet.</p>';
             }
 
             // Reviews (guest only)
             if (reviews.length > 0) {
-                html += '<h4 style="margin:0 0 10px;font-size:14px;color:#EAEAEA;">Reviews (' + reviews.length + ')</h4>';
+                html += '<h4 style="margin:0 0 10px;font-size:14px;color:var(--tt-text, #EAEAEA);">Reviews (' + reviews.length + ')</h4>';
                 reviews.forEach(function (r) {
                     var stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
-                    html += '<div style="background:#262A35;border-radius:8px;padding:12px 14px;margin-bottom:8px;">'
+                    html += '<div style="background:var(--th-raised, #262A35);border-radius:8px;padding:12px 14px;margin-bottom:8px;">'
                         + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'
-                        + '<span style="color:#f59e0b;font-size:13px;">' + stars + '</span>'
-                        + '<span style="color:#A0A3B0;font-size:11px;">' + (r.created_at ? new Date(r.created_at).toLocaleDateString() : '') + '</span>'
+                        + '<span style="color:var(--tt-amber2, #f59e0b);font-size:13px;">' + stars + '</span>'
+                        + '<span style="color:var(--tt-muted, #A0A3B0);font-size:11px;">' + (r.created_at ? new Date(r.created_at).toLocaleDateString() : '') + '</span>'
                         + '</div>'
-                        + (r.title ? '<p style="margin:0 0 4px;font-weight:600;font-size:13px;color:#EAEAEA;">' + r.title + '</p>' : '')
-                        + (r.body ? '<p style="margin:0;font-size:12px;color:#A0A3B0;">' + r.body + '</p>' : '')
+                        + (r.title ? '<p style="margin:0 0 4px;font-weight:600;font-size:13px;color:var(--tt-text, #EAEAEA);">' + r.title + '</p>' : '')
+                        + (r.body ? '<p style="margin:0;font-size:12px;color:var(--tt-muted, #A0A3B0);">' + r.body + '</p>' : '')
                         + '</div>';
                 });
             }
 
             // Edit User
-            html += '<div style="border-top:1px solid #3A3F4B;padding-top:20px;margin-top:20px;">'
-                + '<h4 style="margin:0 0 12px;font-size:14px;color:#EAEAEA;">Edit Profile</h4>'
+            html += '<div style="border-top:1px solid var(--tb-border, #3A3F4B);padding-top:20px;margin-top:20px;">'
+                + '<h4 style="margin:0 0 12px;font-size:14px;color:var(--tt-text, #EAEAEA);">Edit Profile</h4>'
                 + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">'
-                + '<div><label style="font-size:11px;color:#A0A3B0;font-weight:600;display:block;margin-bottom:3px;">Name</label>'
-                + '<input type="text" id="udEditName" value="' + (u.full_name || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:7px 10px;border:1px solid #3A3F4B;border-radius:6px;font-size:12px;box-sizing:border-box;"></div>'
-                + '<div><label style="font-size:11px;color:#A0A3B0;font-weight:600;display:block;margin-bottom:3px;">Email</label>'
-                + '<input type="email" id="udEditEmail" value="' + (u.email || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:7px 10px;border:1px solid #3A3F4B;border-radius:6px;font-size:12px;box-sizing:border-box;"></div>'
-                + '<div><label style="font-size:11px;color:#A0A3B0;font-weight:600;display:block;margin-bottom:3px;">Phone</label>'
-                + '<input type="text" id="udEditPhone" value="' + (u.phone || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:7px 10px;border:1px solid #3A3F4B;border-radius:6px;font-size:12px;box-sizing:border-box;"></div>'
+                + '<div><label style="font-size:11px;color:var(--tt-muted, #A0A3B0);font-weight:600;display:block;margin-bottom:3px;">Name</label>'
+                + '<input type="text" id="udEditName" value="' + (u.full_name || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:7px 10px;border:1px solid var(--tb-border, #3A3F4B);border-radius:6px;font-size:12px;box-sizing:border-box;"></div>'
+                + '<div><label style="font-size:11px;color:var(--tt-muted, #A0A3B0);font-weight:600;display:block;margin-bottom:3px;">Email</label>'
+                + '<input type="email" id="udEditEmail" value="' + (u.email || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:7px 10px;border:1px solid var(--tb-border, #3A3F4B);border-radius:6px;font-size:12px;box-sizing:border-box;"></div>'
+                + '<div><label style="font-size:11px;color:var(--tt-muted, #A0A3B0);font-weight:600;display:block;margin-bottom:3px;">Phone</label>'
+                + '<input type="text" id="udEditPhone" value="' + (u.phone || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:7px 10px;border:1px solid var(--tb-border, #3A3F4B);border-radius:6px;font-size:12px;box-sizing:border-box;"></div>'
                 + '</div>'
                 + '<button onclick="adminSaveUserEdit(' + u.id + ')" style="margin-top:10px;padding:7px 20px;background:#C9A84C;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save Changes</button>'
                 + '</div>';
 
             // Admin Notes
-            html += '<div style="border-top:1px solid #3A3F4B;padding-top:20px;margin-top:20px;">'
-                + '<h4 style="margin:0 0 8px;font-size:14px;color:#EAEAEA;">Admin Notes</h4>'
-                + '<p style="margin:0 0 8px;font-size:11px;color:#A0A3B0;">Internal notes — not visible to the user.</p>'
-                + '<textarea id="udAdminNotes" rows="3" style="width:100%;padding:8px 10px;border:1px solid #3A3F4B;border-radius:6px;font-size:12px;resize:vertical;box-sizing:border-box;font-family:inherit;">' + (u.admin_notes || '') + '</textarea>'
+            html += '<div style="border-top:1px solid var(--tb-border, #3A3F4B);padding-top:20px;margin-top:20px;">'
+                + '<h4 style="margin:0 0 8px;font-size:14px;color:var(--tt-text, #EAEAEA);">Admin Notes</h4>'
+                + '<p style="margin:0 0 8px;font-size:11px;color:var(--tt-muted, #A0A3B0);">Internal notes — not visible to the user.</p>'
+                + '<textarea id="udAdminNotes" rows="3" style="width:100%;padding:8px 10px;border:1px solid var(--tb-border, #3A3F4B);border-radius:6px;font-size:12px;resize:vertical;box-sizing:border-box;font-family:inherit;">' + (u.admin_notes || '') + '</textarea>'
                 + '<button onclick="adminSaveNotes(' + u.id + ')" style="margin-top:8px;padding:7px 20px;background:#8b5cf6;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save Notes</button>'
                 + '</div>';
 
@@ -1647,20 +1647,20 @@ function escHtml(s) {
             });
         }
         if (rows.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#A0A3B0;padding:40px;">No drivers found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:40px;">No drivers found</td></tr>';
             return;
         }
         tbody.innerHTML = rows.map(function (d) {
             var statusClass = d.status === 'approved' ? 'success' : d.status === 'pending' ? 'warning' : 'danger';
-            var photo = d.photo_url ? '<img src="' + d.photo_url + '" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">' : '<div style="width:40px;height:40px;border-radius:50%;background:#3A3F4B;"></div>';
+            var photo = d.photo_url ? '<img src="' + d.photo_url + '" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">' : '<div style="width:40px;height:40px;border-radius:50%;background:var(--th-borderfill, #3A3F4B);"></div>';
             return '<tr>'
                 + '<td>' + d.id + '</td>'
                 + '<td>' + photo + '</td>'
-                + '<td><b>' + esc(d.full_name || '') + '</b><br><span style="font-size:11px;color:#A0A3B0;">' + (d.partner_name || '') + '</span></td>'
+                + '<td><b>' + esc(d.full_name || '') + '</b><br><span style="font-size:11px;color:var(--tt-muted, #A0A3B0);">' + (d.partner_name || '') + '</span></td>'
                 + '<td>' + esc(d.company_name || d.partner_email || '') + '</td>'
                 + '<td>' + esc(d.location_city || '') + '</td>'
                 + '<td><span class="admin-status ' + statusClass + '">' + d.status + '</span></td>'
-                + '<td>' + (d.is_verified ? '<span style="color:#22c55e;font-size:12px;">&#10003; Yes</span>' : '<span style="color:#A0A3B0;font-size:12px;">No</span>') + '</td>'
+                + '<td>' + (d.is_verified ? '<span style="color:var(--tt-green2, #22c55e);font-size:12px;">&#10003; Yes</span>' : '<span style="color:var(--tt-muted, #A0A3B0);font-size:12px;">No</span>') + '</td>'
                 + '<td>$' + (d.price_amount || 0) + ' / ' + (d.price_unit || 'day') + '</td>'
                 + '<td style="white-space:nowrap;">'
                 + '<button class="admin-action-btn small" onclick="adminDriverStatus(' + d.id + ',\'approved\')">Approve</button>'
@@ -1706,19 +1706,19 @@ function escHtml(s) {
     function renderAdminAds() {
         var tbody = document.getElementById('adsTableBody');
         if (_adminAds.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#A0A3B0;padding:40px;">No ad cards yet</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:40px;">No ad cards yet</td></tr>';
             return;
         }
         tbody.innerHTML = _adminAds.map(function (a) {
             var clicks = a.clicks || 0;
-            var clickBadge = clicks > 0 ? '<span style="background:rgba(34,197,94,0.15);color:#22c55e;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;">' + clicks + '</span>' : '<span style="color:#A0A3B0;font-size:11px;">0</span>';
+            var clickBadge = clicks > 0 ? '<span style="background:rgba(34,197,94,0.15);color:var(--tt-green2, #22c55e);padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;">' + clicks + '</span>' : '<span style="color:var(--tt-muted, #A0A3B0);font-size:11px;">0</span>';
             return '<tr>'
                 + '<td>' + a.id + '</td>'
-                + '<td><b>' + esc(a.title || 'Untitled') + '</b><br><span style="font-size:11px;color:#A0A3B0;">' + esc(a.target_link || '') + '</span></td>'
+                + '<td><b>' + esc(a.title || 'Untitled') + '</b><br><span style="font-size:11px;color:var(--tt-muted, #A0A3B0);">' + esc(a.target_link || '') + '</span></td>'
                 + '<td>' + esc(a.placement || 'cars') + '</td>'
                 + '<td>' + ((String(a.placement || '').split(',').indexOf('vehicles') !== -1) ? ('pg' + (parseInt(a.page, 10) === 0 ? 'all' : (a.page || 1)) + ' · ' + a.position) : a.position) + '</td>'
                 + '<td>' + clickBadge + '</td>'
-                + '<td>' + (a.is_active ? '<span style="color:#22c55e;font-size:12px;">Yes</span>' : '<span style="color:#ef4444;font-size:12px;">No</span>') + '</td>'
+                + '<td>' + (a.is_active ? '<span style="color:var(--tt-green2, #22c55e);font-size:12px;">Yes</span>' : '<span style="color:#ef4444;font-size:12px;">No</span>') + '</td>'
                 + '<td style="white-space:nowrap;">'
                 + '<button class="admin-action-btn small" onclick="adminEditAd(' + a.id + ')">Edit</button>'
                 + '<button class="admin-action-btn small danger" onclick="adminDeleteAd(' + a.id + ')">Delete</button>'
@@ -1913,7 +1913,7 @@ function escHtml(s) {
             var tbody = document.getElementById('customerReviewsTableBody');
             if (!tbody) return;
             if (reviews.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#A0A3B0;padding:40px;">No customer reviews yet</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:40px;">No customer reviews yet</td></tr>';
                 return;
             }
             tbody.innerHTML = reviews.map(function (r) {
@@ -1921,7 +1921,7 @@ function escHtml(s) {
                 for (var i = 1; i <= 5; i++) stars += '<span style="color:' + (i <= r.rating ? '#C9A84C' : '#3A3F4B') + ';">&#9733;</span>';
                 return '<tr>'
                     + '<td>' + r.id + '</td>'
-                    + '<td>' + esc(r.guest_name || '-') + '<br><span style="font-size:11px;color:#A0A3B0;">' + esc(r.guest_email || '') + '</span></td>'
+                    + '<td>' + esc(r.guest_name || '-') + '<br><span style="font-size:11px;color:var(--tt-muted, #A0A3B0);">' + esc(r.guest_email || '') + '</span></td>'
                     + '<td>' + esc(r.vehicle_name || '-') + '</td>'
                     + '<td>' + stars + '</td>'
                     + '<td style="max-width:300px;font-size:13px;">' + (r.title ? '<strong>' + esc(r.title) + '</strong><br>' : '') + esc((r.body || '').slice(0, 250)) + '</td>'
@@ -1957,7 +1957,7 @@ function escHtml(s) {
     function renderAdminDriverReviews() {
         var tbody = document.getElementById('driverReviewsTableBody');
         if (_adminDriverReviews.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#A0A3B0;padding:40px;">No driver reviews yet</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:40px;">No driver reviews yet</td></tr>';
             return;
         }
         tbody.innerHTML = _adminDriverReviews.map(function (r) {
@@ -1968,11 +1968,11 @@ function escHtml(s) {
             return '<tr>'
                 + '<td>' + r.id + '</td>'
                 + '<td>' + esc(r.driver_name || '') + '</td>'
-                + '<td>' + esc(r.customer_name || '') + '<br><span style="font-size:11px;color:#A0A3B0;">' + esc(r.customer_email || '') + '</span></td>'
+                + '<td>' + esc(r.customer_name || '') + '<br><span style="font-size:11px;color:var(--tt-muted, #A0A3B0);">' + esc(r.customer_email || '') + '</span></td>'
                 + '<td>' + stars + '</td>'
                 + '<td style="max-width:300px;font-size:13px;">' + esc((r.review_text || '').slice(0, 200)) + '</td>'
                 + '<td>' + (r.created_at ? new Date(r.created_at).toLocaleDateString() : '') + '</td>'
-                + '<td>' + (r.is_hidden ? '<span style="color:#ef4444;font-size:12px;">Hidden</span>' : '<span style="color:#22c55e;font-size:12px;">Visible</span>') + '</td>'
+                + '<td>' + (r.is_hidden ? '<span style="color:#ef4444;font-size:12px;">Hidden</span>' : '<span style="color:var(--tt-green2, #22c55e);font-size:12px;">Visible</span>') + '</td>'
                 + '<td style="white-space:nowrap;">'
                 + '<button class="admin-action-btn small" onclick="adminToggleReviewHide(' + r.id + ')">' + (r.is_hidden ? 'Show' : 'Hide') + '</button>'
                 + '<button class="admin-action-btn small danger" onclick="adminDeleteDriverReview(' + r.id + ')">Delete</button>'
@@ -2002,18 +2002,18 @@ function escHtml(s) {
     function renderAdminTrust() {
         var tbody = document.getElementById('trustTableBody');
         if (!tbody) return;
-        if (_adminTrust.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#A0A3B0;padding:40px;">No badges yet</td></tr>'; return; }
+        if (_adminTrust.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:40px;">No badges yet</td></tr>'; return; }
         tbody.innerHTML = _adminTrust.map(function (b) {
             var iconCell = b.image_url
                 ? '<img src="' + esc(b.image_url) + '" style="height:26px;max-width:80px;object-fit:contain;vertical-align:middle;">'
                 : '<span style="font-size:18px;">' + esc(b.icon || '') + '</span>';
-            var labelCell = esc(b.label || '') + (b.link_url ? ' <span style="color:#D4AF37;font-size:11px;">🔗</span>' : '');
+            var labelCell = esc(b.label || '') + (b.link_url ? ' <span style="color:var(--tt-gold, #D4AF37);font-size:11px;">🔗</span>' : '');
             return '<tr>'
                 + '<td>' + (b.position || 1) + '</td>'
                 + '<td>' + iconCell + '</td>'
                 + '<td>' + labelCell + '</td>'
-                + '<td style="font-size:11px;color:#A0A3B0;">' + esc(b.placement || '') + '</td>'
-                + '<td>' + (b.is_active ? '<span style="color:#22c55e;font-size:12px;">Yes</span>' : '<span style="color:#ef4444;font-size:12px;">No</span>') + '</td>'
+                + '<td style="font-size:11px;color:var(--tt-muted, #A0A3B0);">' + esc(b.placement || '') + '</td>'
+                + '<td>' + (b.is_active ? '<span style="color:var(--tt-green2, #22c55e);font-size:12px;">Yes</span>' : '<span style="color:#ef4444;font-size:12px;">No</span>') + '</td>'
                 + '<td style="white-space:nowrap;">'
                 + '<button class="admin-action-btn small" onclick="adminEditTrust(' + b.id + ')">Edit</button>'
                 + '<button class="admin-action-btn small danger" onclick="adminDeleteTrust(' + b.id + ')">Delete</button>'
@@ -2208,7 +2208,7 @@ function escHtml(s) {
                 });
                 document.getElementById('adminRefPendingPayouts').textContent = pendingCount;
             }
-            adminRefTableBody.innerHTML = html || '<tr><td colspan="8" style="text-align:center;color:#A0A3B0;padding:40px;">No records</td></tr>';
+            adminRefTableBody.innerHTML = html || '<tr><td colspan="8" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:40px;">No records</td></tr>';
         } catch (err) {
             console.error('Admin referrals load error:', err);
             if (adminRefTableBody) adminRefTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#ef4444;padding:40px;">Failed to load</td></tr>';

@@ -134,7 +134,7 @@
     "whatsapp_label": "WhatsApp",
     "contact_us": "Свяжитесь с нами",
     "contact_help": "Мы здесь, чтобы помочь! Свяжитесь с нами в любое время.",
-    "address": "13 University St, Тбилиси, Грузия",
+    "address": "",
     "rights": "Все права защищены.",
     "copyright": "© 2026 EliteAuto.rent. Все права защищены."
   },
@@ -202,7 +202,7 @@
     "email_title": "Эл. почта",
     "phone_title": "Телефон / WhatsApp",
     "address_title": "Адрес",
-    "address_text": "ул. Университетская 13<br>Тбилиси, Грузия",
+    "address_text": "",
     "hours_title": "Часы работы",
     "hours_text": "Понедельник - Воскресенье: 9:00 - 21:00<br>Поддержка WhatsApp 24/7",
     "map_title": "Найдите нас на карте",

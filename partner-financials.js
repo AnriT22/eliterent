@@ -237,7 +237,7 @@
         var tbody = document.getElementById('recentBookingsTable');
         
         if (!bookings || bookings.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#94a3b8;">No bookings found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--tt-muted2, #94a3b8);">No bookings found</td></tr>';
             return;
         }
 
@@ -252,12 +252,12 @@
             var idStr = String(booking.id);
             
             html += '<tr>';
-            html += '<td><span style="font-family:monospace;color:#A0A3B0;">#' + idStr + '</span></td>';
+            html += '<td><span style="font-family:monospace;color:var(--tt-muted, #A0A3B0);">#' + idStr + '</span></td>';
             html += '<td>' + escapeHtml(booking.customer_name) + '</td>';
             html += '<td>' + escapeHtml(booking.vehicle_name) + '</td>';
-            html += '<td style="font-size:13px;color:#A0A3B0;">' + formatDate(booking.pickup_date) + ' → ' + formatDate(booking.dropoff_date) + '</td>';
+            html += '<td style="font-size:13px;color:var(--tt-muted, #A0A3B0);">' + formatDate(booking.pickup_date) + ' → ' + formatDate(booking.dropoff_date) + '</td>';
             html += '<td><span class="fin-status-badge ' + statusClass + '">' + statusText + '</span></td>';
-            html += '<td style="font-weight:700;color:#22c55e;">$' + (booking.partner_earnings || 0).toFixed(2) + '</td>';
+            html += '<td style="font-weight:700;color:var(--tt-green2, #22c55e);">$' + (booking.partner_earnings || 0).toFixed(2) + '</td>';
             html += '</tr>';
         });
         

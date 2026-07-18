@@ -218,7 +218,7 @@
             locEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + esc(locLabel);
         } else {
             document.getElementById('vdVehicleMeta').insertAdjacentHTML('afterend',
-                '<div class="vd-location" style="font-size:13px;color:#A0A3B0;margin-top:4px;display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + esc(locLabel) + '</div>');
+                '<div class="vd-location" style="font-size:13px;color:var(--tt-muted, #A0A3B0);margin-top:4px;display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + esc(locLabel) + '</div>');
         }
 
         // Price — for "rent with driver only" cars, show rent + driver service total.
@@ -243,7 +243,7 @@
         if (!vdPriceBreakdownEl && vdDriverOnly && vdDriverPrice > 0) {
             vdPriceBreakdownEl = document.createElement('div');
             vdPriceBreakdownEl.id = 'vdPriceBreakdown';
-            vdPriceBreakdownEl.style.cssText = 'font-size:12px;color:#A0A3B0;margin-top:2px;';
+            vdPriceBreakdownEl.style.cssText = 'font-size:12px;color:var(--tt-muted, #A0A3B0);margin-top:2px;';
             if (priceEl.parentNode) priceEl.parentNode.appendChild(vdPriceBreakdownEl);
         }
         if (vdPriceBreakdownEl) {

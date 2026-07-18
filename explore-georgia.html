@@ -4,6 +4,7 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4XTKG24HN6"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-4XTKG24HN6');</script>
     <meta charset="UTF-8">
+    <script src="theme.js?v=1"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Explore Georgia — Regions & Road Trips by Car | EliteAuto</title>
     <meta name="description" content="Explore Georgia by car: Kakheti wine country, Kazbegi & Svaneti mountains, Batumi's Black Sea coast, Tbilisi and ancient Mtskheta. Top sights and road-trip guides for every region.">
@@ -34,25 +35,26 @@
     <link rel="stylesheet" href="city-landing.css?v=5">
     <style>
         .eg-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:22px; }
-        .eg-card { background:#1C1E26; border:1px solid #2A2D3A; border-radius:16px; overflow:hidden; display:flex; flex-direction:column; transition:transform .2s, border-color .2s; }
-        .eg-card:hover { transform:translateY(-4px); border-color:#D4AF37; }
+        .eg-card { background:var(--th-surface, #1C1E26); border:1px solid #2A2D3A; border-radius:16px; overflow:hidden; display:flex; flex-direction:column; transition:transform .2s, border-color .2s; }
+        .eg-card:hover { transform:translateY(-4px); border-color:var(--tb-gold2, #D4AF37); }
         .eg-card-banner { height:150px; position:relative; background-size:cover; background-position:center; }
         .eg-card-banner span { position:absolute; left:16px; bottom:12px; color:#fff; font-size:22px; font-weight:900; text-shadow:0 2px 8px rgba(0,0,0,.6); }
         .eg-card-body { padding:18px; display:flex; flex-direction:column; flex:1; }
-        .eg-card-body p { color:#A0A3B0; font-size:14px; line-height:1.6; margin:0 0 14px; flex:1; }
+        .eg-card-body p { color:var(--tt-muted, #A0A3B0); font-size:14px; line-height:1.6; margin:0 0 14px; flex:1; }
         .eg-card-body .eg-sights { color:#C9CCD6; font-size:13px; margin:0 0 14px; }
-        .eg-learn { color:#D4AF37; font-weight:700; font-size:14px; text-decoration:none; align-self:flex-start; }
+        .eg-learn { color:var(--tt-gold, #D4AF37); font-weight:700; font-size:14px; text-decoration:none; align-self:flex-start; }
         .eg-learn:hover { text-decoration:underline; }
         .eg-ads { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:18px; margin-top:8px; }
-        .eg-ad { background:linear-gradient(135deg,#1C1E26,#262A35); border:1px solid #C9A84C; border-radius:16px; overflow:hidden; display:flex; flex-direction:column; text-decoration:none; }
-        .eg-ad__cover { height:160px; background-size:cover; background-position:center; background-color:#2A2D3A; }
+        .eg-ad { background:linear-gradient(135deg,var(--th-surface, #1C1E26),var(--th-raised, #262A35)); border:1px solid var(--tb-gold, #C9A84C); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; text-decoration:none; }
+        .eg-ad__cover { height:160px; background-size:cover; background-position:center; background-color:var(--th-raised3, #2A2D3A); }
         .eg-ad__body { padding:16px; }
-        .eg-ad__body h4 { margin:0 0 6px; font-size:16px; color:#EAEAEA; }
-        .eg-ad__body p { margin:0 0 10px; font-size:13px; color:#A0A3B0; }
-        .eg-ad__cta { color:#D4AF37; font-weight:700; font-size:13px; }
+        .eg-ad__body h4 { margin:0 0 6px; font-size:16px; color:var(--tt-text, #EAEAEA); }
+        .eg-ad__body p { margin:0 0 10px; font-size:13px; color:var(--tt-muted, #A0A3B0); }
+        .eg-ad__cta { color:var(--tt-gold, #D4AF37); font-weight:700; font-size:13px; }
     </style>
     <script src="api-helper.js?v=2"></script>
     <script src="i18n.js?v=6"></script>
+    <link rel="stylesheet" href="theme.css?v=1">
 </head>
 <body>
     <header class="header sticky-header">
@@ -162,10 +164,10 @@
         </div>
     </section>
 
-    <section style="padding:72px 0; background:linear-gradient(135deg,#1C1E26,#0D1B2A); text-align:center;">
+    <section style="padding:72px 0; background:linear-gradient(135deg,var(--th-surface, #1C1E26),var(--th-navy, #0D1B2A)); text-align:center;">
         <div class="container">
-            <h2 style="font-size:30px;font-weight:900;color:#EAEAEA;margin:0 0 12px;" data-i18n="explore_page.cta_title">Ready to hit the road?</h2>
-            <p style="font-size:16px;color:#A0A3B0;max-width:520px;margin:0 auto 26px;" data-i18n="explore_page.cta_sub">Pick up a car in Tbilisi, Batumi or Kutaisi and explore Georgia at your own pace.</p>
+            <h2 style="font-size:30px;font-weight:900;color:var(--tt-text, #EAEAEA);margin:0 0 12px;" data-i18n="explore_page.cta_title">Ready to hit the road?</h2>
+            <p style="font-size:16px;color:var(--tt-muted, #A0A3B0);max-width:520px;margin:0 auto 26px;" data-i18n="explore_page.cta_sub">Pick up a car in Tbilisi, Batumi or Kutaisi and explore Georgia at your own pace.</p>
             <a href="vehicles.html" class="cl-cta-btn" data-i18n="explore_page.cta">Rent a Car to Explore &#8594;</a>
         </div>
     </section>

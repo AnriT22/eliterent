@@ -13,8 +13,8 @@ body.auth-page {
     padding: 0;
     min-height: 100vh;
     font-family: 'Poppins', sans-serif;
-    background: #0c1117;
-    color: #e2e8f0;
+    background: var(--th-bg2, #0c1117);
+    color: var(--tt-soft2, #e2e8f0);
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
@@ -88,7 +88,7 @@ body.auth-page .auth-form-header h2 {
 
 body.auth-page .auth-form-header p {
     font-size: 14px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     margin: 0;
     font-weight: 400;
 }
@@ -134,11 +134,11 @@ body.auth-page .login-role-tab.active {
 }
 
 body.auth-page .login-role-tab.active svg {
-    stroke: #0c1117;
+    stroke: var(--th-bg2, #0c1117);
 }
 
 body.auth-page .login-role-tab:hover:not(.active) {
-    color: #e2e8f0;
+    color: var(--tt-soft2, #e2e8f0);
     background: rgba(136, 189, 242, 0.08);
 }
 
@@ -161,7 +161,7 @@ body.auth-page .form-group label,
 body.auth-page .form-label {
     font-size: 13px;
     font-weight: 500;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     letter-spacing: 0.2px;
     margin: 0;
     margin-bottom: 2px;
@@ -176,13 +176,13 @@ body.auth-page .form-label-row {
 body.auth-page .form-link {
     font-size: 13px;
     font-weight: 500;
-    color: #88BDF2;
+    color: var(--tt-blue, #88BDF2);
     text-decoration: none;
     transition: color 0.2s;
 }
 
 body.auth-page .form-link:hover {
-    color: #BDDDFC;
+    color: var(--tt-bluesoft, #BDDDFC);
 }
 
 /* ===== INPUT WRAPPER ===== */
@@ -218,7 +218,7 @@ body.auth-page .form-icon svg {
 }
 
 body.auth-page .form-input-wrapper:focus-within .form-icon svg {
-    stroke: #88BDF2;
+    stroke: var(--tb-blue, #88BDF2);
 }
 
 /* ===== INPUTS ===== */
@@ -234,7 +234,7 @@ body.auth-page .form-group textarea {
     font-family: 'Poppins', sans-serif;
     font-size: 14px;
     font-weight: 400;
-    color: #e2e8f0;
+    color: var(--tt-soft2, #e2e8f0);
     transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
     box-sizing: border-box;
     outline: none;
@@ -247,7 +247,7 @@ body.auth-page .form-input::placeholder {
 body.auth-page .form-input:focus,
 body.auth-page .form-group input:focus,
 body.auth-page .form-group select:focus {
-    border-color: #88BDF2;
+    border-color: var(--tb-blue, #88BDF2);
     box-shadow: 0 0 0 3px rgba(136, 189, 242, 0.1);
     background: rgba(136, 189, 242, 0.08);
 }
@@ -264,7 +264,7 @@ body.auth-page select.form-input {
 
 body.auth-page select.form-input option {
     background: #111824;
-    color: #e2e8f0;
+    color: var(--tt-soft2, #e2e8f0);
 }
 
 body.auth-page input[type="date"].form-input {
@@ -302,13 +302,13 @@ body.auth-page .form-toggle-password:hover {
 }
 
 body.auth-page .form-toggle-password:hover svg {
-    stroke: #88BDF2;
+    stroke: var(--tb-blue, #88BDF2);
 }
 
 /* ===== FORM ERROR ===== */
 body.auth-page .form-error {
     font-size: 12px;
-    color: #f87171;
+    color: var(--tt-redsoft, #f87171);
     font-weight: 500;
     display: none;
 }
@@ -341,7 +341,7 @@ body.auth-page .checkbox-input {
 
 body.auth-page .checkbox-input:checked {
     background: #88BDF2;
-    border-color: #88BDF2;
+    border-color: var(--tb-blue, #88BDF2);
 }
 
 body.auth-page .checkbox-input:checked::after {
@@ -351,14 +351,14 @@ body.auth-page .checkbox-input:checked::after {
     top: 2px;
     width: 5px;
     height: 9px;
-    border: solid #0c1117;
+    border: solid var(--th-bg2, #0c1117);
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
 }
 
 body.auth-page .checkbox-label {
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     cursor: pointer;
     margin: 0;
 }
@@ -398,7 +398,7 @@ body.auth-page .btn-primary:active {
 
 body.auth-page .btn-secondary {
     background: rgba(136, 189, 242, 0.1);
-    color: #88BDF2;
+    color: var(--tt-blue, #88BDF2);
     border: 1px solid rgba(136, 189, 242, 0.12);
 }
 
@@ -467,7 +467,7 @@ body.auth-page .social-btn {
     font-family: 'Poppins', sans-serif;
     font-size: 13px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--tt-soft2, #e2e8f0);
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -538,7 +538,7 @@ body.auth-page .auth-footer {
 
 body.auth-page .auth-footer p {
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     margin: 0 0 10px 0;
 }
 
@@ -553,13 +553,13 @@ body.auth-page .auth-footer-links {
 body.auth-page .auth-link {
     font-size: 13px;
     font-weight: 600;
-    color: #88BDF2;
+    color: var(--tt-blue, #88BDF2);
     text-decoration: none;
     transition: color 0.2s;
 }
 
 body.auth-page .auth-link:hover {
-    color: #BDDDFC;
+    color: var(--tt-bluesoft, #BDDDFC);
     text-decoration: underline;
 }
 
@@ -601,7 +601,7 @@ body.auth-page .progress-number {
 
 body.auth-page .progress-step.active .progress-number {
     background: #88BDF2;
-    border-color: #88BDF2;
+    border-color: var(--tb-blue, #88BDF2);
     color: #0c1117;
     box-shadow: 0 0 16px rgba(136, 189, 242, 0.3);
 }
@@ -613,7 +613,7 @@ body.auth-page .progress-label {
 }
 
 body.auth-page .progress-step.active .progress-label {
-    color: #BDDDFC;
+    color: var(--tt-bluesoft, #BDDDFC);
 }
 
 body.auth-page .progress-line {
@@ -661,7 +661,7 @@ body.auth-page .license-option {
     cursor: pointer;
     transition: all 0.2s;
     font-size: 14px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     width: 100%;
     box-sizing: border-box;
 }
@@ -706,7 +706,7 @@ body.auth-page .success-message h3 {
 
 body.auth-page .success-message p {
     font-size: 14px;
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
     margin: 0;
 }
 
@@ -740,7 +740,7 @@ body.auth-page .support-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #e2e8f0;
+    color: var(--tt-soft2, #e2e8f0);
     line-height: 1;
 }
 
@@ -781,23 +781,23 @@ body.auth-page .floating-whatsapp svg {
 body.auth-page .footer {
     position: relative;
     z-index: 1;
-    background: #0c1117;
+    background: var(--th-bg2, #0c1117);
     border-top: 1px solid rgba(136, 189, 242, 0.1);
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
 }
 
 body.auth-page .footer h4 {
-    color: #BDDDFC;
+    color: var(--tt-bluesoft, #BDDDFC);
 }
 
 body.auth-page .footer p,
 body.auth-page .footer a,
 body.auth-page .footer li {
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
 }
 
 body.auth-page .footer a:hover {
-    color: #88BDF2;
+    color: var(--tt-blue, #88BDF2);
 }
 
 body.auth-page .footer-bottom {
@@ -809,11 +809,11 @@ body.auth-page .footer-bottom p {
 }
 
 body.auth-page .social-icon {
-    color: #94a3b8;
+    color: var(--tt-muted2, #94a3b8);
 }
 
 body.auth-page .social-icon:hover {
-    color: #88BDF2;
+    color: var(--tt-blue, #88BDF2);
 }
 
 /* ===== PHONE CODE SELECTOR ===== */

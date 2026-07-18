@@ -134,7 +134,7 @@
     "whatsapp_label": "WhatsApp",
     "contact_us": "დაგვიკავშირდით",
     "contact_help": "ჩვენ მზად ვართ დაგეხმაროთ! დაგვიკავშირდით ნებისმიერ დროს.",
-    "address": "13 University St, თბილისი, საქართველო",
+    "address": "",
     "rights": "ყველა უფლება დაცულია.",
     "copyright": "© 2026 EliteAuto.rent. ყველა უფლება დაცულია."
   },
@@ -202,7 +202,7 @@
     "email_title": "ელფოსტა",
     "phone_title": "ტელეფონი / WhatsApp",
     "address_title": "მისამართი",
-    "address_text": "უნივერსიტეტის ქუჩა 13<br>თბილისი, საქართველო",
+    "address_text": "",
     "hours_title": "სამუშაო საათები",
     "hours_text": "ორშაბათი - კვირა: 9:00 - 21:00<br>WhatsApp მხარდაჭერა 24/7",
     "map_title": "გვიპოვე რუკაზე",
