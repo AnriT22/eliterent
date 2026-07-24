@@ -235,7 +235,7 @@ router.get('/va/timeseries', function (req, res) {
     cached(req, res, 60000, async function () {
         var days = { '14': 14, '30': 30, '60': 60, '90': 90 }[String(req.query.days)] || 30;
         var visits = await queryAll(
-            `SELECT created_at::date AS date, COUNT(*) AS pageviews,
+            `SELECT created_at::date::text AS date, COUNT(*) AS pageviews,
                     COUNT(DISTINCT visitor_id) AS visitors,
                     COUNT(DISTINCT session_id) AS sessions
              FROM page_visits
@@ -243,7 +243,7 @@ router.get('/va/timeseries', function (req, res) {
              GROUP BY 1 ORDER BY 1`
         );
         var books = await queryAll(
-            `SELECT created_at::date AS date,
+            `SELECT created_at::date::text AS date,
                     COUNT(*) FILTER (WHERE ${REAL_BOOKINGS}) AS bookings,
                     COALESCE(SUM(total_price) FILTER (WHERE ${REVENUE_FILTER}), 0) AS revenue
              FROM bookings
