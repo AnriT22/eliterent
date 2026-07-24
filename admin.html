@@ -11,7 +11,7 @@
     <link rel="icon" type="image/png" href="/images/Lettermark.png">
     <link rel="stylesheet" href="style.css?v=16">
     <link rel="stylesheet" href="premium.css?v=24">
-    <link rel="stylesheet" href="admin.css?v=7">
+    <link rel="stylesheet" href="admin.css?v=8">
     <script src="api-helper.js?v=3"></script>
     <script src="i18n.js?v=7"></script>
     <link rel="stylesheet" href="theme.css?v=2">
@@ -33,6 +33,14 @@
                 <button class="admin-nav-item active" data-tab="dashboard">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                     Dashboard
+                </button>
+                <button class="admin-nav-item" data-tab="visitors">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Visitors
+                </button>
+                <button class="admin-nav-item" data-tab="seo">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                    SEO Analytics
                 </button>
                 <button class="admin-nav-item" data-tab="users">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -142,6 +150,199 @@
                         <h3>Monthly Uploads</h3>
                         <div id="monthlyUploadsChart" class="admin-chart-placeholder"></div>
                     </div>
+                </div>
+            </section>
+
+            <!-- VISITORS ANALYTICS TAB -->
+            <section class="admin-tab" id="tabVisitors">
+                <div class="admin-toolbar" style="align-items:center;">
+                    <select class="admin-filter-select" id="vaRange">
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="7d">Last 7 Days</option>
+                        <option value="30d" selected>Last 30 Days</option>
+                        <option value="month">This Month</option>
+                        <option value="lastmonth">Last Month</option>
+                        <option value="year">This Year</option>
+                        <option value="all">All Time</option>
+                    </select>
+                    <span id="vaLiveBadge"></span>
+                    <button class="admin-action-btn" id="vaRefreshBtn" style="margin-left:auto;white-space:nowrap;">&#8635; Refresh</button>
+                </div>
+
+                <div class="admin-stats-grid" id="vaCards">
+                    <p style="color:var(--tt-muted, #A0A3B0);">Loading visitor analytics…</p>
+                </div>
+
+                <div class="admin-charts-row">
+                    <div class="admin-card">
+                        <h3>Visitors &amp; Page Views <span class="va-sub" id="vaTrafficChartSub"></span></h3>
+                        <div id="vaTrafficChart" class="va-chart"></div>
+                    </div>
+                    <div class="admin-card">
+                        <h3>Bookings &amp; Revenue <span class="va-sub" id="vaRevenueChartSub"></span></h3>
+                        <div id="vaRevenueChart" class="va-chart"></div>
+                    </div>
+                </div>
+
+                <div class="admin-card" style="margin-top:20px;">
+                    <div class="va-card-head">
+                        <h3>&#127758; Visitors World Map</h3>
+                        <span class="va-sub">click a country for details</span>
+                    </div>
+                    <div id="vaWorldMap"></div>
+                    <div id="vaMapDetail"></div>
+                </div>
+
+                <div class="admin-card" style="margin-top:20px;">
+                    <div class="va-card-head">
+                        <h3>Top Countries &amp; Cities</h3>
+                        <select class="admin-filter-select" id="vaGeoBy">
+                            <option value="country" selected>Countries</option>
+                            <option value="city">Cities</option>
+                        </select>
+                        <select class="admin-filter-select" id="vaGeoLimit">
+                            <option value="10">Top 10</option>
+                            <option value="25" selected>Top 25</option>
+                            <option value="50">Top 50</option>
+                            <option value="300">Complete ranking</option>
+                        </select>
+                    </div>
+                    <div id="vaGeoTable" style="overflow-x:auto;"></div>
+                </div>
+
+                <div class="admin-card" style="margin-top:20px;">
+                    <div class="va-card-head">
+                        <h3><span class="va-live-dot"></span> Live Visitors <span class="va-sub" id="vaLiveCount"></span></h3>
+                        <span class="va-sub">auto-refreshes every 15s</span>
+                    </div>
+                    <div id="vaLiveTable" style="overflow-x:auto;"></div>
+                </div>
+
+                <div class="admin-charts-row" style="margin-top:20px;">
+                    <div class="admin-card">
+                        <h3>Traffic Sources</h3>
+                        <div id="vaSourcesTable" style="overflow-x:auto;"></div>
+                    </div>
+                    <div class="admin-card">
+                        <h3>Booking Journey (Funnel)</h3>
+                        <div id="vaFunnel"></div>
+                    </div>
+                </div>
+
+                <div class="admin-charts-row" style="margin-top:20px;">
+                    <div class="admin-card">
+                        <h3>Devices</h3>
+                        <div id="vaDevices"></div>
+                    </div>
+                    <div class="admin-card">
+                        <h3>Browsers &amp; Operating Systems</h3>
+                        <div id="vaBrowsers"></div>
+                    </div>
+                </div>
+
+                <div class="admin-charts-row" style="margin-top:20px;">
+                    <div class="admin-card">
+                        <h3>Languages</h3>
+                        <div id="vaLanguages" style="overflow-x:auto;"></div>
+                    </div>
+                    <div class="admin-card">
+                        <h3>Top Referrer Websites</h3>
+                        <div id="vaReferrers" style="overflow-x:auto;"></div>
+                    </div>
+                </div>
+
+                <div class="admin-card" style="margin-top:20px;">
+                    <div class="va-card-head" style="flex-wrap:wrap;">
+                        <h3>All Visitors</h3>
+                        <input type="text" class="admin-search" id="vaSearch" placeholder="Search IP, city, country, page…" style="max-width:230px;">
+                        <select class="admin-filter-select" id="vaCountryFilter"><option value="">All countries</option></select>
+                        <select class="admin-filter-select" id="vaDeviceFilter">
+                            <option value="">All devices</option>
+                            <option value="desktop">Desktop</option>
+                            <option value="mobile">Mobile</option>
+                            <option value="tablet">Tablet</option>
+                        </select>
+                        <select class="admin-filter-select" id="vaSourceFilter">
+                            <option value="">All sources</option>
+                            <option value="direct">Direct</option>
+                            <option value="google_organic">Google Organic</option>
+                            <option value="google_ads">Google Ads</option>
+                            <option value="google_maps">Google Maps</option>
+                            <option value="organic_other">Other Search</option>
+                            <option value="facebook">Facebook</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="tiktok">TikTok</option>
+                            <option value="whatsapp">WhatsApp</option>
+                            <option value="telegram">Telegram</option>
+                            <option value="email">Email</option>
+                            <option value="qr">QR Codes</option>
+                            <option value="referral">Referral</option>
+                        </select>
+                    </div>
+                    <div id="vaVisitorsTable" style="overflow-x:auto;"></div>
+                    <div id="vaVisitorsPager" class="va-pager"></div>
+                </div>
+            </section>
+
+            <!-- SEO ANALYTICS TAB -->
+            <section class="admin-tab" id="tabSeo">
+                <div class="admin-toolbar" style="align-items:center;">
+                    <select class="admin-filter-select" id="seoRange">
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="7d">Last 7 Days</option>
+                        <option value="30d" selected>Last 30 Days</option>
+                        <option value="month">This Month</option>
+                        <option value="lastmonth">Last Month</option>
+                        <option value="year">This Year</option>
+                        <option value="all">All Time</option>
+                    </select>
+                    <button class="admin-action-btn" id="seoRefreshBtn" style="margin-left:auto;white-space:nowrap;">&#8635; Refresh</button>
+                </div>
+
+                <div class="admin-stats-grid" id="seoCards">
+                    <p style="color:var(--tt-muted, #A0A3B0);">Loading SEO analytics…</p>
+                </div>
+
+                <div class="admin-charts-row">
+                    <div class="admin-card">
+                        <h3>Top Landing Pages <span class="va-sub">first page of each session</span></h3>
+                        <div id="seoLandingTable" style="overflow-x:auto;"></div>
+                    </div>
+                    <div class="admin-card">
+                        <h3>Top Exit Pages <span class="va-sub">last page before leaving</span></h3>
+                        <div id="seoExitTable" style="overflow-x:auto;"></div>
+                    </div>
+                </div>
+
+                <div class="admin-card" style="margin-top:20px;">
+                    <h3>Page Performance <span class="va-sub">views, engagement &amp; bounce per page</span></h3>
+                    <div id="seoPagesTable" style="overflow-x:auto;"></div>
+                </div>
+
+                <div class="admin-card" style="margin-top:20px;">
+                    <h3>Location Page Performance <span class="va-sub">the SEO landing pages</span></h3>
+                    <div id="seoLocationsTable" style="overflow-x:auto;"></div>
+                </div>
+
+                <div class="admin-card" style="margin-top:20px;">
+                    <h3>&#128161; AI Recommendations &amp; Business Insights</h3>
+                    <div id="seoRecs"><p style="color:var(--tt-muted, #A0A3B0);">Analyzing…</p></div>
+                </div>
+
+                <div class="admin-card" style="margin-top:20px;">
+                    <div class="va-card-head">
+                        <h3>&#128295; Technical SEO Audit</h3>
+                        <button class="admin-action-btn" id="seoAuditRefresh" style="white-space:nowrap;">Re-scan</button>
+                    </div>
+                    <div id="seoAuditSummary"></div>
+                    <div id="seoAuditTable" style="overflow-x:auto;"></div>
+                </div>
+
+                <div class="admin-card" style="margin-top:20px;">
+                    <h3>&#128273; Keyword Analytics (Google Search Console)</h3>
+                    <div id="seoGsc"></div>
                 </div>
             </section>
 
@@ -734,7 +935,12 @@
         }
     })();
     </script>
-    <script src="admin.js?v=20"></script>
+    <script src="admin.js?v=21"></script>
+    <!-- World-map library for the Visitors tab (CSP already allows cdn.jsdelivr.net).
+         If it fails to load the map card falls back to the country table. -->
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.6.0/dist/jsvectormap.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.6.0/dist/maps/world.js" defer></script>
+    <script src="admin-analytics.js?v=1" defer></script>
 <script src="premium-animations.js?v=4"></script>
 </body>
 </html>

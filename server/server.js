@@ -181,88 +181,16 @@ app.use((req, res, next) => {
 // client-side (admin.js, dashboard.js check localStorage token+role → redirect to login).
 // All sensitive data/actions are protected server-side via API-level JWT auth middleware.
 
-// ========== Visitor tracking with bot detection ==========
-function isBot(req) {
-    var ua = req.headers['user-agent'] || '';
-    var lowerUa = ua.toLowerCase();
+// ========== Visitor tracking ==========
+// Enriched pageview capture (geo, device, source, sessions) — see visitor-tracking.js.
+// Fire-and-forget inserts; adds no measurable latency to page delivery.
+const visitorTracking = require('./visitor-tracking');
+const { getPool: getTrackingPool } = require('./db');
+app.use(visitorTracking.middleware(getTrackingPool));
 
-    // 1. Known bot/crawler strings
-    if (/bot|crawl|spider|slurp|scrape|scan|fetch|libcurl|wget|curl|python-requests|httpclient| okhttp|axios|node-fetch|undici|phantomjs|headless|selenium|puppeteer|playwright|apifox|postman|insomnia|ahrefs|semrush|majestic|moz|blexbot|dotbot|rogerbot|bingpreview|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|discordbot|slackbot|applebot|yandex|baidu|sogou|exabot|nutch|jakarta|guzzlehttp|java\//i.test(ua)) return true;
-
-    // 2. Very short or empty UA (most real browsers send 80+ chars)
-    if (!ua || ua.length < 30) return true;
-
-    // 3. Missing critical headers real browsers always send
-    if (!req.headers['accept-language']) return true;
-    if (!req.headers['accept']) return true;
-
-    // 4. No JS-capable indicators — real browsers send Accept: text/html, application/xhtml+xml
-    var accept = req.headers['accept'] || '';
-    if (!accept.includes('text/html')) return true;
-
-    // 5. Known headless/browser automation markers
-    if (lowerUa.includes('headless') || lowerUa.includes('selenium') || lowerUa.includes('webdriver')) return true;
-
-    // 6. No referrer on non-first-page visits is suspicious but not conclusive — leave for client-side verification
-    return false;
-}
-
-app.use((req, res, next) => {
-    if (req.method !== 'GET') return next();
-    var p = req.path;
-    // Track root, .html pages — skip assets, API, uploads
-    if (p !== '/' && !p.endsWith('.html')) return next();
-
-    var bot = isBot(req);
-    var ua = req.headers['user-agent'] || '';
-
-    // Get or set visitor cookie
-    var cookies = {};
-    (req.headers.cookie || '').split(';').forEach(function(c) {
-        var parts = c.trim().split('=');
-        if (parts.length === 2) cookies[parts[0]] = parts[1];
-    });
-    var vid = cookies['vid'];
-    if (!vid) {
-        vid = crypto.randomBytes(12).toString('hex');
-        res.setHeader('Set-Cookie', 'vid=' + vid + '; Path=/; HttpOnly; SameSite=Lax; Max-Age=31536000');
-    }
-
-    // Fire-and-forget insert (mark bot flag server-side)
-    var { getPool } = require('./db');
-    var pool = getPool();
-    if (pool) {
-        var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
-        if (ip.includes(',')) ip = ip.split(',')[0].trim();
-        pool.query(
-            'INSERT INTO page_visits (page, ip, user_agent, referrer, visitor_id, is_bot) VALUES ($1, $2, $3, $4, $5, $6)',
-            [p, ip, (ua || '').substring(0, 500), (req.headers['referer'] || '').substring(0, 500), vid, bot ? 1 : 0]
-        ).catch(function() {});
-    }
-    next();
-});
-
-// Client-side human verification — lightweight JS ping after page load
-app.post('/api/verify-human', (req, res) => {
-    var cookies = {};
-    (req.headers.cookie || '').split(';').forEach(function(c) {
-        var parts = c.trim().split('=');
-        if (parts.length === 2) cookies[parts[0]] = parts[1];
-    });
-    var vid = cookies['vid'];
-    if (!vid) return res.json({ ok: false });
-
-    var { getPool } = require('./db');
-    var pool = getPool();
-    if (pool) {
-        // Mark recent visits from this visitor as verified human
-        pool.query(
-            "UPDATE page_visits SET is_verified = 1 WHERE visitor_id = $1 AND created_at > NOW() - INTERVAL '1 hour'",
-            [vid]
-        ).catch(function() {});
-    }
-    res.json({ ok: true });
-});
+// Client-side human verification — lightweight JS ping after page load, now also
+// carries screen size / client timezone for the visitor analytics dashboards.
+app.post('/api/verify-human', visitorTracking.verifyHumanHandler(getTrackingPool));
 
 // SEO: inject server-rendered content for ALL visitors (before static), with NO
 // User-Agent branching — users and crawlers get identical HTML. Homepage gets the
@@ -455,6 +383,7 @@ app.use('/api', authRoutes);
 app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin', require('./routes/admin-analytics'));
 app.use('/api/favorites', favoritesRoutes);
 app.use('/api/availability', availabilityRoutes);
 app.use('/api/bookings', bookingsRoutes);
@@ -552,14 +481,15 @@ initDB().then(() => {
         }
     }, 60 * 1000); // every 1 minute
 
-    // Cleanup old page visits (older than 90 days) — runs every hour
+    // Cleanup old page visits (older than 400 days — keeps 13 months so the
+    // analytics dashboards can do year and year-over-year views) — runs hourly
     setInterval(async () => {
         try {
             const pool = getPool();
             if (!pool) return;
-            const result = await pool.query("DELETE FROM page_visits WHERE created_at < NOW() - INTERVAL '90 days'");
+            const result = await pool.query("DELETE FROM page_visits WHERE created_at < NOW() - INTERVAL '400 days'");
             if (result.rowCount > 0) {
-                console.log('[Cleanup] Removed ' + result.rowCount + ' old page visit records (90d+)');
+                console.log('[Cleanup] Removed ' + result.rowCount + ' old page visit records (400d+)');
             }
         } catch (e) { /* ignore */ }
     }, 3600 * 1000);

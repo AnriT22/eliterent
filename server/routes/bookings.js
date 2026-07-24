@@ -528,13 +528,15 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
         }
       }
 
-      // Create booking with pending status
+      // Create booking with pending status. visitor_id (analytics cookie) links
+      // the booking to the visitor's traffic source / country / device stats.
+      var visitorId = require('../visitor-tracking').getVisitorId(req);
       var insertResult = await txClient.query(
         `INSERT INTO bookings
                (guest_id, vehicle_id, partner_id, pickup_date, dropoff_date, pickup_time, dropoff_time, rental_days,
                 pickup_location, dropoff_location, extras_json, extras_total, location_fee, service_fee,
-                total_price, status, payment_expires_at, guest_notes)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 'pending', NOW() + INTERVAL '8 minutes', $16)
+                total_price, status, payment_expires_at, guest_notes, visitor_id)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 'pending', NOW() + INTERVAL '8 minutes', $16, $17)
                RETURNING id`,
         [
           req.user.id,
@@ -553,6 +555,7 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
           serviceFee,
           total_price,
           guest_notes || null,
+          visitorId,
         ],
       );
 

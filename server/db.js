@@ -573,6 +573,40 @@ async function initDB() {
         await pool.query(`ALTER TABLE page_visits ADD COLUMN IF NOT EXISTS is_verified INTEGER DEFAULT 0`);
     } catch (e) { /* columns may already exist */ }
 
+    // Visitor-analytics enrichment columns (existing DBs). Each pageview row now
+    // carries the session, geo (from offline IP lookup), device/browser (parsed
+    // from the UA once at insert time so dashboards never re-parse), the browser
+    // language, the classified traffic source and the referrer host. `screen` and
+    // `timezone` arrive later via the /api/verify-human JS ping. `is_new` marks
+    // the visitor's first-ever pageview (no vid cookie yet).
+    try {
+        var pvCols = [
+            'session_id TEXT', 'country TEXT', 'country_code TEXT', 'city TEXT',
+            'region TEXT', 'timezone TEXT', 'latitude REAL', 'longitude REAL',
+            'browser TEXT', 'browser_version TEXT', 'os TEXT', 'device TEXT',
+            'language TEXT', 'screen TEXT', 'source TEXT', 'referrer_host TEXT',
+            'is_new INTEGER DEFAULT 0', 'user_id INTEGER'
+        ];
+        for (var pvI = 0; pvI < pvCols.length; pvI++) {
+            await pool.query('ALTER TABLE page_visits ADD COLUMN IF NOT EXISTS ' + pvCols[pvI]);
+        }
+    } catch (e) { /* columns may already exist */ }
+
+    // Attribute bookings to the visitor (vid cookie) that created them, so
+    // analytics can tie revenue/conversions to countries, sources and devices.
+    try {
+        await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS visitor_id TEXT`);
+    } catch (e) { /* column may already exist */ }
+
+    // Indexes for the analytics dashboards (grouped aggregations over date ranges)
+    try {
+        await pool.query('CREATE INDEX IF NOT EXISTS idx_page_visits_session ON page_visits(session_id)');
+        await pool.query('CREATE INDEX IF NOT EXISTS idx_page_visits_country ON page_visits(country_code)');
+        await pool.query('CREATE INDEX IF NOT EXISTS idx_page_visits_source ON page_visits(source)');
+        await pool.query('CREATE INDEX IF NOT EXISTS idx_page_visits_page_created ON page_visits(page, created_at)');
+        await pool.query('CREATE INDEX IF NOT EXISTS idx_bookings_visitor ON bookings(visitor_id)');
+    } catch (e) { /* indexes may already exist */ }
+
     // Drivers registry — partner-added driver profiles, admin-moderated.
     // Directory/contact model (no online booking). Hidden until approved.
     await pool.query(`
