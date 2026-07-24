@@ -1429,10 +1429,21 @@ function init() {
     safeInit(initResponsiveMenu);
     safeInit(initAccessibility);
 
-    // Human verification ping — proves browser executes JavaScript (most bots don't)
+    // Human verification ping — proves browser executes JavaScript (most bots don't).
+    // Also reports screen size + timezone for the admin visitor analytics.
     // Delayed so it doesn't block critical rendering
     setTimeout(function () {
-        fetch('/api/verify-human', { method: 'POST', credentials: 'same-origin' }).catch(function () {});
+        var info = {};
+        try {
+            info.screen = window.screen.width + 'x' + window.screen.height;
+            info.tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        } catch (e) {}
+        fetch('/api/verify-human', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(info)
+        }).catch(function () {});
     }, 2000);
 }
 

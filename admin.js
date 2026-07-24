@@ -35,6 +35,8 @@ function escHtml(s) {
             pageTitle.textContent = this.textContent.trim();
 
             if (tabName === 'dashboard') loadAnalytics();
+            if (tabName === 'visitors' && window.vaLoad) window.vaLoad();
+            if (tabName === 'seo' && window.seoLoad) window.seoLoad();
             if (tabName === 'users') loadUsers();
             if (tabName === 'partners') { loadPartners(); loadInviteCodes(); }
             if (tabName === 'vehicles') loadVehicles();
