@@ -26,8 +26,11 @@ function isBot(req) {
     var ua = req.headers['user-agent'] || '';
     var lowerUa = ua.toLowerCase();
 
-    // 1. Known bot/crawler strings
-    if (/bot|crawl|spider|slurp|scrape|scan|fetch|libcurl|wget|curl|python-requests|httpclient| okhttp|axios|node-fetch|undici|phantomjs|headless|selenium|puppeteer|playwright|apifox|postman|insomnia|ahrefs|semrush|majestic|moz|blexbot|dotbot|rogerbot|bingpreview|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|discordbot|slackbot|applebot|yandex|baidu|sogou|exabot|nutch|jakarta|guzzlehttp|java\//i.test(ua)) return true;
+    // 1. Known bot/crawler strings. (The old list contained a bare "moz" which
+    // matched "Mozilla/5.0" — i.e. EVERY real browser — so header-based
+    // detection never passed anyone. Moz's actual crawlers are rogerbot/dotbot,
+    // both still listed.)
+    if (/bot|crawl|spider|slurp|scrape|scan|fetch|libcurl|wget|curl|python-requests|httpclient| okhttp|axios|node-fetch|undici|phantomjs|headless|selenium|puppeteer|playwright|apifox|postman|insomnia|ahrefs|semrush|majestic|blexbot|dotbot|rogerbot|bingpreview|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|discordbot|slackbot|applebot|yandex|baidu|sogou|exabot|nutch|jakarta|guzzlehttp|java\//i.test(ua)) return true;
 
     // 2. Very short or empty UA (most real browsers send 80+ chars)
     if (!ua || ua.length < 30) return true;
@@ -196,8 +199,11 @@ function middleware(getPool) {
 
             var pool = getPool();
             if (pool) {
+                // Geo + device are stored even for suspected bots: many real
+                // browsers are only "proven human" later by the JS ping, and
+                // their rows must already carry correct geo/device data.
                 var ip = clientIp(req);
-                var geo = bot ? null : lookupGeo(ip);
+                var geo = lookupGeo(ip);
                 var parsed = parseUserAgent(ua);
                 var referrer = req.headers['referer'] || '';
                 pool.query(
@@ -211,7 +217,7 @@ function middleware(getPool) {
                         geo ? geo.country : null, geo ? geo.country_code : null, geo ? geo.city : null,
                         geo ? geo.region : null, geo ? geo.timezone : null, geo ? geo.latitude : null,
                         geo ? geo.longitude : null,
-                        parsed.browser, parsed.version, parsed.os, bot ? 'bot' : parsed.device,
+                        parsed.browser, parsed.version, parsed.os, parsed.device,
                         primaryLanguage(req), classifySource(referrer, req.query), referrerHost(referrer), isNew
                     ]
                 ).catch(function () {});
