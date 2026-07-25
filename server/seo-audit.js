@@ -25,6 +25,19 @@ const KNOWN_ROUTES = new Set([
     '/car-rental/sedan', '/car-rental/luxury', '/car-rental/minivan', '/no-deposit'
 ]);
 
+// Localized routes served dynamically by i18n-render (/ru/, /ka/, /he/ funnel
+// pages) — valid link targets even though no file exists on disk.
+try {
+    const i18n = require('./i18n-render');
+    (i18n.LANGS || []).forEach(function (lang) {
+        KNOWN_ROUTES.add('/' + lang);
+        KNOWN_ROUTES.add('/' + lang + '/');
+        Object.keys(i18n.LOCALIZABLE || {}).forEach(function (p) {
+            if (p) KNOWN_ROUTES.add('/' + lang + '/' + p);
+        });
+    });
+} catch (e) { /* audit still works without the localizer */ }
+
 let cache = { report: null, ts: 0 };
 const CACHE_MS = 10 * 60 * 1000;
 
