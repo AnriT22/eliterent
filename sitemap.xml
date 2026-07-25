@@ -243,4 +243,65 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+  <!-- Hebrew (static) landing pages - real translated bodies, reciprocal hreflang -->
+  <url>
+    <loc>https://eliteauto.rent/he/tbilisi-airport-car-rental.html</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/tbilisi-airport-car-rental.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/tbilisi-airport-car-rental.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/tbilisi-airport-car-rental.html"/>
+  </url>
+  <url>
+    <loc>https://eliteauto.rent/he/kutaisi-airport-car-rental.html</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/kutaisi-airport-car-rental.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/kutaisi-airport-car-rental.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/kutaisi-airport-car-rental.html"/>
+  </url>
+  <url>
+    <loc>https://eliteauto.rent/he/suv-rental-georgia.html</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/suv-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/suv-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/suv-rental-georgia.html"/>
+  </url>
+  <url>
+    <loc>https://eliteauto.rent/he/cheap-car-rental-georgia.html</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/cheap-car-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/cheap-car-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/cheap-car-rental-georgia.html"/>
+  </url>
+  <url>
+    <loc>https://eliteauto.rent/he/automatic-car-rental-georgia.html</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/automatic-car-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/automatic-car-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/automatic-car-rental-georgia.html"/>
+  </url>
+  <url>
+    <loc>https://eliteauto.rent/he/no-deposit-car-rental-georgia.html</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/no-deposit-car-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/no-deposit-car-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/no-deposit-car-rental-georgia.html"/>
+  </url>
+  <url>
+    <loc>https://eliteauto.rent/drivers.html</loc>
+    <lastmod>2026-07-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
 </urlset>

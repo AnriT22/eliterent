@@ -44,6 +44,22 @@ const LOCALIZABLE = {
     'contact.html': 1
 };
 
+// Static per-language pages (real translated files on disk, e.g. he/*.html —
+// the Hebrew Wave-1 landing pages). Links to these are kept in-language; links
+// to pages with NO version in the current language are pointed at the English
+// page instead of 404-ing under /<lang>/.
+var staticLangFiles = {};
+LANGS.forEach(function (lang) {
+    try {
+        staticLangFiles[lang] = new Set(
+            fs.readdirSync(path.join(ROOT, lang)).filter(function (f) { return f.endsWith('.html'); })
+        );
+    } catch (e) { staticLangFiles[lang] = new Set(); }
+});
+function hasLangVersion(lang, page) {
+    return Object.prototype.hasOwnProperty.call(LOCALIZABLE, page) || staticLangFiles[lang].has(page);
+}
+
 // Localized <title> / meta description for the core money pages.
 // RU is provided; KA bodies are localized from ka.json but KA <title>/<meta>
 // should be filled by a native speaker (see SEO-CHANGES.md).
@@ -203,11 +219,22 @@ function localize(html, lang, page, t) {
         '$1/$2$3'
     );
 
-    // Prerendered SEO blocks use root-absolute links. Keep those in-language too.
-    html = html.replace(/href="\/([^"#?]+\.html)([^"]*)"/g, function (m, p, suffix) {
-        return Object.prototype.hasOwnProperty.call(LOCALIZABLE, p)
+    // Prerendered SEO blocks use root-absolute links. Keep those in-language
+    // when a real localized version exists (dynamic funnel page OR a static
+    // translated file like he/tbilisi-airport-car-rental.html).
+    html = html.replace(/href="\/([^"#?\/][^"#?]*\.html)([^"]*)"/g, function (m, p, suffix) {
+        return hasLangVersion(lang, p)
             ? 'href="/' + lang + '/' + p + suffix + '"'
             : m;
+    });
+    // Relative page links resolve under /<lang>/ in the browser. That is right
+    // when an in-language version exists, but 404s otherwise (e.g. /he/blog.html).
+    // Normalize every relative link: in-language pages get an explicit
+    // /<lang>/ URL; everything else goes root-absolute to the English page.
+    html = html.replace(/href="(?!https?:|\/\/|\/|#|mailto:|tel:|data:|javascript:)([^":#?]+\.html)([^"]*)"/g, function (m, p, suffix) {
+        return hasLangVersion(lang, p)
+            ? 'href="/' + lang + '/' + p + suffix + '"'
+            : 'href="/' + p + suffix + '"';
     });
     html = html.replace(/href="\/"/g, 'href="/' + lang + '/"');
 
