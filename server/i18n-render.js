@@ -261,8 +261,24 @@ async function middleware(req, res, next) {
         if (page === '' || page === 'index') page = '';            // → index.html
         var fileName = page === '' ? 'index.html' : page;
         if (LANGS.indexOf(lang) === -1) return next();
-        if (!Object.prototype.hasOwnProperty.call(LOCALIZABLE, page)) return next();
         if (fileName.indexOf('..') !== -1 || !/^[a-zA-Z0-9._-]+\.html$/.test(fileName)) return next();
+
+        if (!Object.prototype.hasOwnProperty.call(LOCALIZABLE, page)) {
+            // A static translated file (e.g. he/suv-rental-georgia.html) — let
+            // express.static serve it as-is.
+            if (staticLangFiles[lang] && staticLangFiles[lang].has(fileName)) return next();
+            // No version of this page exists in this language. Historically these
+            // URLs 404'd (Google logged 36 of them), because localized pages linked
+            // to /<lang>/<page> for every page. Send visitors and crawlers to the
+            // real English page instead of a dead end.
+            if (fs.existsSync(path.join(ROOT, fileName))) {
+                var target = '/' + (fileName === 'index.html' ? '' : fileName);
+                var qs = req.originalUrl.indexOf('?');
+                if (qs !== -1) target += req.originalUrl.slice(qs);
+                return res.redirect(301, target);
+            }
+            return next();
+        }
 
         if (!fs.existsSync(path.join(ROOT, fileName))) return next();
 

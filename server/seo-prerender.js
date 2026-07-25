@@ -95,7 +95,9 @@ function buildItemListJson(vehicles) {
     var elements, name;
     if (vehicles && vehicles.length) {
         name = 'Rental Cars in Georgia';
-        elements = vehicles.slice(0, 10).map(function (v, i) {
+        // 30 is a practical ceiling for an ItemList — enough to describe the
+        // listing without bloating the page with a second copy of the fleet.
+        elements = vehicles.slice(0, 30).map(function (v, i) {
             return {
                 '@type': 'ListItem',
                 position: i + 1,
@@ -199,12 +201,20 @@ function buildVehicleCardsHtml(vehicles) {
 // everyone. We do NOT inject a bot-only listing (no cloaking); we only strip the
 // marker and keep the ItemList schema accurate to real inventory when it exists.
 // (Full server-rendering of the grid for all visitors is tracked as S-01.)
+// Cap on how many cars are server-rendered into the grid. This is the ONLY page
+// that links to every /vehicle.html?id=N, so the cap must stay above the real
+// fleet size — cars rendered beyond it have no internal link anywhere and Google
+// reports them as "Discovered – currently not indexed" (that was 63 of 74 cars).
+// The page's JS wipes and re-paginates the grid on load, so a higher cap changes
+// nothing for users; it only costs a little extra (gzipped) HTML.
+const VEHICLE_RENDER_CAP = 250;
+
 async function renderVehiclesPage() {
     var filePath = path.join(ROOT, 'vehicles.html');
     var html = fs.readFileSync(filePath, 'utf8');
     var vehicles = [];
     try {
-        vehicles = await fetchActiveVehicles(24);
+        vehicles = await fetchActiveVehicles(VEHICLE_RENDER_CAP);
     } catch (e) {
         console.error('[SEO] vehicles fetch:', e.message);
     }
