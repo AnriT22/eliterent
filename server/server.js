@@ -288,6 +288,15 @@ if (headInject.isEnabled) {
     });
 }
 
+// The error page itself must answer with 404, not 200 — served with a 200 it is
+// a textbook "soft 404" in Search Console (Google finds a page that says
+// "not found" while the server claims success).
+app.get('/404.html', (req, res) => {
+    res.status(404).sendFile(path.join(__dirname, '..', '404.html'), (err) => {
+        if (err) res.status(404).send('<h1>404 — Page Not Found</h1><p><a href="/">Go Home</a></p>');
+    });
+});
+
 // Serve static files with caching.
 // HTML is never long-cached: pages have no ?v= cache-buster, so a stale copy in
 // the browser is what makes deployed changes "not show up" (e.g. the admin panel).
