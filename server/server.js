@@ -282,6 +282,10 @@ if (headInject.isEnabled) {
                 if (err) return next();
                 res.setHeader('Content-Type', 'text/html; charset=utf-8');
                 res.setHeader('Cache-Control', 'no-cache');
+                // The error page must answer 404 even when requested directly —
+                // this handler owns html delivery, so the status has to be set
+                // here (see the /404.html route below for the no-inject case).
+                if (p === '/404.html') res.status(404);
                 res.send(headInject.inject(html));
             });
         } catch (e) { next(); }
@@ -290,7 +294,8 @@ if (headInject.isEnabled) {
 
 // The error page itself must answer with 404, not 200 — served with a 200 it is
 // a textbook "soft 404" in Search Console (Google finds a page that says
-// "not found" while the server claims success).
+// "not found" while the server claims success). Reached only when head-injection
+// is disabled; otherwise the handler above sets the status.
 app.get('/404.html', (req, res) => {
     res.status(404).sendFile(path.join(__dirname, '..', '404.html'), (err) => {
         if (err) res.status(404).send('<h1>404 — Page Not Found</h1><p><a href="/">Go Home</a></p>');
