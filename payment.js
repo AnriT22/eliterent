@@ -18,36 +18,29 @@
     document.getElementById('payBookingLabel').textContent = 'Booking #' + bookingId;
 
     // Conversion tracking: the website fee was PAID — this is real revenue and the
-    // conversion ad platforms should optimise toward. Fires once per successful pay.
+    // conversion ad platforms should optimise toward.
+    //
+    // The purchase event itself fires on /booking-confirmed.html, NOT here. Ad
+    // platforms (Google Ads "Add Page", Meta, etc.) need a distinct post-purchase
+    // URL to count as a conversion; payment.html is also the checkout page, so
+    // counting it would score every abandoned checkout as a sale. The amount is
+    // handed over in sessionStorage so it cannot be forged through the URL.
     var _purchaseTracked = false;
-    function trackPurchase(bId, fee) {
+    function completePurchase(bId, fee) {
         if (_purchaseTracked) return;
         _purchaseTracked = true;
         try {
-            if (typeof gtag === 'function') {
-                gtag('event', 'purchase', {
-                    transaction_id: 'booking-' + bId,
-                    currency: 'USD',
-                    value: parseFloat(fee) || 0
-                });
-            }
+            sessionStorage.setItem('ea_last_purchase', JSON.stringify({
+                id: bId, fee: parseFloat(fee) || 0, ts: Date.now()
+            }));
         } catch (e) {}
+        window.location.href = 'booking-confirmed.html?booking_id=' + encodeURIComponent(bId);
     }
 
     var payBody = document.getElementById('payBody');
 
-    // Shown on the confirmation screen (kept off the checkout page to keep it clean):
-    // the owner still needs these documents before handing the car over.
-    function docsNoticeHtml() {
-        var t = function (k, d) { return (typeof I18n !== 'undefined' && I18n.t && I18n.t(k) !== k) ? I18n.t(k) : d; };
-        return '<div style="text-align:left;background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.35);border-radius:10px;padding:14px 16px;margin:16px 0;">'
-            + '<p style="margin:0 0 6px;font-size:13px;font-weight:700;color:var(--tt-gold, #D4AF37);">&#128196; ' + t('payment_page.docs_title', 'Next step — send your documents') + '</p>'
-            + '<p style="margin:0 0 8px;font-size:12px;color:var(--tt-muted, #A0A3B0);">' + t('payment_page.docs_sub', 'Please send these to the car owner on WhatsApp so they can prepare your car:') + '</p>'
-            + '<ul style="margin:0;padding-left:18px;color:var(--tt-muted, #A0A3B0);font-size:12px;line-height:1.7;">'
-            + '<li>' + t('reservation.doc_license', "Driver's license (both sides)") + '</li>'
-            + '<li>' + t('reservation.doc_passport', 'Passport photo page') + '</li>'
-            + '</ul></div>';
-    }
+    // The "send your documents" notice now lives on booking-confirmed.html,
+    // which is where the guest lands after a successful payment.
 
     // Session expired mid-payment → re-login and return to this payment page.
     function handleSessionExpired() {
@@ -357,14 +350,15 @@
         })
         .then(function (result) {
             if (result.status === 'COMPLETED') {
-                trackPurchase(bookingId, serviceFee);
+                // Show a brief confirmation, then hand off to the dedicated
+                // thank-you page where the conversion event fires.
                 document.getElementById('payBody').innerHTML =
                     '<div class="pay-success">'
                     + '<div class="pay-success-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>'
                     + '<h2>Payment Successful!</h2>'
-                    + '<p>Your reservation payment of $' + serviceFee.toFixed(2) + ' has been received.<br>Your booking is now confirmed and awaiting admin approval.</p>' + docsNoticeHtml()
-                    + '<a href="guest-profile.html" class="pay-success-btn">View My Bookings</a>'
+                    + '<p>Your reservation payment of $' + serviceFee.toFixed(2) + ' has been received.</p>'
                     + '</div>';
+                completePurchase(bookingId, serviceFee);
             } else {
                 throw new Error(result.error || 'Payment failed');
             }
@@ -427,14 +421,15 @@
                 .then(function (r) { return r.json(); })
                 .then(function (result) {
                     if (result.status === 'COMPLETED') {
-                        trackPurchase(bookingId, serviceFee);
+                        // Show a brief confirmation, then hand off to the dedicated
+                        // thank-you page where the conversion event fires.
                         payBody.innerHTML =
                             '<div class="pay-success">'
                             + '<div class="pay-success-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>'
                             + '<h2>Payment Successful!</h2>'
-                            + '<p>Your reservation payment of $' + serviceFee.toFixed(2) + ' has been received.<br>Your booking is now confirmed and awaiting admin approval.</p>' + docsNoticeHtml()
-                            + '<a href="guest-profile.html" class="pay-success-btn">View My Bookings</a>'
+                            + '<p>Your reservation payment of $' + serviceFee.toFixed(2) + ' has been received.</p>'
                             + '</div>';
+                        completePurchase(bookingId, serviceFee);
                     } else {
                         container.innerHTML = '<div class="pay-error">Payment issue: ' + (result.error || result.status) + '</div>';
                     }
