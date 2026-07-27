@@ -4193,3 +4193,54 @@ body {
     white-space: nowrap;
     border: 0;
 }
+
+/* Currency picker inside the mobile menu.
+   The header currency selector is hidden below 1300px (see the media queries
+   above / premium.css), which left phone and tablet visitors with no way to
+   switch currency. Injected by initMobileCurrency() in script.js. */
+.mobile-nav-currency {
+    padding: 14px 24px 4px;
+    border-top: 1px solid var(--tf-10, rgba(255,255,255,0.1));
+}
+.mobile-nav-currency .mnc-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--tt-gold3, #D4B86A);
+    margin-bottom: 10px;
+}
+.mobile-nav-currency .mnc-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.mobile-nav-currency .mnc-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 9px 13px;
+    min-height: 40px; /* comfortable tap target */
+    border-radius: 10px;
+    border: 1px solid var(--tb-border, rgba(255,255,255,0.16));
+    background: var(--th-raised, rgba(255,255,255,0.04));
+    color: var(--tt-soft2, rgba(255,255,255,0.85));
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.mobile-nav-currency .mnc-chip .mnc-sym {
+    font-size: 14px;
+    opacity: 0.9;
+}
+.mobile-nav-currency .mnc-chip:hover {
+    border-color: var(--tb-gold, #C9A84C);
+    color: var(--tt-gold3, #D4B86A);
+}
+.mobile-nav-currency .mnc-chip.active {
+    background: rgba(201, 168, 76, 0.16);
+    border-color: var(--tb-gold, #C9A84C);
+    color: var(--tt-gold3, #D4B86A);
+}
