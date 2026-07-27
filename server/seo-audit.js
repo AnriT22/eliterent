@@ -13,6 +13,7 @@ const EXCLUDE = new Set([
     'reset-password.html', 'verify-phone.html', 'guest-profile.html',
     'partner-dashboard.html', 'partner-financials.html', 'payment.html',
     'booking.html', 'reservation.html', 'google-auth-success.html',
+    'booking-confirmed.html',
     'leave-a-review.html', '404.html', 'RoyalCar_Guide_GEO.html',
     '85a9e1a5-97ae-4d57-8987-f00c8fd0da3e.html'
 ]);
