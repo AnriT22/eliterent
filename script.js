@@ -111,6 +111,60 @@ function initDropdowns() {
     });
 }
 
+/* The header currency selector is hidden by CSS below 1300px, so on phones,
+   tablets and narrow laptops there was no way to change currency at all — a
+   visitor from Israel or Russia was stuck reading USD prices. This adds a row
+   of currency chips into the mobile menu, where there is plenty of room.
+   Built in JS because the mobile panel is duplicated across ~39 static pages;
+   one function keeps every page in sync. */
+function initMobileCurrency() {
+    const panel = document.querySelector('.mobile-nav-panel');
+    if (!panel || panel.querySelector('.mobile-nav-currency')) return;
+
+    const CODES = ['USD', 'EUR', 'GEL', 'ILS', 'RUB', 'TRY', 'AED'];
+    const SYMBOLS = { USD: '$', EUR: '€', GEL: '₾', ILS: '₪', RUB: '₽', TRY: '₺', AED: 'د.إ' };
+
+    function activeCode() {
+        if (typeof Currency !== 'undefined' && Currency.current) return Currency.current();
+        try { return localStorage.getItem('EliteAuto_currency') || 'USD'; } catch (e) { return 'USD'; }
+    }
+
+    const section = document.createElement('div');
+    section.className = 'mobile-nav-currency';
+    section.innerHTML = '<div class="mnc-title" data-i18n="nav.currency">Currency</div>'
+        + '<div class="mnc-chips">'
+        + CODES.map(c => '<button type="button" class="mnc-chip" data-currency="' + c + '">'
+            + '<span class="mnc-sym">' + SYMBOLS[c] + '</span>' + c + '</button>').join('')
+        + '</div>';
+
+    const footer = panel.querySelector('.mobile-nav-footer');
+    if (footer) panel.insertBefore(section, footer);
+    else panel.appendChild(section);
+
+    function paint() {
+        const cur = activeCode();
+        section.querySelectorAll('.mnc-chip').forEach(chip => {
+            chip.classList.toggle('active', chip.dataset.currency === cur);
+        });
+    }
+
+    section.querySelectorAll('.mnc-chip').forEach(chip => {
+        chip.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const code = chip.dataset.currency;
+            if (typeof Currency !== 'undefined' && Currency.set) Currency.set(code);
+            // Keep the desktop header button in sync when both exist.
+            const deskText = document.querySelector('#currencyBtn .selector-text');
+            if (deskText) deskText.textContent = code;
+            paint();
+        });
+    });
+
+    document.addEventListener('currencyChanged', paint);
+    paint();
+}
+
 function toggleDropdown(btn, dropdown) {
     if (dropdown.style.display === 'none' || !dropdown.style.display) {
         dropdown.style.display = 'block';
@@ -1418,6 +1472,7 @@ function init() {
     safeInit(initLocationDropdowns);
     safeInit(initAdvancedFilters);
     safeInit(initDropdowns);
+    safeInit(initMobileCurrency);
     safeInit(initCalendar);
     safeInit(initCarousel);
     safeInit(initTripSelection);
