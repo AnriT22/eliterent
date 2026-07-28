@@ -496,7 +496,7 @@ function escHtml(s) {
             var tbody = document.getElementById('partnersTableBody');
             var partners = data.partners || [];
             if (partners.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:30px;">No partners found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--tt-muted, #A0A3B0);padding:30px;">No partners found</td></tr>';
                 return;
             }
             window._adminPartners = partners;
@@ -515,12 +515,28 @@ function escHtml(s) {
                     : (p.signup_paid
                         ? '<span class="admin-status" style="background:rgba(34,197,94,0.12);color:var(--tt-green2, #22c55e);font-size:10px;" title="Paid $49.99 verification fee">Paid $49.99</span>'
                         : '<span class="admin-status" style="background:rgba(148,163,184,0.12);color:var(--tt-muted2, #94a3b8);font-size:10px;" title="Opened PayPal but has not completed payment">Unpaid</span>');
+                // Cars: total, with the active/pending/inactive split underneath so
+                // it's obvious when a partner's fleet is sitting unapproved.
+                var vTotal = parseInt(p.vehicles_total) || 0;
+                var vActive = parseInt(p.vehicles_active) || 0;
+                var vPending = parseInt(p.vehicles_pending) || 0;
+                var vInactive = parseInt(p.vehicles_inactive) || 0;
+                var carsBreakdown = [];
+                if (vActive) carsBreakdown.push('<span style="color:var(--tt-green2, #22c55e);">' + vActive + ' active</span>');
+                if (vPending) carsBreakdown.push('<span style="color:#f59e0b;">' + vPending + ' pending</span>');
+                if (vInactive) carsBreakdown.push('<span style="color:var(--tt-muted2, #94a3b8);">' + vInactive + ' off</span>');
+                var carsCell = vTotal === 0
+                    ? '<span style="color:var(--tt-muted2, #94a3b8);" title="This partner has not added any cars yet">0</span>'
+                    : '<a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:var(--tt-gold2, #C9A84C);text-decoration:none;font-weight:700;font-size:15px;" title="View this partner\'s cars">' + vTotal + '</a>'
+                      + (carsBreakdown.length ? '<div style="font-size:10px;line-height:1.4;margin-top:2px;white-space:nowrap;">' + carsBreakdown.join(' · ') + '</div>' : '');
+
                 return '<tr>'
                     + '<td>' + p.id + '</td>'
                     + '<td><strong><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:var(--tt-gold2, #C9A84C);text-decoration:none;">' + escHtml(p.full_name || '-') + '</a></strong></td>'
                     + '<td class="hide-mobile"><a href="#" onclick="adminViewUser(' + p.id + ');return false;" style="color:var(--tt-gold2, #C9A84C);text-decoration:none;">' + escHtml(p.company_name || '-') + '</a></td>'
                     + '<td class="hide-mobile">' + escHtml(p.email || '-') + '</td>'
                     + '<td class="hide-mobile">' + escHtml(p.phone || '-') + pPhoneBadge + '</td>'
+                    + '<td>' + carsCell + '</td>'
                     + '<td><span class="admin-status ' + verified + '">' + verified + '</span></td>'
                     + '<td class="hide-mobile">' + typeBadge + '</td>'
                     + '<td class="hide-mobile">' + date + '</td>'

@@ -571,12 +571,26 @@ router.put('/users/:id/notes', async (req, res) => {
 // ========================================
 router.get('/partners', async (req, res) => {
     try {
+        // Vehicle counts per partner come from one grouped sub-select rather than a
+        // per-row query, so the list stays fast as the partner count grows.
         const partners = await queryAll(
             `SELECT u.id, u.email, u.full_name, u.phone, u.google_id, u.phone_verified, u.email_verified, u.is_verified as user_verified, u.created_at,
                     pp.company_name, pp.location, pp.is_verified, pp.description, pp.whatsapp, pp.telegram,
-                    pp.signup_method, pp.signup_paid, pp.invite_code_used
+                    pp.signup_method, pp.signup_paid, pp.invite_code_used,
+                    COALESCE(vc.total, 0)    AS vehicles_total,
+                    COALESCE(vc.active, 0)   AS vehicles_active,
+                    COALESCE(vc.pending, 0)  AS vehicles_pending,
+                    COALESCE(vc.inactive, 0) AS vehicles_inactive
              FROM users u
              LEFT JOIN partner_profiles pp ON u.id = pp.user_id
+             LEFT JOIN (
+                 SELECT partner_id,
+                        COUNT(*) AS total,
+                        COUNT(*) FILTER (WHERE status = 'active')   AS active,
+                        COUNT(*) FILTER (WHERE status = 'pending')  AS pending,
+                        COUNT(*) FILTER (WHERE status = 'inactive') AS inactive
+                 FROM vehicles GROUP BY partner_id
+             ) vc ON vc.partner_id = u.id
              WHERE u.role = 'partner'
              ORDER BY u.created_at DESC`
         );
