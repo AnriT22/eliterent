@@ -953,6 +953,23 @@ html[data-theme="light"] .theme-toggle .tt-moon { display: none; }
 }
 html[data-theme="light"] .theme-toggle--floating { box-shadow: 0 6px 20px rgba(25,25,35,0.18); }
 
+/* Auth pages (login / register / register-partner) already park a 48px support
+   button in the bottom-left corner (auth-luxury.css: bottom 24px, left 24px).
+   The floating toggle sits at bottom 18px / left 18px with a far higher
+   z-index, so it landed directly on top and hid the support button. Stack it
+   above instead: 24 (support offset) + 48 (its height) + 12 (gap) = 84px. */
+body.auth-page .theme-toggle--floating {
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+    left: 24px; /* line up with the support button below it */
+}
+@media (max-width: 768px) {
+    /* premium.css tightens the support button to bottom/left 16px on mobile. */
+    body.auth-page .theme-toggle--floating {
+        bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+        left: 16px;
+    }
+}
+
 /* Smooth cross-fade while switching themes (added briefly by theme.js) */
 html.theme-switching, html.theme-switching *, html.theme-switching *::before, html.theme-switching *::after {
     transition: background-color 0.25s ease, background 0.25s ease, color 0.25s ease,
