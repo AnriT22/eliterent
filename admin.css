@@ -352,6 +352,11 @@
     flex-wrap: wrap;
 }
 
+/* NOTE on `color` below: theme.css sets `color-scheme: dark` globally, which
+   makes the browser paint form controls with its dark defaults — i.e. WHITE
+   text. These controls force a white background, so without an explicit colour
+   the typed text was white on white and invisible in dark mode. Always set both
+   background and colour on an admin input. */
 .admin-search {
     flex: 1;
     min-width: 200px;
@@ -360,7 +365,12 @@
     border-radius: 8px;
     font-size: 14px;
     background: #fff;
+    color: #0f172a;
     font-family: inherit;
+}
+.admin-search::placeholder {
+    color: #94a3b8;
+    opacity: 1; /* Firefox dims placeholders by default */
 }
 
 .admin-search:focus {
@@ -375,8 +385,14 @@
     border-radius: 8px;
     font-size: 14px;
     background: #fff;
+    color: #0f172a;
     cursor: pointer;
     font-family: inherit;
+}
+/* The dropdown list itself is painted by the OS and also follows color-scheme. */
+.admin-filter-select option {
+    background: #fff;
+    color: #0f172a;
 }
 
 /* TABLE */
