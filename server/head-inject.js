@@ -16,6 +16,10 @@
 
 const GA_MEASUREMENT_ID = process.env.GA_MEASUREMENT_ID || "";
 const GSC_VERIFICATION = process.env.GSC_VERIFICATION || "";
+// Google Ads conversion tag (AW-…). Shares the SAME gtag.js library as GA4 —
+// Google's rule is "one Google tag per page", so we load the library once and
+// add a second config() line rather than a second <script src>. Optional.
+const GOOGLE_ADS_ID = process.env.GOOGLE_ADS_ID || "AW-18229782833";
 
 function headTags() {
   var out = "";
@@ -24,15 +28,21 @@ function headTags() {
     out += '<meta name="google-site-verification" content="' + GSC_VERIFICATION + '">';
   }
 
-  if (GA_MEASUREMENT_ID) {
+  // Load the gtag library once, off whichever Google id we have, then config
+  // every destination (GA4 measurement + Google Ads conversion) on it.
+  var libId = GA_MEASUREMENT_ID || GOOGLE_ADS_ID;
+  if (libId) {
+    var configs = "";
+    if (GA_MEASUREMENT_ID) configs += "gtag('config','" + GA_MEASUREMENT_ID + "');";
+    if (GOOGLE_ADS_ID) configs += "gtag('config','" + GOOGLE_ADS_ID + "');";
     out +=
       '<script async src="https://www.googletagmanager.com/gtag/js?id=' +
-      GA_MEASUREMENT_ID +
+      libId +
       '"></script>' +
       "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}" +
-      "gtag('js',new Date());gtag('config','" +
-      GA_MEASUREMENT_ID +
-      "');</script>";
+      "gtag('js',new Date());" +
+      configs +
+      "</script>";
   }
 
   return out;
