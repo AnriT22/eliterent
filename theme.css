@@ -963,10 +963,13 @@ body.auth-page .theme-toggle--floating {
     left: 24px; /* line up with the support button below it */
 }
 @media (max-width: 768px) {
-    /* premium.css tightens the support button to bottom/left 16px on mobile. */
+    /* On mobile the support button keeps its bottom/left of 24px (the
+       body.auth-page rule outranks premium.css's generic .floating-support),
+       but premium.css adds 10px of padding, making it 68px tall rather than
+       48px. So the toggle has to clear 24 + 68 + 12 = 104px. */
     body.auth-page .theme-toggle--floating {
-        bottom: calc(74px + env(safe-area-inset-bottom, 0px));
-        left: 16px;
+        bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+        left: 24px;
     }
 }
 
