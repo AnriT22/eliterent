@@ -1800,7 +1800,7 @@ function escHtml(s) {
             fd.append('image', file);
             fetch('/api/upload/ad-cover', {
                 method: 'POST',
-                headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '') },
+                headers: { 'Authorization': 'Bearer ' + token },
                 body: fd
             })
             .then(function (r) { return r.json(); })
@@ -2073,7 +2073,7 @@ function escHtml(s) {
             statusEl.textContent = 'Uploading...';
             var fd = new FormData();
             fd.append('image', file);
-            fetch('/api/upload/ad-cover', { method: 'POST', headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '') }, body: fd })
+            fetch('/api/upload/ad-cover', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: fd })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     if (data.url) { setTrustLogo(data.url); statusEl.textContent = 'Uploaded!'; }
