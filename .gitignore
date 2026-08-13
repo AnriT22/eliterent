@@ -11,6 +11,9 @@ uploads/
 *-sqlite-backup.js
 
 # Internal docs — keep off the public site
+.seo-engine/
+.claude/
+CLAUDE.md
 SEO-WORKFLOW.md
 SEO-CHANGES.md
 DEPLOY-AND-INDEX.md

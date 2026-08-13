@@ -10,7 +10,7 @@ function findHtmlFiles(dir, files = []) {
     for (const entry of entries) {
         const fullPath = path.join(dir, entry.name);
         if (entry.isDirectory()) {
-            if (entry.name === 'node_modules' || entry.name === 'server' || entry.name === 'scripts' || entry.name === '.git') continue;
+            if (entry.name === 'node_modules' || entry.name === 'server' || entry.name === 'scripts' || entry.name === '.git' || entry.name === '.seo-engine') continue;
             findHtmlFiles(fullPath, files);
         } else if (entry.isFile() && entry.name.endsWith('.html')) {
             files.push(fullPath);
