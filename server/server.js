@@ -165,6 +165,7 @@ app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 // Block access to sensitive files
 app.use((req, res, next) => {
     const blocked = ['.env', '.git', 'package.json', 'package-lock.json', 'node_modules',
+        '.seo-engine', 'claude.md',
         'AUDIT-REPORT.md', 'SECURITY-AUDIT.md', 'README.md', '.gitignore',
         'ecosystem.config.js', '.windsurf', 'progress.txt', 'Dockerfile', 'docker-compose.yml'];
     const reqPath = req.path.toLowerCase();
