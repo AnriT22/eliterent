@@ -59,22 +59,34 @@
   </url>
   <url>
     <loc>https://eliteauto.rent/rent-car-tbilisi.html</loc>
-    <lastmod>2026-05-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
-  </url>
+  
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/rent-car-tbilisi.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/rent-car-tbilisi.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/rent-car-tbilisi.html"/>
+</url>
   <url>
     <loc>https://eliteauto.rent/rent-car-batumi.html</loc>
-    <lastmod>2026-05-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
-  </url>
+  
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/rent-car-batumi.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/rent-car-batumi.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/rent-car-batumi.html"/>
+</url>
   <url>
     <loc>https://eliteauto.rent/rent-car-kutaisi.html</loc>
-    <lastmod>2026-05-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
-  </url>
+  
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/rent-car-kutaisi.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/rent-car-kutaisi.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/rent-car-kutaisi.html"/>
+</url>
   <url>
     <loc>https://eliteauto.rent/tbilisi-airport-car-rental.html</loc>
     <lastmod>2026-06-17</lastmod>
@@ -95,10 +107,14 @@
   </url>
   <url>
     <loc>https://eliteauto.rent/batumi-airport-car-rental.html</loc>
-    <lastmod>2026-06-12</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
-  </url>
+  
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/batumi-airport-car-rental.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/batumi-airport-car-rental.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/batumi-airport-car-rental.html"/>
+</url>
   <url>
     <loc>https://eliteauto.rent/automatic-car-rental-georgia.html</loc>
     <lastmod>2026-06-17</lastmod>
@@ -119,10 +135,14 @@
   </url>
   <url>
     <loc>https://eliteauto.rent/monthly-long-term-car-rental-tbilisi.html</loc>
-    <lastmod>2026-06-12</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>
+  
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/monthly-long-term-car-rental-tbilisi.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/monthly-long-term-car-rental-tbilisi.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/monthly-long-term-car-rental-tbilisi.html"/>
+</url>
   <url>
     <loc>https://eliteauto.rent/no-deposit-car-rental-georgia.html</loc>
     <lastmod>2026-06-17</lastmod>
@@ -143,28 +163,44 @@
   </url>
   <url>
     <loc>https://eliteauto.rent/economy-car-rental-georgia.html</loc>
-    <lastmod>2026-05-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>
+  
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/economy-car-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/economy-car-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/economy-car-rental-georgia.html"/>
+</url>
   <url>
     <loc>https://eliteauto.rent/sedan-rental-georgia.html</loc>
-    <lastmod>2026-05-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>
+  
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/sedan-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/sedan-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/sedan-rental-georgia.html"/>
+</url>
   <url>
     <loc>https://eliteauto.rent/luxury-car-rental-tbilisi.html</loc>
-    <lastmod>2026-05-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>
+  
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/luxury-car-rental-tbilisi.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/luxury-car-rental-tbilisi.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/luxury-car-rental-tbilisi.html"/>
+</url>
   <url>
     <loc>https://eliteauto.rent/minivan-7-seater-rental-georgia.html</loc>
-    <lastmod>2026-05-29</lastmod>
+    <lastmod>2026-08-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>
+  
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/minivan-7-seater-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/minivan-7-seater-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/minivan-7-seater-rental-georgia.html"/>
+</url>
   <url>
     <loc>https://eliteauto.rent/blog.html</loc>
     <lastmod>2026-05-29</lastmod>
@@ -303,5 +339,86 @@
     <lastmod>2026-07-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eliteauto.rent/he/batumi-airport-car-rental.html</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/batumi-airport-car-rental.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/batumi-airport-car-rental.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/batumi-airport-car-rental.html"/>
+  </url>
+  <url>
+    <loc>https://eliteauto.rent/he/rent-car-tbilisi.html</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/rent-car-tbilisi.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/rent-car-tbilisi.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/rent-car-tbilisi.html"/>
+  </url>
+  <url>
+    <loc>https://eliteauto.rent/he/rent-car-batumi.html</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/rent-car-batumi.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/rent-car-batumi.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/rent-car-batumi.html"/>
+  </url>
+  <url>
+    <loc>https://eliteauto.rent/he/rent-car-kutaisi.html</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/rent-car-kutaisi.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/rent-car-kutaisi.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/rent-car-kutaisi.html"/>
+  </url>
+  <url>
+    <loc>https://eliteauto.rent/he/economy-car-rental-georgia.html</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/economy-car-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/economy-car-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/economy-car-rental-georgia.html"/>
+  </url>
+  <url>
+    <loc>https://eliteauto.rent/he/sedan-rental-georgia.html</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/sedan-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/sedan-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/sedan-rental-georgia.html"/>
+  </url>
+  <url>
+    <loc>https://eliteauto.rent/he/luxury-car-rental-tbilisi.html</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/luxury-car-rental-tbilisi.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/luxury-car-rental-tbilisi.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/luxury-car-rental-tbilisi.html"/>
+  </url>
+  <url>
+    <loc>https://eliteauto.rent/he/minivan-7-seater-rental-georgia.html</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/minivan-7-seater-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/minivan-7-seater-rental-georgia.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/minivan-7-seater-rental-georgia.html"/>
+  </url>
+  <url>
+    <loc>https://eliteauto.rent/he/monthly-long-term-car-rental-tbilisi.html</loc>
+    <lastmod>2026-08-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://eliteauto.rent/monthly-long-term-car-rental-tbilisi.html"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://eliteauto.rent/he/monthly-long-term-car-rental-tbilisi.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://eliteauto.rent/monthly-long-term-car-rental-tbilisi.html"/>
   </url>
 </urlset>
