@@ -253,7 +253,7 @@
         panel.innerHTML = ''
             + '<div class="mobile-nav-header">'
             + '  <a href="/" class="logo">'
-            + '    <img src="images/logo3.png" alt="EliteAuto.rent" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" onerror="this.style.display=\'none\'">'
+            + '    <img src="/images/logo3.png" alt="EliteAuto.rent" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" onerror="this.style.display=\'none\'">'
             + '    <span>EliteAuto.rent</span>'
             + '  </a>'
             + '  <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">&#x2715;</button>'
@@ -264,6 +264,7 @@
             + '  <button class="mobile-lang-btn' + (currentLang === 'en' ? ' active' : '') + '" data-lang="en" style="' + langBtnStyle('en') + '">\uD83C\uDDEC\uD83C\uDDE7 EN</button>'
             + '  <button class="mobile-lang-btn' + (currentLang === 'ka' ? ' active' : '') + '" data-lang="ka" style="' + langBtnStyle('ka') + '">\uD83C\uDDEC\uD83C\uDDEA KA</button>'
             + '  <button class="mobile-lang-btn' + (currentLang === 'ru' ? ' active' : '') + '" data-lang="ru" style="' + langBtnStyle('ru') + '">\uD83C\uDDF7\uD83C\uDDFA RU</button>'
+            + '  <button class="mobile-lang-btn' + (currentLang === 'he' ? ' active' : '') + '" data-lang="he" style="' + langBtnStyle('he') + '">\uD83C\uDDEE\uD83C\uDDF1 HE</button>'
             + '</div>'
             + (token && user
                 ? '<button class="partner-btn" id="mobileLogoutBtn" style="background:#ef4444;">' + t('nav.logout','Log Out') + '</button>'
