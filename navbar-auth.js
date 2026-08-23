@@ -52,6 +52,38 @@
 
     var initialized = false;
     var mobileInitialized = false;
+    var walletLoaded = false;   // cache across re-renders (language switch re-inits the navbar)
+    var walletCache = null;
+
+    function money(n) {
+        var v = parseFloat(n);
+        if (isNaN(v)) return null;
+        return '$' + v.toFixed(2);
+    }
+
+    function paintWallet() {
+        var el = document.getElementById('navWalletBalance');
+        if (!el || walletCache == null) return;
+        el.textContent = money(walletCache);
+    }
+
+    function loadWalletBalance() {
+        var item = document.getElementById('navWalletItem');
+        if (!item) return;
+        if (walletLoaded) { paintWallet(); return; }
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) return;
+        fetch('/api/partner/vip-wallet', { headers: { 'Authorization': 'Bearer ' + token } })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) {
+                if (!d) { item.style.display = 'none'; return; }
+                walletLoaded = true;
+                // Spendable credit is what a partner cares about at a glance.
+                walletCache = (parseFloat(d.vip_balance) || 0);
+                paintWallet();
+            })
+            .catch(function () { item.style.display = 'none'; });
+    }
 
     function translateDesktopNav() {
         var navLinks = document.querySelectorAll('.nav-menu .nav-link');
@@ -60,7 +92,8 @@
             'vehicles.html': 'nav.vehicles',
             'reviews.html': 'nav.reviews',
             'about.html': 'nav.about',
-            'contact.html': 'nav.contact'
+            'contact.html': 'nav.contact',
+            'partner-program.html': 'nav.partner'
         };
         navLinks.forEach(function (link) {
             var href = (link.getAttribute('href') || '').replace(/^\//, '');
@@ -120,6 +153,12 @@
                 + (user.role === 'partner'
                     ? '<a href="partner-dashboard.html" class="nav-profile-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>' + t('nav.dashboard','Dashboard') + '</a>'
                     : '<a href="guest-profile.html" class="nav-profile-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + t('nav.my_profile','My Profile') + '</a>')
+                + (user.role === 'partner'
+                    ? '<a href="partner-dashboard.html#wallet" class="nav-profile-item nav-profile-wallet" id="navWalletItem">'
+                      + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>'
+                      + t('partner_dashboard.wallet','Wallet')
+                      + '<span class="nav-wallet-balance" id="navWalletBalance">—</span></a>'
+                    : '')
                 + '    <a href="guest-profile.html#bookings" class="nav-profile-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' + t('nav.my_bookings','My Bookings') + '</a>'
                 + '    <a href="guest-profile.html#favorites" class="nav-profile-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' + t('nav.favorites','Favorites') + '</a>'
                 + '    <div class="nav-profile-divider"></div>'
@@ -137,6 +176,9 @@
             } else {
                 headerRight.appendChild(profileEl);
             }
+
+            // Wallet balance for partners (no-op for guests).
+            if (user.role === 'partner') loadWalletBalance();
 
             // Toggle dropdown
             var profileBtn = document.getElementById('navProfileBtn');
@@ -208,7 +250,8 @@
             { href: 'vehicles.html', label: t('nav.vehicles','Vehicles') },
             { href: 'reviews.html',  label: t('nav.reviews','Reviews') },
             { href: 'about.html',    label: t('nav.about','About') },
-            { href: 'contact.html',  label: t('nav.contact','Contact') }
+            { href: 'contact.html',  label: t('nav.contact','Contact') },
+            { href: 'partner-program.html', label: t('nav.partner','Partner') }
         ];
 
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');

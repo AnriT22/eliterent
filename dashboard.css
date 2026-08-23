@@ -2559,6 +2559,200 @@ select.db-input option:checked {
 }
 
 /* ========================================
+   WALLET STYLES
+   ======================================== */
+
+.wallet-cur-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.wallet-cur-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--tb-borderw, #2A2520);
+    background: var(--tw-surface, #1A1814);
+    color: var(--tt-muted2, #94a3b8);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.wallet-cur-chip:hover {
+    color: var(--tt-text2, #F0ECE2);
+    border-color: var(--tb-gold2, #D4AF37);
+}
+
+.wallet-cur-chip.active {
+    color: #0F0D0A;
+    background: var(--tb-gold2, #D4AF37);
+    border-color: var(--tb-gold2, #D4AF37);
+}
+
+.wcc-sym {
+    font-weight: 700;
+}
+
+.wallet-bonus-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    border-radius: 12px;
+    border: 1px solid var(--tb-gold2, #D4AF37);
+    background: linear-gradient(135deg, rgba(212,175,55,0.12) 0%, var(--tw-surface, #1A1814) 100%);
+    color: var(--tt-text2, #F0ECE2);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.wbb-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.wallet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.wallet-card {
+    background: var(--tw-surface, #1A1814);
+    border: 1px solid var(--tb-borderw, #2A2520);
+    border-radius: 14px;
+    padding: 18px;
+}
+
+.wallet-card--main {
+    grid-column: span 2;
+    border-color: var(--tb-gold2, #D4AF37);
+    background: linear-gradient(135deg, rgba(212,175,55,0.10) 0%, var(--tw-surface, #1A1814) 100%);
+}
+
+.wc-label {
+    font-size: 12px;
+    color: var(--tt-muted2, #94a3b8);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.wc-amount {
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--tt-gold, #D4AF37);
+}
+
+.wc-amount.small {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--tt-text2, #F0ECE2);
+}
+
+.wc-usd {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--tt-muted2, #94a3b8);
+}
+
+.wc-hint {
+    margin-top: 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--tt-muted2, #94a3b8);
+}
+
+.wallet-topup-note {
+    margin: 0 0 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--tt-muted2, #94a3b8);
+}
+
+.wallet-amounts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.wallet-amt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 92px;
+    padding: 12px 18px;
+    border-radius: 12px;
+    border: 1px solid var(--tb-borderw, #2A2520);
+    background: var(--tw-surface, #1A1814);
+    color: var(--tt-text2, #F0ECE2);
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s;
+}
+
+.wallet-amt:hover {
+    border-color: var(--tb-gold2, #D4AF37);
+    transform: translateY(-2px);
+}
+
+.wallet-amt.active {
+    border-color: var(--tb-gold2, #D4AF37);
+    box-shadow: 0 0 0 1px var(--tb-gold2, #D4AF37) inset;
+}
+
+.wa-main {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.wa-sub {
+    font-size: 11px;
+    color: var(--tt-muted2, #94a3b8);
+}
+
+#walletPayPal {
+    max-width: 340px;
+}
+
+.wallet-msg {
+    margin-top: 12px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.wallet-amt-pos {
+    color: var(--tt-green2, #22c55e);
+    font-weight: 600;
+}
+
+.wallet-amt-neg {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .wallet-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .wc-amount {
+        font-size: 30px;
+    }
+    .wallet-amt {
+        flex: 1 1 40%;
+    }
+}
+
+/* ========================================
    REFERRAL PROGRAM STYLES
    ======================================== */
 
@@ -2613,6 +2807,45 @@ select.db-input option:checked {
     font-size: 22px;
     font-weight: 700;
     color: var(--tt-text2, #F0ECE2);
+}
+
+/* Shareable invite link — the URL is long, so this card spans two grid columns */
+.db-referral-card--link {
+    grid-column: span 2;
+}
+
+/* Stacked so the whole URL stays visible and the copy button is a full-width tap target */
+.drc-link-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.drc-link-input {
+    width: 100%;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--tb-border, #3A3F4B);
+    border-radius: 10px;
+    background: var(--th-surface, #1C1E26);
+    color: var(--tt-gold, #D4AF37);
+    font-family: monospace;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+}
+
+.drc-link-input:focus {
+    outline: none;
+    border-color: var(--tb-gold2, #D4AF37);
+}
+
+.drc-link-note {
+    margin-top: 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--tt-muted2, #94a3b8);
 }
 
 .db-referral-actions {

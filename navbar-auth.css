@@ -241,3 +241,23 @@
         font-size: 12px;
     }
 }
+
+/* Wallet row in the profile dropdown — balance sits right-aligned in gold.
+   The row is a normal .nav-profile-item, so it inherits hover/spacing. */
+.nav-profile-item.nav-profile-wallet {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.nav-profile-item.nav-profile-wallet .nav-wallet-balance {
+    margin-left: auto;
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--tt-gold, #D4AF37);
+    letter-spacing: .2px;
+}
+/* RTL: balance moves to the opposite edge */
+html[dir="rtl"] .nav-profile-item.nav-profile-wallet .nav-wallet-balance {
+    margin-left: 0;
+    margin-right: auto;
+}
