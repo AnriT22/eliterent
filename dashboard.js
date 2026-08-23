@@ -412,6 +412,17 @@
         });
     });
 
+    // Deep links: partner-dashboard.html#wallet opens that tab directly (used by the
+    // navbar wallet shortcut). Only known tabs are honoured.
+    function openTabFromHash() {
+        var name = (window.location.hash || '').replace(/^#/, '');
+        if (!name) return;
+        if (!document.querySelector('.db-nav-item[data-tab="' + name + '"]')) return;
+        switchTab(name);
+    }
+    openTabFromHash();
+    window.addEventListener('hashchange', openTabFromHash);
+
     // Quick links to add vehicle tab
     var addFromList = document.getElementById('addVehicleFromList');
     var addFirst = document.getElementById('addFirstVehicle');
@@ -1983,6 +1994,261 @@
     }
 
     // ========================================
+    // WALLET
+    // Balances are stored and charged in USD. The currency chips only change how
+    // the amounts are DISPLAYED (via the shared Currency helper) — when a partner
+    // is not viewing in USD we always print the USD original underneath, so the
+    // amount they will actually be charged is never ambiguous.
+    // ========================================
+    var _wallet = null;
+    var WALLET_TOPUP_AMOUNTS = [10, 20, 30, 50];
+
+    function walletHasCurrency() {
+        return typeof Currency !== 'undefined' && Currency.formatPrice && Currency.current;
+    }
+
+    // Amount shown in the partner's chosen currency.
+    function walletFmt(usd) {
+        var n = parseFloat(usd) || 0;
+        return walletHasCurrency() ? Currency.formatPrice(n) : '$' + n.toFixed(2);
+    }
+
+    // "≈ $12.00 USD" note — empty when the display currency already is USD.
+    function walletUsdNote(usd) {
+        if (!walletHasCurrency() || Currency.current() === 'USD') return '';
+        return '≈ $' + (parseFloat(usd) || 0).toFixed(2) + ' USD';
+    }
+
+    function walletSetPair(amountId, usdId, usd) {
+        var a = document.getElementById(amountId);
+        if (a) a.textContent = walletFmt(usd);
+        var u = document.getElementById(usdId);
+        if (u) {
+            var note = walletUsdNote(usd);
+            u.textContent = note;
+            u.style.display = note ? 'block' : 'none';
+        }
+    }
+
+    function walletMsg(text, ok) {
+        var el = document.getElementById('walletMsg');
+        if (!el) return;
+        el.textContent = text;
+        el.style.display = text ? 'block' : 'none';
+        el.style.color = ok ? 'var(--tt-green2, #22c55e)' : '#ef4444';
+    }
+
+    function buildWalletCurrencyChips() {
+        var box = document.getElementById('walletCurrencyPicker');
+        if (!box || !walletHasCurrency()) return;
+        box.innerHTML = Currency.supported.map(function (c) {
+            return '<button type="button" class="wallet-cur-chip" data-currency="' + c + '">'
+                + '<span class="wcc-sym">' + (Currency.symbols[c] || '') + '</span>' + c + '</button>';
+        }).join('');
+        Array.prototype.forEach.call(box.querySelectorAll('.wallet-cur-chip'), function (chip) {
+            chip.addEventListener('click', function () {
+                // Currency.set is site-wide and persisted, and fires 'currencyChanged'
+                // which re-renders the wallet — no local state to keep in sync.
+                Currency.set(chip.getAttribute('data-currency'));
+            });
+        });
+        paintWalletCurrencyChips();
+    }
+
+    function paintWalletCurrencyChips() {
+        var box = document.getElementById('walletCurrencyPicker');
+        if (!box || !walletHasCurrency()) return;
+        var cur = Currency.current();
+        Array.prototype.forEach.call(box.querySelectorAll('.wallet-cur-chip'), function (chip) {
+            chip.classList.toggle('active', chip.getAttribute('data-currency') === cur);
+        });
+    }
+
+    // The fee is a number the translation has to interpolate, so this one goes
+    // through I18n.t directly instead of tOr.
+    function walletFeeHint(fee) {
+        var key = 'partner_dashboard.wallet_vip_fee_hint';
+        if (typeof I18n !== 'undefined' && I18n.t && I18n.t(key) !== key) {
+            return I18n.t(key, { fee: fee });
+        }
+        return 'At $' + fee + ' per car / 30 days';
+    }
+
+    function walletTxLabel(tx) {
+        if (tx.type === 'topup') return tOr('partner_dashboard.wallet_tx_topup', 'Top-up');
+        if (tx.type === 'bonus') return tOr('partner_dashboard.wallet_tx_bonus', 'Bonus');
+        if (tx.type === 'spend') {
+            var what = tx.vehicle_id
+                ? tOr('partner_dashboard.wallet_tx_vip_car', 'VIP placement') + ' · #' + tx.vehicle_id
+                : tOr('partner_dashboard.wallet_tx_spend', 'Spent');
+            // Paid out of referral earnings rather than the wallet itself.
+            if (tx.source === 'referral_balance') {
+                what += ' (' + tOr('partner_dashboard.wallet_referral', 'Referral Earnings') + ')';
+            }
+            return what;
+        }
+        return tx.type || '-';
+    }
+
+    function renderWallet() {
+        if (!_wallet) return;
+        var vip = parseFloat(_wallet.vip_balance) || 0;
+        var ref = parseFloat(_wallet.referral_balance) || 0;
+        var fee = parseFloat(_wallet.vip_fee) || 10;
+
+        walletSetPair('walletBalance', 'walletBalanceUsd', vip);
+        walletSetPair('walletReferral', 'walletReferralUsd', ref);
+        walletSetPair('walletAvailable', 'walletAvailableUsd', vip + ref);
+
+        var countEl = document.getElementById('walletVipCount');
+        if (countEl) countEl.textContent = fee > 0 ? Math.floor((vip + ref) / fee) : 0;
+        var feeHint = document.getElementById('walletVipFeeHint');
+        if (feeHint) feeHint.textContent = walletFeeHint(fee);
+
+        var banner = document.getElementById('walletBonusBanner');
+        if (banner) banner.style.display = _wallet.first_bonus_available ? 'flex' : 'none';
+
+        renderWalletAmounts();
+        renderWalletTx(_wallet.transactions || []);
+        paintWalletCurrencyChips();
+    }
+
+    function renderWalletAmounts() {
+        var box = document.getElementById('walletAmounts');
+        if (!box) return;
+        // Keep the partner's pick selected across a currency re-render.
+        var active = box.querySelector('.wallet-amt.active');
+        var activeAmt = active ? active.getAttribute('data-amt') : null;
+        // USD leads here: this is the amount PayPal actually charges. The chosen
+        // currency is the secondary, "roughly this much" line.
+        box.innerHTML = WALLET_TOPUP_AMOUNTS.map(function (amt) {
+            var sub = (walletHasCurrency() && Currency.current() !== 'USD') ? '≈ ' + walletFmt(amt) : '';
+            return '<button type="button" class="wallet-amt" data-amt="' + amt + '">'
+                + '<span class="wa-main">$' + amt + '</span>'
+                + (sub ? '<span class="wa-sub">' + sub + '</span>' : '')
+                + '</button>';
+        }).join('');
+        Array.prototype.forEach.call(box.querySelectorAll('.wallet-amt'), function (btn) {
+            if (activeAmt && btn.getAttribute('data-amt') === activeAmt) btn.classList.add('active');
+            btn.addEventListener('click', function () {
+                Array.prototype.forEach.call(box.querySelectorAll('.wallet-amt'), function (b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                renderWalletTopupButton(parseInt(btn.getAttribute('data-amt'), 10));
+            });
+        });
+    }
+
+    function renderWalletTx(txs) {
+        var tbody = document.querySelector('#walletTxTable tbody');
+        var empty = document.getElementById('walletTxEmpty');
+        var table = document.getElementById('walletTxTable');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        if (!txs.length) {
+            if (empty) empty.style.display = 'block';
+            if (table) table.style.display = 'none';
+            return;
+        }
+        if (empty) empty.style.display = 'none';
+        if (table) table.style.display = '';
+        txs.forEach(function (tx) {
+            var amt = parseFloat(tx.amount) || 0;
+            var row = document.createElement('tr');
+            var amtCell = document.createElement('td');
+            amtCell.className = amt < 0 ? 'wallet-amt-neg' : 'wallet-amt-pos';
+            amtCell.textContent = (amt < 0 ? '−' : '+') + walletFmt(Math.abs(amt));
+
+            var dateCell = document.createElement('td');
+            dateCell.textContent = tx.created_at ? new Date(tx.created_at).toLocaleDateString() : '-';
+            var typeCell = document.createElement('td');
+            typeCell.textContent = walletTxLabel(tx);
+            var afterCell = document.createElement('td');
+            afterCell.textContent = tx.balance_after == null ? '—' : walletFmt(tx.balance_after);
+
+            row.appendChild(dateCell);
+            row.appendChild(typeCell);
+            row.appendChild(amtCell);
+            row.appendChild(afterCell);
+            tbody.appendChild(row);
+        });
+    }
+
+    function loadWallet() {
+        var tab = document.getElementById('tab-wallet');
+        if (!tab) return;
+        fetch('/api/partner/vip-wallet', { headers: { 'Authorization': 'Bearer ' + token } })
+            .then(function (r) { return r.json(); })
+            .then(function (w) {
+                if (w.error) { walletMsg(w.error, false); return; }
+                _wallet = w;
+                renderWallet();
+            })
+            .catch(function (err) {
+                console.error('Load wallet error:', err);
+                walletMsg(tOr('partner_dashboard.wallet_load_error', 'Could not load your wallet. Please refresh.'), false);
+            });
+    }
+    window.loadWallet = loadWallet;
+
+    // PayPal always charges in USD, so the order amount is the raw USD number
+    // regardless of which currency the partner is viewing.
+    function renderWalletTopupButton(amtUsd) {
+        var c = document.getElementById('walletPayPal');
+        if (!c) return;
+        walletMsg('', true);
+        c.innerHTML = '<div class="payment-loading">' + tOr('partner_dashboard.wallet_loading_paypal', 'Loading PayPal…') + '</div>';
+        loadPayPalSdk().then(function (pp) {
+            c.innerHTML = '';
+            pp.Buttons({
+                style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' },
+                createOrder: async function () {
+                    var r = await fetch('/api/payments/vip-wallet/topup/create-order', {
+                        method: 'POST', headers: vipAuthHeaders(), body: JSON.stringify({ amount: amtUsd })
+                    });
+                    var d = await r.json();
+                    if (!r.ok) throw new Error(d.error || 'Failed to create order');
+                    return d.orderId;
+                },
+                onApprove: async function (ad) {
+                    c.innerHTML = '<div class="payment-loading">' + tOr('partner_dashboard.wallet_processing', 'Processing…') + '</div>';
+                    var r = await fetch('/api/payments/vip-wallet/topup/capture-order', {
+                        method: 'POST', headers: vipAuthHeaders(), body: JSON.stringify({ order_id: ad.orderID, amount: amtUsd })
+                    });
+                    var d = await r.json();
+                    c.innerHTML = '';
+                    if (!r.ok) { walletMsg(d.error || 'Payment failed.', false); return; }
+                    walletMsg('✓ ' + (d.message || 'Wallet topped up with $' + amtUsd), true);
+                    loadWallet();
+                },
+                onError: function () { walletMsg(tOr('partner_dashboard.wallet_pay_failed', 'Payment failed. Please try again.'), false); }
+            }).render('#walletPayPal');
+        }).catch(function (e) {
+            c.innerHTML = '';
+            walletMsg(e.message || 'PayPal unavailable.', false);
+        });
+    }
+
+    var walletNavItem = document.querySelector('.db-nav-item[data-tab="wallet"]');
+    if (walletNavItem) {
+        walletNavItem.addEventListener('click', loadWallet);
+    }
+
+    // Top-up options don't depend on the wallet request, so they render up front —
+    // a failed balance load still leaves the partner able to add funds.
+    renderWalletAmounts();
+
+    // Rates load asynchronously; build the chips (and re-render) once they're in.
+    if (walletHasCurrency()) {
+        buildWalletCurrencyChips();
+        Currency.onReady(function () { buildWalletCurrencyChips(); renderWalletAmounts(); renderWallet(); });
+        document.addEventListener('currencyChanged', function () {
+            paintWalletCurrencyChips();
+            renderWalletAmounts();
+            renderWallet();
+        });
+    }
+
+    // ========================================
     // REFERRAL PROGRAM
     // ========================================
     function fmtMoney(amount) {
@@ -2001,7 +2267,14 @@
             document.getElementById('refMyCode').textContent = data.my_code || '-';
             document.getElementById('refPartnerCount').textContent = data.total_referred_partners || 0;
             document.getElementById('refCarCount').textContent = data.total_referral_cars || 0;
-            document.getElementById('refCurrentTier').textContent = (data.tier && data.tier.percent ? Math.round(data.tier.percent * 100) : 0) + '%';
+            // Full shareable invite link — the code travels in ?ref=, so the invited
+            // partner never types it (api-helper.js stores it, registration auto-applies it).
+            var linkInput = document.getElementById('refMyLink');
+            if (linkInput) {
+                linkInput.value = data.my_code
+                    ? window.location.origin + '/register-partner.html?ref=' + encodeURIComponent(data.my_code)
+                    : '';
+            }
             document.getElementById('refBalance').textContent = fmtMoney(data.balance);
             document.getElementById('refEarningsTotal').textContent = fmtMoney(data.earnings && data.earnings.total);
             document.getElementById('refEarningsPending').textContent = fmtMoney(data.earnings && data.earnings.pending);
@@ -2046,6 +2319,15 @@
             var applyBox = document.getElementById('refApplyBox');
             if (applyBox) {
                 applyBox.style.display = data.referred_by ? 'none' : 'block';
+                // Pre-fill from an invite link this partner arrived through, so an
+                // existing account that clicked ?ref= still doesn't have to type it.
+                if (!data.referred_by) {
+                    try {
+                        var pendingRef = localStorage.getItem('pendingReferralCode');
+                        var applyInput = document.getElementById('refApplyInput');
+                        if (pendingRef && applyInput && !applyInput.value) applyInput.value = pendingRef;
+                    } catch (e) { /* ignore */ }
+                }
             }
         })
         .catch(function(err) {
@@ -2101,26 +2383,53 @@
         });
     }
 
+    // Copy to clipboard with a textarea fallback for browsers without the async API
+    // (and for insecure origins, where navigator.clipboard rejects).
+    function refCopyText(text, onDone) {
+        function legacy() {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); } catch (e) { /* ignore */ }
+            document.body.removeChild(ta);
+            onDone();
+        }
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(onDone).catch(legacy);
+        } else {
+            legacy();
+        }
+    }
+
+    // Flash "Copied" on a button, then restore its own label.
+    function refFlashCopied(btn, labelKey, labelFallback) {
+        btn.textContent = tOr('partner_dashboard.copied', 'Copied');
+        setTimeout(function() { btn.textContent = tOr(labelKey, labelFallback); }, 1500);
+    }
+
     var copyCodeBtn = document.getElementById('refCopyCodeBtn');
     if (copyCodeBtn) {
         copyCodeBtn.addEventListener('click', function() {
             var code = document.getElementById('refMyCode').textContent;
             if (!code || code === '-') return;
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(code).then(function() {
-                    copyCodeBtn.textContent = ((typeof I18n!=='undefined'&&I18n.t&&I18n.t('partner_dashboard.copied')!=='partner_dashboard.copied')?I18n.t('partner_dashboard.copied'):'Copied');
-                    setTimeout(function() { copyCodeBtn.textContent = ((typeof I18n!=='undefined'&&I18n.t&&I18n.t('partner_dashboard.copy')!=='partner_dashboard.copy')?I18n.t('partner_dashboard.copy'):'Copy'); }, 1500);
-                });
-            } else {
-                var ta = document.createElement('textarea');
-                ta.value = code;
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand('copy');
-                document.body.removeChild(ta);
-                copyCodeBtn.textContent = ((typeof I18n!=='undefined'&&I18n.t&&I18n.t('partner_dashboard.copied')!=='partner_dashboard.copied')?I18n.t('partner_dashboard.copied'):'Copied');
-                setTimeout(function() { copyCodeBtn.textContent = ((typeof I18n!=='undefined'&&I18n.t&&I18n.t('partner_dashboard.copy')!=='partner_dashboard.copy')?I18n.t('partner_dashboard.copy'):'Copy'); }, 1500);
-            }
+            refCopyText(code, function() {
+                refFlashCopied(copyCodeBtn, 'partner_dashboard.copy', 'Copy');
+            });
+        });
+    }
+
+    // Copy the full invite link (referral code already baked into ?ref=)
+    var copyLinkBtn = document.getElementById('refCopyLinkBtn');
+    if (copyLinkBtn) {
+        copyLinkBtn.addEventListener('click', function() {
+            var linkEl = document.getElementById('refMyLink');
+            var link = linkEl ? linkEl.value : '';
+            if (!link) return;
+            if (linkEl.select) { linkEl.select(); linkEl.setSelectionRange(0, 99999); }
+            refCopyText(link, function() {
+                refFlashCopied(copyLinkBtn, 'partner_dashboard.copy_link', 'Copy Link');
+            });
         });
     }
 

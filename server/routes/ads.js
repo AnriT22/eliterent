@@ -9,7 +9,7 @@ function sanitizeAd(b, existing) {
     // Placement is a comma-separated list of surfaces — an ad can target several pages
     // at once (e.g. "vehicles,blog,checkout"). Accept a `placements` array (new admin UI)
     // or a legacy single/comma `placement` string. 'both' is kept for old records.
-    var VALID = ['cars', 'drivers', 'vehicles', 'blog', 'checkout', 'both'];
+    var VALID = ['cars', 'drivers', 'vehicles', 'blog', 'checkout', 'partner', 'both'];
     var rawList = Array.isArray(b.placements) ? b.placements
         : (b.placement !== undefined ? String(b.placement).split(',') : null);
     var placement;
@@ -48,7 +48,7 @@ function sanitizeAd(b, existing) {
 
     // Per-placement slot config: a different Position per page (+ Vehicles page number).
     // Shape: { cars, drivers, vehicles, blog, checkout, vehicles_page }
-    var PP_KEYS = ['cars', 'drivers', 'vehicles', 'blog', 'checkout'];
+    var PP_KEYS = ['cars', 'drivers', 'vehicles', 'blog', 'checkout', 'partner'];
     var ppOut = null;
     if (b.placement_positions && typeof b.placement_positions === 'object') {
         ppOut = {};
@@ -80,7 +80,7 @@ function sanitizeAd(b, existing) {
 // GET /api/ads?placement=cars|drivers — active ad cards for a page
 router.get('/', async (req, res) => {
     try {
-        var placement = ['cars', 'drivers', 'vehicles', 'blog', 'checkout'].indexOf(req.query.placement) !== -1 ? req.query.placement : null;
+        var placement = ['cars', 'drivers', 'vehicles', 'blog', 'checkout', 'partner'].indexOf(req.query.placement) !== -1 ? req.query.placement : null;
         var sql = 'SELECT id, title, description, cover_url, target_link, cta_text, placement, page, position, placement_positions, title_ru, title_ka, title_he, description_ru, description_ka, description_he, cta_text_ru, cta_text_ka, cta_text_he FROM ad_cards WHERE is_active = 1';
         var params = [];
         if (placement) {

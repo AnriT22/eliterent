@@ -143,6 +143,14 @@
 
                 </a>
 
+                <a href="#" class="db-nav-item" data-tab="wallet">
+
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+
+                    <span data-i18n="partner_dashboard.wallet">Wallet</span>
+
+                </a>
+
                 <a href="#" class="db-nav-item" data-tab="referrals">
 
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
@@ -1706,6 +1714,124 @@
 
 
 
+            <!-- TAB: WALLET -->
+
+            <div class="db-tab" id="tab-wallet">
+
+                <div class="db-tab-header">
+
+                    <h2 data-i18n="partner_dashboard.wallet_title">My Wallet</h2>
+
+                    <div class="wallet-cur-chips" id="walletCurrencyPicker" role="group" aria-label="Display currency"></div>
+
+                </div>
+
+                <div class="wallet-bonus-banner" id="walletBonusBanner" style="display:none;">
+
+                    <span class="wbb-icon">🎁</span>
+
+                    <span data-i18n="partner_dashboard.vip_first_bonus">First-VIP bonus: get $10 free credit added after your first activation.</span>
+
+                </div>
+
+                <div class="wallet-grid">
+
+                    <div class="wallet-card wallet-card--main">
+
+                        <div class="wc-label" data-i18n="partner_dashboard.wallet_balance">Wallet Balance</div>
+
+                        <div class="wc-amount" id="walletBalance">$0.00</div>
+
+                        <div class="wc-usd" id="walletBalanceUsd"></div>
+
+                        <div class="wc-hint" data-i18n="partner_dashboard.wallet_spend_hint">Use it to put your cars in VIP placement — $10 per car for 30 days.</div>
+
+                    </div>
+
+                    <div class="wallet-card">
+
+                        <div class="wc-label" data-i18n="partner_dashboard.wallet_referral">Referral Earnings</div>
+
+                        <div class="wc-amount small" id="walletReferral">$0.00</div>
+
+                        <div class="wc-usd" id="walletReferralUsd"></div>
+
+                    </div>
+
+                    <div class="wallet-card">
+
+                        <div class="wc-label" data-i18n="partner_dashboard.wallet_available">Available to Spend</div>
+
+                        <div class="wc-amount small" id="walletAvailable">$0.00</div>
+
+                        <div class="wc-usd" id="walletAvailableUsd"></div>
+
+                    </div>
+
+                    <div class="wallet-card">
+
+                        <div class="wc-label" data-i18n="partner_dashboard.wallet_vip_covered">VIP Activations Covered</div>
+
+                        <div class="wc-amount small" id="walletVipCount">0</div>
+
+                        <div class="wc-hint" id="walletVipFeeHint"></div>
+
+                    </div>
+
+                </div>
+
+                <h3 class="db-section-title" data-i18n="partner_dashboard.wallet_topup_title">Top Up Your Wallet</h3>
+
+                <p class="wallet-topup-note" data-i18n="partner_dashboard.wallet_topup_note">Pick an amount to add. Payments are charged in USD — other currencies are shown for reference only.</p>
+
+                <div class="wallet-amounts" id="walletAmounts"></div>
+
+                <div id="walletPayPal"></div>
+
+                <div class="wallet-msg" id="walletMsg" style="display:none;"></div>
+
+                <h3 class="db-section-title" data-i18n="partner_dashboard.wallet_history">Wallet History</h3>
+
+                <div class="db-referral-table-wrapper">
+
+                    <table class="db-referral-table" id="walletTxTable">
+
+                        <thead>
+
+                            <tr>
+
+                                <th data-i18n="partner_dashboard.th_date">Date</th>
+
+                                <th data-i18n="partner_dashboard.th_type">Type</th>
+
+                                <th data-i18n="partner_dashboard.th_amount">Amount</th>
+
+                                <th data-i18n="partner_dashboard.th_balance_after">Balance After</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <!-- Populated by JS -->
+
+                        </tbody>
+
+                    </table>
+
+                    <div class="db-empty-state" id="walletTxEmpty" style="display:none;">
+
+                        <p data-i18n="partner_dashboard.wallet_no_tx">No wallet activity yet. Top up to get started.</p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
             <!-- TAB: REFERRALS -->
 
             <div class="db-tab" id="tab-referrals">
@@ -1768,11 +1894,19 @@
 
                     </div>
 
-                    <div class="db-referral-card">
+                    <div class="db-referral-card db-referral-card--link">
 
-                        <div class="drc-label" data-i18n="partner_dashboard.current_tier">Current Tier</div>
+                        <div class="drc-label" data-i18n="partner_dashboard.referral_link">My Invite Link</div>
 
-                        <div class="drc-value" id="refCurrentTier">0%</div>
+                        <div class="drc-link-row">
+
+                            <input type="text" id="refMyLink" class="drc-link-input" readonly value="" aria-label="Referral link">
+
+                            <button class="btn btn-secondary btn-small" id="refCopyLinkBtn" data-i18n="partner_dashboard.copy_link">Copy Link</button>
+
+                        </div>
+
+                        <div class="drc-link-note" data-i18n="partner_dashboard.referral_link_note">Share this link — anyone who signs up through it is linked to you automatically. No code to type.</div>
 
                     </div>
 
@@ -2216,7 +2350,9 @@
 
     <script src="location-data.js?v=5"></script>
 
-    <script src="dashboard.js?v=31"></script>
+    <script src="currency.js?v=2"></script>
+
+    <script src="dashboard.js?v=32"></script>
 
 <script src="premium-animations.js?v=4"></script>
 

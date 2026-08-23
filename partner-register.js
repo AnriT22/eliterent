@@ -10,6 +10,9 @@
     var totalSteps = 2;
     var nextBtn = document.getElementById('pNextStep');
     var prevBtn = document.getElementById('pPrevStep');
+    // Declared here (not next to enterChoiceStep) because the choice step can run
+    // during init below — a later `var` would reset the flag mid-flight.
+    var autoReferralTried = false;
 
     // ---- GOOGLE OAUTH / post-phone flow: skip straight to referral, choice, or payment step ----
     var urlParams = new URLSearchParams(window.location.search);
@@ -252,6 +255,18 @@
 
     /* ---- CHOICE STEP: Pay $49.99 vs Invite Code ---- */
     function enterChoiceStep(data) {
+        // Arrived through a partner's invite link (?ref=CODE, stored by api-helper.js)?
+        // Apply the code for them and skip this step entirely — no code to type.
+        if (!autoReferralTried) {
+            autoReferralTried = true;
+            var pendingRef = null;
+            try { pendingRef = localStorage.getItem('pendingReferralCode'); } catch (e) {}
+            if (pendingRef) {
+                autoApplyPendingReferral(pendingRef, data);
+                return;
+            }
+        }
+
         // Hide form and related UI
         form.style.display = 'none';
         document.getElementById('pFormActions').style.display = 'none';
@@ -294,6 +309,70 @@
         // Show choice step
         document.getElementById('pChoiceStep').style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ---- AUTO-REFERRAL: applied from a shared invite link, no typing required ---- */
+    async function autoApplyPendingReferral(code, data) {
+        var box = showAutoReferralApplying();
+
+        try {
+            var res = await fetch('/api/register/partner/apply-invite', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + (localStorage.getItem('token') || ''),
+                },
+                body: JSON.stringify({ invite_code: code }),
+            });
+            var result = await res.json();
+
+            // 409 = a code was already applied to this account; treat as done.
+            if (!res.ok && res.status !== 409) {
+                throw new Error(result.error || 'Invalid referral code');
+            }
+
+            try { localStorage.removeItem('pendingReferralCode'); } catch (e) {}
+            if (box && box.parentNode) box.parentNode.removeChild(box);
+            showPendingApproval('Redirecting to your dashboard…');
+            setTimeout(function () { window.location.href = 'partner-dashboard.html'; }, 4000);
+
+        } catch (err) {
+            // Code is no longer valid (or is the visitor's own) — fall back to the
+            // normal choice step with the code pre-filled so nothing is lost.
+            try { localStorage.removeItem('pendingReferralCode'); } catch (e) {}
+            if (box && box.parentNode) box.parentNode.removeChild(box);
+            enterChoiceStep(data);
+            var input = document.getElementById('pChoiceInviteCode');
+            if (input) input.value = code;
+            var errorEl = document.getElementById('choiceInviteError');
+            if (errorEl) {
+                errorEl.textContent = err.message;
+                errorEl.style.display = 'block';
+            }
+        }
+    }
+
+    function showAutoReferralApplying() {
+        form.style.display = 'none';
+        document.getElementById('pFormActions').style.display = 'none';
+        var authDivider = document.getElementById('pAuthDivider');
+        var googleBtn = document.getElementById('googlePartnerBtn');
+        var authFooter = document.querySelector('.auth-footer');
+        if (authDivider) authDivider.style.display = 'none';
+        if (googleBtn) googleBtn.style.display = 'none';
+        if (authFooter) authFooter.style.display = 'none';
+
+        var box = document.createElement('div');
+        box.className = 'pending-approval-box';
+        box.innerHTML = '<span class="pab-icon">🎁</span>'
+            + '<h3>Applying Your Invite</h3>'
+            + '<p>You were invited by an EliteAuto partner — we\'re linking your account now. '
+            + 'No referral code to enter.</p>';
+
+        var wrapper = document.querySelector('.auth-form-wrapper');
+        wrapper.insertBefore(box, wrapper.firstChild);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return box;
     }
 
     function choosePayPath() {
@@ -440,7 +519,7 @@
     window.enterChoiceStep = enterChoiceStep;
 
     /* ---- INVITE PATH: pending approval message ---- */
-    function showPendingApproval() {
+    function showPendingApproval(redirectNote) {
         form.style.display = 'none';
         document.getElementById('pFormActions').style.display = 'none';
         var choiceStep = document.getElementById('pChoiceStep');
@@ -458,7 +537,7 @@
             + '<h3>Account Created — Pending Approval</h3>'
             + '<p>Your invite code was accepted. Our team will review and verify your account shortly. '
             + 'You can access your dashboard now — you\'ll be notified when approved.</p>'
-            + '<p style="margin-top:10px;font-size:12px;color:#6b7280;">Redirecting to phone verification…</p>';
+            + '<p style="margin-top:10px;font-size:12px;color:#6b7280;">' + (redirectNote || 'Redirecting to phone verification…') + '</p>';
 
         var wrapper = document.querySelector('.auth-form-wrapper');
         wrapper.insertBefore(box, wrapper.firstChild);
