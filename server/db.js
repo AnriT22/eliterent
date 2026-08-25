@@ -504,6 +504,7 @@ async function initDB() {
         await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS description_ka TEXT`);
         await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS description_ru TEXT`);
         await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS description_he TEXT`);
+        await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS description_tr TEXT`);
         // Georgia-only flag: vehicle may be driven on off-road / mountain routes.
         await pool.query(`ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS offroad_allowed INTEGER DEFAULT 0`);
         // Admin flag for the "SUV 6-8 Seats" (3-row) homepage category, so existing
@@ -650,7 +651,7 @@ async function initDB() {
             target_link TEXT NOT NULL,
             cta_text TEXT,
             title_ru TEXT, title_ka TEXT, title_he TEXT,
-            description_ru TEXT, description_ka TEXT, description_he TEXT,
+            description_ru TEXT, description_ka TEXT, description_he TEXT, description_tr TEXT,
             cta_text_ru TEXT, cta_text_ka TEXT, cta_text_he TEXT,
             placement TEXT DEFAULT 'cars',
             page INTEGER DEFAULT 1,

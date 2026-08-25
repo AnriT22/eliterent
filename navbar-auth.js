@@ -308,6 +308,7 @@
             + '  <button class="mobile-lang-btn' + (currentLang === 'ka' ? ' active' : '') + '" data-lang="ka" style="' + langBtnStyle('ka') + '">\uD83C\uDDEC\uD83C\uDDEA KA</button>'
             + '  <button class="mobile-lang-btn' + (currentLang === 'ru' ? ' active' : '') + '" data-lang="ru" style="' + langBtnStyle('ru') + '">\uD83C\uDDF7\uD83C\uDDFA RU</button>'
             + '  <button class="mobile-lang-btn' + (currentLang === 'he' ? ' active' : '') + '" data-lang="he" style="' + langBtnStyle('he') + '">\uD83C\uDDEE\uD83C\uDDF1 HE</button>'
+            + '  <button class="mobile-lang-btn' + (currentLang === 'tr' ? ' active' : '') + '" data-lang="tr" style="' + langBtnStyle('tr') + '">\uD83C\uDDF9\uD83C\uDDF7 TR</button>'
             + '</div>'
             + (token && user
                 ? '<button class="partner-btn" id="mobileLogoutBtn" style="background:#ef4444;">' + t('nav.logout','Log Out') + '</button>'

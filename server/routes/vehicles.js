@@ -9,19 +9,19 @@ const router = express.Router();
 // populated with the first non-empty translation so existing consumers and the
 // language fallback keep working. No-op when the client sends none of them.
 async function saveVehicleDescriptions(vehicleId, b, legacyDescription) {
-    var has = ['description_en', 'description_ka', 'description_ru', 'description_he']
+    var has = ['description_en', 'description_ka', 'description_ru', 'description_he', 'description_tr']
         .some(function (k) { return b[k] !== undefined; });
     if (!has) return;
     function clean(v) { return (v == null ? '' : String(v)).trim() || null; }
     var dEn = clean(b.description_en), dKa = clean(b.description_ka),
-        dRu = clean(b.description_ru), dHe = clean(b.description_he);
+        dRu = clean(b.description_ru), dHe = clean(b.description_he), dTr = clean(b.description_tr);
     await execute(
-        'UPDATE vehicles SET description_en = $1, description_ka = $2, description_ru = $3, description_he = $4 WHERE id = $5',
-        [dEn, dKa, dRu, dHe, vehicleId]
+        'UPDATE vehicles SET description_en = $1, description_ka = $2, description_ru = $3, description_he = $4, description_tr = $5 WHERE id = $6',
+        [dEn, dKa, dRu, dHe, dTr, vehicleId]
     );
     // Fallback: if the universal description is empty, seed it from a translation.
     if (!legacyDescription || !String(legacyDescription).trim()) {
-        var fb = dEn || dKa || dRu || dHe;
+        var fb = dEn || dKa || dRu || dHe || dTr;
         if (fb) await execute("UPDATE vehicles SET description = $1 WHERE id = $2 AND (description IS NULL OR description = '')", [fb, vehicleId]);
     }
 }
