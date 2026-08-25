@@ -67,6 +67,13 @@ function hasLangVersion(lang, page) {
 // RU is provided; KA bodies are localized from ka.json but KA <title>/<meta>
 // should be filled by a native speaker (see SEO-CHANGES.md).
 const SEO = {
+    tr: {
+        "index.html": { title: "Gürcistan Araç Kiralama — Tiflis, Batum ve Kutaisi", desc: "Gürcistan’da günlük 39 $’dan başlayan fiyatlarla araç kiralayın. Tiflis, Batum ve Kutaisi havalimanlarında teslim. Doğrulanmış partnerlerden SUV, sedan ve lüks araçlar." },
+        "vehicles.html": { title: "Gürcistan Araç Kiralama — Günlük 39 $’dan | EliteAuto", desc: "Gürcistan’da kiralamak için araç seçin — SUV, sedan, ekonomi ve lüks. Depozitosuz seçenekler, havalimanında teslim, sigorta dahil." },
+        "reviews.html": { title: "Gürcistan Araç Kiralama Yorumları | EliteAuto.rent", desc: "EliteAuto.rent üzerinden Gürcistan’da araç kiralayan gezginlerin gerçek yorumları — Tiflis, Batum ve Kutaisi." },
+        "about.html": { title: "Hakkımızda — EliteAuto.rent | Gürcistan Araç Kiralama", desc: "EliteAuto.rent hakkında bilgi edinin — gezginleri Gürcistan genelinde doğrulanmış yerel partnerlerle buluşturan araç kiralama platformu." },
+        "contact.html": { title: "İletişim — EliteAuto.rent", desc: "EliteAuto.rent ile iletişime geçin — Gürcistan’da araç kiralama desteği. E-posta, telefon ve 7/24 WhatsApp." }
+    },
     ru: {
         'index.html': { title: 'Аренда авто в Грузии — Тбилиси, Батуми и Кутаиси', desc: 'Аренда автомобиля в Грузии от $39/день. Выдача в аэропортах Тбилиси, Батуми и Кутаиси. Внедорожники, седаны и люкс от проверенных партнёров. Без депозита, страховка включена.' },
         'vehicles.html': { title: 'Аренда авто в Грузии — от $39/день | EliteAuto', desc: 'Выберите автомобиль для аренды в Грузии — внедорожники, седаны, эконом и люкс. Без депозита, выдача в аэропорту, страховка включена. От $39/день.' },
