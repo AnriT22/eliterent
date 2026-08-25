@@ -18,7 +18,7 @@
         { code: 'georgia',    name: 'Georgia',    flag: '🇬🇪', live: true },
         { code: 'armenia',    name: 'Armenia',    flag: '🇦🇲', live: false },
         { code: 'azerbaijan', name: 'Azerbaijan', flag: '🇦🇿', live: false },
-        { code: 'turkey',     name: 'Turkey',     flag: '🇹🇷', live: false },
+        { code: 'turkey',     name: 'Turkey',     flag: '🇹🇷', live: true  },
         { code: 'usa',        name: 'USA',        flag: '🇺🇸', live: false }
     ];
     var POP_ID = 'cpopOverlay', STYLE_ID = 'cpopStyle';
