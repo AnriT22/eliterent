@@ -1387,6 +1387,7 @@
             description_ka: getVal('vDescriptionKa').trim() || null,
             description_ru: getVal('vDescriptionRu').trim() || null,
             description_he: getVal('vDescriptionHe').trim() || null,
+            description_tr: getVal('vDescriptionTr').trim() || null,
             tech_passport_front: getVal('vPassportFront') || null,
             tech_passport_back: getVal('vPassportBack') || null,
             registration_number: getVal('vRegNumber').trim(),
@@ -1731,9 +1732,10 @@
             setVal('vDescriptionKa', v.description_ka || '');
             setVal('vDescriptionRu', v.description_ru || '');
             setVal('vDescriptionHe', v.description_he || '');
-            if (!v.description_en && !v.description_ka && !v.description_ru && !v.description_he && v.description) {
+            setVal('vDescriptionTr', v.description_tr || '');
+            if (!v.description_en && !v.description_ka && !v.description_ru && !v.description_he && !v.description_tr && v.description) {
                 var _cl = ((typeof I18n !== 'undefined' && I18n.lang) ? I18n.lang() : (document.documentElement.lang || 'en')).slice(0, 2);
-                var _map = { en: 'vDescription', ka: 'vDescriptionKa', ru: 'vDescriptionRu', he: 'vDescriptionHe' };
+                var _map = { en: 'vDescription', ka: 'vDescriptionKa', ru: 'vDescriptionRu', he: 'vDescriptionHe', tr: 'vDescriptionTr' };
                 setVal(_map[_cl] || 'vDescription', v.description);
             }
             // Restore saved main-photo card position (default 50 = centered).

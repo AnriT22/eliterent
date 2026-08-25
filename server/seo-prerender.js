@@ -11,7 +11,8 @@ const MARKER_HOME = '<!-- SEO_PRERENDER_HOME_FLEET -->';
 // ---------------------------------------------------------------------------
 // Source-of-truth data for crawlable fallbacks.
 // "from" prices and URLs MUST stay in sync with the type/city landing pages
-// (economy $25, sedan $30, suv $50, minivan $45, luxury $80). No invented numbers.
+// (verified floors — keep in sync with scripts/sync-price-floor.js: overall $39,
+// suv $45, minivan $50, luxury $100). No invented numbers.
 //
 // IMPORTANT (anti-cloaking): every block produced here is rendered for ALL
 // visitors, never only for crawlers. Search engines and users must see the
@@ -19,11 +20,11 @@ const MARKER_HOME = '<!-- SEO_PRERENDER_HOME_FLEET -->';
 // from real database rows, rendered client-side identically for bots and users.
 // ---------------------------------------------------------------------------
 const CATEGORIES = [
-    { name: 'Economy cars', url: '/economy-car-rental-georgia.html', from: 25, blurb: 'Fuel-efficient hatchbacks & compacts' },
-    { name: 'Sedans', url: '/sedan-rental-georgia.html', from: 30, blurb: 'Comfortable cars for business & highways' },
+    { name: 'Economy cars', url: '/economy-car-rental-georgia.html', from: 39, blurb: 'Fuel-efficient hatchbacks & compacts' },
+    { name: 'Sedans', url: '/sedan-rental-georgia.html', from: 39, blurb: 'Comfortable cars for business & highways' },
     { name: 'SUV & 4x4', url: '/suv-rental-georgia.html', from: 50, blurb: 'Mountain-ready for Kazbegi & Svaneti' },
-    { name: '7-seater & minivan', url: '/minivan-7-seater-rental-georgia.html', from: 45, blurb: 'Space for families & groups' },
-    { name: 'Luxury & executive', url: '/luxury-car-rental-tbilisi.html', from: 80, blurb: 'Mercedes, BMW & Range Rover' }
+    { name: '7-seater & minivan', url: '/minivan-7-seater-rental-georgia.html', from: 50, blurb: 'Space for families & groups' },
+    { name: 'Luxury & executive', url: '/luxury-car-rental-tbilisi.html', from: 100, blurb: 'Mercedes, BMW & Range Rover' }
 ];
 
 const CITIES = [
