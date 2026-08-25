@@ -29,6 +29,9 @@ const SITE = 'https://eliteauto.rent';
 const LANGS = ['ru', 'ka', 'he', 'tr'];
 const RTL_LANGS = ['he'];
 
+// Built from LANGS so a new language only has to be added in one place.
+const LANG_PATH_RE = new RegExp('^\/(' + LANGS.join('|') + ')(?:\/(.*))?$');
+
 // Pages served under /ru/ and /ka/. A page belongs here ONLY when its on-page
 // BODY is genuinely translated (not just its <title>/<meta>) — otherwise we'd
 // publish a localized URL with English content (a duplicate/doorway risk) and
@@ -256,7 +259,7 @@ async function renderSourceHtml(fileName) {
 
 async function middleware(req, res, next) {
     try {
-        var m = /^\/(ru|ka|he)(?:\/(.*))?$/.exec(req.path);
+        var m = LANG_PATH_RE.exec(req.path);
         if (!m) return next();
         var lang = m[1];
         var page = (m[2] || '').replace(/\/+$/, ''); // trim trailing slash
