@@ -353,11 +353,33 @@ router.put('/users/:id/approve', async (req, res) => {
     }
 });
 
+// A user must never be deleted while money is still in play: deleting cascades to
+// their bookings, which would destroy the record of a reservation the customer has
+// already paid for. Deletion is allowed once every paid booking has reached a
+// settled state (completed / cancelled / rejected) or has been refunded.
+const OPEN_PAID_SQL =
+    "SELECT COUNT(*) AS cnt FROM bookings" +
+    " WHERE (guest_id = $1 OR partner_id = $1)" +
+    " AND payment_status = 'paid'" +
+    " AND status NOT IN ('completed', 'cancelled', 'rejected')";
+
+// Returns an error message when the user still has unsettled paid bookings, else null.
+async function blockingPaidBookings(userId) {
+    var row = await queryOne(OPEN_PAID_SQL, [userId]);
+    var n = row ? parseInt(row.cnt, 10) : 0;
+    if (!n) return null;
+    return 'Cannot remove this user: ' + n + ' paid reservation(s) are still open. ' +
+        'Complete or refund them first, then delete.';
+}
+
 router.put('/users/:id/reject', async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
         const user = await queryOne('SELECT * FROM users WHERE id = $1 AND role != $2', [userId, 'admin']);
         if (!user) return res.status(404).json({ error: 'User not found' });
+
+        var blocked = await blockingPaidBookings(userId);
+        if (blocked) return res.status(400).json({ error: blocked });
 
         // Cancel active bookings (as guest or partner) and unblock dates
         var activeBookings = await queryAll(
@@ -393,14 +415,8 @@ router.delete('/users/:id', async (req, res) => {
         const user = await queryOne('SELECT * FROM users WHERE id = $1 AND role != $2', [userId, 'admin']);
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        // Block if user has paid but unrefunded bookings
-        var paidBookings = await queryOne(
-            "SELECT COUNT(*) as cnt FROM bookings WHERE (guest_id = $1 OR partner_id = $1) AND payment_status = 'paid'",
-            [userId]
-        );
-        if (paidBookings && parseInt(paidBookings.cnt) > 0) {
-            return res.status(400).json({ error: 'Cannot delete user with ' + paidBookings.cnt + ' paid booking(s). Refund them first.' });
-        }
+        var blockedDel = await blockingPaidBookings(userId);
+        if (blockedDel) return res.status(400).json({ error: blockedDel });
 
         // Cancel active bookings and unblock dates
         var activeBookings = await queryAll(

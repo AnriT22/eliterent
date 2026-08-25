@@ -3116,14 +3116,14 @@
             if (!e.target.closest('.vf-city-group')) hideResults();
         });
 
-        // Off-road driving + the Georgian-airport fee fields are Georgia-only.
+        // Off-road driving applies in every country (Turkish partners list cars for
+        // Cappadocia trails, etc). The airport-fee shortcut below names Georgian
+        // airports specifically, so that one stays Georgia-only -- partners in other
+        // countries set airport fees on the generic pickup-location rows instead.
         function syncOffroadVisibility() {
             var isGe = (countrySel.value || 'georgia') === 'georgia';
             var grp = document.getElementById('vOffroadGroup');
-            if (grp) {
-                grp.style.display = isGe ? '' : 'none';
-                if (!isGe) { var cb = document.getElementById('vOffroadAllowed'); if (cb) cb.checked = false; }
-            }
+            if (grp) grp.style.display = '';
             var ga = document.getElementById('georgiaAirportFees');
             if (ga) {
                 ga.style.display = isGe ? '' : 'none';

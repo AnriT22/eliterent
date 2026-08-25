@@ -379,9 +379,9 @@ router.post('/', authenticateToken, requireRole('partner'), async (req, res) => 
 
         if (newVehicle) await saveVehicleDescriptions(newVehicle.id, b, newVehicle.description);
 
-        // Georgia-only off-road flag (forced off for non-Georgia vehicles).
+        // Off-road flag - available in every country.
         if (newVehicle && b.offroad_allowed !== undefined) {
-            var off = (String(b.country || 'georgia').toLowerCase() === 'georgia' && b.offroad_allowed) ? 1 : 0;
+            var off = b.offroad_allowed ? 1 : 0;
             await execute('UPDATE vehicles SET offroad_allowed = $1 WHERE id = $2', [off, newVehicle.id]);
         }
         // "SUV 6-8 Seats" flag — partner can self-mark (admin can also toggle it).
@@ -503,8 +503,7 @@ router.put('/:id', authenticateToken, requireRole('partner'), async (req, res) =
         await saveVehicleDescriptions(vehicleId, b, b.description);
 
         if (b.offroad_allowed !== undefined) {
-            var offCountry = (b.country !== undefined ? b.country : (existing.country || 'georgia'));
-            var off2 = (String(offCountry).toLowerCase() === 'georgia' && b.offroad_allowed) ? 1 : 0;
+            var off2 = b.offroad_allowed ? 1 : 0;
             await execute('UPDATE vehicles SET offroad_allowed = $1 WHERE id = $2 AND partner_id = $3', [off2, vehicleId, req.user.id]);
         }
         if (b.suv_6_8 !== undefined) {
