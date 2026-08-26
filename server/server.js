@@ -307,6 +307,12 @@ app.get('/404.html', (req, res) => {
 // HTML is never long-cached: pages have no ?v= cache-buster, so a stale copy in
 // the browser is what makes deployed changes "not show up" (e.g. the admin panel).
 // It still revalidates cheaply via ETag (304). Versioned assets keep the 1d cache.
+// Resize-on-demand variants for uploaded photos. Must sit BEFORE the static
+// handler below: that one serves the whole project folder (uploads/ included),
+// so anything mounted after it would never see an /uploads request.
+const imageVariants = require('./image-variants');
+app.use('/uploads', imageVariants.variantMiddleware);
+
 app.use(express.static(path.join(__dirname, '..'), {
     maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
     etag: true,
@@ -320,13 +326,12 @@ app.use(express.static(path.join(__dirname, '..'), {
 // Serve uploaded images with caching + security headers.
 // variantMiddleware answers ?w=<width> with a cached, card-sized WebP; every
 // other request falls through to the static handler untouched.
-const imageVariants = require('./image-variants');
 app.use('/uploads', (req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Content-Disposition', 'inline');
     res.setHeader('Referrer-Policy', 'no-referrer');
     next();
-}, imageVariants.variantMiddleware, express.static(path.join(__dirname, '..', 'uploads'), {
+}, express.static(path.join(__dirname, '..', 'uploads'), {
     maxAge: '7d',
     etag: true
 }));
