@@ -174,8 +174,14 @@ function buildVehicleCardsHtml(vehicles) {
         var partner = v.company_name ? escapeHtml(v.company_name) : '';
         var href = '/vehicle.html?id=' + encodeURIComponent(v.id);
         var img = v.image_url ? escapeHtml(v.image_url) : '';
+        // Cards render ~400px wide; ?w= asks for a card-sized variant
+        // (server/image-variants.js) instead of the full-size upload.
+        var imgSized = img && img.indexOf('/uploads/') === 0 ? img + '?w=400' : img;
+        var imgSrcset = img && img.indexOf('/uploads/') === 0
+            ? ' srcset="' + img + '?w=400 400w, ' + img + '?w=700 700w" sizes="(max-width: 700px) 100vw, 400px"'
+            : '';
         var imgTag = img
-            ? '<img src="' + img + '" alt="' + name + ' rental in ' + city + ', Georgia" width="400" height="240" loading="lazy">'
+            ? '<img src="' + imgSized + '"' + imgSrcset + ' alt="' + name + ' rental in ' + city + ', Georgia" width="400" height="240" loading="lazy" decoding="async">'
             : '';
         function spec(s) { return s ? '<span class="vc-spec">' + escapeHtml(s.replace(/_/g, ' ')) + '</span>' : ''; }
         return '<div class="vc-card" data-id="' + v.id + '"'

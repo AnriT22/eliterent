@@ -624,6 +624,14 @@ function renderCarousel(vehicles, adminAds, firstBlockLength) {
 
     vehicles.forEach(function (v, idx) {
         const imgSrc = v.image_url || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240'%3E%3Crect fill='%23e2e8f0' width='400' height='240'/%3E%3Ctext x='200' y='125' text-anchor='middle' fill='%2394a3b8' font-size='16' font-family='sans-serif'%3ENo Image%3C/text%3E%3C/svg%3E";
+        // Cards render ~660px wide, so request card-sized variants instead of the
+        // full upload. ?w= is served by server/image-variants.js; anything that is not
+        // an /uploads/ photo (e.g. the inline "No Image" SVG) keeps its plain src.
+        const isUpload = typeof imgSrc === "string" && imgSrc.indexOf("/uploads/") === 0;
+        const cardSrc = isUpload ? imgSrc + "?w=700" : imgSrc;
+        const cardSrcset = isUpload
+            ? imgSrc + "?w=400 400w, " + imgSrc + "?w=700 700w, " + imgSrc + "?w=1000 1000w"
+            : "";
         const isNew = v.created_at && (Date.now() - new Date(v.created_at).getTime()) < 24 * 60 * 60 * 1000;
 
         // For "rent with driver only" cars, the displayed price is rent + driver service.
@@ -645,7 +653,7 @@ function renderCarousel(vehicles, adminAds, firstBlockLength) {
         html += `
             <div class="fleet-card ${v.is_vip ? 'fleet-card-vip' : ''}" data-category="${(v.category||'').toLowerCase()}" data-engine="${(v.engine||'').toLowerCase()}" data-gearbox="${(v.gearbox||'').toLowerCase()}" data-drivetype="${(v.drive_type||'').toLowerCase()}" data-interior="${(v.interior_type||'').toLowerCase()}" data-steering="${(v.steering_side||'').toLowerCase()}" data-payment="${(v.payment_method||'').toLowerCase()}" onclick="if(!event.target.closest('button'))window.location.href='vehicle.html?id=${v.id}'">
                 <div class="fleet-card-img">
-                    <img src="${imgSrc}" alt="${v.name}" style="object-position:50% ${v.image_offset_y == null ? 50 : v.image_offset_y}%;">
+                    <img src="${cardSrc}"${cardSrcset ? ` srcset="${cardSrcset}" sizes="(max-width: 700px) 100vw, 700px"` : ""} alt="${v.name}" width="700" height="394" loading="lazy" decoding="async" style="object-position:50% ${v.image_offset_y == null ? 50 : v.image_offset_y}%;">
                     ${isNew ? '<span class="fleet-card-badge">NEW</span>' : ''}
                 </div>
                 <div class="fleet-card-body">
