@@ -317,13 +317,16 @@ app.use(express.static(path.join(__dirname, '..'), {
     }
 }));
 
-// Serve uploaded images with caching + security headers
+// Serve uploaded images with caching + security headers.
+// variantMiddleware answers ?w=<width> with a cached, card-sized WebP; every
+// other request falls through to the static handler untouched.
+const imageVariants = require('./image-variants');
 app.use('/uploads', (req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Content-Disposition', 'inline');
     res.setHeader('Referrer-Policy', 'no-referrer');
     next();
-}, express.static(path.join(__dirname, '..', 'uploads'), {
+}, imageVariants.variantMiddleware, express.static(path.join(__dirname, '..', 'uploads'), {
     maxAge: '7d',
     etag: true
 }));
