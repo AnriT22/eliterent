@@ -653,7 +653,7 @@ function renderCarousel(vehicles, adminAds, firstBlockLength) {
         html += `
             <div class="fleet-card ${v.is_vip ? 'fleet-card-vip' : ''}" data-category="${(v.category||'').toLowerCase()}" data-engine="${(v.engine||'').toLowerCase()}" data-gearbox="${(v.gearbox||'').toLowerCase()}" data-drivetype="${(v.drive_type||'').toLowerCase()}" data-interior="${(v.interior_type||'').toLowerCase()}" data-steering="${(v.steering_side||'').toLowerCase()}" data-payment="${(v.payment_method||'').toLowerCase()}" onclick="if(!event.target.closest('button'))window.location.href='vehicle.html?id=${v.id}'">
                 <div class="fleet-card-img">
-                    <img src="${cardSrc}"${cardSrcset ? ` srcset="${cardSrcset}" sizes="(max-width: 700px) 100vw, 700px"` : ""} alt="${v.name}" width="700" height="394" loading="lazy" decoding="async" style="object-position:50% ${v.image_offset_y == null ? 50 : v.image_offset_y}%;">
+                    <img src="${cardSrc}"${cardSrcset ? ` srcset="${cardSrcset}" sizes="(max-width: 700px) 92vw, 700px"` : ""} alt="${v.name}" width="700" height="394" loading="lazy" decoding="async" style="object-position:50% ${v.image_offset_y == null ? 50 : v.image_offset_y}%;">
                     ${isNew ? '<span class="fleet-card-badge">NEW</span>' : ''}
                 </div>
                 <div class="fleet-card-body">

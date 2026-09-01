@@ -110,7 +110,11 @@
             .vp-topbar-left { gap: 8px; }
         }
     </style>
-    <script src="site-config.js?v=2"></script>
+    <script>/* Inlined from site-config.js (render-blocking round trip for 2 lines).
+       EDIT HERE, not in site-config.js. Set autoCountryPopup to true to re-enable
+       the automatic country popups on the homepage / vehicles page. */
+    window.SiteConfig = window.SiteConfig || {};
+    window.SiteConfig.autoCountryPopup = false;</script>
     <script src="api-helper.js?v=3" defer></script>
     <script src="i18n.js?v=8" defer></script>
     <link rel="stylesheet" href="theme.css?v=4">
@@ -783,7 +787,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=25"></script>
+    <script src="script.js?v=26"></script>
     <script>
     (function () {
         var grid = document.getElementById('vpGrid');
