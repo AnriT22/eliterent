@@ -696,7 +696,7 @@ function renderCarousel(vehicles, adminAds, firstBlockLength) {
         var desc = adLocalized(ad, 'description');
         var cta = adLocalized(ad, 'cta_text') || 'Learn More';
         return '<a class="fleet-ad-card" href="' + (ad.target_link || 'vehicles.html') + '" rel="noopener" target="_blank"' + trackClick + '>'
-            + '<div class="fleet-ad-card__img"><img src="' + img + '" alt="' + title + '" loading="lazy"></div>'
+            + '<div class="fleet-ad-card__img"><img src="' + (img && img.indexOf('/uploads/') === 0 ? img + '?w=700' : img) + '" alt="' + title + '" width="700" height="300" loading="lazy" decoding="async"></div>'
             + '<div class="fleet-ad-card__body"><h3 class="fleet-ad-card__title">' + title + '</h3>'
             + '<p class="fleet-ad-card__desc">' + desc + '</p>'
             + '<span class="fleet-ad-card__cta">' + cta + ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></span>'
