@@ -21,7 +21,7 @@
     <!-- CWV: connect early to the analytics origin and preload the LCP hero image -->
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
-    <link rel="preload" as="image" href="images/bmw8.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="images/bmw8.webp" imagesrcset="images/bmw8-480.webp 480w, images/bmw8-800.webp 800w, images/bmw8.webp 1400w" imagesizes="(max-width: 768px) 60vw, 800px" fetchpriority="high">
     <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="Car Rental Georgia — Tbilisi, Batumi &amp; Kutaisi | EliteAuto">
@@ -323,7 +323,7 @@
 
                 <!-- Right Car Image -->
                 <div class="hero-right">
-                    <img src="images/bmw8.webp" alt="BMW 8 Series - Luxury Car Rental Georgia" class="car-image" width="1400" height="924" fetchpriority="high" decoding="async">
+                    <img src="images/bmw8.webp" srcset="images/bmw8-480.webp 480w, images/bmw8-800.webp 800w, images/bmw8.webp 1400w" sizes="(max-width: 768px) 60vw, 800px" alt="BMW 8 Series - Luxury Car Rental Georgia" class="car-image" width="1400" height="924" fetchpriority="high" decoding="async">
                 </div>
             </div>
 
