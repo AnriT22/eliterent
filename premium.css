@@ -470,8 +470,12 @@ html[lang="ru"] .hero-tagline { font-size: 21px; }
 }
 .trust-item:hover .trust-logo { transform: scale(1.06); }
 @media (prefers-reduced-motion: reduce) {
-    /* No motion: fall back to a centered, wrapping row. */
+    /* No motion: fall back to a centered, wrapping row. The duplicate set only
+       exists to hide the seam in the scrolling loop — with no loop it would just
+       show every badge twice, so drop it. !important beats the inline
+       display:contents trust-bar.js writes on the wrapper. */
     .trust-bar-items { animation: none; flex-wrap: wrap; justify-content: center; width: auto; gap: 10px 26px; }
+    .trust-bar-items > .trust-dup { display: none !important; }
     .trust-icon { transition: none; }
 }
 
