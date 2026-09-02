@@ -156,6 +156,29 @@ function bySuitability(a, b) {
     return a.price - b.price;
 }
 
+// The client sends option ids; the alert should read like a dispatch note,
+// not like a database row.
+var OPTION_LABELS = {
+    child_seat: 'Child seat', extra_luggage: 'Extra luggage',
+    trunk_service: 'Additional trunk service', wheelchair: 'Wheelchair accessible',
+    pet: 'Pet-friendly vehicle', meet_greet: 'Meet & greet',
+    multi_stop: 'Multiple stops', chauffeur: 'Chauffeur service',
+    other: 'Other request', other_extra: 'Other request',
+    extra_stop: 'Additional stop', waiting: 'Waiting time',
+    occasion: 'Special occasion'
+};
+
+function labelList(ids) {
+    if (!Array.isArray(ids) || !ids.length) return null;
+    return ids.map(function (id) { return OPTION_LABELS[id] || String(id); }).join(', ');
+}
+
+function humanDuration(mins) {
+    if (!mins) return null;
+    var h = Math.floor(mins / 60), m = mins % 60;
+    return (h ? h + 'h ' : '') + m + 'm';
+}
+
 // ---- locations -------------------------------------------------------------
 
 router.get('/locations', function (req, res) {
@@ -341,13 +364,57 @@ router.post('/', optionalAuth, async function (req, res) {
             ]
         );
 
-        notifyOwner(
-            '🚘 Transfer ' + (kind === 'booking' ? 'BOOKING' : 'REQUEST') + ' ' + reference + '\n' +
-            pickupLabel + ' → ' + dropoffLabel + '\n' +
-            date + ' ' + time + ' · ' + Math.max(1, int(b.passengers, 1)) + ' pax\n' +
-            (str(b.vehicle_label, 120) || str(b.requested_vehicle, 160) || 'No vehicle chosen') + '\n' +
-            (str(b.contact_name, 100) || '') + ' ' + (str(b.contact_phone, 40) || str(b.contact_email, 160) || '')
-        );
+        // Dispatch note: everything needed to act on this without opening the
+        // admin panel. Ordered by what you decide first — is it bookable, when
+        // is it, what car, who do I call.
+        var paxN = Math.max(1, int(b.passengers, 1));
+        var bagsN = Math.max(0, int(b.luggage, 0));
+        var mountain = isMountainRoute(str(b.pickup_code, 40), str(b.dropoff_code, 40));
+        var reqs = labelList(b.requirements);
+        var extrasTxt = labelList(b.extras);
+        var L = [];
+
+        L.push(kind === 'booking'
+            ? '🚘 NEW TRANSFER BOOKING  ' + reference
+            : '🔎 TRANSFER REQUEST (needs sourcing)  ' + reference);
+        L.push('');
+        L.push('📍 ' + pickupLabel);
+        L.push('     ↓' + (route.distance_km
+            ? '  ' + route.distance_km + ' km · approx ' + humanDuration(route.duration_min) : ''));
+        L.push('📍 ' + dropoffLabel);
+        if (mountain) L.push('⛰️ Mountain route — 4x4 recommended');
+        L.push('');
+        L.push('🗓 ' + date + ' at ' + time);
+        if (str(b.return_date, 20)) {
+            L.push('↩️ Return ' + str(b.return_date, 20) + ' at ' + (str(b.return_time, 10) || '—'));
+        }
+        L.push('👥 ' + paxN + ' passenger' + (paxN === 1 ? '' : 's') +
+               '  ·  🧳 ' + bagsN + ' bag' + (bagsN === 1 ? '' : 's'));
+        L.push('🏷 ' + (str(b.transfer_type, 40) || 'airport'));
+        L.push('');
+
+        if (source === 'fleet') {
+            L.push('🚗 ' + (str(b.vehicle_label, 120) || 'Vehicle') + '  (our own fleet)');
+            L.push('💰 ' + (b.quoted_price != null ? '$' + Number(b.quoted_price) + ' / day' : 'no price'));
+        } else if (source === 'partner') {
+            L.push('🚗 ' + (str(b.vehicle_label, 120) || 'Vehicle') + '  (partner — confirm availability)');
+            L.push('💰 Price on request');
+        } else {
+            L.push('🚗 Requested: ' + (str(b.requested_vehicle, 160) || 'not specified'));
+            L.push('💰 Price on request — source from partners');
+        }
+
+        if (reqs) L.push('❗ Requirements: ' + reqs);
+        if (extrasTxt) L.push('➕ Extras: ' + extrasTxt);
+        L.push('');
+        L.push('👤 ' + (str(b.contact_name, 100) || 'no name'));
+        if (str(b.contact_phone, 40)) L.push('📞 ' + str(b.contact_phone, 40));
+        if (str(b.contact_email, 160)) L.push('✉️ ' + str(b.contact_email, 160));
+        L.push(req.user && req.user.id
+            ? '🔓 Signed-in customer (id ' + req.user.id + ')'
+            : '👋 Guest — not signed in');
+
+        notifyOwner(L.join('\n'));
 
         res.status(201).json({
             reference: reference,
