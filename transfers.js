@@ -116,10 +116,23 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    var lastQuoteKey = null;
+
     function goTo(i) {
         if (i < 0 || i >= STEPS.length) return;
         state.step = i;
         save();
+        // Load whenever the Vehicle step becomes visible, not only when
+        // advancing from Guests — "Request a specific car" jumps straight here
+        // and would otherwise land on an empty grid. Refetch only when the
+        // journey or the party actually changed.
+        if (i === 2) {
+            var key = [state.pickup_code, state.dropoff_code, state.passengers, state.luggage].join('|');
+            if (key !== lastQuoteKey) {
+                lastQuoteKey = key;
+                loadVehicles();
+            }
+        }
         render();
         var flow = $('.tr-flow');
         if (flow) window.scrollTo({ top: flow.offsetTop - 20, behavior: 'smooth' });
@@ -164,7 +177,6 @@
 
     function next() {
         if (!validate(state.step)) return;
-        if (state.step === 1) loadVehicles();
         goTo(state.step + 1);
     }
     function back() { goTo(state.step - 1); }
