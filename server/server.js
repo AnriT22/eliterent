@@ -26,6 +26,7 @@ const adsRoutes = require('./routes/ads');
 const trustRoutes = require('./routes/trust');
 const driverReviewsRoutes = require('./routes/driver-reviews');
 const partnerRoutes = require('./routes/partner');
+const transfersRoutes = require('./routes/transfers');
 const { initSMS } = require('./services/sms');
 const { initRedis } = require('./services/otp');
 
@@ -421,6 +422,7 @@ app.use('/api/ads', adsRoutes);
 app.use('/api/trust-badges', trustRoutes);
 app.use('/api/driver-reviews', driverReviewsRoutes);
 app.use('/api/partner', partnerRoutes);
+app.use('/api/transfers', transfersRoutes);
 
 // Fallback: serve index.html for root
 app.get('/', (req, res) => {
