@@ -16,7 +16,8 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { queryAll, queryOne, execute } = require('../db-helpers');
 const { authenticateToken, JWT_SECRET } = require('../middleware/auth');
-const { LOCATIONS, BY_CODE, estimateRoute } = require('../services/transfer-locations');
+const { LOCATIONS, BY_CODE, estimateRoute, isMountainRoute, mountainEndpoint } =
+    require('../services/transfer-locations');
 const { listPartnerVehicles } = require('../services/transfer-partners');
 
 let notifyOwner = function () {};
@@ -139,9 +140,18 @@ function withLuggageFlag(v, bags) {
     return v;
 }
 
-// Roomy-enough vehicles first, then cheapest — so the default choice is one
-// that actually takes the luggage.
+// Vehicle classes that actually belong on a Georgian mountain road.
+var MOUNTAIN_READY = ['suv', 'crossover', 'suv_6_8'];
+
+function markTerrain(v, mountain) {
+    v.recommended = mountain && MOUNTAIN_READY.indexOf(v.category) !== -1;
+    return v;
+}
+
+// Ordering answers "which car should I take?" in the order it matters:
+// right vehicle for the road, then enough room for the bags, then price.
 function bySuitability(a, b) {
+    if (a.recommended !== b.recommended) return a.recommended ? -1 : 1;
     if (a.luggage_ok !== b.luggage_ok) return a.luggage_ok ? -1 : 1;
     return a.price - b.price;
 }
@@ -174,20 +184,25 @@ router.post('/quote', async function (req, res) {
         var bags = Math.max(0, int(b.luggage, 0));
         var pickup = str(b.pickup_code, 40);
 
+        var dropoff = str(b.dropoff_code, 40);
+        var mountain = isMountainRoute(pickup, dropoff);
+
         var fleet = (await activeFleet())
             .map(function (v) { return fleetRow(v, pax); })
             .filter(function (v) { return fits(v, pax); })
-            .map(function (v) { return withLuggageFlag(v, bags); })
+            .map(function (v) { return markTerrain(withLuggageFlag(v, bags), mountain); })
             .sort(bySuitability);
 
         var partner = listPartnerVehicles({ passengers: pax, pickup_code: pickup })
-            .map(function (v) { return withLuggageFlag(v, bags); })
+            .map(function (v) { return markTerrain(withLuggageFlag(v, bags), mountain); })
             .sort(bySuitability);
 
         res.json({
             fleet: fleet,
             partner: partner,
-            route: estimateRoute(pickup, str(b.dropoff_code, 40))
+            route: estimateRoute(pickup, dropoff),
+            terrain: mountain ? 'mountain' : 'road',
+            terrain_label: mountainEndpoint(pickup, dropoff)
         });
     } catch (e) {
         console.error('[transfers] quote error:', e.message);

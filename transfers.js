@@ -63,6 +63,8 @@
 
     var locations = [];
     var currency = 'USD';
+    var terrain = null;      // 'mountain' when either end is Gudauri/Kazbegi/Mestia/etc
+    var terrainLabel = null;
 
     // ---- utilities --------------------------------------------------------
 
@@ -223,6 +225,9 @@
         var badge = v.instant
             ? '<span class="tr-badge tr-badge-ok">Available now</span>'
             : '<span class="tr-badge tr-badge-wait">Via a trusted partner</span>';
+        if (v.recommended) {
+            badge = '<span class="tr-badge tr-badge-rec">4x4 &middot; recommended for this route</span>' + badge;
+        }
         // Luggage is an estimate, so say so rather than quietly dropping the car.
         if (v.luggage_ok === false) {
             badge += '<span class="tr-badge tr-badge-wait">Tight for ' + state.luggage + ' bags — add trunk service</span>';
@@ -259,6 +264,18 @@
                 passengers: state.passengers, luggage: state.luggage
             }
         }).then(function (d) {
+            terrain = d.terrain; terrainLabel = d.terrain_label;
+            var note = $('#trTerrainNote');
+            if (note) {
+                if (terrain === 'mountain') {
+                    note.innerHTML = '<strong>' + esc(terrainLabel || 'This route') +
+                        '</strong> is a mountain road — steep, and snow-covered for much of the winter. ' +
+                        'We’ve put SUVs and 4x4s first; a sedan can do it in summer, but it is not the car we would send.';
+                    note.style.display = 'block';
+                } else {
+                    note.style.display = 'none';
+                }
+            }
             var sel = state.vehicle;
             var same = function (v) { return sel && String(sel.id) === String(v.id) && sel.source === v.source; };
 

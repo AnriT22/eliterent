@@ -338,3 +338,15 @@ html[data-theme="light"] .tr-btn-primary { color: #fff; }
 
 /* "Show all vehicles" affordance under the first screenful of fleet cards. */
 .tr-more { display: flex; justify-content: center; margin-top: 22px; }
+
+/* Route advice above the vehicle list (mountain roads want a 4x4). */
+.tr-note {
+    background: rgba(212,175,55,.08);
+    border: 1px solid rgba(212,175,55,.28);
+    border-left: 3px solid #D4AF37;
+    border-radius: 10px;
+    padding: 14px 18px; margin: 0 0 22px;
+    font-size: 14px; line-height: 1.6; color: var(--tr-muted);
+}
+.tr-note strong { color: var(--tr-text); }
+.tr-badge-rec { background: rgba(212,175,55,.16); color: #E9C766; }
