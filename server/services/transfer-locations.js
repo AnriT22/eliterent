@@ -62,6 +62,26 @@ function haversineKm(a, b) {
 // and a lower average speed. These are estimates and the UI labels them as such.
 const MOUNTAIN = ['gudauri', 'kazbegi', 'mestia', 'bakuriani', 'borjomi'];
 
+/**
+ * True when either end of the journey is a mountain destination.
+ *
+ * These are the routes where the vehicle genuinely matters: the Georgian
+ * Military Highway to Gudauri and Kazbegi, and the road to Mestia, are
+ * snow-bound for months and steep year-round. A sedan can physically do them
+ * in summer, but an SUV/4x4 is the right answer — so the matching engine
+ * promotes them rather than leaving a guest to work it out.
+ */
+function isMountainRoute(fromCode, toCode) {
+    return MOUNTAIN.indexOf(fromCode) !== -1 || MOUNTAIN.indexOf(toCode) !== -1;
+}
+
+/** The label to show when explaining why 4x4s are surfaced first. */
+function mountainEndpoint(fromCode, toCode) {
+    var code = MOUNTAIN.indexOf(toCode) !== -1 ? toCode
+        : (MOUNTAIN.indexOf(fromCode) !== -1 ? fromCode : null);
+    return code && BY_CODE[code] ? BY_CODE[code].label : null;
+}
+
 function estimateRoute(fromCode, toCode) {
     var a = BY_CODE[fromCode];
     var b = BY_CODE[toCode];
@@ -73,4 +93,4 @@ function estimateRoute(fromCode, toCode) {
     return { distance_km: km, duration_min: Math.max(15, Math.round(km / speed * 60)) };
 }
 
-module.exports = { LOCATIONS, BY_CODE, estimateRoute };
+module.exports = { LOCATIONS, BY_CODE, estimateRoute, isMountainRoute, mountainEndpoint };
