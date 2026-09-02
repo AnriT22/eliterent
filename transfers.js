@@ -22,6 +22,7 @@
         { id: 'meet_greet', label: 'Meet & greet', price: null },
         { id: 'child_seat', label: 'Child seat', price: null },
         { id: 'extra_luggage', label: 'Extra luggage', price: null },
+        { id: 'trunk_service', label: 'Additional trunk service', price: null },
         { id: 'extra_stop', label: 'Additional stop', price: null },
         { id: 'waiting', label: 'Waiting time', price: null },
         { id: 'chauffeur', label: 'Chauffeur service', price: null },
@@ -32,6 +33,7 @@
     var REQUIREMENTS = [
         { id: 'child_seat', label: 'Child seat' },
         { id: 'extra_luggage', label: 'Extra luggage' },
+        { id: 'trunk_service', label: 'Additional trunk service' },
         { id: 'wheelchair', label: 'Wheelchair accessible' },
         { id: 'pet', label: 'Pet-friendly vehicle' },
         { id: 'meet_greet', label: 'Meet & greet' },
@@ -209,6 +211,10 @@
         var badge = v.instant
             ? '<span class="tr-badge tr-badge-ok">Available now</span>'
             : '<span class="tr-badge tr-badge-wait">Via a trusted partner</span>';
+        // Luggage is an estimate, so say so rather than quietly dropping the car.
+        if (v.luggage_ok === false) {
+            badge += '<span class="tr-badge tr-badge-wait">Tight for ' + state.luggage + ' bags — add trunk service</span>';
+        }
         var price = v.instant
             ? '<span class="tr-vcard-price">' + money(v.price) + ' <small>/ day</small></span>'
             : '<span class="tr-vcard-price">from ' + money(v.price) + '</span>';
@@ -218,7 +224,9 @@
             '<span class="tr-vcard-brand">' + esc(v.brand) + '</span>' +
             '<h4 class="tr-vcard-name">' + esc(v.model || v.label) + '</h4>' +
             '<span class="tr-vcard-class">' + esc(v.label || v.category) + '</span>' +
-            '<span class="tr-vcard-cap">' + v.passengers + ' passengers &middot; ' + v.luggage + ' luggage</span>' +
+            '<span class="tr-vcard-cap">' + v.passengers + ' passengers &middot; approx ' + v.luggage + ' bags' +
+            (v.passengers >= 7 && state.passengers > 5 ? ' <em style="opacity:.75">(third row in use)</em>' : '') +
+            '</span>' +
             badge +
             '<span class="tr-vcard-foot">' + price +
             '<span class="tr-btn tr-btn-ghost tr-btn-sm">' + (selected ? 'Selected' : 'Select') + '</span></span>' +
@@ -262,8 +270,8 @@
                     fleetBox.parentNode.appendChild(more);
                 }
             } else {
-                fleetBox.innerHTML = '<div class="tr-empty">No vehicle in our own fleet carries ' + state.passengers +
-                    ' passengers and ' + state.luggage + ' bags on this date. Try the partner tab, or tell us the car you want below.</div>';
+                fleetBox.innerHTML = '<div class="tr-empty">No vehicle in our own fleet seats ' + state.passengers +
+                    ' passengers. Try the partner tab, or tell us the car you want below.</div>';
             }
 
             if (partnerBox) {
@@ -575,6 +583,14 @@
         stepper('#trPax', 'passengers', 1);
         stepper('#trBags', 'luggage', 0);
         buildChips($('#trRequirements'), REQUIREMENTS, state.requirements);
+        // With four or more bags the boot is the real constraint, so point at
+        // the trunk-service option rather than letting people hit an empty list.
+        var bagHint = $('#trBagHint');
+        function syncBagHint() {
+            if (bagHint) bagHint.style.display = state.luggage >= 4 ? 'block' : 'none';
+        }
+        syncBagHint();
+        $$('#trBags button').forEach(function (b) { b.addEventListener('click', syncBagHint); });
 
         // Vehicle
         $$('.tr-tab').forEach(function (tab) {
