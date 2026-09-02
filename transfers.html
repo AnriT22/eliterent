@@ -43,7 +43,7 @@
     <link rel="stylesheet" href="style.css?v=17">
     <link rel="stylesheet" href="premium.css?v=25">
     <link rel="stylesheet" href="navbar-auth.css?v=8">
-    <link rel="stylesheet" href="transfers.css?v=5">
+    <link rel="stylesheet" href="transfers.css?v=6">
     <script src="api-helper.js?v=3"></script>
     <script src="i18n.js?v=8"></script>
     <link rel="stylesheet" href="theme.css?v=4">
@@ -137,6 +137,43 @@
                         <p>Name the exact car you want. We'll search our fleet and our trusted partners.</p>
                     </button>
                 </div>
+            </div>
+        </section>
+
+        <section class="tr-section tr-section-alt" id="trOffersSection">
+            <div class="tr-wrap">
+                <h2 class="tr-h2">Ready-made transfers &amp; tours</h2>
+                <p class="tr-lede">Journeys our partners have already planned and priced. Pick one and book it &mdash; no waiting for a quote on the base price.</p>
+
+                <div class="tr-offer-search">
+                    <div class="tr-field" style="margin:0;">
+                        <label class="tr-label" for="trOfFrom">From</label>
+                        <select class="tr-select" id="trOfFrom"><option value="">Anywhere</option></select>
+                    </div>
+                    <div class="tr-field" style="margin:0;">
+                        <label class="tr-label" for="trOfTo">To</label>
+                        <select class="tr-select" id="trOfTo"><option value="">Anywhere</option></select>
+                    </div>
+                    <div class="tr-field" style="margin:0;">
+                        <label class="tr-label" for="trOfDate">Date</label>
+                        <input class="tr-input" type="date" id="trOfDate">
+                    </div>
+                    <div class="tr-field" style="margin:0;">
+                        <label class="tr-label" for="trOfPax">Passengers</label>
+                        <input class="tr-input" type="number" id="trOfPax" min="1" max="20" placeholder="Any">
+                    </div>
+                    <div class="tr-field" style="margin:0;">
+                        <label class="tr-label" for="trOfKind">Type</label>
+                        <select class="tr-select" id="trOfKind">
+                            <option value="">Transfers &amp; tours</option>
+                            <option value="transfer">Transfers</option>
+                            <option value="tour">Tours</option>
+                        </select>
+                    </div>
+                    <button type="button" class="tr-btn tr-btn-primary" id="trOfSearch">Search</button>
+                </div>
+
+                <div class="tr-offers" id="trOffers"></div>
             </div>
         </section>
 
@@ -461,6 +498,6 @@
 
     <script src="script.js?v=26"></script>
     <script src="navbar-auth.js?v=6"></script>
-    <script src="transfers.js?v=7"></script>
+    <script src="transfers.js?v=8"></script>
 </body>
 </html>

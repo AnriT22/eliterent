@@ -4138,7 +4138,112 @@
             });
         }
 
+        function offerCard(o) {
+            var paused = o.status !== 'active';
+            return '<div style="background:var(--th-surface, #1C1E26);border:1px solid rgba(148,163,184,.18);' +
+                'border-radius:14px;padding:16px 18px;margin-bottom:12px;' + (paused ? 'opacity:.6;' : '') + '">' +
+                '<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline;">' +
+                  '<div style="font-weight:700;">' + esc(o.title || (o.from_label + ' → ' + o.to_label)) + '</div>' +
+                  '<span style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;' +
+                  'color:' + (paused ? '#8894a5' : '#34d399') + ';">' + esc(o.status) + '</span>' +
+                '</div>' +
+                '<div style="font-size:13px;color:var(--tt-muted, #A0A3B0);margin-top:6px;">' +
+                  esc(o.from_label) + ' → ' + esc(o.to_label) + ' · ' +
+                  esc(o.offer_date || 'any date') + (o.offer_time ? ' ' + esc(o.offer_time) : '') +
+                  ' · ' + o.seats + ' seats · ' + o.luggage + ' bags' +
+                '</div>' +
+                '<div style="margin-top:8px;font-size:15px;font-weight:800;color:#D4AF37;">from $' +
+                  Number(o.base_price).toFixed(0) + '</div>' +
+                '<div style="margin-top:12px;">' +
+                  '<button class="btn btn-sm tr-offer-toggle" data-id="' + o.id + '" data-next="' +
+                  (paused ? 'active' : 'paused') + '">' + (paused ? 'Reactivate' : 'Pause') + '</button>' +
+                '</div></div>';
+        }
+
+        function loadOffers() {
+            body.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:40px;">Loading&hellip;</p>';
+            fetch('/api/transfers/offers/mine', { headers: { 'Authorization': 'Bearer ' + token } })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    var list = (d && d.offers) || [];
+                    body.innerHTML = list.length
+                        ? list.map(offerCard).join('')
+                        : '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:50px;">' +
+                          'No offers published yet. Use the form above to publish one.</p>';
+                    body.querySelectorAll('.tr-offer-toggle').forEach(function (b) {
+                        b.addEventListener('click', function () {
+                            b.disabled = true;
+                            fetch('/api/transfers/offers/' + b.dataset.id, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                                body: JSON.stringify({ status: b.dataset.next })
+                            }).then(loadOffers).catch(function () { b.disabled = false; });
+                        });
+                    });
+                })
+                .catch(function () {
+                    body.innerHTML = '<p style="color:#f87171;text-align:center;padding:40px;">Could not load your offers.</p>';
+                });
+        }
+
+        function fillOfferLocations() {
+            fetch('/api/transfers/locations').then(function (r) { return r.json(); }).then(function (d) {
+                var opts = (d.locations || []).map(function (l) {
+                    return '<option value="' + esc(l.code) + '">' + esc(l.label) + '</option>';
+                }).join('');
+                ['ofFrom', 'ofTo'].forEach(function (id) {
+                    var el = document.getElementById(id);
+                    if (el) el.innerHTML = opts;
+                });
+            }).catch(function () { /* selects stay empty; publish will validate */ });
+        }
+
+        function publishOffer() {
+            var msg = document.getElementById('ofMsg');
+            var btn = document.getElementById('ofPublish');
+            function val(id) { var e = document.getElementById(id); return e ? e.value : ''; }
+            function csv(id) {
+                return val(id).split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+            }
+            var fromSel = document.getElementById('ofFrom'), toSel = document.getElementById('ofTo');
+            if (!fromSel.value || !toSel.value) { msg.textContent = 'Choose a departure and destination.'; return; }
+            btn.disabled = true; msg.textContent = 'Publishing...';
+
+            fetch('/api/transfers/offers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({
+                    kind: val('ofKind'), title: val('ofTitle'),
+                    from_code: fromSel.value, from_label: fromSel.options[fromSel.selectedIndex].text,
+                    to_code: toSel.value, to_label: toSel.options[toSel.selectedIndex].text,
+                    offer_date: val('ofDate'), offer_time: val('ofTime'),
+                    vehicle_label: val('ofVehicle'),
+                    seats: parseInt(val('ofSeats'), 10) || 4,
+                    luggage: parseInt(val('ofLuggage'), 10) || 0,
+                    included: csv('ofIncluded'), additional: csv('ofAdditional'),
+                    base_price: parseFloat(val('ofPrice')),
+                    conditions: val('ofConditions')
+                })
+            })
+                .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Failed'); return d; }); })
+                .then(function () {
+                    btn.disabled = false;
+                    msg.textContent = 'Published - customers can now find it.';
+                    ['ofTitle', 'ofVehicle', 'ofPrice', 'ofIncluded', 'ofAdditional', 'ofConditions'].forEach(function (id) {
+                        var e = document.getElementById(id); if (e) e.value = '';
+                    });
+                    loadOffers();
+                })
+                .catch(function (e) {
+                    btn.disabled = false;
+                    msg.textContent = e.message || 'Could not publish.';
+                });
+        }
+
         function load() {
+            var creator = document.getElementById('trOfferCreate');
+            if (creator) creator.style.display = view === 'offers' ? '' : 'none';
+            if (view === 'offers') { loadOffers(); return; }
             body.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:40px;">Loading&hellip;</p>';
             fetch('/api/transfers/' + (view === 'open' ? 'open' : 'claimed'),
                   { headers: { 'Authorization': 'Bearer ' + token } })
@@ -4173,6 +4278,10 @@
                 load();
             });
         });
+
+        var pub = document.getElementById('ofPublish');
+        if (pub) pub.addEventListener('click', publishOffer);
+        fillOfferLocations();
 
         var navItem = document.querySelector('.db-nav-item[data-tab="transfers"]');
         if (navItem) navItem.addEventListener('click', load);
