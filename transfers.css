@@ -335,3 +335,6 @@ html[data-theme="light"] .tr-eyebrow { color: #F0D48A; }
 html[data-theme="light"] .tr-input,
 html[data-theme="light"] .tr-select { background: #fff; border-color: rgba(15,23,42,.28); color: #14161C; }
 html[data-theme="light"] .tr-btn-primary { color: #fff; }
+
+/* "Show all vehicles" affordance under the first screenful of fleet cards. */
+.tr-more { display: flex; justify-content: center; margin-top: 22px; }

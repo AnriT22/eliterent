@@ -228,6 +228,7 @@
     function loadVehicles() {
         var fleetBox = $('#trFleet'), partnerBox = $('#trPartner');
         if (!fleetBox) return;
+        var oldMore=document.querySelector('.tr-more'); if(oldMore) oldMore.remove();
         fleetBox.innerHTML = '<div class="tr-empty">Finding vehicles for your journey&hellip;</div>';
         if (partnerBox) partnerBox.innerHTML = '';
 
@@ -241,10 +242,29 @@
             var sel = state.vehicle;
             var same = function (v) { return sel && String(sel.id) === String(v.id) && sel.source === v.source; };
 
-            fleetBox.innerHTML = d.fleet && d.fleet.length
-                ? d.fleet.map(function (v) { return vehicleCard(v, same(v)); }).join('')
-                : '<div class="tr-empty">No vehicle in our own fleet carries ' + state.passengers +
-                  ' passengers and ' + state.luggage + ' bags on this date. Try the partner tab, or tell us the car you want below.</div>';
+            // The whole fleet is ~80 cars. Dumping all of them here buries the
+            // "Find my car" panel under a wall of cards and makes the step feel
+            // like a search results page rather than a curated choice, so show a
+            // first screenful and let people open the rest.
+            var FIRST = 9;
+            if (d.fleet && d.fleet.length) {
+                var shown = d.fleet.slice(0, FIRST);
+                fleetBox.innerHTML = shown.map(function (v) { return vehicleCard(v, same(v)); }).join('');
+                if (d.fleet.length > FIRST) {
+                    var more = document.createElement('div');
+                    more.className = 'tr-more';
+                    more.innerHTML = '<button type="button" class="tr-btn tr-btn-ghost">Show all ' +
+                        d.fleet.length + ' vehicles</button>';
+                    more.querySelector('button').addEventListener('click', function () {
+                        fleetBox.innerHTML = d.fleet.map(function (v) { return vehicleCard(v, same(v)); }).join('');
+                        more.remove();
+                    });
+                    fleetBox.parentNode.appendChild(more);
+                }
+            } else {
+                fleetBox.innerHTML = '<div class="tr-empty">No vehicle in our own fleet carries ' + state.passengers +
+                    ' passengers and ' + state.luggage + ' bags on this date. Try the partner tab, or tell us the car you want below.</div>';
+            }
 
             if (partnerBox) {
                 partnerBox.innerHTML = d.partner && d.partner.length
