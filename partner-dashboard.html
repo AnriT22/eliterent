@@ -135,6 +135,14 @@
 
                 </a>
 
+                <a href="#" class="db-nav-item" data-tab="transfers">
+
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 17h14M5 17a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2M5 17v2M19 17v2"/><circle cx="7.5" cy="14.5" r="1"/><circle cx="16.5" cy="14.5" r="1"/></svg>
+
+                    <span data-i18n="partner_dashboard.transfers">Transfers</span>
+
+                </a>
+
                 <a href="partner-financials.html" class="db-nav-item">
 
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -1694,6 +1702,23 @@
 
             <!-- TAB: BOOKINGS -->
 
+            <div class="db-tab" id="tab-transfers">
+                <div class="db-tab-header">
+                    <h2>Transfers</h2>
+                    <p style="color:var(--tt-muted, #A0A3B0);font-size:14px;margin:6px 0 0;">
+                        Jobs assigned to you, plus open requests any partner can take.
+                        Price a transfer and the customer sees your breakdown and accepts or rejects it.
+                    </p>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
+                    <button class="btn btn-sm tr-p-filter active" data-view="mine">My transfers</button>
+                    <button class="btn btn-sm tr-p-filter" data-view="open">Open requests</button>
+                </div>
+                <div id="trPartnerBody">
+                    <p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:40px;">Loading&hellip;</p>
+                </div>
+            </div>
+
             <div class="db-tab" id="tab-bookings">
 
                 <div class="db-tab-header">
@@ -2354,7 +2379,7 @@
 
     <script src="currency.js?v=2"></script>
 
-    <script src="dashboard.js?v=33"></script>
+    <script src="dashboard.js?v=34"></script>
 
 <script src="premium-animations.js?v=4"></script>
 
