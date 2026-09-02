@@ -725,6 +725,58 @@ async function initDB() {
         )
     `);
 
+    // Private transfers. One row per customer journey request.
+    //
+    // Two shapes share this table, distinguished by `kind`:
+    //   'booking' — a vehicle from our own fleet was selected and is bookable.
+    //   'request' — either the customer asked for a specific car we could not
+    //               confirm instantly, or the match came from a partner whose
+    //               availability needs checking. Price may be null until then.
+    //
+    // `reference` is the human-facing code (TR-XXXX-XXXX) the customer quotes.
+    // guest_id is nullable so people can request a transfer before registering.
+    // JSON columns keep the flexible parts (stops, extras, requested vehicle,
+    // the matched offer) out of the schema so partners can be added later
+    // without a migration.
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS transfer_requests (
+            id SERIAL PRIMARY KEY,
+            reference TEXT NOT NULL UNIQUE,
+            guest_id INTEGER,
+            kind TEXT NOT NULL DEFAULT 'request' CHECK(kind IN ('booking', 'request')),
+            transfer_type TEXT DEFAULT 'airport',
+            contact_name TEXT,
+            contact_email TEXT,
+            contact_phone TEXT,
+            pickup_code TEXT,
+            pickup_label TEXT NOT NULL,
+            dropoff_code TEXT,
+            dropoff_label TEXT NOT NULL,
+            pickup_date TEXT NOT NULL,
+            pickup_time TEXT NOT NULL,
+            return_date TEXT,
+            return_time TEXT,
+            distance_km NUMERIC(8,1),
+            duration_min INTEGER,
+            passengers INTEGER DEFAULT 1,
+            luggage INTEGER DEFAULT 0,
+            requirements TEXT,
+            extras TEXT,
+            vehicle_id INTEGER,
+            vehicle_source TEXT DEFAULT 'fleet' CHECK(vehicle_source IN ('fleet', 'partner', 'requested')),
+            vehicle_label TEXT,
+            requested_vehicle TEXT,
+            quoted_price NUMERIC(10,2),
+            currency TEXT DEFAULT 'USD',
+            status TEXT DEFAULT 'new' CHECK(status IN ('new', 'searching', 'offered', 'confirmed', 'cancelled')),
+            admin_note TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (guest_id) REFERENCES users(id) ON DELETE SET NULL,
+            FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE SET NULL
+        )
+    `);
+
     // Create indexes
     const indexes = [
         'CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)',
@@ -749,7 +801,11 @@ async function initDB() {
         'CREATE INDEX IF NOT EXISTS idx_ad_cards_placement ON ad_cards(placement)',
         'CREATE INDEX IF NOT EXISTS idx_ad_cards_active ON ad_cards(is_active)',
         'CREATE INDEX IF NOT EXISTS idx_driver_reviews_driver ON driver_reviews(driver_id)',
-        'CREATE INDEX IF NOT EXISTS idx_driver_reviews_customer ON driver_reviews(customer_id)'
+        'CREATE INDEX IF NOT EXISTS idx_driver_reviews_customer ON driver_reviews(customer_id)',
+        'CREATE INDEX IF NOT EXISTS idx_transfers_reference ON transfer_requests(reference)',
+        'CREATE INDEX IF NOT EXISTS idx_transfers_guest ON transfer_requests(guest_id)',
+        'CREATE INDEX IF NOT EXISTS idx_transfers_status ON transfer_requests(status)',
+        'CREATE INDEX IF NOT EXISTS idx_transfers_created ON transfer_requests(created_at)'
     ];
     for (const sql of indexes) {
         await pool.query(sql);
