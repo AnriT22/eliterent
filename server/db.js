@@ -777,6 +777,55 @@ async function initDB() {
         )
     `);
 
+    // Transfer quotes — the negotiated price for a transfer.
+    //
+    // A separate table rather than columns on transfer_requests because a
+    // partner may re-quote after a customer rejects, and we want the history:
+    // who offered what, when, and what the customer said. The newest row for a
+    // transfer is the live offer.
+    //
+    // Fee lines are explicit columns rather than a JSON blob so they can be
+    // summed, reported on, and reused by the pre-created-offers feature later.
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS transfer_quotes (
+            id SERIAL PRIMARY KEY,
+            transfer_id INTEGER NOT NULL,
+            partner_id INTEGER NOT NULL,
+            price_car NUMERIC(10,2) DEFAULT 0,
+            fee_airport NUMERIC(10,2) DEFAULT 0,
+            fee_chauffeur NUMERIC(10,2) DEFAULT 0,
+            fee_dropoff NUMERIC(10,2) DEFAULT 0,
+            fee_luggage NUMERIC(10,2) DEFAULT 0,
+            fee_other NUMERIC(10,2) DEFAULT 0,
+            other_label TEXT,
+            note TEXT,
+            total NUMERIC(10,2) NOT NULL,
+            currency TEXT DEFAULT 'USD',
+            status TEXT DEFAULT 'offered' CHECK(status IN ('offered', 'accepted', 'rejected', 'withdrawn')),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            responded_at TIMESTAMP,
+            FOREIGN KEY (transfer_id) REFERENCES transfer_requests(id) ON DELETE CASCADE,
+            FOREIGN KEY (partner_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    `);
+
+    // Transfers gained a lifecycle once partners started quoting them. These run
+    // as ALTERs so an already-deployed table picks them up — the CREATE above
+    // only fires on a fresh database.
+    await pool.query(`ALTER TABLE transfer_requests ADD COLUMN IF NOT EXISTS partner_id INTEGER`);
+    await pool.query(`ALTER TABLE transfer_requests ADD COLUMN IF NOT EXISTS claimed_at TIMESTAMP`);
+    await pool.query(`ALTER TABLE transfer_requests ADD COLUMN IF NOT EXISTS quoted_total NUMERIC(10,2)`);
+
+    // Widen the status vocabulary for the quote workflow:
+    //   open -> claimed -> quoted -> confirmed | declined | cancelled
+    // Drop-and-re-add is safe because the constraint is addressed by name.
+    await pool.query(`ALTER TABLE transfer_requests DROP CONSTRAINT IF EXISTS transfer_requests_status_check`);
+    await pool.query(`
+        ALTER TABLE transfer_requests ADD CONSTRAINT transfer_requests_status_check
+        CHECK(status IN ('new','searching','open','claimed','quoted','offered','accepted','confirmed','declined','rejected','cancelled'))
+    `);
+
+
     // Create indexes
     const indexes = [
         'CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)',
@@ -805,7 +854,10 @@ async function initDB() {
         'CREATE INDEX IF NOT EXISTS idx_transfers_reference ON transfer_requests(reference)',
         'CREATE INDEX IF NOT EXISTS idx_transfers_guest ON transfer_requests(guest_id)',
         'CREATE INDEX IF NOT EXISTS idx_transfers_status ON transfer_requests(status)',
-        'CREATE INDEX IF NOT EXISTS idx_transfers_created ON transfer_requests(created_at)'
+        'CREATE INDEX IF NOT EXISTS idx_transfers_created ON transfer_requests(created_at)',
+        'CREATE INDEX IF NOT EXISTS idx_transfers_partner ON transfer_requests(partner_id)',
+        'CREATE INDEX IF NOT EXISTS idx_transfer_quotes_transfer ON transfer_quotes(transfer_id)',
+        'CREATE INDEX IF NOT EXISTS idx_transfer_quotes_partner ON transfer_quotes(partner_id)'
     ];
     for (const sql of indexes) {
         await pool.query(sql);

@@ -13,9 +13,8 @@
 
 const express = require('express');
 const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
 const { queryAll, queryOne, execute } = require('../db-helpers');
-const { authenticateToken, JWT_SECRET } = require('../middleware/auth');
+const { authenticateToken, requireRole } = require('../middleware/auth');
 const { LOCATIONS, BY_CODE, estimateRoute, isMountainRoute, mountainEndpoint } =
     require('../services/transfer-locations');
 const { listPartnerVehicles } = require('../services/transfer-partners');
@@ -24,20 +23,6 @@ let notifyOwner = function () {};
 try { notifyOwner = require('../services/notify').notifyOwner; } catch (e) { /* alerts optional */ }
 
 const router = express.Router();
-
-/**
- * Attaches req.user when a valid token is present and does nothing otherwise.
- * A transfer can be requested before signing up, but if the visitor IS signed
- * in we want the row linked so it appears under their account.
- */
-function optionalAuth(req, res, next) {
-    var header = req.headers['authorization'];
-    var token = (header && header.split(' ')[1]) || req.query.token;
-    if (token) {
-        try { req.user = jwt.verify(token, JWT_SECRET); } catch (e) { /* treat as guest */ }
-    }
-    next();
-}
 
 // ---- helpers ---------------------------------------------------------------
 
@@ -305,7 +290,7 @@ router.post('/find-vehicle', async function (req, res) {
  * visitor can request a transfer before they have an account; if a valid token
  * is present the row is linked to them and shows up in their profile.
  */
-router.post('/', optionalAuth, async function (req, res) {
+router.post('/', authenticateToken, async function (req, res) {
     try {
         var b = req.body || {};
 
@@ -360,7 +345,7 @@ router.post('/', optionalAuth, async function (req, res) {
                 // A partner offer is indicative only — never stored as a firm quote.
                 kind === 'booking' ? (b.quoted_price != null ? Number(b.quoted_price) : null) : null,
                 str(b.currency, 8) || 'USD',
-                kind === 'booking' ? 'new' : 'searching'
+                'open'
             ]
         );
 
@@ -418,7 +403,7 @@ router.post('/', optionalAuth, async function (req, res) {
         res.status(201).json({
             reference: reference,
             kind: kind,
-            status: kind === 'booking' ? 'new' : 'searching'
+            status: 'open'
         });
     } catch (e) {
         console.error('[transfers] create error:', e.message);
@@ -455,16 +440,194 @@ router.get('/ref/:reference', async function (req, res) {
 router.get('/mine', authenticateToken, async function (req, res) {
     try {
         var rows = await queryAll(
-            'SELECT reference, kind, status, transfer_type, pickup_label, dropoff_label,' +
-            ' pickup_date, pickup_time, passengers, luggage, vehicle_label, requested_vehicle,' +
-            ' quoted_price, currency, created_at' +
-            ' FROM transfer_requests WHERE guest_id = $1 ORDER BY created_at DESC LIMIT 50',
+            'SELECT t.reference, t.kind, t.status, t.transfer_type, t.pickup_label, t.dropoff_label,' +
+            ' t.pickup_date, t.pickup_time, t.passengers, t.luggage, t.vehicle_label,' +
+            ' t.requested_vehicle, t.currency, t.created_at,' +
+            ' q.price_car, q.fee_airport, q.fee_chauffeur, q.fee_dropoff, q.fee_luggage,' +
+            ' q.fee_other, q.other_label, q.note AS quote_note, q.total AS quote_total,' +
+            ' q.status AS quote_status' +
+            ' FROM transfer_requests t' +
+            ' LEFT JOIN LATERAL (SELECT * FROM transfer_quotes' +
+            '   WHERE transfer_id = t.id ORDER BY created_at DESC, id DESC LIMIT 1) q ON true' +
+            ' WHERE t.guest_id = $1 ORDER BY t.created_at DESC LIMIT 50',
             [req.user.id]
         );
         res.json({ transfers: rows });
     } catch (e) {
         console.error('[transfers] mine error:', e.message);
         res.status(500).json({ error: 'Could not load your transfers' });
+    }
+});
+
+
+// ---- quote workflow --------------------------------------------------------
+//
+// open -> claimed -> quoted -> confirmed
+//                      \----> declined (customer rejects; partner may re-quote)
+//
+// Every transfer goes through it: prices here are negotiated, so even a car
+// from our own fleet is priced by the partner who takes the job rather than
+// billed at the listed day rate.
+
+var FEE_FIELDS = ['price_car', 'fee_airport', 'fee_chauffeur', 'fee_dropoff', 'fee_luggage', 'fee_other'];
+
+function money(v) {
+    var n = parseFloat(v);
+    if (isNaN(n) || n < 0) return 0;
+    return Math.round(n * 100) / 100;
+}
+
+/** The live offer for a transfer is simply its newest quote. */
+async function latestQuote(transferId) {
+    return queryOne(
+        'SELECT * FROM transfer_quotes WHERE transfer_id = $1 ORDER BY created_at DESC, id DESC LIMIT 1',
+        [transferId]
+    );
+}
+
+/**
+ * GET /api/transfers/open — the partner job board.
+ * Broadcast model: every partner sees unclaimed transfers, first to claim wins.
+ */
+router.get('/open', authenticateToken, requireRole('partner'), async function (req, res) {
+    try {
+        var rows = await queryAll(
+            'SELECT reference, transfer_type, pickup_label, dropoff_label, pickup_date, pickup_time,' +
+            ' return_date, return_time, distance_km, duration_min, passengers, luggage, extras,' +
+            ' vehicle_label, requested_vehicle, vehicle_source, created_at' +
+            ' FROM transfer_requests WHERE partner_id IS NULL' +
+            "  AND status IN ('open','new','searching')" +
+            ' ORDER BY pickup_date ASC, created_at ASC LIMIT 100'
+        );
+        res.json({ transfers: rows });
+    } catch (e) {
+        console.error('[transfers] open error:', e.message);
+        res.status(500).json({ error: 'Could not load open transfers' });
+    }
+});
+
+/** GET /api/transfers/claimed — the transfers this partner has taken. */
+router.get('/claimed', authenticateToken, requireRole('partner'), async function (req, res) {
+    try {
+        var rows = await queryAll(
+            'SELECT t.*, q.total AS live_total, q.status AS quote_status' +
+            ' FROM transfer_requests t' +
+            ' LEFT JOIN LATERAL (SELECT total, status FROM transfer_quotes' +
+            '   WHERE transfer_id = t.id ORDER BY created_at DESC, id DESC LIMIT 1) q ON true' +
+            ' WHERE t.partner_id = $1 ORDER BY t.pickup_date ASC LIMIT 100',
+            [req.user.id]
+        );
+        res.json({ transfers: rows });
+    } catch (e) {
+        console.error('[transfers] claimed error:', e.message);
+        res.status(500).json({ error: 'Could not load your transfers' });
+    }
+});
+
+/**
+ * POST /api/transfers/:reference/claim
+ * Race-free: the WHERE clause only matches while the transfer is unclaimed, so
+ * if two partners press Accept at the same moment exactly one UPDATE affects a
+ * row and the other is told it has gone.
+ */
+router.post('/:reference/claim', authenticateToken, requireRole('partner'), async function (req, res) {
+    try {
+        var ref = (str(req.params.reference, 20) || '').toUpperCase();
+        var r = await execute(
+            'UPDATE transfer_requests SET partner_id = $1, claimed_at = CURRENT_TIMESTAMP,' +
+            "  status = 'claimed', updated_at = CURRENT_TIMESTAMP" +
+            ' WHERE reference = $2 AND partner_id IS NULL' +
+            "  AND status IN ('open','new','searching')",
+            [req.user.id, ref]
+        );
+        if (!r.rowCount) {
+            return res.status(409).json({ error: 'Another partner has already taken this transfer' });
+        }
+        notifyOwner('Transfer ' + ref + ' claimed by partner #' + req.user.id);
+        res.json({ ok: true, reference: ref, status: 'claimed' });
+    } catch (e) {
+        console.error('[transfers] claim error:', e.message);
+        res.status(500).json({ error: 'Could not claim this transfer' });
+    }
+});
+
+/**
+ * POST /api/transfers/:reference/quote — the partner's pricing form.
+ * Only the holding partner may price it. Re-quoting after a rejection creates a
+ * new row rather than overwriting, so the negotiation history survives.
+ */
+router.post('/:reference/quote', authenticateToken, requireRole('partner'), async function (req, res) {
+    try {
+        var ref = (str(req.params.reference, 20) || '').toUpperCase();
+        var t = await queryOne(
+            'SELECT id, partner_id, status FROM transfer_requests WHERE reference = $1', [ref]);
+        if (!t) return res.status(404).json({ error: 'Not found' });
+        if (t.partner_id !== req.user.id) return res.status(403).json({ error: 'This transfer is not yours' });
+        if (['confirmed', 'cancelled'].indexOf(t.status) !== -1) {
+            return res.status(409).json({ error: 'This transfer is already ' + t.status });
+        }
+
+        var b = req.body || {};
+        var vals = FEE_FIELDS.map(function (f) { return money(b[f]); });
+        var total = Math.round(vals.reduce(function (a, n) { return a + n; }, 0) * 100) / 100;
+        if (total <= 0) return res.status(400).json({ error: 'Enter at least a car price' });
+
+        await execute(
+            'INSERT INTO transfer_quotes (transfer_id, partner_id, price_car, fee_airport, fee_chauffeur,' +
+            ' fee_dropoff, fee_luggage, fee_other, other_label, note, total, currency)' +
+            ' VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)',
+            [t.id, req.user.id].concat(vals).concat([
+                str(b.other_label, 80), str(b.note, 500), total, str(b.currency, 8) || 'USD'
+            ])
+        );
+        await execute(
+            "UPDATE transfer_requests SET status = 'quoted', quoted_total = $1," +
+            ' updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+            [total, t.id]
+        );
+
+        notifyOwner('Transfer ' + ref + ' quoted at ' + total + ' by partner #' + req.user.id);
+        res.json({ ok: true, reference: ref, total: total, status: 'quoted' });
+    } catch (e) {
+        console.error('[transfers] quote submit error:', e.message);
+        res.status(500).json({ error: 'Could not save the quote' });
+    }
+});
+
+/**
+ * POST /api/transfers/:reference/respond — the customer accepts or rejects.
+ * A rejection hands the transfer back to the partner to re-quote rather than
+ * killing the job outright.
+ */
+router.post('/:reference/respond', authenticateToken, async function (req, res) {
+    try {
+        var ref = (str(req.params.reference, 20) || '').toUpperCase();
+        var accept = !!(req.body && req.body.accept === true);
+        var t = await queryOne(
+            'SELECT id, guest_id, status FROM transfer_requests WHERE reference = $1', [ref]);
+        if (!t) return res.status(404).json({ error: 'Not found' });
+        if (t.guest_id !== req.user.id) return res.status(403).json({ error: 'This transfer is not yours' });
+        if (t.status !== 'quoted') return res.status(409).json({ error: 'There is no offer to respond to' });
+
+        var q = await latestQuote(t.id);
+        if (!q) return res.status(409).json({ error: 'There is no offer to respond to' });
+
+        await execute(
+            'UPDATE transfer_quotes SET status = $1, responded_at = CURRENT_TIMESTAMP WHERE id = $2',
+            [accept ? 'accepted' : 'rejected', q.id]
+        );
+        await execute(
+            'UPDATE transfer_requests SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+            [accept ? 'confirmed' : 'claimed', t.id]
+        );
+
+        notifyOwner(accept
+            ? 'Transfer ' + ref + ' CONFIRMED by the customer at ' + q.total
+            : 'Transfer ' + ref + ' offer REJECTED by the customer (' + q.total + ')');
+        res.json({ ok: true, status: accept ? 'confirmed' : 'declined' });
+    } catch (e) {
+        console.error('[transfers] respond error:', e.message);
+        res.status(500).json({ error: 'Could not record your response' });
     }
 });
 
