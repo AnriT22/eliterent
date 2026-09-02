@@ -350,3 +350,16 @@ html[data-theme="light"] .tr-btn-primary { color: #fff; }
 }
 .tr-note strong { color: var(--tr-text); }
 .tr-badge-rec { background: rgba(212,175,55,.16); color: #E9C766; }
+
+/* Fee lines on Review — the shape of the quote, before any figures exist. */
+.tr-fees { display: flex; flex-direction: column; gap: 9px; }
+.tr-fee { display: flex; align-items: baseline; gap: 12px; font-size: 14.5px; }
+.tr-fee-name { color: var(--tr-text); }
+.tr-fee-dots { flex: 1; border-bottom: 1px dotted var(--tr-line-strong); transform: translateY(-3px); }
+.tr-fee-val { color: var(--tr-muted); font-size: 13px; white-space: nowrap; }
+.tr-signin {
+    background: rgba(212,175,55,.08); border: 1px solid rgba(212,175,55,.3);
+    border-radius: 12px; padding: 16px 18px; margin-bottom: 16px;
+    font-size: 14px; line-height: 1.6; color: var(--tr-muted);
+}
+.tr-signin strong { color: var(--tr-text); }

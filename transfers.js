@@ -60,6 +60,10 @@
     var terrain = null;      // 'mountain' when either end is Gudauri/Kazbegi/Mestia/etc
     var terrainLabel = null;
 
+    function authToken() {
+        try { return localStorage.getItem('token') || null; } catch (e) { return null; }
+    }
+
     // ---- utilities --------------------------------------------------------
 
     function $(sel, root) { return (root || document).querySelector(sel); }
@@ -420,15 +424,44 @@
             ? extrasChosen.map(function (e) { return esc(e.label) + (e.price ? ' — ' + money(e.price) : ''); }).join('<br>')
             : '<span style="color:var(--tr-muted)">None</span>';
 
-        // Only our own fleet can be quoted. A partner or sourced vehicle is
-        // priced once the partner confirms — never guessed here.
-        var instant = v && v.instant;
-        var total = instant ? Number(v.price) + extrasTotal : null;
-        $('#trTotalValue').textContent = total != null ? money(total) : 'On request';
-        $('#trTotalNote').textContent = total != null
-            ? 'Estimated total for the vehicle and selected extras. We confirm the final price before you pay.'
-            : 'We’ll confirm the price with our partner network and come back to you with a firm quote.';
-        $('#trSubmit').textContent = instant ? 'Confirm transfer' : 'Send vehicle request';
+        // Nothing is priced yet. Under the quote workflow the partner who takes
+        // the job sets the figures, so Review shows the SHAPE of the quote —
+        // which lines you will be charged for — rather than inventing numbers.
+        var feeLines = [
+            ['Car price', 'the vehicle for your journey'],
+            ['Airport fee', 'if pick-up or drop-off is an airport'],
+            ['Chauffeur fee', 'driver for the journey'],
+            ['Drop-off fee', 'leaving the car at the destination'],
+            ['Extra luggage', 'support vehicle or roof box']
+        ];
+        if (extrasChosen.length) {
+            feeLines.push(['Selected services', extrasChosen.map(function (e) { return e.label; }).join(', ')]);
+        }
+        $('#trSumFees').innerHTML = '<div class="tr-fees">' + feeLines.map(function (f) {
+            return '<div class="tr-fee"><span class="tr-fee-name">' + esc(f[0]) + '</span>' +
+                '<span class="tr-fee-dots"></span>' +
+                '<span class="tr-fee-val">' + esc(f[1]) + '</span></div>';
+        }).join('') + '</div>' +
+        '<p class="tr-hint">Only the lines that apply to your journey are charged.</p>';
+
+        $('#trTotalValue').textContent = 'On request';
+        $('#trTotalNote').textContent =
+            'Our partner prices your journey and sends you a full breakdown. ' +
+            'Nothing is charged until you accept that price.';
+
+        var signedIn = !!authToken();
+        var gate = $('#trSignin');
+        if (gate) {
+            gate.style.display = signedIn ? 'none' : 'block';
+            gate.innerHTML = signedIn ? '' :
+                '<strong>Sign in to send this request.</strong><br>' +
+                'You need an account so we can send you the price and you can accept it. ' +
+                'Your journey is saved &mdash; you will come straight back here.' +
+                '<div style="margin-top:12px;"><a class="tr-btn tr-btn-primary tr-btn-sm" ' +
+                'href="login.html?redirect=transfers.html">Sign in or register</a></div>';
+        }
+        $('#trSubmit').disabled = !signedIn;
+        $('#trSubmit').textContent = 'Send transfer request';
     }
 
     function submit() {
@@ -461,15 +494,14 @@
             }
         }).then(function (d) {
             try { sessionStorage.removeItem(STORE_KEY); } catch (e) {}
-            var booked = d.kind === 'booking';
+            var booked = false; // every transfer is priced by a partner first
             $('.tr-flow').innerHTML =
                 '<div class="tr-wrap"><div class="tr-result">' +
                 '<div class="tr-result-ico">' + (booked ? '✅' : '🔎') + '</div>' +
-                '<h2>' + (booked ? 'Transfer confirmed' : 'Request received') + '</h2>' +
-                '<p>' + (booked
-                    ? 'Your transfer is booked. We’ll be in touch shortly with your driver details.'
-                    : 'We’re searching for your requested vehicle and will come back to you with the best available option.') +
-                '</p>' +
+                '<h2>Request received</h2>' +
+                '<p>One of our partners will price your journey and send you a full ' +
+                'breakdown &mdash; car price plus any airport, chauffeur, drop-off or luggage ' +
+                'fees. You can accept or reject it, and nothing is charged until you accept.</p>' +
                 '<div class="tr-ref">' + esc(d.reference) + '</div>' +
                 '<p>Keep this reference. You can quote it to us any time, and it appears in your account if you’re signed in.</p>' +
                 '<div class="tr-nav" style="justify-content:center;">' +
@@ -479,8 +511,14 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }).catch(function (e) {
             btn.disabled = false;
-            btn.textContent = 'Try again';
-            err('errContact', e.message || 'Something went wrong. Please try again.');
+            btn.textContent = 'Send transfer request';
+            var msg = e.message || 'Something went wrong. Please try again.';
+            if (/token|expired|Access/i.test(msg)) {
+                msg = 'Your session expired. Sign in again and your journey will still be here.';
+                var gate = $('#trSignin');
+                if (gate) { gate.style.display = 'block'; }
+            }
+            err('errContact', msg);
         });
     }
 
