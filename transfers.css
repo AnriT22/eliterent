@@ -1,23 +1,28 @@
 /* ===========================================================================
    Transfers — premium private-transfer experience.
 
-   Built on the site's existing theme tokens (--th-*/--tt-*) so light and dark
-   both work and the page reads as part of EliteAuto rather than a bolt-on.
+   Self-contained palette (see the note on .tr-page) with an explicit light
+   override, so both themes work without depending on tokens defined elsewhere.
    Layout leans on generous space and a single gold accent; the only strong
    colour is the accent and the semantic states (available / request).
    =========================================================================== */
 
+/* Literal values, not var() chains into the site tokens. Chaining
+   (--tr-gold: var(--tt-gold)) means one missing token anywhere upstream makes
+   every gold background resolve to `transparent` and every gold text colour
+   fall back to inherit — which silently erases the primary buttons and the
+   active step pip. Defining them here keeps this page self-contained. */
 .tr-page {
-    --tr-gold: var(--tt-gold, #D4AF37);
+    --tr-gold: #D4AF37;
     --tr-gold-soft: rgba(212, 175, 55, 0.12);
-    --tr-bg: var(--th-bg, #0B0C10);
-    --tr-surface: var(--th-surface, #1C1E26);
-    --tr-surface-2: var(--th-bg2, #141922);
-    --tr-line: rgba(148, 163, 184, 0.16);
-    --tr-line-strong: rgba(148, 163, 184, 0.3);
-    --tr-text: var(--tt-text, #EAEAEA);
-    --tr-muted: var(--tt-muted, #A0A3B0);
-    --tr-muted-2: var(--tt-muted2, #94a3b8);
+    --tr-bg: #0B0C10;
+    --tr-surface: #1C1E26;
+    --tr-surface-2: #141922;
+    --tr-line: rgba(148, 163, 184, 0.22);
+    --tr-line-strong: rgba(148, 163, 184, 0.42);
+    --tr-text: #EAEAEA;
+    --tr-muted: #A0A3B0;
+    --tr-muted-2: #94a3b8;
     --tr-ok: #34d399;
     --tr-ok-soft: rgba(52, 211, 153, 0.12);
     --tr-wait: #e0b252;
@@ -61,7 +66,7 @@
     cursor: pointer; text-decoration: none; transition: transform .18s ease, background .18s ease, border-color .18s ease;
     font-family: inherit;
 }
-.tr-btn-primary { background: var(--tr-gold); color: #0B0C10; }
+.tr-btn-primary { background: #D4AF37; background: var(--tr-gold); color: #0B0C10; }
 .tr-btn-primary:hover { transform: translateY(-2px); background: #e3c258; }
 .tr-btn-ghost { background: transparent; color: var(--tr-text); border-color: var(--tr-line-strong); }
 .tr-btn-ghost:hover { border-color: var(--tr-gold); color: var(--tr-gold); }
@@ -108,7 +113,7 @@
 .tr-step-pip b { font-variant-numeric: tabular-nums; font-size: 11px; letter-spacing: .06em; opacity: .75; }
 .tr-step-pip.is-done { color: var(--tr-text); cursor: pointer; }
 .tr-step-pip.is-done:hover { border-color: var(--tr-line-strong); }
-.tr-step-pip.is-active { color: #0B0C10; background: var(--tr-gold); border-color: var(--tr-gold); }
+.tr-step-pip.is-active { color: #0B0C10; background: #D4AF37; background: var(--tr-gold); border-color: #D4AF37; }
 
 .tr-panel { display: none; }
 .tr-panel.is-active { display: block; animation: trFade .28s ease both; }
@@ -126,8 +131,8 @@
 }
 .tr-input, .tr-select {
     width: 100%; box-sizing: border-box;
-    background: var(--tr-surface); color: var(--tr-text);
-    border: 1px solid var(--tr-line); border-radius: 12px;
+    background: #1C1E26; background: var(--tr-surface); color: #EAEAEA; color: var(--tr-text);
+    border: 1px solid rgba(148,163,184,.42); border-radius: 12px;
     padding: 15px 16px; font-size: 15px; font-family: inherit;
     transition: border-color .18s ease;
 }
@@ -204,7 +209,7 @@
 .tr-tab:hover { color: var(--tr-text); }
 .tr-tab.is-active { color: var(--tr-gold); border-bottom-color: var(--tr-gold); }
 
-.tr-vehicles { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+.tr-vehicles { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; min-height: 180px; }
 .tr-vcard {
     display: flex; flex-direction: column; text-align: left; padding: 0; overflow: hidden;
     background: var(--tr-surface); border: 1px solid var(--tr-line);
@@ -229,15 +234,16 @@
     font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
     padding: 5px 11px; border-radius: 999px;
 }
-.tr-badge-ok { background: var(--tr-ok-soft); color: var(--tr-ok); }
+.tr-badge-ok { background: rgba(52,211,153,.12); background: var(--tr-ok-soft); color: #34d399; color: var(--tr-ok); }
 .tr-badge-wait { background: var(--tr-wait-soft); color: var(--tr-wait); }
 
-.tr-empty { padding: 48px 24px; text-align: center; color: var(--tr-muted); border: 1px dashed var(--tr-line-strong); border-radius: var(--tr-radius); }
+.tr-empty { padding: 36px 24px; grid-column: 1 / -1; text-align: center; color: var(--tr-muted); border: 1px dashed var(--tr-line-strong); border-radius: var(--tr-radius); }
 
 /* ---------- find my car ---------- */
 .tr-find {
+    margin-top: 28px;
     background: linear-gradient(135deg, var(--tr-surface) 0%, var(--tr-surface-2) 100%);
-    border: 1px solid var(--tr-line); border-radius: 24px; padding: 40px 36px; margin-top: 40px;
+    border: 1px solid var(--tr-line); border-radius: 24px; padding: 32px 30px;
 }
 .tr-find h3 { font-size: clamp(21px, 2.6vw, 28px); font-weight: 800; letter-spacing: -.02em; margin: 0 0 10px; }
 .tr-find p { color: var(--tr-muted); margin: 0 0 26px; max-width: 520px; font-size: 15px; line-height: 1.65; }
@@ -309,6 +315,23 @@
 
 /* Light theme: the hero keeps its dark cinematic treatment (the photo needs
    it), everything below flips to the light surfaces. */
-html[data-theme="light"] .tr-page { --tr-line: rgba(15, 23, 42, 0.12); --tr-line-strong: rgba(15, 23, 42, 0.24); }
+html[data-theme="light"] .tr-page {
+    --tr-bg: #F6F5F1;
+    --tr-surface: #FFFFFF;
+    --tr-surface-2: #F1EFEA;
+    --tr-line: rgba(15, 23, 42, 0.14);
+    --tr-line-strong: rgba(15, 23, 42, 0.28);
+    --tr-text: #14161C;
+    --tr-muted: #55606E;
+    --tr-muted-2: #64707E;
+    --tr-gold: #9C7E14;
+}
+/* The hero keeps its dark cinematic treatment in both themes — the photograph
+   needs it — so its own text stays light regardless. */
 html[data-theme="light"] .tr-hero h1,
-html[data-theme="light"] .tr-hero-sub { color: #fff; }
+html[data-theme="light"] .tr-hero-sub,
+html[data-theme="light"] .tr-eyebrow { color: #fff; }
+html[data-theme="light"] .tr-eyebrow { color: #F0D48A; }
+html[data-theme="light"] .tr-input,
+html[data-theme="light"] .tr-select { background: #fff; border-color: rgba(15,23,42,.28); color: #14161C; }
+html[data-theme="light"] .tr-btn-primary { color: #fff; }
