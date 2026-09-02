@@ -725,4 +725,203 @@ router.post('/admin/:reference/decline', authenticateToken, requireRole('admin')
     }
 });
 
+
+// ---- pre-created partner offers -------------------------------------------
+//
+// The mirror image of a request: the partner publishes a transfer or tour with
+// a base price up front, and customers search and book it. Booking one still
+// enters the same approval + quote lifecycle, because extras and fees are only
+// known once the partner sees the specific journey.
+
+function jsonList(v) {
+    if (Array.isArray(v)) return JSON.stringify(v.slice(0, 30).map(function (x) { return String(x).slice(0, 80); }));
+    return JSON.stringify([]);
+}
+
+function offerRow(o) {
+    function parse(raw) {
+        try { var a = JSON.parse(raw); return Array.isArray(a) ? a : []; } catch (e) { return []; }
+    }
+    return {
+        id: o.id,
+        kind: o.kind,
+        title: o.title,
+        from_label: o.from_label,
+        to_label: o.to_label,
+        from_code: o.from_code,
+        to_code: o.to_code,
+        offer_date: o.offer_date,
+        offer_time: o.offer_time,
+        vehicle_label: o.vehicle_label,
+        seats: o.seats,
+        luggage: o.luggage,
+        included: parse(o.included_services),
+        additional: parse(o.additional_services),
+        base_price: o.base_price == null ? null : Number(o.base_price),
+        currency: o.currency,
+        conditions: o.conditions,
+        // The partner is never named to the customer — the platform is the
+        // single booking surface, the partner is the supply behind it.
+        status: o.status
+    };
+}
+
+/**
+ * GET /api/transfers/offers — public search.
+ * Filters are all optional so the page can show everything by default.
+ */
+router.get('/offers', async function (req, res) {
+    try {
+        var where = ["status = 'active'"];
+        var params = [];
+        var q = req.query || {};
+
+        if (str(q.from, 40)) { params.push(str(q.from, 40)); where.push('from_code = $' + params.length); }
+        if (str(q.to, 40)) { params.push(str(q.to, 40)); where.push('to_code = $' + params.length); }
+        // An offer with no date is an "any date" standing offer, so it should
+        // still surface when someone searches a specific day.
+        if (str(q.date, 20)) {
+            params.push(str(q.date, 20));
+            where.push('(offer_date IS NULL OR offer_date = $' + params.length + ')');
+        }
+        if (int(q.passengers)) { params.push(int(q.passengers)); where.push('seats >= $' + params.length); }
+        if (str(q.kind, 20) === 'tour' || str(q.kind, 20) === 'transfer') {
+            params.push(str(q.kind, 20)); where.push('kind = $' + params.length);
+        }
+
+        var rows = await queryAll(
+            'SELECT * FROM transfer_offers WHERE ' + where.join(' AND ') +
+            ' ORDER BY base_price ASC, id DESC LIMIT 60', params);
+        res.json({ offers: rows.map(offerRow) });
+    } catch (e) {
+        console.error('[transfers] offers search error:', e.message);
+        res.status(500).json({ error: 'Could not load offers' });
+    }
+});
+
+/** GET /api/transfers/offers/mine — the partner's own offers, any status. */
+router.get('/offers/mine', authenticateToken, requireRole('partner'), async function (req, res) {
+    try {
+        var rows = await queryAll(
+            'SELECT * FROM transfer_offers WHERE partner_id = $1 ORDER BY created_at DESC LIMIT 100',
+            [req.user.id]);
+        res.json({ offers: rows.map(offerRow) });
+    } catch (e) {
+        console.error('[transfers] offers mine error:', e.message);
+        res.status(500).json({ error: 'Could not load your offers' });
+    }
+});
+
+/** POST /api/transfers/offers — publish an offer. */
+router.post('/offers', authenticateToken, requireRole('partner'), async function (req, res) {
+    try {
+        var b = req.body || {};
+        var fromLabel = str(b.from_label, 160);
+        var toLabel = str(b.to_label, 160);
+        var price = parseFloat(b.base_price);
+
+        if (!fromLabel || !toLabel) return res.status(400).json({ error: 'Departure and destination are required' });
+        if (isNaN(price) || price <= 0) return res.status(400).json({ error: 'Enter a base price' });
+
+        var kind = b.kind === 'tour' ? 'tour' : 'transfer';
+        await execute(
+            'INSERT INTO transfer_offers (partner_id, kind, title, from_code, from_label, to_code, to_label,' +
+            ' offer_date, offer_time, vehicle_label, seats, luggage, included_services, additional_services,' +
+            ' base_price, currency, conditions)' +
+            ' VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)',
+            [
+                req.user.id, kind, str(b.title, 160),
+                str(b.from_code, 40), fromLabel,
+                str(b.to_code, 40), toLabel,
+                str(b.offer_date, 20), str(b.offer_time, 10),
+                str(b.vehicle_label, 120),
+                Math.max(1, int(b.seats, 4)), Math.max(0, int(b.luggage, 2)),
+                jsonList(b.included), jsonList(b.additional),
+                Math.round(price * 100) / 100, str(b.currency, 8) || 'USD',
+                str(b.conditions, 1000)
+            ]
+        );
+        notifyOwner('New transfer offer published by partner #' + req.user.id + ': ' +
+            fromLabel + ' -> ' + toLabel + ' from ' + price);
+        res.status(201).json({ ok: true });
+    } catch (e) {
+        console.error('[transfers] offer create error:', e.message);
+        res.status(500).json({ error: 'Could not publish the offer' });
+    }
+});
+
+/** PATCH /api/transfers/offers/:id — pause, reactivate or retire an offer. */
+router.patch('/offers/:id', authenticateToken, requireRole('partner'), async function (req, res) {
+    try {
+        var id = int(req.params.id);
+        var status = str(req.body && req.body.status, 20);
+        if (['active', 'paused', 'expired'].indexOf(status) === -1) {
+            return res.status(400).json({ error: 'Unknown status' });
+        }
+        var r = await execute(
+            'UPDATE transfer_offers SET status = $1, updated_at = CURRENT_TIMESTAMP' +
+            ' WHERE id = $2 AND partner_id = $3',
+            [status, id, req.user.id]);
+        if (!r.rowCount) return res.status(404).json({ error: 'Not found' });
+        res.json({ ok: true, status: status });
+    } catch (e) {
+        console.error('[transfers] offer patch error:', e.message);
+        res.status(500).json({ error: 'Could not update the offer' });
+    }
+});
+
+/**
+ * POST /api/transfers/offers/:id/book — a customer takes a published offer.
+ * It becomes a normal transfer request pre-assigned to the offer's partner, so
+ * it goes through the same admin approval and quote steps. The base price is
+ * carried as a hint, not as a promise: extras and fees still get confirmed.
+ */
+router.post('/offers/:id/book', authenticateToken, async function (req, res) {
+    try {
+        var id = int(req.params.id);
+        var o = await queryOne("SELECT * FROM transfer_offers WHERE id = $1 AND status = 'active'", [id]);
+        if (!o) return res.status(404).json({ error: 'This offer is no longer available' });
+
+        var b = req.body || {};
+        if (!str(b.contact_name, 100) || !(str(b.contact_phone, 40) || str(b.contact_email, 160))) {
+            return res.status(400).json({ error: 'A name and either a phone or an email are required' });
+        }
+
+        var reference = makeReference();
+        var date = str(b.pickup_date, 20) || o.offer_date;
+        var time = str(b.pickup_time, 10) || o.offer_time;
+        if (!date || !time) return res.status(400).json({ error: 'Choose a date and time' });
+
+        var route = estimateRoute(o.from_code, o.to_code) || {};
+
+        await execute(
+            'INSERT INTO transfer_requests (reference, guest_id, partner_id, offer_id, kind, transfer_type,' +
+            ' contact_name, contact_email, contact_phone, pickup_code, pickup_label, dropoff_code, dropoff_label,' +
+            ' pickup_date, pickup_time, distance_km, duration_min, passengers, luggage, requirements, extras,' +
+            ' vehicle_source, vehicle_label, quoted_price, currency, status)' +
+            ' VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26)',
+            [
+                reference, req.user.id, o.partner_id, o.id, 'request',
+                o.kind === 'tour' ? 'tour' : 'intercity',
+                str(b.contact_name, 100), str(b.contact_email, 160), str(b.contact_phone, 40),
+                o.from_code, o.from_label, o.to_code, o.to_label,
+                date, time,
+                route.distance_km || null, route.duration_min || null,
+                Math.max(1, int(b.passengers, 1)), Math.max(0, int(b.luggage, 0)),
+                JSON.stringify([]), jsonList(b.extras),
+                'partner', o.vehicle_label || (o.title || 'Partner offer'),
+                o.base_price, o.currency || 'USD',
+                'pending_admin'
+            ]
+        );
+
+        notifyOwner('Offer booked ' + reference + '\n' + o.from_label + ' -> ' + o.to_label +
+            '\n' + date + ' ' + time + '\nfrom ' + o.base_price + ' (partner #' + o.partner_id + ')');
+        res.status(201).json({ reference: reference, status: 'pending_admin' });
+    } catch (e) {
+        console.error('[transfers] offer book error:', e.message);
+        res.status(500).json({ error: 'Could not book this offer' });
+    }
+});
+
 module.exports = router;
