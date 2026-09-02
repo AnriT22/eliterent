@@ -822,7 +822,7 @@ async function initDB() {
     await pool.query(`ALTER TABLE transfer_requests DROP CONSTRAINT IF EXISTS transfer_requests_status_check`);
     await pool.query(`
         ALTER TABLE transfer_requests ADD CONSTRAINT transfer_requests_status_check
-        CHECK(status IN ('new','searching','open','claimed','quoted','offered','accepted','confirmed','declined','rejected','cancelled'))
+        CHECK(status IN ('pending_admin','new','searching','open','claimed','quoted','offered','accepted','confirmed','declined','rejected','cancelled'))
     `);
 
 
