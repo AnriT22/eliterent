@@ -370,8 +370,8 @@ router.post('/', optionalAuth, async function (req, res) {
         var paxN = Math.max(1, int(b.passengers, 1));
         var bagsN = Math.max(0, int(b.luggage, 0));
         var mountain = isMountainRoute(str(b.pickup_code, 40), str(b.dropoff_code, 40));
-        var reqs = labelList(b.requirements);
-        var extrasTxt = labelList(b.extras);
+        // One merged list now — Step 2 collects every optional service.
+        var servicesTxt = labelList(b.extras);
         var L = [];
 
         L.push(kind === 'booking'
@@ -404,8 +404,7 @@ router.post('/', optionalAuth, async function (req, res) {
             L.push('💰 Price on request — source from partners');
         }
 
-        if (reqs) L.push('❗ Requirements: ' + reqs);
-        if (extrasTxt) L.push('➕ Extras: ' + extrasTxt);
+        if (servicesTxt) L.push('➕ Services: ' + servicesTxt);
         L.push('');
         L.push('👤 ' + (str(b.contact_name, 100) || 'no name'));
         if (str(b.contact_phone, 40)) L.push('📞 ' + str(b.contact_phone, 40));

@@ -155,10 +155,9 @@
 
             <ol class="tr-steps">
                 <li><button type="button" class="tr-step-pip is-active"><b>01</b> Journey</button></li>
-                <li><button type="button" class="tr-step-pip"><b>02</b> Guests</button></li>
+                <li><button type="button" class="tr-step-pip"><b>02</b> Guests &amp; services</button></li>
                 <li><button type="button" class="tr-step-pip"><b>03</b> Vehicle</button></li>
-                <li><button type="button" class="tr-step-pip"><b>04</b> Extras</button></li>
-                <li><button type="button" class="tr-step-pip"><b>05</b> Review</button></li>
+                <li><button type="button" class="tr-step-pip"><b>04</b> Review</button></li>
             </ol>
 
             <!-- STEP 01 -->
@@ -250,8 +249,9 @@
                 </div>
 
                 <div class="tr-field" style="margin-top:12px;">
-                    <span class="tr-label">Special requirements <span style="text-transform:none;letter-spacing:0;font-weight:400;">(optional)</span></span>
-                    <div class="tr-chips" id="trRequirements"></div>
+                    <span class="tr-label">Additional services <span style="text-transform:none;letter-spacing:0;font-weight:400;">(optional)</span></span>
+                    <p class="tr-hint" style="margin:0 0 14px;">Anything you pick here is quoted with your transfer &mdash; nothing is charged until you approve the price.</p>
+                    <div class="tr-chips" id="trServices"></div>
                 </div>
 
                 <div class="tr-nav">
@@ -336,18 +336,6 @@
             </section>
 
             <!-- STEP 04 -->
-            <section class="tr-panel">
-                <h2 class="tr-panel-h">Make your transfer yours</h2>
-                <p class="tr-panel-sub">Optional touches. Anything without a price is confirmed with your quote.</p>
-                <div class="tr-chips" id="trExtras"></div>
-                <div class="tr-nav">
-                    <button type="button" class="tr-btn tr-btn-ghost" data-back>Back</button>
-                    <span class="tr-nav-spacer"></span>
-                    <button type="button" class="tr-btn tr-btn-primary" data-next>Review transfer</button>
-                </div>
-            </section>
-
-            <!-- STEP 05 -->
             <section class="tr-panel">
                 <h2 class="tr-panel-h">Review your transfer</h2>
                 <p class="tr-panel-sub">Check everything over, then tell us where to reach you.</p>
@@ -460,6 +448,6 @@
 
     <script src="script.js?v=26"></script>
     <script src="navbar-auth.js?v=6"></script>
-    <script src="transfers.js?v=5"></script>
+    <script src="transfers.js?v=6"></script>
 </body>
 </html>

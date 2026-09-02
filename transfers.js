@@ -12,13 +12,18 @@
     'use strict';
 
     // -----------------------------------------------------------------------
-    // OWNER CONFIG — extras.
-    // `price: null` renders the extra as selectable with no price shown, which
-    // is deliberate: inventing prices would put numbers on the page that you
-    // never agreed to. Set a number here and the UI shows it and adds it to the
-    // estimated total.
+    // OWNER CONFIG — additional services.
+    //
+    // ONE list. There used to be two (Step 2 "requirements" and Step 4
+    // "extras") that overlapped on almost every entry, so the same thing could
+    // be asked for twice. Everything optional now lives on Step 2.
+    //
+    // `price: null` renders the service with no price, which is deliberate:
+    // under the quote workflow the partner sets the real figure, and inventing
+    // one here would put a number on the page nobody agreed to. Set a number
+    // and it shows and feeds the estimate.
     // -----------------------------------------------------------------------
-    var EXTRAS = [
+    var SERVICES = [
         { id: 'meet_greet', label: 'Meet & greet', price: null },
         { id: 'child_seat', label: 'Child seat', price: null },
         { id: 'extra_luggage', label: 'Extra luggage', price: null },
@@ -26,23 +31,13 @@
         { id: 'extra_stop', label: 'Additional stop', price: null },
         { id: 'waiting', label: 'Waiting time', price: null },
         { id: 'chauffeur', label: 'Chauffeur service', price: null },
+        { id: 'wheelchair', label: 'Wheelchair accessible', price: null },
+        { id: 'pet', label: 'Pet-friendly vehicle', price: null },
         { id: 'occasion', label: 'Special occasion', price: null },
-        { id: 'other_extra', label: 'Other request', price: null }
+        { id: 'other', label: 'Other request', price: null }
     ];
 
-    var REQUIREMENTS = [
-        { id: 'child_seat', label: 'Child seat' },
-        { id: 'extra_luggage', label: 'Extra luggage' },
-        { id: 'trunk_service', label: 'Additional trunk service' },
-        { id: 'wheelchair', label: 'Wheelchair accessible' },
-        { id: 'pet', label: 'Pet-friendly vehicle' },
-        { id: 'meet_greet', label: 'Meet & greet' },
-        { id: 'multi_stop', label: 'Multiple stops' },
-        { id: 'chauffeur', label: 'Chauffeur service' },
-        { id: 'other', label: 'Other request' }
-    ];
-
-    var STEPS = ['journey', 'guests', 'vehicle', 'extras', 'review'];
+    var STEPS = ['journey', 'guests', 'vehicle', 'review'];
     var STORE_KEY = 'EliteAuto_transfer_draft';
 
     var state = {
@@ -54,10 +49,9 @@
         has_return: false, return_date: '', return_time: '',
         distance_km: null, duration_min: null,
         passengers: 2, luggage: 2,
-        requirements: [],
+        services: [],
         vehicle: null,          // the chosen offer object
         requested_vehicle: null, // {brand, model, year, vehicle_class} from Find My Car
-        extras: [],
         contact_name: '', contact_email: '', contact_phone: ''
     };
 
@@ -160,7 +154,7 @@
             }
             return true;
         }
-        if (step === 4) {
+        if (step === 3) {
             if (!state.contact_name.trim()) return err('errName', 'We need a name for the booking.');
             if (!state.contact_phone.trim() && !state.contact_email.trim()) {
                 return err('errContact', 'Add a phone number or an email so we can reach you.');
@@ -191,7 +185,7 @@
             pip.classList.toggle('is-done', i < state.step);
         });
         $$('.tr-panel').forEach(function (p, i) { p.classList.toggle('is-active', i === state.step); });
-        if (state.step === 4) renderReview();
+        if (state.step === 3) renderReview();
     }
 
     function renderRoute() {
@@ -397,7 +391,7 @@
 
     function renderReview() {
         var v = state.vehicle;
-        var extrasChosen = EXTRAS.filter(function (e) { return state.extras.indexOf(e.id) !== -1; });
+        var extrasChosen = SERVICES.filter(function (e) { return state.services.indexOf(e.id) !== -1; });
         var extrasTotal = extrasChosen.reduce(function (s, e) { return s + (e.price || 0); }, 0);
 
         $('#trSumJourney').innerHTML =
@@ -438,7 +432,7 @@
     }
 
     function submit() {
-        if (!validate(4)) return;
+        if (!validate(3)) return;
         var btn = $('#trSubmit');
         btn.disabled = true;
         btn.textContent = 'Sending…';
@@ -457,8 +451,7 @@
                 return_date: state.has_return ? state.return_date : null,
                 return_time: state.has_return ? state.return_time : null,
                 passengers: state.passengers, luggage: state.luggage,
-                requirements: state.requirements,
-                extras: state.extras,
+                extras: state.services,
                 vehicle_id: v && v.source === 'fleet' ? v.id : null,
                 vehicle_source: v ? v.source : 'requested',
                 vehicle_label: v ? (v.brand + ' ' + (v.model || v.label)) : null,
@@ -611,7 +604,7 @@
         // Guests
         stepper('#trPax', 'passengers', 1);
         stepper('#trBags', 'luggage', 0);
-        buildChips($('#trRequirements'), REQUIREMENTS, state.requirements);
+        buildChips($('#trServices'), SERVICES, state.services);
         // With four or more bags the boot is the real constraint, so point at
         // the trunk-service option rather than letting people hit an empty list.
         var bagHint = $('#trBagHint');
@@ -639,9 +632,6 @@
             $('#trFindForm').classList.toggle('is-shown');
         });
         $('#trFindGo').addEventListener('click', findMyCar);
-
-        // Extras
-        buildChips($('#trExtras'), EXTRAS, state.extras);
 
         $('#trSubmit').addEventListener('click', submit);
 
