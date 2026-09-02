@@ -91,13 +91,12 @@ const PARTNER_VEHICLES = [
 function listPartnerVehicles(criteria) {
     criteria = criteria || {};
     var pax = parseInt(criteria.passengers, 10) || 1;
-    var bags = parseInt(criteria.luggage, 10) || 0;
     var zone = criteria.pickup_code;
 
     return PARTNER_VEHICLES
         .filter(function (v) {
+            // Seats gate the list; luggage is advisory (see fits() in the route).
             if (v.passengers < pax) return false;
-            if (v.luggage < bags) return false;
             if (zone && v.zones.indexOf(zone) === -1) return false;
             return true;
         })

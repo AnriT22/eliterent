@@ -3,7 +3,7 @@
  *
  * Supply is aggregated from two sources behind one interface, in this order:
  *   1. our own fleet   (vehicles table, status = 'active')
- *   2. partner supply  (server/data/transfer-partners.js)
+ *   2. partner supply  (server/services/transfer-partners.js)
  *
  * The customer never leaves the site and never sees which partner a car came
  * from — a partner match simply becomes a request rather than an instant
@@ -59,15 +59,32 @@ function makeReference() {
     return 'TR-' + raw.slice(0, 4) + '-' + raw.slice(4, 8);
 }
 
-// `luggage` on vehicles is a free-text column ("2 large, 1 small", "3", null).
-// Pull the first number out; fall back to a seats-derived guess so a vehicle is
-// never silently excluded just because the field was written loosely.
-function luggageCount(raw, seats) {
-    if (raw !== null && raw !== undefined) {
-        var m = String(raw).match(/\d+/);
-        if (m) return parseInt(m[0], 10);
+// `luggage` on vehicles is a SIZE word, not a count — the column only ever
+// holds 'small', 'medium' or 'large'. Map that to a realistic number of large
+// suitcases, and accept a bare number too in case the field is ever filled in
+// numerically later.
+//
+// The third row matters: a 7-seater with every seat occupied has almost no
+// boot left, because the luggage space *is* the third row. So capacity is
+// computed against the party size, not in the abstract.
+var LUGGAGE_BY_SIZE = { small: 2, medium: 3, large: 4 };
+
+function luggageCapacity(raw, seats, passengers) {
+    var n;
+    var m = raw != null ? String(raw).match(/\d+/) : null;
+    if (m) {
+        n = parseInt(m[0], 10);
+    } else {
+        var key = String(raw || '').trim().toLowerCase();
+        n = LUGGAGE_BY_SIZE[key];
+        if (n === undefined) n = 3; // unlabelled: assume a normal boot
     }
-    return Math.max(1, (parseInt(seats, 10) || 4) - 2);
+    var s = parseInt(seats, 10) || 5;
+    if (s >= 7) n += 1;                                   // bigger vehicle, bigger boot
+    if (s >= 7 && (parseInt(passengers, 10) || 0) > 5) {
+        n -= 2;                                           // third row in use — boot is gone
+    }
+    return Math.max(1, n);
 }
 
 function firstImage(gallery) {
@@ -79,7 +96,7 @@ function firstImage(gallery) {
     return typeof gallery === 'string' && gallery.indexOf('[') !== 0 ? gallery : null;
 }
 
-function fleetRow(v) {
+function fleetRow(v, pax) {
     return {
         id: v.id,
         source: 'fleet',
@@ -89,7 +106,8 @@ function fleetRow(v) {
         category: (v.category || '').toLowerCase(),
         label: v.category ? String(v.category).replace(/_/g, ' ') : 'Vehicle',
         passengers: parseInt(v.seats, 10) || 4,
-        luggage: luggageCount(v.luggage, v.seats),
+        luggage: luggageCapacity(v.luggage, v.seats, pax),
+        luggage_size: v.luggage || null,
         price: Number(v.price_per_day),
         image: firstImage(v.gallery),
         chauffeur: true,
@@ -104,9 +122,28 @@ async function activeFleet() {
     );
 }
 
-/** Capacity + zone filter shared by the fleet and partner sources. */
-function meetsCapacity(v, pax, bags) {
-    return v.passengers >= pax && v.luggage >= bags;
+/**
+ * Seats are a hard constraint — a five-seat car genuinely cannot take six
+ * people. Luggage is NOT: it is an estimate from a size word, and the real
+ * answer is usually "it fits, or it fits with a support vehicle". Hiding a
+ * Highlander because our guess said 3 bags instead of 5 is worse than showing
+ * it and being honest that the boot is tight. So `fits` gates the list and
+ * `luggage_ok` is advisory, surfaced in the UI as a trunk-service prompt.
+ */
+function fits(v, pax) {
+    return v.passengers >= pax;
+}
+
+function withLuggageFlag(v, bags) {
+    v.luggage_ok = v.luggage >= bags;
+    return v;
+}
+
+// Roomy-enough vehicles first, then cheapest — so the default choice is one
+// that actually takes the luggage.
+function bySuitability(a, b) {
+    if (a.luggage_ok !== b.luggage_ok) return a.luggage_ok ? -1 : 1;
+    return a.price - b.price;
 }
 
 // ---- locations -------------------------------------------------------------
@@ -137,13 +174,15 @@ router.post('/quote', async function (req, res) {
         var bags = Math.max(0, int(b.luggage, 0));
         var pickup = str(b.pickup_code, 40);
 
-        var fleet = (await activeFleet()).map(fleetRow).filter(function (v) {
-            return meetsCapacity(v, pax, bags);
-        });
+        var fleet = (await activeFleet())
+            .map(function (v) { return fleetRow(v, pax); })
+            .filter(function (v) { return fits(v, pax); })
+            .map(function (v) { return withLuggageFlag(v, bags); })
+            .sort(bySuitability);
 
-        var partner = listPartnerVehicles({
-            passengers: pax, luggage: bags, pickup_code: pickup
-        });
+        var partner = listPartnerVehicles({ passengers: pax, pickup_code: pickup })
+            .map(function (v) { return withLuggageFlag(v, bags); })
+            .sort(bySuitability);
 
         res.json({
             fleet: fleet,
@@ -175,9 +214,10 @@ router.post('/find-vehicle', async function (req, res) {
 
         if (!brand) return res.status(400).json({ error: 'Brand is required' });
 
-        var pool = (await activeFleet()).map(fleetRow)
-            .concat(listPartnerVehicles({ passengers: pax, luggage: bags, pickup_code: pickup }))
-            .filter(function (v) { return meetsCapacity(v, pax, bags); });
+        var pool = (await activeFleet()).map(function (v) { return fleetRow(v, pax); })
+            .concat(listPartnerVehicles({ passengers: pax, pickup_code: pickup }))
+            .filter(function (v) { return fits(v, pax); })
+            .map(function (v) { return withLuggageFlag(v, bags); });
 
         var sameBrand = pool.filter(function (v) {
             return (v.brand || '').toLowerCase().indexOf(brand) !== -1;
