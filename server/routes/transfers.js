@@ -313,19 +313,30 @@ router.post('/', authenticateToken, async function (req, res) {
         // vehicle_id is a real FK, so only keep it for our own fleet.
         var vehicleId = source === 'fleet' ? int(b.vehicle_id) : null;
 
+        // If the guest chose one of our listed cars, the partner who owns that
+        // car is the one who fulfils it, so route it straight to them. A
+        // "find my car" request has no owner, so it stays on the shared board
+        // for any partner to pick up.
+        var assignedPartner = null;
+        if (vehicleId) {
+            var owner = await queryOne('SELECT partner_id FROM vehicles WHERE id = $1', [vehicleId]);
+            if (owner) assignedPartner = owner.partner_id;
+        }
+
         var route = estimateRoute(str(b.pickup_code, 40), str(b.dropoff_code, 40)) || {};
 
         await execute(
             'INSERT INTO transfer_requests (' +
-            'reference, guest_id, kind, transfer_type, contact_name, contact_email, contact_phone,' +
+            'reference, guest_id, partner_id, kind, transfer_type, contact_name, contact_email, contact_phone,' +
             'pickup_code, pickup_label, dropoff_code, dropoff_label, pickup_date, pickup_time,' +
             'return_date, return_time, distance_km, duration_min, passengers, luggage,' +
             'requirements, extras, vehicle_id, vehicle_source, vehicle_label, requested_vehicle,' +
             'quoted_price, currency, status' +
-            ') VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28)',
+            ') VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29)',
             [
                 reference,
                 (req.user && req.user.id) || null,
+                assignedPartner,
                 kind,
                 str(b.transfer_type, 40) || 'airport',
                 str(b.contact_name, 100),
@@ -345,7 +356,7 @@ router.post('/', authenticateToken, async function (req, res) {
                 // A partner offer is indicative only — never stored as a firm quote.
                 kind === 'booking' ? (b.quoted_price != null ? Number(b.quoted_price) : null) : null,
                 str(b.currency, 8) || 'USD',
-                'open'
+                'pending_admin'
             ]
         );
 
@@ -496,7 +507,7 @@ router.get('/open', authenticateToken, requireRole('partner'), async function (r
             ' return_date, return_time, distance_km, duration_min, passengers, luggage, extras,' +
             ' vehicle_label, requested_vehicle, vehicle_source, created_at' +
             ' FROM transfer_requests WHERE partner_id IS NULL' +
-            "  AND status IN ('open','new','searching')" +
+            "  AND status = 'open'" +
             ' ORDER BY pickup_date ASC, created_at ASC LIMIT 100'
         );
         res.json({ transfers: rows });
@@ -537,7 +548,7 @@ router.post('/:reference/claim', authenticateToken, requireRole('partner'), asyn
             'UPDATE transfer_requests SET partner_id = $1, claimed_at = CURRENT_TIMESTAMP,' +
             "  status = 'claimed', updated_at = CURRENT_TIMESTAMP" +
             ' WHERE reference = $2 AND partner_id IS NULL' +
-            "  AND status IN ('open','new','searching')",
+            "  AND status = 'open'",
             [req.user.id, ref]
         );
         if (!r.rowCount) {
@@ -628,6 +639,89 @@ router.post('/:reference/respond', authenticateToken, async function (req, res) 
     } catch (e) {
         console.error('[transfers] respond error:', e.message);
         res.status(500).json({ error: 'Could not record your response' });
+    }
+});
+
+
+// ---- admin approval --------------------------------------------------------
+//
+// Nothing reaches a partner until you have seen it. A submitted transfer sits
+// at `pending_admin`; approving it either hands it to the partner who owns the
+// car the guest chose, or puts it on the shared board when no specific car was
+// picked.
+
+/** GET /api/transfers/admin/list?status= — the admin queue. */
+router.get('/admin/list', authenticateToken, requireRole('admin'), async function (req, res) {
+    try {
+        var status = str(req.query.status, 30);
+        var params = [];
+        var where = '';
+        if (status === 'pending') {
+            where = " WHERE t.status = 'pending_admin'";
+        } else if (status) {
+            params.push(status);
+            where = ' WHERE t.status = $1';
+        }
+        var rows = await queryAll(
+            'SELECT t.*, u.full_name AS guest_name, u.email AS guest_email,' +
+            ' p.full_name AS partner_name,' +
+            ' q.total AS quote_total, q.status AS quote_status' +
+            ' FROM transfer_requests t' +
+            ' LEFT JOIN users u ON u.id = t.guest_id' +
+            ' LEFT JOIN users p ON p.id = t.partner_id' +
+            ' LEFT JOIN LATERAL (SELECT total, status FROM transfer_quotes' +
+            '   WHERE transfer_id = t.id ORDER BY created_at DESC, id DESC LIMIT 1) q ON true' +
+            where +
+            ' ORDER BY t.created_at DESC LIMIT 200',
+            params
+        );
+        res.json({ transfers: rows });
+    } catch (e) {
+        console.error('[transfers] admin list error:', e.message);
+        res.status(500).json({ error: 'Could not load transfers' });
+    }
+});
+
+/**
+ * POST /api/transfers/admin/:reference/approve
+ * Releases the transfer. If a partner was auto-assigned from the chosen car it
+ * goes to them (`claimed`); otherwise it lands on the shared board (`open`).
+ */
+router.post('/admin/:reference/approve', authenticateToken, requireRole('admin'), async function (req, res) {
+    try {
+        var ref = (str(req.params.reference, 20) || '').toUpperCase();
+        var t = await queryOne('SELECT id, partner_id, status FROM transfer_requests WHERE reference = $1', [ref]);
+        if (!t) return res.status(404).json({ error: 'Not found' });
+        if (t.status !== 'pending_admin') {
+            return res.status(409).json({ error: 'Already ' + t.status });
+        }
+        var next = t.partner_id ? 'claimed' : 'open';
+        await execute(
+            'UPDATE transfer_requests SET status = $1, claimed_at = CASE WHEN $2::int IS NULL' +
+            ' THEN claimed_at ELSE CURRENT_TIMESTAMP END, updated_at = CURRENT_TIMESTAMP WHERE id = $3',
+            [next, t.partner_id, t.id]
+        );
+        res.json({ ok: true, status: next, assigned: !!t.partner_id });
+    } catch (e) {
+        console.error('[transfers] approve error:', e.message);
+        res.status(500).json({ error: 'Could not approve' });
+    }
+});
+
+/** POST /api/transfers/admin/:reference/decline */
+router.post('/admin/:reference/decline', authenticateToken, requireRole('admin'), async function (req, res) {
+    try {
+        var ref = (str(req.params.reference, 20) || '').toUpperCase();
+        var r = await execute(
+            "UPDATE transfer_requests SET status = 'cancelled', admin_note = $1," +
+            ' updated_at = CURRENT_TIMESTAMP WHERE reference = $2',
+            [str(req.body && req.body.note, 500), ref]
+        );
+        if (!r.rowCount) return res.status(404).json({ error: 'Not found' });
+        res.json({ ok: true, status: 'cancelled' });
+    } catch (e) {
+        console.error('[transfers] decline error:', e.message);
+        res.status(500).json({ error: 'Could not decline' });
     }
 });
 
