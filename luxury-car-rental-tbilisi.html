@@ -84,7 +84,7 @@
     <link rel="stylesheet" href="style.css?v=17">
     <link rel="stylesheet" href="premium.css?v=25">
     <link rel="stylesheet" href="navbar-auth.css?v=8">
-    <link rel="stylesheet" href="city-landing.css?v=6">
+    <link rel="stylesheet" href="city-landing.css?v=7">
     <script src="api-helper.js?v=3"></script>
     <script src="i18n.js?v=8"></script>
     <link rel="stylesheet" href="theme.css?v=4">
@@ -134,7 +134,7 @@
                 <div class="cl-stat-sep"></div>
                 <div class="cl-stat"><strong>Chauffeur</strong><span>on request</span></div>
             </div>
-            <a href="vehicles.html" class="cl-cta-btn">Browse Luxury Cars &#8594;</a>
+            <a href="vehicles.html?priceMin=120" class="cl-cta-btn">Browse Luxury Cars &#8594;</a>
         </div>
     </section>
 
@@ -178,7 +178,40 @@
         </div>
     </section>
 
-    <section class="faq-section" style="padding:80px 0;background:var(--th-surface, #1C1E26);">
+    <section style="padding:80px 0;background:var(--th-surface, #1C1E26);">
+        <div class="container">
+            <h2 class="cl-section-title">Luxury Rental Prices in Georgia</h2>
+            <p style="text-align:center;color:var(--tt-muted, #A0A3B0);max-width:720px;margin:0 auto 32px;">Pick your budget — each band opens the fleet already filtered to that price. Luxury spans several body styles, so these bands filter on price across the whole fleet.</p>
+            <div class="cl-price-grid">
+                <a class="cl-price-card" href="vehicles.html?priceMin=120&amp;priceMax=230">
+                    <div class="cl-price-tier">Premium</div>
+                    <div class="cl-price-amount">$120–$230</div>
+                    <div class="cl-price-per">/day, all in</div>
+                    <p class="cl-price-models">Lexus GX 460, Dodge Challenger, Ford Mustang, BMW 428 Convertible</p>
+                    <span class="cl-price-cta">See these cars &#8594;</span>
+                </a>
+                <a class="cl-price-card" href="vehicles.html?priceMin=230&amp;priceMax=450">
+                    <div class="cl-price-tier">Luxury</div>
+                    <div class="cl-price-amount">$230–$450</div>
+                    <div class="cl-price-per">/day, all in</div>
+                    <p class="cl-price-models">Mercedes-Benz GLS 450, Toyota Land Cruiser 200, Mercedes-Benz S 550</p>
+                    <span class="cl-price-cta">See these cars &#8594;</span>
+                </a>
+                <a class="cl-price-card" href="vehicles.html?priceMin=450">
+                    <div class="cl-price-tier">Exotic &amp; supercar</div>
+                    <div class="cl-price-amount">$450+</div>
+                    <div class="cl-price-per">/day, all in</div>
+                    <p class="cl-price-models">Porsche Taycan 4S, Mercedes-AMG GT S 63, BMW M8 Competition, Chevrolet Corvette C7</p>
+                    <span class="cl-price-cta">See these cars &#8594;</span>
+                </a>
+            </div>
+            <div style="text-align:center;margin-top:32px;">
+                <a href="vehicles.html?priceMin=120" class="cl-cta-btn">Browse All Luxury Cars &#8594;</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq-section" style="padding:80px 0;background:var(--th-bg, #0B0C10);">
         <div class="container">
             <h2 class="cl-section-title">Luxury Rental FAQ</h2>
             <div class="faq-grid" style="max-width:800px;margin:0 auto;">

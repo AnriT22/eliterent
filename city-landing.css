@@ -354,3 +354,44 @@
     .cl-features { padding: 40px 16px; }
     .cl-features-grid { grid-template-columns: 1fr; gap: 14px; }
 }
+
+/* ---------------------------------------------------------------------------
+   Price-band cards (category landing pages).
+   Each card is an <a> into /vehicles.html carrying the matching price filter,
+   so clicking a band lands the visitor on a pre-filtered fleet listing.
+   Bands are fitted to real inventory, not round numbers — see the per-page
+   markup for the values.
+   --------------------------------------------------------------------------- */
+.cl-price-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+.cl-price-card {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    background: var(--th-surface, #1C1E26);
+    border: 1px solid rgba(148,163,184,0.15);
+    border-radius: 16px;
+    padding: 26px 22px;
+    transition: border-color .2s ease, transform .2s ease;
+}
+.cl-price-card:hover,
+.cl-price-card:focus-visible { border-color: var(--tt-gold, #D4AF37); transform: translateY(-3px); }
+.cl-price-card.is-popular { border-color: var(--tt-gold2, #D4AF37); }
+.cl-price-badge {
+    background: var(--tt-gold, #D4AF37); color: #0B0C10;
+    font-size: 11px; font-weight: 800; letter-spacing: .04em;
+    padding: 4px 12px; border-radius: 6px; display: inline-block; margin-bottom: 12px;
+}
+.cl-price-tier { font-size: 16px; font-weight: 700; color: var(--tt-muted, #A0A3B0); margin: 0 0 8px; }
+.cl-price-amount { font-size: 34px; font-weight: 900; color: var(--tt-gold, #D4AF37); line-height: 1.1; }
+.cl-price-per { font-size: 14px; color: #888; margin-bottom: 14px; }
+.cl-price-models { font-size: 13px; color: var(--tt-muted2, #94a3b8); line-height: 1.6; margin: 0 0 16px; }
+.cl-price-cta { font-size: 13px; font-weight: 700; color: var(--tt-gold, #D4AF37); }
+.cl-price-card:hover .cl-price-cta { text-decoration: underline; }
+@media (prefers-reduced-motion: reduce) {
+    .cl-price-card { transition: none; }
+    .cl-price-card:hover, .cl-price-card:focus-visible { transform: none; }
+}

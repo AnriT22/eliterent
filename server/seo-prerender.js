@@ -19,8 +19,11 @@ const MARKER_HOME = '<!-- SEO_PRERENDER_HOME_FLEET -->';
 // same content. There is NO fabricated-review fallback — reviews come solely
 // from real database rows, rendered client-side identically for bots and users.
 // ---------------------------------------------------------------------------
+// Four cards. "Economy cars" was removed from this grid deliberately — the
+// economy-car-rental-georgia.html page still exists and is still linked from the
+// blog and city pages, but the `economy` filter matches no live vehicles, so the
+// card sent visitors to an empty result set.
 const CATEGORIES = [
-    { name: 'Economy cars', url: '/economy-car-rental-georgia.html', from: 39, blurb: 'Fuel-efficient hatchbacks & compacts' },
     { name: 'Sedans', url: '/sedan-rental-georgia.html', from: 39, blurb: 'Comfortable cars for business & highways' },
     { name: 'SUV & 4x4', url: '/suv-rental-georgia.html', from: 50, blurb: 'Mountain-ready for Kazbegi & Svaneti' },
     { name: '7-seater & minivan', url: '/minivan-7-seater-rental-georgia.html', from: 50, blurb: 'Space for families & groups' },
