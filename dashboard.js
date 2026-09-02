@@ -3958,4 +3958,225 @@
     }
 
     console.log('✓ Partner dashboard initialized');
+
+    /* ---------------------------------------------------------------------
+       TRANSFERS — partner console.
+
+       Two views:
+         "My transfers"  — jobs routed to me because the guest picked one of my
+                           cars, plus anything I claimed from the board.
+         "Open requests" — approved jobs with no owner, first to claim wins.
+
+       Pricing is the point of this screen. The fee lines here are exactly the
+       ones the customer saw as "to be quoted" on the transfer page, so the
+       breakdown they receive matches what they were told to expect.
+       --------------------------------------------------------------------- */
+    (function () {
+        var body = document.getElementById('trPartnerBody');
+        if (!body) return;
+
+        var view = 'mine';
+
+        var FEES = [
+            ['price_car', 'Car price', 'The vehicle for the journey'],
+            ['fee_airport', 'Airport fee', 'Meeting or dropping at an airport'],
+            ['fee_chauffeur', 'Chauffeur fee', 'Driver for the journey'],
+            ['fee_dropoff', 'Drop-off fee', 'Leaving the car at the destination'],
+            ['fee_luggage', 'Extra luggage', 'Support vehicle or roof box'],
+            ['fee_other', 'Other', 'Anything else — name it below']
+        ];
+
+        var STATUS = {
+            open:      ['Open — claim it', '#6FA8D4'],
+            claimed:   ['Needs your price', '#e0b252'],
+            quoted:    ['Priced — waiting on customer', '#D4AF37'],
+            confirmed: ['Confirmed', '#34d399'],
+            declined:  ['Customer rejected — re-price', '#f87171'],
+            cancelled: ['Cancelled', '#8894a5']
+        };
+
+        function esc(v) {
+            var d = document.createElement('div');
+            d.textContent = v == null ? '' : v;
+            return d.innerHTML;
+        }
+
+        function services(raw) {
+            try {
+                var a = typeof raw === 'string' ? JSON.parse(raw) : raw;
+                return Array.isArray(a) && a.length ? a.join(', ') : null;
+            } catch (e) { return null; }
+        }
+
+        function journeyBlock(t) {
+            return '<div style="font-weight:700;font-size:15.5px;">' + esc(t.pickup_label) +
+                ' <span style="opacity:.6;">&rarr;</span> ' + esc(t.dropoff_label) + '</div>' +
+                '<div style="font-size:13px;color:var(--tt-muted, #A0A3B0);margin-top:7px;">' +
+                esc(t.pickup_date) + ' at ' + esc(t.pickup_time) +
+                (t.return_date ? ' &middot; return ' + esc(t.return_date) + ' ' + esc(t.return_time || '') : '') +
+                ' &middot; ' + t.passengers + ' pax &middot; ' + t.luggage + ' bags' +
+                (t.distance_km ? ' &middot; ' + t.distance_km + ' km' : '') +
+                '</div>' +
+                '<div style="font-size:13px;color:var(--tt-muted, #A0A3B0);margin-top:5px;">' +
+                (t.vehicle_label ? 'Vehicle: <strong>' + esc(t.vehicle_label) + '</strong>' : '') +
+                (t.requested_vehicle ? 'Requested: <strong>' + esc(t.requested_vehicle) + '</strong>' : '') +
+                (services(t.extras) ? '<br>Services: ' + esc(services(t.extras)) : '') +
+                '</div>' +
+                '<div style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px;opacity:.65;margin-top:8px;">' +
+                esc(t.reference) + '</div>';
+        }
+
+        function priceForm(t) {
+            var rows = FEES.map(function (f) {
+                return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap;">' +
+                    '<label style="min-width:150px;font-size:13.5px;">' + esc(f[1]) +
+                    '<span style="display:block;font-size:11.5px;color:var(--tt-muted, #A0A3B0);">' + esc(f[2]) + '</span></label>' +
+                    '<input type="number" min="0" step="1" class="tr-fee-in" data-field="' + f[0] + '" ' +
+                    'placeholder="0" style="width:120px;padding:9px 12px;border-radius:9px;' +
+                    'border:1px solid rgba(148,163,184,.4);background:transparent;color:inherit;font-size:14px;">' +
+                    '</div>';
+            }).join('');
+
+            return '<div class="tr-price-form" data-ref="' + esc(t.reference) + '" ' +
+                'style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(148,163,184,.2);">' +
+                '<div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;' +
+                'color:var(--tt-muted, #A0A3B0);margin-bottom:14px;">Your price</div>' +
+                rows +
+                '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap;">' +
+                  '<label style="min-width:150px;font-size:13.5px;">Label for "Other"</label>' +
+                  '<input type="text" class="tr-other-label" maxlength="80" placeholder="e.g. night surcharge" ' +
+                  'style="flex:1;min-width:180px;padding:9px 12px;border-radius:9px;border:1px solid rgba(148,163,184,.4);' +
+                  'background:transparent;color:inherit;font-size:14px;">' +
+                '</div>' +
+                '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap;">' +
+                  '<label style="min-width:150px;font-size:13.5px;">Note to customer</label>' +
+                  '<textarea class="tr-note" rows="2" maxlength="500" placeholder="Optional — anything they should know" ' +
+                  'style="flex:1;min-width:220px;padding:9px 12px;border-radius:9px;border:1px solid rgba(148,163,184,.4);' +
+                  'background:transparent;color:inherit;font-size:14px;font-family:inherit;"></textarea>' +
+                '</div>' +
+                '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">' +
+                  '<button class="btn btn-primary tr-send-quote">Send price to customer</button>' +
+                  '<span class="tr-running-total" style="font-size:15px;font-weight:700;color:#D4AF37;">Total $0</span>' +
+                '</div></div>';
+        }
+
+        function card(t) {
+            var st = STATUS[t.status] || [t.status, '#8894a5'];
+            var canPrice = view === 'mine' && ['claimed', 'declined', 'quoted'].indexOf(t.status) !== -1;
+
+            return '<div style="background:var(--th-surface, #1C1E26);border:1px solid rgba(148,163,184,.18);' +
+                'border-radius:14px;padding:18px 20px;margin-bottom:14px;">' +
+                '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between;">' +
+                  '<div style="flex:1;min-width:240px;">' + journeyBlock(t) + '</div>' +
+                  '<span style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;' +
+                    'padding:5px 11px;border-radius:999px;color:' + st[1] + ';background:rgba(148,163,184,.13);">' +
+                    esc(st[0]) + '</span>' +
+                '</div>' +
+                (t.live_total != null
+                    ? '<div style="margin-top:10px;font-size:14px;">Your last price: <strong style="color:#D4AF37;">$' +
+                      Number(t.live_total).toFixed(0) + '</strong>' +
+                      (t.quote_status === 'rejected' ? ' &mdash; rejected, send a new one' : '') + '</div>'
+                    : '') +
+                (view === 'open'
+                    ? '<div style="margin-top:14px;"><button class="btn btn-primary tr-claim" data-ref="' +
+                      esc(t.reference) + '">Accept this transfer</button></div>'
+                    : '') +
+                (canPrice ? priceForm(t) : '') +
+                '</div>';
+        }
+
+        function wire() {
+            body.querySelectorAll('.tr-claim').forEach(function (b) {
+                b.addEventListener('click', function () {
+                    b.disabled = true; b.textContent = 'Accepting…';
+                    fetch('/api/transfers/' + encodeURIComponent(b.dataset.ref) + '/claim', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+                    })
+                        .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Failed'); return d; }); })
+                        .then(function () { view = 'mine'; syncFilterButtons(); load(); })
+                        .catch(function (e) {
+                            b.disabled = false; b.textContent = 'Accept this transfer';
+                            alert(e.message || 'Could not take this transfer.');
+                            load();   // it was probably claimed by someone else — refresh the board
+                        });
+                });
+            });
+
+            body.querySelectorAll('.tr-price-form').forEach(function (form) {
+                var totalEl = form.querySelector('.tr-running-total');
+                function recalc() {
+                    var sum = 0;
+                    form.querySelectorAll('.tr-fee-in').forEach(function (i) {
+                        var v = parseFloat(i.value);
+                        if (!isNaN(v) && v > 0) sum += v;
+                    });
+                    totalEl.textContent = 'Total $' + (Math.round(sum * 100) / 100);
+                }
+                form.querySelectorAll('.tr-fee-in').forEach(function (i) { i.addEventListener('input', recalc); });
+
+                form.querySelector('.tr-send-quote').addEventListener('click', function () {
+                    var btn = this;
+                    var payload = { other_label: form.querySelector('.tr-other-label').value,
+                                    note: form.querySelector('.tr-note').value };
+                    form.querySelectorAll('.tr-fee-in').forEach(function (i) {
+                        payload[i.dataset.field] = parseFloat(i.value) || 0;
+                    });
+                    btn.disabled = true; btn.textContent = 'Sending…';
+                    fetch('/api/transfers/' + encodeURIComponent(form.dataset.ref) + '/quote', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                        body: JSON.stringify(payload)
+                    })
+                        .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Failed'); return d; }); })
+                        .then(load)
+                        .catch(function (e) {
+                            btn.disabled = false; btn.textContent = 'Send price to customer';
+                            alert(e.message || 'Could not send the price.');
+                        });
+                });
+            });
+        }
+
+        function load() {
+            body.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:40px;">Loading&hellip;</p>';
+            fetch('/api/transfers/' + (view === 'open' ? 'open' : 'claimed'),
+                  { headers: { 'Authorization': 'Bearer ' + token } })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    var list = (d && d.transfers) || [];
+                    if (!list.length) {
+                        body.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:60px;">' +
+                            (view === 'open'
+                                ? 'No open transfer requests right now.'
+                                : 'No transfers assigned to you yet. Check the open requests tab.') + '</p>';
+                        return;
+                    }
+                    body.innerHTML = list.map(card).join('');
+                    wire();
+                })
+                .catch(function () {
+                    body.innerHTML = '<p style="color:#f87171;text-align:center;padding:40px;">Could not load transfers.</p>';
+                });
+        }
+
+        function syncFilterButtons() {
+            document.querySelectorAll('.tr-p-filter').forEach(function (x) {
+                x.classList.toggle('active', x.dataset.view === view);
+            });
+        }
+
+        document.querySelectorAll('.tr-p-filter').forEach(function (b) {
+            b.addEventListener('click', function () {
+                view = b.dataset.view;
+                syncFilterButtons();
+                load();
+            });
+        });
+
+        var navItem = document.querySelector('.db-nav-item[data-tab="transfers"]');
+        if (navItem) navItem.addEventListener('click', load);
+        load();
+    })();
+
 })();

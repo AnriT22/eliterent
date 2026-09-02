@@ -43,7 +43,7 @@ function escHtml(s) {
             if (tabName === 'bookings') loadBookings();
             if (tabName === 'financial') loadFinancial();
             if (tabName === 'promos') loadPromos();
-            if (tabName === 'activity') loadActivity();
+            if (tabName === 'transfers') loadTransfers();
         });
     });
 
@@ -1342,36 +1342,136 @@ function escHtml(s) {
     // ========================================
     // ACTIVITY FEED
     // ========================================
-    function loadActivity() {
-        apiGet('/api/admin/activity').then(function (data) {
-            var feed = document.getElementById('activityFeed');
-            var activities = data.activities || [];
-            if (activities.length === 0) {
-                feed.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:40px;">No recent activity</p>';
-                return;
-            }
-            var iconMap = {
-                user: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
-                calendar: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>',
-                car: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
-                check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>'
-            };
-            var colorMap = { registration: '#C9A84C', booking: '#f59e0b', vehicle: '#16a34a', status_change: '#8b5cf6' };
-            feed.innerHTML = activities.map(function (a) {
-                var icon = iconMap[a.icon] || iconMap.check;
-                var color = colorMap[a.type] || '#A0A3B0';
-                var timeAgo = getTimeAgo(a.time);
-                return '<div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #E2E5EB;">'
-                    + '<div style="width:32px;height:32px;border-radius:50%;background:' + color + '10;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + icon + '</div>'
-                    + '<div style="flex:1;min-width:0;">'
-                    + '<p style="margin:0;font-size:13px;color:#1e293b;">' + a.text + '</p>'
-                    + '<p style="margin:2px 0 0;font-size:11px;color:#64748b;">' + timeAgo + '</p>'
-                    + '</div></div>';
-            }).join('');
-        }).catch(function () {
-            document.getElementById('activityFeed').innerHTML = '<p style="color:#ef4444;text-align:center;padding:40px;">Failed to load activity</p>';
-        });
+
+    /* ---------------------------------------------------------------------
+       TRANSFERS — admin approval queue.
+
+       Nothing reaches a partner until it is approved here. Approving either
+       hands the job to the partner who owns the car the guest picked, or puts
+       it on the shared board when no specific car was chosen.
+       --------------------------------------------------------------------- */
+    var trAdminStatus = 'pending';
+
+    var TR_ADMIN_STATUS = {
+        pending_admin: ['Awaiting your approval', '#e0b252'],
+        open:          ['On the partner board', '#6FA8D4'],
+        claimed:       ['With a partner', '#6FA8D4'],
+        quoted:        ['Priced — waiting on customer', '#D4AF37'],
+        confirmed:     ['Confirmed', '#34d399'],
+        declined:      ['Customer rejected the price', '#e0b252'],
+        cancelled:     ['Cancelled', '#8894a5']
+    };
+
+    function trEsc(v) {
+        var d = document.createElement('div');
+        d.textContent = v == null ? '' : v;
+        return d.innerHTML;
     }
+
+    function trAdminCard(t) {
+        var st = TR_ADMIN_STATUS[t.status] || [t.status, '#8894a5'];
+        var pending = t.status === 'pending_admin';
+        var routedTo = t.partner_name
+            ? 'Routed to <strong>' + trEsc(t.partner_name) + '</strong> (owns the chosen car)'
+            : 'No car chosen &mdash; will go to the shared partner board';
+
+        return '<div class="admin-card" style="background:var(--th-surface, #1C1E26);border:1px solid rgba(148,163,184,.18);' +
+            'border-radius:14px;padding:18px 20px;margin-bottom:14px;">' +
+            '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between;">' +
+              '<div style="font-weight:700;font-size:15.5px;">' + trEsc(t.pickup_label) +
+                ' <span style="opacity:.6;">&rarr;</span> ' + trEsc(t.dropoff_label) + '</div>' +
+              '<span style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;' +
+                'padding:5px 11px;border-radius:999px;color:' + st[1] + ';background:rgba(148,163,184,.13);">' +
+                trEsc(st[0]) + '</span>' +
+            '</div>' +
+            '<div style="font-size:13px;color:var(--tt-muted, #A0A3B0);margin-top:7px;">' +
+              trEsc(t.pickup_date) + ' at ' + trEsc(t.pickup_time) + ' &middot; ' +
+              t.passengers + ' pax &middot; ' + t.luggage + ' bags &middot; ' + trEsc(t.transfer_type) +
+              (t.distance_km ? ' &middot; ' + t.distance_km + ' km' : '') +
+            '</div>' +
+            '<div style="font-size:13px;color:var(--tt-muted, #A0A3B0);margin-top:5px;">' +
+              (t.vehicle_label ? 'Vehicle: <strong>' + trEsc(t.vehicle_label) + '</strong>' : '') +
+              (t.requested_vehicle ? 'Requested: <strong>' + trEsc(t.requested_vehicle) + '</strong>' : '') +
+            '</div>' +
+            '<div style="font-size:13px;color:var(--tt-muted, #A0A3B0);margin-top:5px;">' + routedTo + '</div>' +
+            '<div style="font-size:13px;color:var(--tt-muted, #A0A3B0);margin-top:5px;">' +
+              trEsc(t.contact_name || t.guest_name || '') +
+              (t.contact_phone ? ' &middot; ' + trEsc(t.contact_phone) : '') +
+              (t.contact_email ? ' &middot; ' + trEsc(t.contact_email) : '') +
+            '</div>' +
+            (t.quote_total != null
+                ? '<div style="margin-top:8px;font-size:14px;">Partner quoted <strong style="color:#D4AF37;">$' +
+                  Number(t.quote_total).toFixed(0) + '</strong></div>'
+                : '') +
+            '<div style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px;opacity:.65;margin-top:8px;">' +
+              trEsc(t.reference) + '</div>' +
+            (pending
+                ? '<div style="display:flex;gap:9px;margin-top:14px;flex-wrap:wrap;">' +
+                  '<button class="btn btn-primary btn-sm tr-adm-approve" data-ref="' + trEsc(t.reference) + '">Approve</button>' +
+                  '<button class="btn btn-sm tr-adm-decline" data-ref="' + trEsc(t.reference) + '" ' +
+                  'style="background:transparent;border:1px solid rgba(248,113,113,.5);color:#f87171;">Decline</button>' +
+                  '</div>'
+                : '') +
+            '</div>';
+    }
+
+    function loadTransfers() {
+        var body = document.getElementById('trAdminBody');
+        if (!body) return;
+        body.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:40px;">Loading transfers...</p>';
+
+        fetch('/api/transfers/admin/list' + (trAdminStatus ? '?status=' + encodeURIComponent(trAdminStatus) : ''),
+              { headers: { 'Authorization': 'Bearer ' + token } })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                var list = (d && d.transfers) || [];
+                if (!list.length) {
+                    body.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:60px;">' +
+                        (trAdminStatus === 'pending' ? 'Nothing waiting for approval.' : 'No transfers here yet.') + '</p>';
+                    return;
+                }
+                body.innerHTML = list.map(trAdminCard).join('');
+                body.querySelectorAll('.tr-adm-approve').forEach(function (b) {
+                    b.addEventListener('click', function () { trAdminAct(b.dataset.ref, 'approve', b); });
+                });
+                body.querySelectorAll('.tr-adm-decline').forEach(function (b) {
+                    b.addEventListener('click', function () {
+                        if (!confirm('Decline this transfer? The customer will see it as cancelled.')) return;
+                        trAdminAct(b.dataset.ref, 'decline', b);
+                    });
+                });
+            })
+            .catch(function () {
+                body.innerHTML = '<p style="color:#f87171;text-align:center;padding:40px;">Could not load transfers.</p>';
+            });
+    }
+
+    function trAdminAct(ref, action, btn) {
+        btn.disabled = true;
+        btn.textContent = action === 'approve' ? 'Approving…' : 'Declining…';
+        fetch('/api/transfers/admin/' + encodeURIComponent(ref) + '/' + action, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({})
+        })
+            .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Failed'); return d; }); })
+            .then(loadTransfers)
+            .catch(function (e) {
+                btn.disabled = false;
+                btn.textContent = action === 'approve' ? 'Approve' : 'Decline';
+                alert(e.message || 'Action failed.');
+            });
+    }
+
+    document.querySelectorAll('.tr-adm-filter').forEach(function (b) {
+        b.addEventListener('click', function () {
+            document.querySelectorAll('.tr-adm-filter').forEach(function (x) { x.classList.remove('active'); });
+            b.classList.add('active');
+            trAdminStatus = b.dataset.status;
+            loadTransfers();
+        });
+    });
+
 
     function getTimeAgo(dateStr) {
         if (!dateStr) return '';
