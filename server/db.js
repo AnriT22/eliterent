@@ -826,6 +826,43 @@ async function initDB() {
     `);
 
 
+    // Pre-created partner offers — a transfer or tour a partner publishes in
+    // advance, which customers can search and book. Distinct from
+    // transfer_requests: a request starts with the customer and gets priced;
+    // an offer starts with the partner and already carries a base price.
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS transfer_offers (
+            id SERIAL PRIMARY KEY,
+            partner_id INTEGER NOT NULL,
+            kind TEXT NOT NULL DEFAULT 'transfer' CHECK(kind IN ('transfer', 'tour')),
+            title TEXT,
+            from_code TEXT,
+            from_label TEXT NOT NULL,
+            to_code TEXT,
+            to_label TEXT NOT NULL,
+            offer_date TEXT,
+            offer_time TEXT,
+            vehicle_id INTEGER,
+            vehicle_label TEXT,
+            seats INTEGER DEFAULT 4,
+            luggage INTEGER DEFAULT 2,
+            included_services TEXT,
+            additional_services TEXT,
+            base_price NUMERIC(10,2) NOT NULL,
+            currency TEXT DEFAULT 'USD',
+            conditions TEXT,
+            status TEXT DEFAULT 'active' CHECK(status IN ('active', 'paused', 'expired')),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (partner_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE SET NULL
+        )
+    `);
+
+    // A request booked against a published offer keeps the link.
+    await pool.query(`ALTER TABLE transfer_requests ADD COLUMN IF NOT EXISTS offer_id INTEGER`);
+
+
     // Create indexes
     const indexes = [
         'CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)',
@@ -857,7 +894,10 @@ async function initDB() {
         'CREATE INDEX IF NOT EXISTS idx_transfers_created ON transfer_requests(created_at)',
         'CREATE INDEX IF NOT EXISTS idx_transfers_partner ON transfer_requests(partner_id)',
         'CREATE INDEX IF NOT EXISTS idx_transfer_quotes_transfer ON transfer_quotes(transfer_id)',
-        'CREATE INDEX IF NOT EXISTS idx_transfer_quotes_partner ON transfer_quotes(partner_id)'
+        'CREATE INDEX IF NOT EXISTS idx_transfer_quotes_partner ON transfer_quotes(partner_id)',
+        'CREATE INDEX IF NOT EXISTS idx_transfer_offers_partner ON transfer_offers(partner_id)',
+        'CREATE INDEX IF NOT EXISTS idx_transfer_offers_status ON transfer_offers(status)',
+        'CREATE INDEX IF NOT EXISTS idx_transfer_offers_route ON transfer_offers(from_code, to_code)'
     ];
     for (const sql of indexes) {
         await pool.query(sql);
