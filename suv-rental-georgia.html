@@ -85,7 +85,7 @@
     <link rel="stylesheet" href="style.css?v=17">
     <link rel="stylesheet" href="premium.css?v=25">
     <link rel="stylesheet" href="navbar-auth.css?v=8">
-    <link rel="stylesheet" href="city-landing.css?v=6">
+    <link rel="stylesheet" href="city-landing.css?v=7">
     <script src="api-helper.js?v=3"></script>
     <script src="i18n.js?v=8"></script>
     <link rel="stylesheet" href="theme.css?v=4">
@@ -201,26 +201,29 @@
     <section style="padding:80px 0;background:var(--th-surface, #1C1E26);">
         <div class="container">
             <h2 class="cl-section-title">SUV Rental Prices in Georgia</h2>
-            <div class="cl-features-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
-                <div class="cl-feature-card" style="text-align:center;">
-                    <h3 style="font-size:16px;color:var(--tt-muted, #A0A3B0);margin-bottom:8px;">Compact SUV</h3>
-                    <div style="font-size:36px;font-weight:900;color:var(--tt-gold, #D4AF37);">$50–$70</div>
-                    <div style="font-size:14px;color:#888;margin-bottom:16px;">/day</div>
-                    <p style="font-size:13px;">Hyundai Tucson, Toyota RAV4, Nissan X-Trail</p>
-                </div>
-                <div class="cl-feature-card" style="text-align:center;border-color:var(--tb-gold2, #D4AF37);">
-                    <div style="background:#D4AF37;color:#0B0C10;font-size:11px;font-weight:800;padding:4px 12px;border-radius:6px;display:inline-block;margin-bottom:12px;">MOST POPULAR</div>
-                    <h3 style="font-size:16px;color:var(--tt-muted, #A0A3B0);margin-bottom:8px;">Full-Size SUV</h3>
-                    <div style="font-size:36px;font-weight:900;color:var(--tt-gold, #D4AF37);">$70–$100</div>
-                    <div style="font-size:14px;color:#888;margin-bottom:16px;">/day</div>
-                    <p style="font-size:13px;">Mitsubishi Pajero, Toyota 4Runner, Land Cruiser Prado</p>
-                </div>
-                <div class="cl-feature-card" style="text-align:center;">
-                    <h3 style="font-size:16px;color:var(--tt-muted, #A0A3B0);margin-bottom:8px;">Premium 4x4</h3>
-                    <div style="font-size:36px;font-weight:900;color:var(--tt-gold, #D4AF37);">$100–$150</div>
-                    <div style="font-size:14px;color:#888;margin-bottom:16px;">/day</div>
-                    <p style="font-size:13px;">Toyota Land Cruiser 200, Mercedes GLE, BMW X5</p>
-                </div>
+            <p style="text-align:center;color:var(--tt-muted, #A0A3B0);max-width:720px;margin:0 auto 32px;">Pick your budget — each band opens the fleet already filtered to that price. Figures are the all-in daily total including the reservation fee, so they match what you see on the listing.</p>
+            <div class="cl-price-grid">
+                <a class="cl-price-card" href="vehicles.html?category=suv&amp;priceMax=90">
+                    <div class="cl-price-tier">Compact &amp; mid-size SUV</div>
+                    <div class="cl-price-amount">Under $90</div>
+                    <div class="cl-price-per">/day, all in</div>
+                    <p class="cl-price-models">Toyota RAV4, Subaru Forester, Mitsubishi Outlander, Toyota Highlander</p>
+                    <span class="cl-price-cta">See these SUVs &#8594;</span>
+                </a>
+                <a class="cl-price-card" href="vehicles.html?category=suv&amp;priceMin=90&amp;priceMax=180">
+                    <div class="cl-price-tier">Full-size &amp; 7-seat SUV</div>
+                    <div class="cl-price-amount">$90–$180</div>
+                    <div class="cl-price-per">/day, all in</div>
+                    <p class="cl-price-models">Hyundai Palisade, Toyota 4Runner, Lexus GX 460, BMW X5</p>
+                    <span class="cl-price-cta">See these SUVs &#8594;</span>
+                </a>
+                <a class="cl-price-card" href="vehicles.html?category=suv&amp;priceMin=180">
+                    <div class="cl-price-tier">Premium 4x4</div>
+                    <div class="cl-price-amount">$180+</div>
+                    <div class="cl-price-per">/day, all in</div>
+                    <p class="cl-price-models">Mercedes-Benz GLS 450, Porsche Cayenne, Toyota Land Cruiser 200, Toyota Prado</p>
+                    <span class="cl-price-cta">See these SUVs &#8594;</span>
+                </a>
             </div>
             <div style="text-align:center;margin-top:32px;">
                 <a href="vehicles.html?category=suv" class="cl-cta-btn">Browse All SUVs &#8594;</a>

@@ -1354,6 +1354,16 @@
             rMin.addEventListener('input', updateSlider);
             rMax.addEventListener('input', updateSlider);
 
+            /* Lets the ?priceMin=/?priceMax= URL params (from the price-band cards
+               on the category landing pages) drive the same slider the user sees,
+               so the filter is both applied and visibly reflected in the panel.
+               500 is the slider ceiling and means "no upper limit" to applyFilters. */
+            window.vcSetPriceRange = function (lo, hi) {
+                rMin.value = Math.max(0, Math.min(500, lo));
+                rMax.value = Math.max(0, Math.min(500, hi));
+                updateSlider();
+            };
+
             if (iMin) iMin.addEventListener('change', function() {
                 rMin.value = Math.max(0, Math.min(parseInt(this.value)||0, parseInt(rMax.value)));
                 updateSlider();
@@ -1387,6 +1397,12 @@
             if (cat) {
                 var catCb = document.querySelector('.vf-panel input[name="category"][value="' + cat.toLowerCase().replace(/"/g, '') + '"]');
                 if (catCb) catCb.checked = true;
+            }
+            // Price band coming from a category landing page's price card.
+            var pMin = parseInt(params.get('priceMin'), 10);
+            var pMax = parseInt(params.get('priceMax'), 10);
+            if ((!isNaN(pMin) || !isNaN(pMax)) && typeof window.vcSetPriceRange === 'function') {
+                window.vcSetPriceRange(isNaN(pMin) ? 0 : pMin, isNaN(pMax) ? 500 : pMax);
             }
             vcLoadVehicles();
             if (typeof updateClearButtonVisibility === 'function') updateClearButtonVisibility();
