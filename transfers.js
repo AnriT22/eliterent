@@ -541,6 +541,21 @@
         if (state.dropoff_code) $('#trDropoff').value = state.dropoff_code;
     }
 
+    function fillOfferSelects() {
+        var groups = {};
+        locations.forEach(function (l) { (groups[l.group] = groups[l.group] || []).push(l); });
+        var opts = Object.keys(groups).map(function (g) {
+            return '<optgroup label="' + esc(g) + '">' +
+                groups[g].map(function (l) {
+                    return '<option value="' + esc(l.code) + '">' + esc(l.label) + '</option>';
+                }).join('') + '</optgroup>';
+        }).join('');
+        ['#trOfFrom', '#trOfTo'].forEach(function (sel) {
+            var el = $(sel);
+            if (el) el.innerHTML = '<option value="">Anywhere</option>' + opts;
+        });
+    }
+
     function buildChips(host, items, selected, onChange) {
         host.innerHTML = items.map(function (it) {
             var on = selected.indexOf(it.id) !== -1;
@@ -578,6 +593,135 @@
         draw();
     }
 
+
+    /* ---------------------------------------------------------------------
+       Partner offers + ad placements on the landing page.
+
+       Offers are journeys a partner has already planned and priced. Booking
+       one still goes through admin approval and the partner's final pricing,
+       so the base price is shown as "from" — extras and fees are confirmed
+       before anything is charged.
+       --------------------------------------------------------------------- */
+
+    function offerCard(o) {
+        var when = o.offer_date
+            ? esc(o.offer_date) + (o.offer_time ? ' at ' + esc(o.offer_time) : '')
+            : 'Any date';
+        var inc = (o.included || []).length
+            ? 'Includes: ' + esc((o.included || []).join(', '))
+            : '';
+        return '<div class="tr-offer">' +
+            '<span class="tr-offer-kind">' + (o.kind === 'tour' ? 'Tour' : 'Transfer') + '</span>' +
+            '<div class="tr-offer-route">' + esc(o.title || (o.from_label + ' → ' + o.to_label)) + '</div>' +
+            (o.title ? '<div class="tr-offer-meta">' + esc(o.from_label) + ' → ' + esc(o.to_label) + '</div>' : '') +
+            '<div class="tr-offer-meta">' + when + ' · ' + o.seats + ' seats · ' + o.luggage + ' bags' +
+              (o.vehicle_label ? ' · ' + esc(o.vehicle_label) : '') + '</div>' +
+            (inc ? '<p class="tr-offer-inc">' + inc + '</p>' : '') +
+            (o.conditions ? '<p class="tr-offer-inc">' + esc(o.conditions) + '</p>' : '') +
+            '<div class="tr-offer-foot">' +
+              '<span class="tr-offer-price">from ' + money(o.base_price) + '</span>' +
+              '<button type="button" class="tr-btn tr-btn-primary tr-btn-sm tr-offer-book" ' +
+              'data-id="' + o.id + '">Book this</button>' +
+            '</div></div>';
+    }
+
+    function loadOffers() {
+        var box = $('#trOffers');
+        if (!box) return;
+        box.innerHTML = '<div class="tr-empty">Loading offers&hellip;</div>';
+
+        var qs = [];
+        var f = $('#trOfFrom').value, t = $('#trOfTo').value,
+            dt = $('#trOfDate').value, px = $('#trOfPax').value, kd = $('#trOfKind').value;
+        if (f) qs.push('from=' + encodeURIComponent(f));
+        if (t) qs.push('to=' + encodeURIComponent(t));
+        if (dt) qs.push('date=' + encodeURIComponent(dt));
+        if (px) qs.push('passengers=' + encodeURIComponent(px));
+        if (kd) qs.push('kind=' + encodeURIComponent(kd));
+
+        api('/offers' + (qs.length ? '?' + qs.join('&') : ''))
+            .then(function (d) {
+                var list = (d && d.offers) || [];
+                if (!list.length) {
+                    box.innerHTML = '<div class="tr-empty">No ready-made journeys match that yet. ' +
+                        'Create a transfer above and we will price it for you.</div>';
+                    return;
+                }
+                box.innerHTML = list.map(offerCard).join('');
+                box.querySelectorAll('.tr-offer-book').forEach(function (b) {
+                    b.addEventListener('click', function () { bookOffer(list, b.dataset.id, b); });
+                });
+            })
+            .catch(function () {
+                box.innerHTML = '<div class="tr-empty">Could not load offers just now.</div>';
+            });
+    }
+
+    function bookOffer(list, id, btn) {
+        var offer = null;
+        for (var i = 0; i < list.length; i++) if (String(list[i].id) === String(id)) offer = list[i];
+        if (!offer) return;
+
+        if (!authToken()) {
+            window.location.href = 'login.html?redirect=transfers.html';
+            return;
+        }
+        var name = prompt('Your name for this booking?');
+        if (!name) return;
+        var phone = prompt('Phone or WhatsApp we can reach you on?');
+        if (!phone) return;
+        var date = offer.offer_date || prompt('Which date? (YYYY-MM-DD)');
+        if (!date) return;
+        var time = offer.offer_time || prompt('What time? (HH:MM)') || '10:00';
+
+        btn.disabled = true;
+        btn.textContent = 'Booking…';
+        api('/offers/' + encodeURIComponent(id) + '/book', {
+            method: 'POST',
+            body: {
+                contact_name: name, contact_phone: phone,
+                pickup_date: date, pickup_time: time,
+                passengers: parseInt($('#trOfPax').value, 10) || 1, luggage: 0
+            }
+        })
+            .then(function (d) {
+                alert('Booked — your reference is ' + d.reference +
+                      '.\nWe will confirm the final price with you before anything is charged. ' +
+                      'You can follow it in My Transfers.');
+                btn.textContent = 'Requested';
+            })
+            .catch(function (e) {
+                btn.disabled = false;
+                btn.textContent = 'Book this';
+                alert(e.message || 'Could not book this offer.');
+            });
+    }
+
+    function loadAds() {
+        var box = $('#trAds'), section = $('#trAdsSection');
+        if (!box || !section) return;
+        fetch('/api/ads?placement=transfers')
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                var ads = (d && (d.ads || d.cards)) || [];
+                if (!ads.length) return;                 // no ads: the section stays hidden
+                box.innerHTML = ads.map(function (a) {
+                    var inner =
+                        (a.cover_url ? '<img src="' + esc(a.cover_url) + '" alt="" loading="lazy">' : '') +
+                        '<div class="tr-ad-body">' +
+                        '<h3>' + esc(a.title || '') + '</h3>' +
+                        (a.description ? '<p>' + esc(a.description) + '</p>' : '') +
+                        (a.cta_text ? '<span class="tr-ad-cta">' + esc(a.cta_text) + ' &rarr;</span>' : '') +
+                        '</div>';
+                    return a.target_link
+                        ? '<a class="tr-ad" href="' + esc(a.target_link) + '" rel="noopener">' + inner + '</a>'
+                        : '<div class="tr-ad">' + inner + '</div>';
+                }).join('');
+                section.style.display = '';
+            })
+            .catch(function () { /* ads are decoration — never block the page */ });
+    }
+
     function init() {
         if (!$('.tr-page')) return;
         restore();
@@ -604,7 +748,12 @@
         $$('[data-back]').forEach(function (b) { b.addEventListener('click', back); });
 
         // Journey
-        api('/locations').then(function (d) { locations = d.locations || []; fillLocationSelects(); renderRoute(); });
+        api('/locations').then(function (d) {
+            locations = d.locations || [];
+            fillLocationSelects();
+            fillOfferSelects();
+            renderRoute();
+        });
 
         $('#trPickup').addEventListener('change', function () {
             state.pickup_code = this.value;
@@ -672,6 +821,12 @@
         $('#trFindGo').addEventListener('click', findMyCar);
 
         $('#trSubmit').addEventListener('click', submit);
+
+        // Landing extras: partner offers and ad placements.
+        var ofSearch = $('#trOfSearch');
+        if (ofSearch) ofSearch.addEventListener('click', loadOffers);
+        loadOffers();
+        loadAds();
 
         render();
     }

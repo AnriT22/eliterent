@@ -1713,6 +1713,50 @@
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
                     <button class="btn btn-sm tr-p-filter active" data-view="mine">My transfers</button>
                     <button class="btn btn-sm tr-p-filter" data-view="open">Open requests</button>
+                    <button class="btn btn-sm tr-p-filter" data-view="offers">My offers</button>
+                </div>
+
+                <div id="trOfferCreate" style="display:none;background:var(--th-surface, #1C1E26);
+                     border:1px solid rgba(148,163,184,.18);border-radius:14px;padding:20px;margin-bottom:20px;">
+                    <h3 style="margin:0 0 4px;font-size:16px;">Publish a transfer or tour</h3>
+                    <p style="margin:0 0 16px;font-size:13px;color:var(--tt-muted, #A0A3B0);">
+                        Customers can search these on the Transfers page and book them directly.
+                    </p>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;">
+                        <label style="font-size:13px;">Type
+                            <select id="ofKind" class="db-input"><option value="transfer">Transfer</option><option value="tour">Tour</option></select></label>
+                        <label style="font-size:13px;">Title (optional)
+                            <input id="ofTitle" class="db-input" maxlength="160" placeholder="Kazbegi day tour"></label>
+                        <label style="font-size:13px;">From
+                            <select id="ofFrom" class="db-input"></select></label>
+                        <label style="font-size:13px;">To
+                            <select id="ofTo" class="db-input"></select></label>
+                        <label style="font-size:13px;">Date (blank = any)
+                            <input id="ofDate" type="date" class="db-input"></label>
+                        <label style="font-size:13px;">Time
+                            <input id="ofTime" type="time" class="db-input"></label>
+                        <label style="font-size:13px;">Vehicle
+                            <input id="ofVehicle" class="db-input" maxlength="120" placeholder="Toyota Highlander"></label>
+                        <label style="font-size:13px;">Seats
+                            <input id="ofSeats" type="number" min="1" max="20" value="4" class="db-input"></label>
+                        <label style="font-size:13px;">Luggage
+                            <input id="ofLuggage" type="number" min="0" max="20" value="2" class="db-input"></label>
+                        <label style="font-size:13px;">Base price (USD)
+                            <input id="ofPrice" type="number" min="1" step="1" class="db-input" placeholder="120"></label>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:12px;">
+                        <label style="font-size:13px;">Included services (comma separated)
+                            <input id="ofIncluded" class="db-input" placeholder="Driver, fuel, water"></label>
+                        <label style="font-size:13px;">Additional services (comma separated)
+                            <input id="ofAdditional" class="db-input" placeholder="Child seat, extra stop"></label>
+                    </div>
+                    <label style="font-size:13px;display:block;margin-top:12px;">Conditions
+                        <textarea id="ofConditions" rows="2" class="db-input" maxlength="1000"
+                                  placeholder="Anything the customer should know"></textarea></label>
+                    <div style="margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <button class="btn btn-primary" id="ofPublish">Publish offer</button>
+                        <span id="ofMsg" style="font-size:13px;color:var(--tt-muted, #A0A3B0);"></span>
+                    </div>
                 </div>
                 <div id="trPartnerBody">
                     <p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:40px;">Loading&hellip;</p>
@@ -2379,7 +2423,7 @@
 
     <script src="currency.js?v=2"></script>
 
-    <script src="dashboard.js?v=34"></script>
+    <script src="dashboard.js?v=35"></script>
 
 <script src="premium-animations.js?v=4"></script>
 
