@@ -18,6 +18,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const { LOCATIONS, BY_CODE, estimateRoute, isMountainRoute, mountainEndpoint } =
     require('../services/transfer-locations');
 const { listPartnerVehicles } = require('../services/transfer-partners');
+const paypal = require('../paypal');
 
 let notifyOwner = function () {};
 try { notifyOwner = require('../services/notify').notifyOwner; } catch (e) { /* alerts optional */ }
@@ -500,7 +501,7 @@ router.get('/mine', authenticateToken, async function (req, res) {
             ' t.requested_vehicle, t.currency, t.created_at,' +
             ' q.price_car, q.fee_airport, q.fee_chauffeur, q.fee_dropoff, q.fee_luggage,' +
             ' q.fee_other, q.other_label, q.note AS quote_note, q.total AS quote_total,' +
-            ' q.status AS quote_status' +
+            ' q.status AS quote_status, t.commission_due, t.payment_status' +
             ' FROM transfer_requests t' +
             ' LEFT JOIN LATERAL (SELECT * FROM transfer_quotes' +
             '   WHERE transfer_id = t.id ORDER BY created_at DESC, id DESC LIMIT 1) q ON true' +
@@ -652,8 +653,9 @@ router.post('/:reference/quote', authenticateToken, requireRole('partner'), asyn
         );
         await execute(
             "UPDATE transfer_requests SET status = 'quoted', quoted_total = $1," +
-            ' updated_at = CURRENT_TIMESTAMP WHERE id = $2',
-            [total, t.id]
+            " commission_due = $2, payment_status = 'unpaid'," +
+            ' updated_at = CURRENT_TIMESTAMP WHERE id = $3',
+            [total, Math.round((total - partnerTotal) * 100) / 100, t.id]
         );
 
         notifyOwner('Transfer ' + ref + ' quoted\nPartner receives ' + partnerTotal +
@@ -684,19 +686,26 @@ router.post('/:reference/respond', authenticateToken, async function (req, res) 
         var q = await latestQuote(t.id);
         if (!q) return res.status(409).json({ error: 'There is no offer to respond to' });
 
+        // Accepting is no longer a click — the customer confirms by paying our
+        // commission (see /pay/create-order). This endpoint handles rejection
+        // only, so nothing can reach 'confirmed' without money changing hands.
+        if (accept) {
+            return res.status(400).json({
+                error: 'Accepting a price means paying the booking fee. Use the payment button.'
+            });
+        }
+
         await execute(
-            'UPDATE transfer_quotes SET status = $1, responded_at = CURRENT_TIMESTAMP WHERE id = $2',
-            [accept ? 'accepted' : 'rejected', q.id]
+            "UPDATE transfer_quotes SET status = 'rejected', responded_at = CURRENT_TIMESTAMP WHERE id = $1",
+            [q.id]
         );
         await execute(
-            'UPDATE transfer_requests SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
-            [accept ? 'confirmed' : 'claimed', t.id]
+            "UPDATE transfer_requests SET status = 'claimed', updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+            [t.id]
         );
 
-        notifyOwner(accept
-            ? 'Transfer ' + ref + ' CONFIRMED by the customer at ' + q.total
-            : 'Transfer ' + ref + ' offer REJECTED by the customer (' + q.total + ')');
-        res.json({ ok: true, status: accept ? 'confirmed' : 'declined' });
+        notifyOwner('Transfer ' + ref + ' offer REJECTED by the customer (' + q.total + ')');
+        res.json({ ok: true, status: 'declined' });
     } catch (e) {
         console.error('[transfers] respond error:', e.message);
         res.status(500).json({ error: 'Could not record your response' });
@@ -982,6 +991,93 @@ router.post('/offers/:id/book', authenticateToken, async function (req, res) {
     } catch (e) {
         console.error('[transfers] offer book error:', e.message);
         res.status(500).json({ error: 'Could not book this offer' });
+    }
+});
+
+
+// ---- paying the booking fee ------------------------------------------------
+//
+// The customer confirms a transfer by paying OUR commission online; the rest
+// goes to the partner directly. Same shape as the rental reservation fee, so
+// the same PayPal helper is reused.
+
+/** The transfer, only if it belongs to the caller and is awaiting payment. */
+async function payableTransfer(ref, userId) {
+    var t = await queryOne(
+        'SELECT id, reference, guest_id, status, commission_due, quoted_total, payment_status' +
+        ' FROM transfer_requests WHERE reference = $1', [ref]);
+    if (!t) return { error: 'Not found', code: 404 };
+    if (t.guest_id !== userId) return { error: 'This transfer is not yours', code: 403 };
+    if (t.status !== 'quoted') return { error: 'There is no offer to pay for', code: 409 };
+    if (t.payment_status === 'paid') return { error: 'Already paid', code: 409 };
+    if (!t.commission_due || Number(t.commission_due) <= 0) {
+        return { error: 'Nothing to pay on this transfer', code: 409 };
+    }
+    return { transfer: t };
+}
+
+router.post('/:reference/pay/create-order', authenticateToken, async function (req, res) {
+    try {
+        if (!paypal.isConfigured()) {
+            return res.status(503).json({ error: 'Online payment is not available right now' });
+        }
+        var ref = (str(req.params.reference, 20) || '').toUpperCase();
+        var r = await payableTransfer(ref, req.user.id);
+        if (r.error) return res.status(r.code).json({ error: r.error });
+
+        var fee = Number(r.transfer.commission_due);
+        var order = await paypal.createOrder(
+            'TRANSFER-' + r.transfer.id, fee, 'USD', 'Booking fee for transfer ' + ref);
+
+        await execute(
+            'UPDATE transfer_requests SET paypal_order_id = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+            [order.id, r.transfer.id]);
+        res.json({ orderId: order.id, amount: fee });
+    } catch (e) {
+        console.error('[transfers] pay create error:', e.message);
+        res.status(500).json({ error: 'Could not start the payment' });
+    }
+});
+
+router.post('/:reference/pay/capture', authenticateToken, async function (req, res) {
+    try {
+        var ref = (str(req.params.reference, 20) || '').toUpperCase();
+        var r = await payableTransfer(ref, req.user.id);
+        if (r.error) return res.status(r.code).json({ error: r.error });
+
+        var orderId = str(req.body && req.body.order_id, 60);
+        if (!orderId) return res.status(400).json({ error: 'Missing order id' });
+
+        var capture = await paypal.captureOrder(orderId);
+        if (!capture || capture.status !== 'COMPLETED') {
+            return res.status(402).json({ error: 'Payment was not completed' });
+        }
+        var captureId = null;
+        try {
+            captureId = capture.purchase_units[0].payments.captures[0].id;
+        } catch (e) { /* keep the booking even if the id shape changes */ }
+
+        var q = await latestQuote(r.transfer.id);
+        if (q) {
+            await execute(
+                "UPDATE transfer_quotes SET status = 'accepted', responded_at = CURRENT_TIMESTAMP WHERE id = $1",
+                [q.id]);
+        }
+        await execute(
+            "UPDATE transfer_requests SET status = 'confirmed', payment_status = 'paid'," +
+            ' paypal_capture_id = $1, paid_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP' +
+            ' WHERE id = $2',
+            [captureId, r.transfer.id]);
+
+        notifyOwner('Transfer ' + ref + ' CONFIRMED and PAID\n' +
+            'Booking fee received: ' + Number(r.transfer.commission_due) + '\n' +
+            'Customer total: ' + Number(r.transfer.quoted_total) + '\n' +
+            'Partner is owed the balance directly.');
+
+        res.json({ ok: true, status: 'confirmed', paid: Number(r.transfer.commission_due) });
+    } catch (e) {
+        console.error('[transfers] pay capture error:', e.message);
+        res.status(500).json({ error: 'Could not confirm the payment' });
     }
 });
 

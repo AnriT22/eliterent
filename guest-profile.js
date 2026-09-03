@@ -496,10 +496,21 @@
                     '<span class="gpt-fee-val">' + cash(v) + '</span></div>';
             }).join('');
 
+            var fee = parseFloat(t.commission_due);
+            var balance = (parseFloat(t.quote_total) || 0) - (fee || 0);
+
             return '<div class="gpt-quote">' +
                 '<div class="gpt-quote-h">Your price</div>' + rows +
                 '<div class="gpt-total"><span class="gpt-total-k">Total</span>' +
                 '<span class="gpt-total-v">' + cash(t.quote_total) + '</span></div>' +
+                (fee > 0
+                    ? '<div class="gpt-split">' +
+                      '<div class="gpt-split-row"><span>Booking fee &mdash; pay now to confirm</span>' +
+                        '<strong>' + cash(fee) + '</strong></div>' +
+                      '<div class="gpt-split-row gpt-split-muted"><span>Balance &mdash; paid to your driver</span>' +
+                        '<span>' + cash(balance) + '</span></div>' +
+                      '</div>'
+                    : '') +
                 (t.quote_note
                     ? '<p class="gpt-quote-note">' + esc(t.quote_note) + '</p>'
                     : '') +
@@ -531,11 +542,85 @@
                 (actionable ? quoteTable(t) : '') +
                 (actionable
                     ? '<div class="gpt-actions">' +
-                      '<button class="gpt-btn gpt-btn-accept gp-tr-accept" data-ref="' + esc(t.reference) + '">Accept this price</button>' +
+                      '<button class="gpt-btn gpt-btn-accept gp-tr-accept" data-ref="' + esc(t.reference) + '">' +
+                        'Accept &amp; pay ' + cash(t.commission_due) + '</button>' +
                       '<button class="gpt-btn gpt-btn-reject gp-tr-reject" data-ref="' + esc(t.reference) + '">Reject</button>' +
-                      '</div>'
+                      '</div>' +
+                      '<div class="gpt-pay" id="gptPay-' + esc(t.reference) + '"></div>'
                     : '') +
                 '</div>';
+        }
+
+        /**
+         * Accepting means paying our booking fee — that payment is what
+         * confirms the transfer, so the button opens PayPal rather than
+         * flipping a status. The balance is settled with the driver.
+         */
+        var sdkLoading = null;
+        function loadPayPal() {
+            if (window.paypal) return Promise.resolve();
+            if (sdkLoading) return sdkLoading;
+            sdkLoading = fetch('/api/payments/config')
+                .then(function (r) { return r.json(); })
+                .then(function (cfg) {
+                    if (!cfg.configured || !cfg.clientId) throw new Error('Online payment is unavailable.');
+                    return new Promise(function (resolve, reject) {
+                        var sc = document.createElement('script');
+                        sc.src = 'https://www.paypal.com/sdk/js?client-id=' +
+                            encodeURIComponent(cfg.clientId) +
+                            '&currency=USD&intent=capture&disable-funding=credit,paylater';
+                        sc.onload = resolve;
+                        sc.onerror = function () { reject(new Error('Could not load PayPal.')); };
+                        document.head.appendChild(sc);
+                    });
+                });
+            return sdkLoading;
+        }
+
+        function startPayment(ref, btn) {
+            var host = document.getElementById('gptPay-' + ref);
+            if (!host) return;
+            btn.disabled = true;
+            host.innerHTML = '<div class="gpt-pay-note">Loading secure payment&hellip;</div>';
+
+            loadPayPal().then(function () {
+                host.innerHTML = '<div class="gpt-pay-note">Pay the booking fee to confirm. ' +
+                    'The balance is paid to your driver.</div><div id="ppb-' + ref + '"></div>';
+                window.paypal.Buttons({
+                    style: { layout: 'vertical', color: 'gold', shape: 'pill', label: 'pay', height: 45 },
+                    createOrder: function () {
+                        return fetch('/api/transfers/' + encodeURIComponent(ref) + '/pay/create-order', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+                        })
+                            .then(function (r) { return r.json(); })
+                            .then(function (d) { if (d.error) throw new Error(d.error); return d.orderId; });
+                    },
+                    onApprove: function (data) {
+                        host.innerHTML = '<div class="gpt-pay-note">Confirming your payment&hellip;</div>';
+                        return fetch('/api/transfers/' + encodeURIComponent(ref) + '/pay/capture', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                            body: JSON.stringify({ order_id: data.orderID })
+                        })
+                            .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Failed'); return d; }); })
+                            .then(function () { load(); })
+                            .catch(function (e) {
+                                host.innerHTML = '<div class="gpt-pay-err">' +
+                                    (e.message || 'Payment could not be confirmed.') +
+                                    ' Nothing has been charged twice — refresh and check before retrying.</div>';
+                            });
+                    },
+                    onCancel: function () { host.innerHTML = ''; btn.disabled = false; },
+                    onError: function () {
+                        host.innerHTML = '<div class="gpt-pay-err">Payment failed. Please try again.</div>';
+                        btn.disabled = false;
+                    }
+                }).render('#ppb-' + ref);
+            }).catch(function (e) {
+                host.innerHTML = '<div class="gpt-pay-err">' + (e.message || 'Payment unavailable.') + '</div>';
+                btn.disabled = false;
+            });
         }
 
         function respond(ref, accept, btn) {
@@ -575,7 +660,7 @@
                     }
                     body.innerHTML = '<div class="gpt-list">' + list.map(card).join('') + '</div>';
                     body.querySelectorAll('.gp-tr-accept').forEach(function (b) {
-                        b.addEventListener('click', function () { respond(b.dataset.ref, true, b); });
+                        b.addEventListener('click', function () { startPayment(b.dataset.ref, b); });
                     });
                     body.querySelectorAll('.gp-tr-reject').forEach(function (b) {
                         b.addEventListener('click', function () { respond(b.dataset.ref, false, b); });
