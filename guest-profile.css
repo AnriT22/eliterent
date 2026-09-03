@@ -612,3 +612,103 @@
     font-weight: 600;
     align-self: center;
 }
+
+/* ===========================================================================
+   MY TRANSFERS
+   Cards carry their own layout rather than inheriting from .gp-card, so the
+   alignment and the price breakdown are predictable. The quote is the point
+   of the card, so it gets a framed panel of its own at a readable width
+   instead of stretching label-to-price across the full card.
+   =========================================================================== */
+.gpt-list { display: flex; flex-direction: column; gap: 16px; }
+
+.gpt-card {
+    text-align: left;
+    background: var(--tw-surface, #1A1814);
+    border: 1px solid var(--tb-borderw, #2A2520);
+    border-radius: 18px;
+    padding: 22px 24px;
+    transition: border-color .2s ease;
+}
+.gpt-card.is-live { border-color: rgba(212,175,55,.45); }
+.gpt-card.is-done { border-color: rgba(52,211,153,.35); }
+
+.gpt-top { display: flex; align-items: flex-start; gap: 14px; justify-content: space-between; flex-wrap: wrap; }
+.gpt-route {
+    font-size: 17px; font-weight: 700; line-height: 1.35;
+    color: var(--tt-text2, #F0ECE2); margin: 0;
+}
+.gpt-route .gpt-arrow { color: var(--tt-gold2, #C9A84C); margin: 0 6px; }
+
+.gpt-badge {
+    flex: none; font-size: 10.5px; font-weight: 800; letter-spacing: .09em;
+    text-transform: uppercase; padding: 6px 12px; border-radius: 999px; white-space: nowrap;
+}
+.gpt-badge.t-wait { background: rgba(224,178,82,.14); color: #e0b252; }
+.gpt-badge.t-gold { background: rgba(212,175,55,.16); color: #D4AF37; }
+.gpt-badge.t-ok   { background: rgba(52,211,153,.14); color: #34d399; }
+.gpt-badge.t-off  { background: rgba(148,163,184,.14); color: #94a3b8; }
+
+.gpt-meta {
+    display: flex; flex-wrap: wrap; gap: 6px 14px;
+    font-size: 13.5px; color: var(--tt-muted2, #94a3b8); margin-top: 10px;
+}
+.gpt-meta span { display: inline-flex; align-items: center; gap: 6px; }
+.gpt-ref {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px;
+    letter-spacing: .06em; color: var(--tt-muted2, #94a3b8); opacity: .8; margin-top: 10px;
+}
+.gpt-note { font-size: 13.5px; line-height: 1.6; color: var(--tt-muted2, #94a3b8); margin: 12px 0 0; }
+
+/* ---- the quote ---- */
+.gpt-quote {
+    margin-top: 18px; padding: 18px 20px;
+    background: rgba(212,175,55,.05);
+    border: 1px solid rgba(212,175,55,.22);
+    border-radius: 14px;
+    max-width: 460px;
+}
+.gpt-quote-h {
+    font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--tt-muted2, #94a3b8); margin-bottom: 14px;
+}
+.gpt-fee { display: flex; align-items: baseline; gap: 10px; font-size: 14px; margin-bottom: 9px; }
+.gpt-fee-name { color: var(--tt-muted2, #94a3b8); }
+.gpt-fee-dots { flex: 1; border-bottom: 1px dotted rgba(148,163,184,.3); transform: translateY(-4px); }
+.gpt-fee-val { font-variant-numeric: tabular-nums; color: var(--tt-text2, #F0ECE2); }
+.gpt-total {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(212,175,55,.25);
+}
+.gpt-total-k { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.gpt-total-v {
+    font-size: 26px; font-weight: 800; color: var(--tt-gold2, #C9A84C);
+    font-variant-numeric: tabular-nums; line-height: 1;
+}
+.gpt-quote-note { font-size: 13px; color: var(--tt-muted2, #94a3b8); margin: 12px 0 0; line-height: 1.55; }
+
+/* ---- actions ---- */
+.gpt-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.gpt-btn {
+    font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+    padding: 12px 22px; border-radius: 999px; border: 1px solid transparent;
+    transition: transform .16s ease, background .16s ease, border-color .16s ease;
+}
+.gpt-btn-accept { background: var(--tt-gold2, #C9A84C); color: #14110B; }
+.gpt-btn-accept:hover:not([disabled]) { background: #dcbb5e; transform: translateY(-1px); }
+.gpt-btn-reject {
+    background: transparent; color: var(--tt-muted2, #94a3b8);
+    border-color: rgba(148,163,184,.35);
+}
+.gpt-btn-reject:hover:not([disabled]) { border-color: #f87171; color: #f87171; }
+.gpt-btn[disabled] { opacity: .5; cursor: not-allowed; transform: none; }
+
+@media (max-width: 640px) {
+    .gpt-card { padding: 18px 16px; }
+    .gpt-quote { padding: 16px; max-width: none; }
+    .gpt-actions .gpt-btn { flex: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .gpt-card, .gpt-btn { transition: none; }
+    .gpt-btn-accept:hover:not([disabled]) { transform: none; }
+}
