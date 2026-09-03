@@ -1368,6 +1368,15 @@ function escHtml(s) {
         return d.innerHTML;
     }
 
+    function trStat(label, value, colour) {
+        return '<div style="background:var(--th-surface, #1C1E26);border:1px solid rgba(148,163,184,.18);' +
+            'border-radius:12px;padding:16px 18px;">' +
+            '<div style="font-size:22px;font-weight:800;color:' + colour + ';font-variant-numeric:tabular-nums;">' +
+            value + '</div>' +
+            '<div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;' +
+            'color:var(--tt-muted, #A0A3B0);margin-top:6px;">' + label + '</div></div>';
+    }
+
     function trAdminCard(t) {
         var st = TR_ADMIN_STATUS[t.status] || [t.status, '#8894a5'];
         var pending = t.status === 'pending_admin';
@@ -1425,12 +1434,21 @@ function escHtml(s) {
             .then(function (r) { return r.json(); })
             .then(function (d) {
                 var list = (d && d.transfers) || [];
+                var tt = (d && d.totals) || {};
+                var summary =
+                    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));' +
+                    'gap:12px;margin-bottom:20px;">' +
+                    trStat('Commission earned', '$' + Number(tt.earned || 0).toFixed(2), '#34d399') +
+                    trStat('Awaiting payment', '$' + Number(tt.pending || 0).toFixed(2), '#D4AF37') +
+                    trStat('Paid transfers', tt.paid_count || 0, '#EAEAEA') +
+                    trStat('Awaiting approval', tt.awaiting_count || 0, '#e0b252') +
+                    '</div>';
                 if (!list.length) {
-                    body.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:60px;">' +
+                    body.innerHTML = summary + '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:60px;">' +
                         (trAdminStatus === 'pending' ? 'Nothing waiting for approval.' : 'No transfers here yet.') + '</p>';
                     return;
                 }
-                body.innerHTML = list.map(trAdminCard).join('');
+                body.innerHTML = summary + list.map(trAdminCard).join('');
                 body.querySelectorAll('.tr-adm-approve').forEach(function (b) {
                     b.addEventListener('click', function () { trAdminAct(b.dataset.ref, 'approve', b); });
                 });
