@@ -101,6 +101,24 @@
         } catch (e) { /* ignore a corrupt draft */ }
     }
 
+    /* Display name for a location code. state.* keeps the English label the
+       server sent, because that is what reaches the partner and the admin. */
+    function locLabel(code, fallback) {
+        return T('loc_' + code, fallback || code || '');
+    }
+
+    function locGroup(name) {
+        return T('locgrp_' + String(name).toLowerCase().replace(/[^a-z0-9]+/g, '_'), name);
+    }
+
+    /** Canonical English label for a code, from the server's location list. */
+    function canonicalLabel(code) {
+        for (var i = 0; i < locations.length; i++) {
+            if (locations[i].code === code) return locations[i].label;
+        }
+        return '';
+    }
+
     function money(n) {
         if (n == null || isNaN(n)) return null;
         return '$' + Number(n).toFixed(Number(n) % 1 ? 2 : 0);
@@ -225,9 +243,11 @@
                 save();
                 var h = Math.floor(r.duration_min / 60), m = r.duration_min % 60;
                 box.innerHTML =
-                    '<span class="tr-route-leg"><span class="tr-route-dot"></span>' + esc(state.pickup_label) + '</span>' +
+                    '<span class="tr-route-leg"><span class="tr-route-dot"></span>' +
+                    esc(locLabel(state.pickup_code, state.pickup_label)) + '</span>' +
                     '<span class="tr-route-arrow">&#8594;</span>' +
-                    '<span class="tr-route-leg"><span class="tr-route-dot"></span>' + esc(state.dropoff_label) + '</span>' +
+                    '<span class="tr-route-leg"><span class="tr-route-dot"></span>' +
+                    esc(locLabel(state.dropoff_code, state.dropoff_label)) + '</span>' +
                     '<span class="tr-route-meta"><strong>' + r.distance_km + ' ' + T('km', 'km') +
                     '</strong> &middot; ' + T('approx', 'approx') + ' <strong>' +
                     (h ? h + 'h ' : '') + m + 'm</strong></span>';
@@ -292,7 +312,13 @@
             var note = $('#trTerrainNote');
             if (note) {
                 if (terrain === 'mountain') {
-                    note.innerHTML = '<strong>' + esc(terrainLabel || T('this_route', 'This route')) + '</strong> ' +
+                    var tCode = '';
+                    for (var ti = 0; ti < locations.length; ti++) {
+                        if (locations[ti].label === terrainLabel) { tCode = locations[ti].code; break; }
+                    }
+                    note.innerHTML = '<strong>' +
+                        esc(tCode ? locLabel(tCode, terrainLabel) : (terrainLabel || T('this_route', 'This route'))) +
+                        '</strong> ' +
                         esc(T('mountain_note',
                             'is a mountain road — steep, and snow-covered for much of the winter. ' +
                             'We’ve put SUVs and 4x4s first; a sedan can do it in summer, but it is not the car we would send.'));
@@ -418,7 +444,8 @@
             '<div class="tr-sum-block"><div class="tr-sum-k">' + esc(T('src_requested', 'Requested vehicle')) +
             '</div><div class="tr-sum-v">' + esc(wanted) + '</div></div>' +
             '<div class="tr-sum-block"><div class="tr-sum-k">' + esc(T('sum_journey', 'Journey')) + '</div><div class="tr-sum-v">' +
-            esc(state.pickup_label) + ' &#8594; ' + esc(state.dropoff_label) + '<br>' +
+            esc(locLabel(state.pickup_code, state.pickup_label)) + ' &#8594; ' +
+            esc(locLabel(state.dropoff_code, state.dropoff_label)) + '<br>' +
             esc(state.pickup_date) + ' ' + esc(T('at', 'at')) + ' ' + esc(state.pickup_time) + '</div></div>' +
             '<div class="tr-sum-block"><div class="tr-sum-k">' + esc(T('src_party', 'Party')) + '</div><div class="tr-sum-v">' +
             esc(T('party_line', '{{p}} passengers · {{b}} luggage', { p: state.passengers, b: state.luggage })) + '</div></div>' +
@@ -436,9 +463,11 @@
         $('#trSumJourney').innerHTML =
             '<div class="tr-sum-when">' + esc(state.pickup_date) + ' &middot; ' + esc(state.pickup_time) + '</div>' +
             '<div class="tr-sum-journey">' +
-            '<div class="tr-sum-leg"><span class="tr-route-dot"></span><span>' + esc(state.pickup_label) + '</span></div>' +
+            '<div class="tr-sum-leg"><span class="tr-route-dot"></span><span>' +
+            esc(locLabel(state.pickup_code, state.pickup_label)) + '</span></div>' +
             '<div class="tr-sum-leg"><span class="tr-route-arrow">&#8595;</span></div>' +
-            '<div class="tr-sum-leg"><span class="tr-route-dot"></span><span>' + esc(state.dropoff_label) + '</span></div>' +
+            '<div class="tr-sum-leg"><span class="tr-route-dot"></span><span>' +
+            esc(locLabel(state.dropoff_code, state.dropoff_label)) + '</span></div>' +
             '</div>' +
             (state.has_return && state.return_date
                 ? '<div class="tr-hint">' + esc(T('return_line', 'Return {{d}} at {{t}}',
@@ -573,8 +602,10 @@
         locations.forEach(function (l) { (groups[l.group] = groups[l.group] || []).push(l); });
         var html = '<option value="">' + esc(T('ph_location', 'Airport, hotel, address or city')) + '</option>' +
             Object.keys(groups).map(function (g) {
-                return '<optgroup label="' + esc(g) + '">' +
-                    groups[g].map(function (l) { return '<option value="' + esc(l.code) + '">' + esc(l.label) + '</option>'; }).join('') +
+                return '<optgroup label="' + esc(locGroup(g)) + '">' +
+                    groups[g].map(function (l) {
+                        return '<option value="' + esc(l.code) + '">' + esc(locLabel(l.code, l.label)) + '</option>';
+                    }).join('') +
                     '</optgroup>';
             }).join('');
         ['#trPickup', '#trDropoff'].forEach(function (sel) {
@@ -589,9 +620,9 @@
         var groups = {};
         locations.forEach(function (l) { (groups[l.group] = groups[l.group] || []).push(l); });
         var opts = Object.keys(groups).map(function (g) {
-            return '<optgroup label="' + esc(g) + '">' +
+            return '<optgroup label="' + esc(locGroup(g)) + '">' +
                 groups[g].map(function (l) {
-                    return '<option value="' + esc(l.code) + '">' + esc(l.label) + '</option>';
+                    return '<option value="' + esc(l.code) + '">' + esc(locLabel(l.code, l.label)) + '</option>';
                 }).join('') + '</optgroup>';
         }).join('');
         ['#trOfFrom', '#trOfTo'].forEach(function (sel) {
@@ -820,12 +851,12 @@
 
         $('#trPickup').addEventListener('change', function () {
             state.pickup_code = this.value;
-            state.pickup_label = this.options[this.selectedIndex].text;
+            state.pickup_label = canonicalLabel(this.value) || this.options[this.selectedIndex].text;
             save(); renderRoute();
         });
         $('#trDropoff').addEventListener('change', function () {
             state.dropoff_code = this.value;
-            state.dropoff_label = this.options[this.selectedIndex].text;
+            state.dropoff_label = canonicalLabel(this.value) || this.options[this.selectedIndex].text;
             save(); renderRoute();
         });
 
