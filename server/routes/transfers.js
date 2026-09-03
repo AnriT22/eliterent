@@ -209,6 +209,65 @@ function customerFacingQuote(q) {
     return out;
 }
 
+
+// ---- holding the vehicle ---------------------------------------------------
+//
+// A confirmed transfer takes the car off the road for the journey, so it has to
+// block availability or the same vehicle can be rented out for the same hours.
+// We use the hour-level vehicle_time_blocks rather than whole-day availability:
+// a transfer is a few hours, and blocking a whole day would cost you rentals.
+// The reader adds its own turnaround buffer on top of end_ts.
+//
+// Only our own fleet can be held — a partner-sourced or "find my car" transfer
+// has no vehicle row here to block.
+var TRANSFER_BUFFER_MINUTES = 120;
+var DEFAULT_TRANSFER_MINUTES = 180;
+
+/** 'YYYY-MM-DD' + 'HH:MM' -> the availability layer's 'YYYY-MM-DDTHH:MM'. */
+function localStamp(dateStr, timeStr, addMinutes) {
+    if (!dateStr || !timeStr) return null;
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+    var t = /^(\d{1,2}):(\d{2})/.exec(timeStr);
+    if (!m || !t) return null;
+    var ms = Date.UTC(+m[1], +m[2] - 1, +m[3], +t[1], +t[2]) + (addMinutes || 0) * 60000;
+    var d = new Date(ms);
+    function p(n) { return String(n).padStart(2, '0'); }
+    return d.getUTCFullYear() + '-' + p(d.getUTCMonth() + 1) + '-' + p(d.getUTCDate()) +
+        'T' + p(d.getUTCHours()) + ':' + p(d.getUTCMinutes());
+}
+
+async function holdVehicleForTransfer(t) {
+    if (!t.vehicle_id) return 0;
+    var mins = parseInt(t.duration_min, 10) || DEFAULT_TRANSFER_MINUTES;
+    var legs = [[t.pickup_date, t.pickup_time]];
+    if (t.return_date && t.return_time) legs.push([t.return_date, t.return_time]);
+
+    var made = 0;
+    for (var i = 0; i < legs.length; i++) {
+        var start = localStamp(legs[i][0], legs[i][1], 0);
+        var end = localStamp(legs[i][0], legs[i][1], mins);
+        if (!start || !end) continue;
+        // Idempotent, mirroring the availability route: a retried capture must
+        // not stack duplicate blocks on the same car.
+        var dup = await queryOne(
+            'SELECT id FROM vehicle_time_blocks WHERE vehicle_id = $1 AND start_ts = $2 AND end_ts = $3',
+            [t.vehicle_id, start, end]);
+        if (dup) continue;
+        await execute(
+            'INSERT INTO vehicle_time_blocks (vehicle_id, start_ts, end_ts, buffer_minutes, transfer_id)' +
+            ' VALUES ($1,$2,$3,$4,$5)',
+            [t.vehicle_id, start, end, TRANSFER_BUFFER_MINUTES, t.id]);
+        made++;
+    }
+    return made;
+}
+
+/** Give the hours back when a confirmed transfer is cancelled. */
+async function releaseVehicleForTransfer(transferId) {
+    var r = await execute('DELETE FROM vehicle_time_blocks WHERE transfer_id = $1', [transferId]);
+    return r.rowCount || 0;
+}
+
 // ---- locations -------------------------------------------------------------
 
 router.get('/locations', function (req, res) {
@@ -782,13 +841,16 @@ router.post('/admin/:reference/approve', authenticateToken, requireRole('admin')
 router.post('/admin/:reference/decline', authenticateToken, requireRole('admin'), async function (req, res) {
     try {
         var ref = (str(req.params.reference, 20) || '').toUpperCase();
-        var r = await execute(
+        var t = await queryOne('SELECT id FROM transfer_requests WHERE reference = $1', [ref]);
+        if (!t) return res.status(404).json({ error: 'Not found' });
+
+        await execute(
             "UPDATE transfer_requests SET status = 'cancelled', admin_note = $1," +
-            ' updated_at = CURRENT_TIMESTAMP WHERE reference = $2',
-            [str(req.body && req.body.note, 500), ref]
-        );
-        if (!r.rowCount) return res.status(404).json({ error: 'Not found' });
-        res.json({ ok: true, status: 'cancelled' });
+            ' updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+            [str(req.body && req.body.note, 500), t.id]);
+        // Hand the hours back to the partner.
+        var freed = await releaseVehicleForTransfer(t.id);
+        res.json({ ok: true, status: 'cancelled', released_blocks: freed });
     } catch (e) {
         console.error('[transfers] decline error:', e.message);
         res.status(500).json({ error: 'Could not decline' });
@@ -1069,10 +1131,23 @@ router.post('/:reference/pay/capture', authenticateToken, async function (req, r
             ' WHERE id = $2',
             [captureId, r.transfer.id]);
 
+        // Take the car off the road for the journey. Never let a booking fail
+        // because the hold could not be written — the money is already taken.
+        var held = 0;
+        try {
+            var full = await queryOne(
+                'SELECT id, vehicle_id, pickup_date, pickup_time, return_date, return_time, duration_min' +
+                ' FROM transfer_requests WHERE id = $1', [r.transfer.id]);
+            if (full) held = await holdVehicleForTransfer(full);
+        } catch (e) {
+            console.error('[transfers] could not hold vehicle:', e.message);
+        }
+
         notifyOwner('Transfer ' + ref + ' CONFIRMED and PAID\n' +
             'Booking fee received: ' + Number(r.transfer.commission_due) + '\n' +
             'Customer total: ' + Number(r.transfer.quoted_total) + '\n' +
-            'Partner is owed the balance directly.');
+            'Partner is owed the balance directly.' +
+            (held ? '\nVehicle held for ' + held + ' leg(s).' : ''));
 
         res.json({ ok: true, status: 'confirmed', paid: Number(r.transfer.commission_due) });
     } catch (e) {

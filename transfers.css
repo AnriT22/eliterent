@@ -406,3 +406,13 @@ html[data-theme="light"] .tr-btn-primary { color: #fff; }
 .tr-offer-price { font-size: 22px; font-weight: 800; color: var(--tr-gold); font-variant-numeric: tabular-nums; }
 .tr-offer-price small { font-size: 12px; font-weight: 600; color: var(--tr-muted); }
 @media (prefers-reduced-motion: reduce) { .tr-offer { transition: none; } .tr-offer:hover { transform: none; } }
+
+/* Partner-only band: a partner on this page wants to publish, not book. */
+.tr-partner-band {
+    display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+    background: linear-gradient(120deg, rgba(212,175,55,.10), rgba(212,175,55,.03));
+    border: 1px solid rgba(212,175,55,.3); border-radius: var(--tr-radius);
+    padding: 26px 28px;
+}
+.tr-partner-band .tr-btn { flex: none; }
+@media (max-width: 640px) { .tr-partner-band .tr-btn { width: 100%; } }
