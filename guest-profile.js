@@ -488,48 +488,51 @@
         function quoteTable(t) {
             var rows = FEE_ROWS.map(function (f) {
                 var v = parseFloat(t[f[0]]);
-                if (!v) return '';                       // only show lines that apply
+                if (!v) return '';                       // only lines that apply
                 var name = f[0] === 'fee_other' && t.other_label ? t.other_label : f[1];
-                return '<tr><td style="padding:6px 0;color:var(--tt-muted, #A0A3B0);">' + esc(name) +
-                       '</td><td style="padding:6px 0;text-align:right;font-variant-numeric:tabular-nums;">' +
-                       cash(v) + '</td></tr>';
+                return '<div class="gpt-fee">' +
+                    '<span class="gpt-fee-name">' + esc(name) + '</span>' +
+                    '<span class="gpt-fee-dots"></span>' +
+                    '<span class="gpt-fee-val">' + cash(v) + '</span></div>';
             }).join('');
-            return '<table style="width:100%;border-collapse:collapse;margin:14px 0 4px;font-size:14px;">' + rows +
-                '<tr><td style="padding:10px 0 0;border-top:1px solid rgba(148,163,184,.25);font-weight:700;">Total</td>' +
-                '<td style="padding:10px 0 0;border-top:1px solid rgba(148,163,184,.25);text-align:right;' +
-                'font-weight:800;font-size:19px;color:#D4AF37;font-variant-numeric:tabular-nums;">' +
-                cash(t.quote_total) + '</td></tr></table>' +
-                (t.quote_note ? '<p style="font-size:13px;color:var(--tt-muted, #A0A3B0);margin:10px 0 0;">' +
-                    esc(t.quote_note) + '</p>' : '');
+
+            return '<div class="gpt-quote">' +
+                '<div class="gpt-quote-h">Your price</div>' + rows +
+                '<div class="gpt-total"><span class="gpt-total-k">Total</span>' +
+                '<span class="gpt-total-v">' + cash(t.quote_total) + '</span></div>' +
+                (t.quote_note
+                    ? '<p class="gpt-quote-note">' + esc(t.quote_note) + '</p>'
+                    : '') +
+                '</div>';
         }
 
         function card(t) {
             var st = TRANSFER_STATUS[t.status] || { label: t.status, tone: 'wait', note: '' };
             var actionable = t.status === 'quoted' && t.quote_total != null;
+            var toneClass = { ok: 't-ok', gold: 't-gold', off: 't-off' }[st.tone] || 't-wait';
+            var edge = t.status === 'confirmed' ? ' is-done' : (actionable ? ' is-live' : '');
 
-            return '<div class="gp-card" style="margin-bottom:16px;">' +
-                '<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:baseline;justify-content:space-between;">' +
-                  '<div style="font-weight:700;font-size:16px;">' + esc(t.pickup_label) +
-                    ' <span style="color:var(--tt-muted, #A0A3B0);">&rarr;</span> ' + esc(t.dropoff_label) + '</div>' +
-                  '<span style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;' +
-                    'padding:5px 11px;border-radius:999px;color:' + toneColor(st.tone) + ';' +
-                    'background:rgba(148,163,184,.12);">' + esc(st.label) + '</span>' +
+            var meta = [];
+            meta.push('<span>' + esc(t.pickup_date) + ' at ' + esc(t.pickup_time) + '</span>');
+            meta.push('<span>' + t.passengers + ' passengers</span>');
+            meta.push('<span>' + t.luggage + ' luggage</span>');
+            if (t.vehicle_label) meta.push('<span>' + esc(t.vehicle_label) + '</span>');
+            if (t.requested_vehicle) meta.push('<span>Requested: ' + esc(t.requested_vehicle) + '</span>');
+
+            return '<div class="gpt-card' + edge + '">' +
+                '<div class="gpt-top">' +
+                  '<h3 class="gpt-route">' + esc(t.pickup_label) +
+                    '<span class="gpt-arrow">&rarr;</span>' + esc(t.dropoff_label) + '</h3>' +
+                  '<span class="gpt-badge ' + toneClass + '">' + esc(st.label) + '</span>' +
                 '</div>' +
-                '<div style="font-size:13.5px;color:var(--tt-muted, #A0A3B0);margin-top:8px;">' +
-                  esc(t.pickup_date) + ' at ' + esc(t.pickup_time) + ' &middot; ' +
-                  t.passengers + ' passengers &middot; ' + t.luggage + ' luggage' +
-                  (t.vehicle_label ? ' &middot; ' + esc(t.vehicle_label) : '') +
-                  (t.requested_vehicle ? ' &middot; requested ' + esc(t.requested_vehicle) : '') +
-                '</div>' +
-                '<div style="font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--tt-muted, #A0A3B0);margin-top:6px;">' +
-                  esc(t.reference) + '</div>' +
-                (st.note ? '<p style="font-size:13.5px;margin:12px 0 0;">' + esc(st.note) + '</p>' : '') +
+                '<div class="gpt-meta">' + meta.join('') + '</div>' +
+                '<div class="gpt-ref">' + esc(t.reference) + '</div>' +
+                (st.note ? '<p class="gpt-note">' + esc(st.note) + '</p>' : '') +
                 (actionable ? quoteTable(t) : '') +
                 (actionable
-                    ? '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">' +
-                      '<button class="btn btn-primary gp-tr-accept" data-ref="' + esc(t.reference) + '">Accept this price</button>' +
-                      '<button class="btn gp-tr-reject" data-ref="' + esc(t.reference) + '" ' +
-                      'style="border:1px solid rgba(148,163,184,.4);background:transparent;color:inherit;">Reject</button>' +
+                    ? '<div class="gpt-actions">' +
+                      '<button class="gpt-btn gpt-btn-accept gp-tr-accept" data-ref="' + esc(t.reference) + '">Accept this price</button>' +
+                      '<button class="gpt-btn gpt-btn-reject gp-tr-reject" data-ref="' + esc(t.reference) + '">Reject</button>' +
                       '</div>'
                     : '') +
                 '</div>';
@@ -555,7 +558,7 @@
         }
 
         function load() {
-            body.innerHTML = '<div style="padding:40px;text-align:center;color:var(--tt-muted, #A0A3B0);">Loading&hellip;</div>';
+            body.innerHTML = '<div style="padding:40px;text-align:center;color:var(--tt-muted2, #94a3b8);">Loading&hellip;</div>';
             fetch('/api/transfers/mine', { headers: { 'Authorization': 'Bearer ' + token } })
                 .then(function (r) { return r.json(); })
                 .then(function (d) {
@@ -570,7 +573,7 @@
                             '<a href="transfers.html" class="btn btn-primary">Book a transfer</a></div>';
                         return;
                     }
-                    body.innerHTML = list.map(card).join('');
+                    body.innerHTML = '<div class="gpt-list">' + list.map(card).join('') + '</div>';
                     body.querySelectorAll('.gp-tr-accept').forEach(function (b) {
                         b.addEventListener('click', function () { respond(b.dataset.ref, true, b); });
                     });
