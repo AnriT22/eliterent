@@ -1625,6 +1625,8 @@
     "loc_mtskheta": "Мцхета",
     "loc_kvareli": "Кварели (Кахетия)",
     "loc_gori": "Гори",
-    "loc_kobuleti": "Кобулети"
+    "loc_kobuleti": "Кобулети",
+    "unit_h": "ч",
+    "unit_m": "м"
   }
 }
