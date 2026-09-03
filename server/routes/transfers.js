@@ -804,7 +804,16 @@ router.get('/admin/list', authenticateToken, requireRole('admin'), async functio
             ' ORDER BY t.created_at DESC LIMIT 200',
             params
         );
-        res.json({ transfers: rows });
+        // What the platform has actually earned, and what is still in flight.
+        var totals = await queryOne(
+            "SELECT" +
+            "  COALESCE(SUM(CASE WHEN payment_status = 'paid' THEN commission_due END), 0) AS earned," +
+            "  COALESCE(SUM(CASE WHEN status = 'quoted' AND payment_status <> 'paid'" +
+            "                    THEN commission_due END), 0) AS pending," +
+            "  COUNT(*) FILTER (WHERE payment_status = 'paid') AS paid_count," +
+            "  COUNT(*) FILTER (WHERE status = 'pending_admin') AS awaiting_count" +
+            ' FROM transfer_requests');
+        res.json({ transfers: rows, totals: totals });
     } catch (e) {
         console.error('[transfers] admin list error:', e.message);
         res.status(500).json({ error: 'Could not load transfers' });
@@ -824,7 +833,11 @@ router.post('/admin/:reference/approve', authenticateToken, requireRole('admin')
         if (t.status !== 'pending_admin') {
             return res.status(409).json({ error: 'Already ' + t.status });
         }
-        var next = t.partner_id ? 'claimed' : 'open';
+        // If a quote already exists (a booked offer priced itself), release it
+        // straight to the customer to pay rather than back to the partner.
+        var priced = await queryOne(
+            'SELECT id FROM transfer_quotes WHERE transfer_id = $1 LIMIT 1', [t.id]);
+        var next = priced ? 'quoted' : (t.partner_id ? 'claimed' : 'open');
         await execute(
             'UPDATE transfer_requests SET status = $1, claimed_at = CASE WHEN $2::int IS NULL' +
             ' THEN claimed_at ELSE CURRENT_TIMESTAMP END, updated_at = CURRENT_TIMESTAMP WHERE id = $3',
@@ -1047,8 +1060,30 @@ router.post('/offers/:id/book', authenticateToken, async function (req, res) {
             ]
         );
 
+        // A published offer already carries the partner's price, so there is
+        // nothing for them to quote — write the quote now so the customer can
+        // pay as soon as you approve it, instead of waiting on a second step.
+        // Same commission maths as a partner-entered quote.
+        var created = await queryOne('SELECT id FROM transfer_requests WHERE reference = $1', [reference]);
+        var net = Math.round(Number(o.base_price) * 100) / 100;
+        var gross = grossUp(net);
+        if (created && net > 0) {
+            await execute(
+                'INSERT INTO transfer_quotes (transfer_id, partner_id, price_car, total, currency,' +
+                ' partner_total, commission_rate, note)' +
+                ' VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',
+                [created.id, o.partner_id, net, gross, o.currency || 'USD', net, PLATFORM_COMMISSION,
+                 o.title ? 'Booked from the published offer: ' + o.title : 'Booked from a published offer']);
+            await execute(
+                'UPDATE transfer_requests SET quoted_total = $1, commission_due = $2 WHERE id = $3',
+                [gross, Math.round((gross - net) * 100) / 100, created.id]);
+        }
+
         notifyOwner('Offer booked ' + reference + '\n' + o.from_label + ' -> ' + o.to_label +
-            '\n' + date + ' ' + time + '\nfrom ' + o.base_price + ' (partner #' + o.partner_id + ')');
+            '\n' + date + ' ' + time +
+            '\nPartner receives ' + net + ', customer pays ' + gross +
+            '\nYour commission ' + (Math.round((gross - net) * 100) / 100) +
+            ' (partner #' + o.partner_id + ')');
         res.status(201).json({ reference: reference, status: 'pending_admin' });
     } catch (e) {
         console.error('[transfers] offer book error:', e.message);
