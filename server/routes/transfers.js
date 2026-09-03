@@ -164,6 +164,50 @@ function humanDuration(mins) {
     return (h ? h + 'h ' : '') + m + 'm';
 }
 
+
+var FEE_FIELDS = ['price_car', 'fee_airport', 'fee_chauffeur', 'fee_dropoff', 'fee_luggage', 'fee_other'];
+
+// ---- platform commission ---------------------------------------------------
+//
+// The platform earns on a confirmed transfer. The partner quotes what THEY want
+// to receive; the customer is shown that grossed up so the commission is
+// included in every line rather than appearing as a separate charge at the end
+// — a visible "service fee" line is what makes people abandon a checkout.
+//
+// COMMISSION is a share of what the CUSTOMER pays, not a markup on the partner's
+// price, so it divides rather than multiplies:
+//
+//     customer = partner / (1 - 0.15)     160 / 0.85 = 188.24
+//     platform = 188.24 - 160  = 28.24    = 15.0% of 188.24
+//
+// (A x1.15 markup would give 184.00 and a real take of only 13.04%.)
+// Change PLATFORM_COMMISSION to adjust the rate; set it to 0 to bill at cost.
+var PLATFORM_COMMISSION = 0.15;
+
+function grossUp(net) {
+    var n = Number(net);
+    if (!n || n <= 0) return 0;
+    return Math.round((n / (1 - PLATFORM_COMMISSION)) * 100) / 100;
+}
+
+/**
+ * Gross every fee line, then take the total from the SUM of those lines rather
+ * than grossing the total separately — otherwise the customer adds the visible
+ * numbers up and gets a different answer to the total, which reads as a
+ * hidden charge even when it is only a rounding cent.
+ */
+function customerFacingQuote(q) {
+    var out = {};
+    var total = 0;
+    FEE_FIELDS.forEach(function (f) {
+        var g = grossUp(q[f]);
+        out[f] = g;
+        total += g;
+    });
+    out.quote_total = Math.round(total * 100) / 100;
+    return out;
+}
+
 // ---- locations -------------------------------------------------------------
 
 router.get('/locations', function (req, res) {
@@ -463,6 +507,13 @@ router.get('/mine', authenticateToken, async function (req, res) {
             ' WHERE t.guest_id = $1 ORDER BY t.created_at DESC LIMIT 50',
             [req.user.id]
         );
+        // Show the customer the commission-inclusive figures.
+        rows.forEach(function (r) {
+            if (r.quote_total == null) return;
+            var g = customerFacingQuote(r);
+            FEE_FIELDS.forEach(function (f) { r[f] = g[f]; });
+            r.quote_total = g.quote_total;
+        });
         res.json({ transfers: rows });
     } catch (e) {
         console.error('[transfers] mine error:', e.message);
@@ -480,7 +531,6 @@ router.get('/mine', authenticateToken, async function (req, res) {
 // from our own fleet is priced by the partner who takes the job rather than
 // billed at the listed day rate.
 
-var FEE_FIELDS = ['price_car', 'fee_airport', 'fee_chauffeur', 'fee_dropoff', 'fee_luggage', 'fee_other'];
 
 function money(v) {
     var n = parseFloat(v);
@@ -579,16 +629,25 @@ router.post('/:reference/quote', authenticateToken, requireRole('partner'), asyn
         }
 
         var b = req.body || {};
+        // What the partner enters is what the partner receives.
         var vals = FEE_FIELDS.map(function (f) { return money(b[f]); });
-        var total = Math.round(vals.reduce(function (a, n) { return a + n; }, 0) * 100) / 100;
-        if (total <= 0) return res.status(400).json({ error: 'Enter at least a car price' });
+        var partnerTotal = Math.round(vals.reduce(function (a, n) { return a + n; }, 0) * 100) / 100;
+        if (partnerTotal <= 0) return res.status(400).json({ error: 'Enter at least a car price' });
+
+        // What the customer pays is that plus our commission, spread across the
+        // lines. Summing the grossed lines keeps the breakdown self-consistent.
+        var grossed = {};
+        vals.forEach(function (v, i) { grossed[FEE_FIELDS[i]] = grossUp(v); });
+        var total = Math.round(FEE_FIELDS.reduce(function (a, f) { return a + grossed[f]; }, 0) * 100) / 100;
 
         await execute(
             'INSERT INTO transfer_quotes (transfer_id, partner_id, price_car, fee_airport, fee_chauffeur,' +
-            ' fee_dropoff, fee_luggage, fee_other, other_label, note, total, currency)' +
-            ' VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)',
+            ' fee_dropoff, fee_luggage, fee_other, other_label, note, total, currency,' +
+            ' partner_total, commission_rate)' +
+            ' VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)',
             [t.id, req.user.id].concat(vals).concat([
-                str(b.other_label, 80), str(b.note, 500), total, str(b.currency, 8) || 'USD'
+                str(b.other_label, 80), str(b.note, 500), total, str(b.currency, 8) || 'USD',
+                partnerTotal, PLATFORM_COMMISSION
             ])
         );
         await execute(
@@ -597,8 +656,10 @@ router.post('/:reference/quote', authenticateToken, requireRole('partner'), asyn
             [total, t.id]
         );
 
-        notifyOwner('Transfer ' + ref + ' quoted at ' + total + ' by partner #' + req.user.id);
-        res.json({ ok: true, reference: ref, total: total, status: 'quoted' });
+        notifyOwner('Transfer ' + ref + ' quoted\nPartner receives ' + partnerTotal +
+            '\nCustomer pays ' + total + '\nYour commission ' +
+            (Math.round((total - partnerTotal) * 100) / 100) + ' (partner #' + req.user.id + ')');
+        res.json({ ok: true, reference: ref, total: total, partner_total: partnerTotal, status: 'quoted' });
     } catch (e) {
         console.error('[transfers] quote submit error:', e.message);
         res.status(500).json({ error: 'Could not save the quote' });
