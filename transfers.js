@@ -70,6 +70,25 @@
     function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
     function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
 
+    /* Translate a transfers.* key, falling back to the English written inline
+       here. i18n.t() returns the key itself when a language file has no entry,
+       so that is the signal to use the fallback — a half-translated language
+       file shows English, never a raw key. {{vars}} interpolate either way. */
+    function T(key, fallback, vars) {
+        var full = 'transfers.' + key;
+        var out = fallback;
+        if (window.I18n && I18n.t) {
+            var v = I18n.t(full, vars);
+            if (v !== full) return v;
+        }
+        if (vars) {
+            Object.keys(vars).forEach(function (k) {
+                out = out.split('{{' + k + '}}').join(vars[k]);
+            });
+        }
+        return out;
+    }
+
     function save() {
         try { sessionStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* private mode */ }
     }
@@ -142,26 +161,26 @@
     function validate(step) {
         clearErrors();
         if (step === 0) {
-            if (!state.pickup_code) return err('errPickup', 'Choose a pick-up point.');
-            if (!state.dropoff_code) return err('errDropoff', 'Choose a drop-off point.');
-            if (state.pickup_code === state.dropoff_code) return err('errDropoff', 'Pick-up and drop-off must differ.');
-            if (!state.pickup_date) return err('errDate', 'Choose a date.');
-            if (!state.pickup_time) return err('errTime', 'Choose a pick-up time.');
+            if (!state.pickup_code) return err('errPickup', T('v_pickup', 'Choose a pick-up point.'));
+            if (!state.dropoff_code) return err('errDropoff', T('v_dropoff', 'Choose a drop-off point.'));
+            if (state.pickup_code === state.dropoff_code) return err('errDropoff', T('v_same', 'Pick-up and drop-off must differ.'));
+            if (!state.pickup_date) return err('errDate', T('v_date', 'Choose a date.'));
+            if (!state.pickup_time) return err('errTime', T('v_time', 'Choose a pick-up time.'));
             if (state.has_return && (!state.return_date || !state.return_time)) {
-                return err('errReturn', 'Add the return date and time, or switch the return off.');
+                return err('errReturn', T('v_return', 'Add the return date and time, or switch the return off.'));
             }
             return true;
         }
         if (step === 2) {
             if (!state.vehicle && !state.requested_vehicle) {
-                return err('errVehicle', 'Choose a vehicle, or tell us which car you want.');
+                return err('errVehicle', T('v_vehicle', 'Choose a vehicle, or tell us which car you want.'));
             }
             return true;
         }
         if (step === 3) {
-            if (!state.contact_name.trim()) return err('errName', 'We need a name for the booking.');
+            if (!state.contact_name.trim()) return err('errName', T('v_name', 'We need a name for the booking.'));
             if (!state.contact_phone.trim() && !state.contact_email.trim()) {
-                return err('errContact', 'Add a phone number or an email so we can reach you.');
+                return err('errContact', T('v_contact', 'Add a phone number or an email so we can reach you.'));
             }
             return true;
         }
@@ -209,7 +228,8 @@
                     '<span class="tr-route-leg"><span class="tr-route-dot"></span>' + esc(state.pickup_label) + '</span>' +
                     '<span class="tr-route-arrow">&#8594;</span>' +
                     '<span class="tr-route-leg"><span class="tr-route-dot"></span>' + esc(state.dropoff_label) + '</span>' +
-                    '<span class="tr-route-meta"><strong>' + r.distance_km + ' km</strong> &middot; approx <strong>' +
+                    '<span class="tr-route-meta"><strong>' + r.distance_km + ' ' + T('km', 'km') +
+                    '</strong> &middot; ' + T('approx', 'approx') + ' <strong>' +
                     (h ? h + 'h ' : '') + m + 'm</strong></span>';
                 box.classList.add('is-shown');
             })
@@ -221,30 +241,35 @@
             ? '<img class="tr-vcard-img" src="' + esc(v.image) + '" alt="' + esc(v.brand + ' ' + v.model) + '" loading="lazy">'
             : '<div class="tr-vcard-img tr-vcard-img--none">&#128663;</div>';
         var badge = v.instant
-            ? '<span class="tr-badge tr-badge-ok">Available now</span>'
-            : '<span class="tr-badge tr-badge-wait">Via a trusted partner</span>';
+            ? '<span class="tr-badge tr-badge-ok">' + esc(T('badge_now', 'Available now')) + '</span>'
+            : '<span class="tr-badge tr-badge-wait">' + esc(T('badge_partner', 'Via a trusted partner')) + '</span>';
         if (v.recommended) {
-            badge = '<span class="tr-badge tr-badge-rec">4x4 &middot; recommended for this route</span>' + badge;
+            badge = '<span class="tr-badge tr-badge-rec">' +
+                esc(T('badge_4x4', '4x4 · recommended for this route')) + '</span>' + badge;
         }
         // Luggage is an estimate, so say so rather than quietly dropping the car.
         if (v.luggage_ok === false) {
-            badge += '<span class="tr-badge tr-badge-wait">Tight for ' + state.luggage + ' bags — add trunk service</span>';
+            badge += '<span class="tr-badge tr-badge-wait">' +
+                esc(T('badge_tight', 'Tight for {{n}} bags — add trunk service', { n: state.luggage })) + '</span>';
         }
         var price = v.instant
-            ? '<span class="tr-vcard-price">' + money(v.price) + ' <small>/ day</small></span>'
-            : '<span class="tr-vcard-price">from ' + money(v.price) + '</span>';
+            ? '<span class="tr-vcard-price">' + money(v.price) + ' <small>/ ' + esc(T('per_day', 'day')) + '</small></span>'
+            : '<span class="tr-vcard-price">' + esc(T('from', 'from')) + ' ' + money(v.price) + '</span>';
         return '<button type="button" class="tr-vcard' + (selected ? ' is-selected' : '') +
             '" data-vehicle=\'' + esc(JSON.stringify(v)) + '\'>' + img +
             '<div class="tr-vcard-body">' +
             '<span class="tr-vcard-brand">' + esc(v.brand) + '</span>' +
             '<h4 class="tr-vcard-name">' + esc(v.model || v.label) + '</h4>' +
             '<span class="tr-vcard-class">' + esc(v.label || v.category) + '</span>' +
-            '<span class="tr-vcard-cap">' + v.passengers + ' passengers &middot; approx ' + v.luggage + ' bags' +
-            (v.passengers >= 7 && state.passengers > 5 ? ' <em style="opacity:.75">(third row in use)</em>' : '') +
+            '<span class="tr-vcard-cap">' + esc(T('cap_line', '{{p}} passengers · approx {{b}} bags',
+                { p: v.passengers, b: v.luggage })) +
+            (v.passengers >= 7 && state.passengers > 5
+                ? ' <em style="opacity:.75">' + esc(T('third_row', '(third row in use)')) + '</em>' : '') +
             '</span>' +
             badge +
             '<span class="tr-vcard-foot">' + price +
-            '<span class="tr-btn tr-btn-ghost tr-btn-sm">' + (selected ? 'Selected' : 'Select') + '</span></span>' +
+            '<span class="tr-btn tr-btn-ghost tr-btn-sm">' +
+            esc(selected ? T('selected', 'Selected') : T('select', 'Select')) + '</span></span>' +
             '</div></button>';
     }
 
@@ -252,7 +277,8 @@
         var fleetBox = $('#trFleet'), partnerBox = $('#trPartner');
         if (!fleetBox) return;
         var oldMore=document.querySelector('.tr-more'); if(oldMore) oldMore.remove();
-        fleetBox.innerHTML = '<div class="tr-empty">Finding vehicles for your journey&hellip;</div>';
+        fleetBox.innerHTML = '<div class="tr-empty">' +
+            esc(T('finding_vehicles', 'Finding vehicles for your journey…')) + '</div>';
         if (partnerBox) partnerBox.innerHTML = '';
 
         api('/quote', {
@@ -266,9 +292,10 @@
             var note = $('#trTerrainNote');
             if (note) {
                 if (terrain === 'mountain') {
-                    note.innerHTML = '<strong>' + esc(terrainLabel || 'This route') +
-                        '</strong> is a mountain road — steep, and snow-covered for much of the winter. ' +
-                        'We’ve put SUVs and 4x4s first; a sedan can do it in summer, but it is not the car we would send.';
+                    note.innerHTML = '<strong>' + esc(terrainLabel || T('this_route', 'This route')) + '</strong> ' +
+                        esc(T('mountain_note',
+                            'is a mountain road — steep, and snow-covered for much of the winter. ' +
+                            'We’ve put SUVs and 4x4s first; a sedan can do it in summer, but it is not the car we would send.'));
                     note.style.display = 'block';
                 } else {
                     note.style.display = 'none';
@@ -320,7 +347,7 @@
             var on = String(d.id) === String(v.id) && d.source === v.source;
             c.classList.toggle('is-selected', on);
             var btn = $('.tr-btn', c);
-            if (btn) btn.textContent = on ? 'Selected' : 'Select';
+            if (btn) btn.textContent = on ? T('selected', 'Selected') : T('select', 'Select');
         });
         clearErrors();
     }
@@ -334,8 +361,12 @@
         var klass = $('#trFindClass').value;
         var out = $('#trFindResult');
 
-        if (!brand) { out.innerHTML = '<div class="tr-empty">Tell us at least a brand.</div>'; return; }
-        out.innerHTML = '<div class="tr-empty">Searching our fleet and trusted partners&hellip;</div>';
+        if (!brand) {
+            out.innerHTML = '<div class="tr-empty">' + esc(T('find_need_brand', 'Tell us at least a brand.')) + '</div>';
+            return;
+        }
+        out.innerHTML = '<div class="tr-empty">' +
+            esc(T('find_searching', 'Searching our fleet and trusted partners…')) + '</div>';
 
         api('/find-vehicle', {
             method: 'POST',
@@ -349,24 +380,26 @@
 
             if (d.outcome === 'exact') {
                 out.innerHTML =
-                    '<h4 class="tr-panel-h" style="font-size:22px;">Your vehicle is available</h4>' +
-                    '<p class="tr-panel-sub">Available for your selected journey.</p>' +
+                    '<h4 class="tr-panel-h" style="font-size:22px;">' +
+                    esc(T('find_exact_t', 'Your vehicle is available')) + '</h4>' +
+                    '<p class="tr-panel-sub">' + esc(T('find_exact_d', 'Available for your selected journey.')) + '</p>' +
                     '<div class="tr-vehicles">' + d.vehicles.map(function (v) { return vehicleCard(v, false); }).join('') + '</div>';
                 return;
             }
             if (d.outcome === 'similar') {
                 out.innerHTML =
-                    '<h4 class="tr-panel-h" style="font-size:22px;">We couldn’t find your exact vehicle</h4>' +
-                    '<p class="tr-panel-sub">But we found some excellent alternatives.</p>' +
+                    '<h4 class="tr-panel-h" style="font-size:22px;">' +
+                    esc(T('find_similar_t', 'We couldn’t find your exact vehicle')) + '</h4>' +
+                    '<p class="tr-panel-sub">' + esc(T('find_similar_d', 'But we found some excellent alternatives.')) + '</p>' +
                     '<div class="tr-vehicles">' + d.vehicles.map(function (v) { return vehicleCard(v, false); }).join('') + '</div>' +
                     '<div class="tr-nav"><button type="button" class="tr-btn tr-btn-ghost" id="trKeepSearching">' +
-                    'Keep searching for my car</button></div>';
+                    esc(T('find_keep', 'Keep searching for my car')) + '</button></div>';
                 $('#trKeepSearching').addEventListener('click', function () { requestSpecific(wanted, klass); });
                 return;
             }
             requestSpecific(wanted, klass);
         }).catch(function () {
-            out.innerHTML = '<div class="tr-empty">Search failed. Please try again.</div>';
+            out.innerHTML = '<div class="tr-empty">' + esc(T('find_failed', 'Search failed. Please try again.')) + '</div>';
         });
     }
 
@@ -377,18 +410,20 @@
         save();
         clearErrors();
         $('#trFindResult').innerHTML =
-            '<h4 class="tr-panel-h" style="font-size:22px;">We’ll find it for you</h4>' +
-            '<p class="tr-panel-sub">Your requested vehicle isn’t currently available for instant confirmation. ' +
-            'We’ll check our trusted vehicle partners and find the best available option for your journey.</p>' +
+            '<h4 class="tr-panel-h" style="font-size:22px;">' + esc(T('src_title', 'We’ll find it for you')) + '</h4>' +
+            '<p class="tr-panel-sub">' + esc(T('src_body',
+                'Your requested vehicle isn’t currently available for instant confirmation. ' +
+                'We’ll check our trusted vehicle partners and find the best available option for your journey.')) + '</p>' +
             '<div class="tr-summary" style="margin-bottom:20px;">' +
-            '<div class="tr-sum-block"><div class="tr-sum-k">Requested vehicle</div><div class="tr-sum-v">' + esc(wanted) + '</div></div>' +
-            '<div class="tr-sum-block"><div class="tr-sum-k">Journey</div><div class="tr-sum-v">' +
+            '<div class="tr-sum-block"><div class="tr-sum-k">' + esc(T('src_requested', 'Requested vehicle')) +
+            '</div><div class="tr-sum-v">' + esc(wanted) + '</div></div>' +
+            '<div class="tr-sum-block"><div class="tr-sum-k">' + esc(T('sum_journey', 'Journey')) + '</div><div class="tr-sum-v">' +
             esc(state.pickup_label) + ' &#8594; ' + esc(state.dropoff_label) + '<br>' +
-            esc(state.pickup_date) + ' at ' + esc(state.pickup_time) + '</div></div>' +
-            '<div class="tr-sum-block"><div class="tr-sum-k">Party</div><div class="tr-sum-v">' +
-            state.passengers + ' passengers &middot; ' + state.luggage + ' luggage</div></div>' +
+            esc(state.pickup_date) + ' ' + esc(T('at', 'at')) + ' ' + esc(state.pickup_time) + '</div></div>' +
+            '<div class="tr-sum-block"><div class="tr-sum-k">' + esc(T('src_party', 'Party')) + '</div><div class="tr-sum-v">' +
+            esc(T('party_line', '{{p}} passengers · {{b}} luggage', { p: state.passengers, b: state.luggage })) + '</div></div>' +
             '</div>' +
-            '<p class="tr-hint">Continue to review and we’ll send this to our partner network.</p>';
+            '<p class="tr-hint">' + esc(T('src_continue', 'Continue to review and we’ll send this to our partner network.')) + '</p>';
     }
 
     // ---- review + submit --------------------------------------------------
@@ -406,69 +441,77 @@
             '<div class="tr-sum-leg"><span class="tr-route-dot"></span><span>' + esc(state.dropoff_label) + '</span></div>' +
             '</div>' +
             (state.has_return && state.return_date
-                ? '<div class="tr-hint">Return ' + esc(state.return_date) + ' at ' + esc(state.return_time) + '</div>' : '') +
-            (state.distance_km ? '<div class="tr-hint">' + state.distance_km + ' km &middot; approx ' +
+                ? '<div class="tr-hint">' + esc(T('return_line', 'Return {{d}} at {{t}}',
+                    { d: state.return_date, t: state.return_time })) + '</div>' : '') +
+            (state.distance_km ? '<div class="tr-hint">' + state.distance_km + ' ' + T('km', 'km') +
+                ' &middot; ' + T('approx', 'approx') + ' ' +
                 Math.round(state.duration_min / 60 * 10) / 10 + ' h</div>' : '');
 
         $('#trSumVehicle').innerHTML = v
             ? '<strong>' + esc(v.brand + ' ' + (v.model || v.label)) + '</strong><br>' +
-              v.passengers + ' passengers &middot; ' + v.luggage + ' luggage' +
-              (v.instant ? '' : '<br><span class="tr-badge tr-badge-wait" style="margin-top:8px;">Via a trusted partner</span>')
+              esc(T('party_line', '{{p}} passengers · {{b}} luggage', { p: v.passengers, b: v.luggage })) +
+              (v.instant ? '' : '<br><span class="tr-badge tr-badge-wait" style="margin-top:8px;">' +
+                  esc(T('badge_partner', 'Via a trusted partner')) + '</span>')
             : state.requested_vehicle
                 ? '<strong>' + esc(state.requested_vehicle.label) + '</strong><br>' +
-                  '<span class="tr-badge tr-badge-wait" style="margin-top:8px;">We’ll source this for you</span>'
-                : '<span class="tr-muted">No vehicle selected</span>';
+                  '<span class="tr-badge tr-badge-wait" style="margin-top:8px;">' +
+                  esc(T('badge_source', 'We’ll source this for you')) + '</span>'
+                : '<span class="tr-muted">' + esc(T('no_vehicle', 'No vehicle selected')) + '</span>';
 
-        $('#trSumGuests').textContent = state.passengers + ' passengers · ' + state.luggage + ' luggage';
+        $('#trSumGuests').textContent =
+            T('party_line', '{{p}} passengers · {{b}} luggage', { p: state.passengers, b: state.luggage });
         $('#trSumExtras').innerHTML = extrasChosen.length
-            ? extrasChosen.map(function (e) { return esc(e.label) + (e.price ? ' — ' + money(e.price) : ''); }).join('<br>')
-            : '<span style="color:var(--tr-muted)">None</span>';
+            ? extrasChosen.map(function (e) {
+                  return esc(T('svc_' + e.id, e.label)) + (e.price ? ' — ' + money(e.price) : '');
+              }).join('<br>')
+            : '<span style="color:var(--tr-muted)">' + esc(T('none', 'None')) + '</span>';
 
         // Nothing is priced yet. Under the quote workflow the partner who takes
         // the job sets the figures, so Review shows the SHAPE of the quote —
         // which lines you will be charged for — rather than inventing numbers.
         var feeLines = [
-            ['Car price', 'the vehicle for your journey'],
-            ['Airport fee', 'if pick-up or drop-off is an airport'],
-            ['Chauffeur fee', 'driver for the journey'],
-            ['Drop-off fee', 'leaving the car at the destination'],
-            ['Extra luggage', 'support vehicle or roof box']
+            [T('fee_car', 'Car price'), T('fee_car_d', 'the vehicle for your journey')],
+            [T('fee_airport', 'Airport fee'), T('fee_airport_d', 'if pick-up or drop-off is an airport')],
+            [T('fee_chauffeur', 'Chauffeur fee'), T('fee_chauffeur_d', 'driver for the journey')],
+            [T('fee_dropoff', 'Drop-off fee'), T('fee_dropoff_d', 'leaving the car at the destination')],
+            [T('fee_luggage', 'Extra luggage'), T('fee_luggage_d', 'support vehicle or roof box')]
         ];
         if (extrasChosen.length) {
-            feeLines.push(['Selected services', extrasChosen.map(function (e) { return e.label; }).join(', ')]);
+            feeLines.push([T('fee_services', 'Selected services'),
+                extrasChosen.map(function (e) { return T('svc_' + e.id, e.label); }).join(', ')]);
         }
         $('#trSumFees').innerHTML = '<div class="tr-fees">' + feeLines.map(function (f) {
             return '<div class="tr-fee"><span class="tr-fee-name">' + esc(f[0]) + '</span>' +
                 '<span class="tr-fee-dots"></span>' +
                 '<span class="tr-fee-val">' + esc(f[1]) + '</span></div>';
         }).join('') + '</div>' +
-        '<p class="tr-hint">Only the lines that apply to your journey are charged.</p>';
+        '<p class="tr-hint">' + esc(T('fees_note', 'Only the lines that apply to your journey are charged.')) + '</p>';
 
-        $('#trTotalValue').textContent = 'On request';
-        $('#trTotalNote').textContent =
+        $('#trTotalValue').textContent = T('on_request', 'On request');
+        $('#trTotalNote').textContent = T('total_note',
             'Our partner prices your journey and sends you a full breakdown. ' +
-            'Nothing is charged until you accept that price.';
+            'Nothing is charged until you accept that price.');
 
         var signedIn = !!authToken();
         var gate = $('#trSignin');
         if (gate) {
             gate.style.display = signedIn ? 'none' : 'block';
             gate.innerHTML = signedIn ? '' :
-                '<strong>Sign in to send this request.</strong><br>' +
-                'You need an account so we can send you the price and you can accept it. ' +
-                'Your journey is saved &mdash; you will come straight back here.' +
+                '<strong>' + esc(T('signin_t', 'Sign in to send this request.')) + '</strong><br>' +
+                esc(T('signin_d', 'You need an account so we can send you the price and you can accept it. ' +
+                    'Your journey is saved — you will come straight back here.')) +
                 '<div style="margin-top:12px;"><a class="tr-btn tr-btn-primary tr-btn-sm" ' +
-                'href="login.html?redirect=transfers.html">Sign in or register</a></div>';
+                'href="login.html?redirect=transfers.html">' + esc(T('signin_cta', 'Sign in or register')) + '</a></div>';
         }
         $('#trSubmit').disabled = !signedIn;
-        $('#trSubmit').textContent = 'Send transfer request';
+        $('#trSubmit').textContent = T('submit', 'Send transfer request');
     }
 
     function submit() {
         if (!validate(3)) return;
         var btn = $('#trSubmit');
         btn.disabled = true;
-        btn.textContent = 'Sending…';
+        btn.textContent = T('sending', 'Sending…');
 
         var v = state.vehicle;
         api('', {
@@ -498,23 +541,24 @@
             $('.tr-flow').innerHTML =
                 '<div class="tr-wrap"><div class="tr-result">' +
                 '<div class="tr-result-ico">' + (booked ? '✅' : '🔎') + '</div>' +
-                '<h2>Request received</h2>' +
-                '<p>One of our partners will price your journey and send you a full ' +
-                'breakdown &mdash; car price plus any airport, chauffeur, drop-off or luggage ' +
-                'fees. You can accept or reject it, and nothing is charged until you accept.</p>' +
+                '<h2>' + esc(T('done_title', 'Request received')) + '</h2>' +
+                '<p>' + esc(T('done_body', 'One of our partners will price your journey and send you a full ' +
+                    'breakdown — car price plus any airport, chauffeur, drop-off or luggage ' +
+                    'fees. You can accept or reject it, and nothing is charged until you accept.')) + '</p>' +
                 '<div class="tr-ref">' + esc(d.reference) + '</div>' +
-                '<p>Keep this reference. You can quote it to us any time, and it appears in your account if you’re signed in.</p>' +
+                '<p>' + esc(T('done_ref', 'Keep this reference. You can quote it to us any time, ' +
+                    'and it appears in your account if you’re signed in.')) + '</p>' +
                 '<div class="tr-nav" style="justify-content:center;">' +
-                '<a class="tr-btn tr-btn-ghost" href="/transfers.html">Book another transfer</a>' +
-                '<a class="tr-btn tr-btn-primary" href="/guest-profile.html">View my transfers</a>' +
+                '<a class="tr-btn tr-btn-ghost" href="/transfers.html">' + esc(T('done_again', 'Book another transfer')) + '</a>' +
+                '<a class="tr-btn tr-btn-primary" href="/guest-profile.html">' + esc(T('done_view', 'View my transfers')) + '</a>' +
                 '</div></div></div>';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }).catch(function (e) {
             btn.disabled = false;
-            btn.textContent = 'Send transfer request';
-            var msg = e.message || 'Something went wrong. Please try again.';
+            btn.textContent = T('submit', 'Send transfer request');
+            var msg = e.message || T('generic_error', 'Something went wrong. Please try again.');
             if (/token|expired|Access/i.test(msg)) {
-                msg = 'Your session expired. Sign in again and your journey will still be here.';
+                msg = T('expired', 'Your session expired. Sign in again and your journey will still be here.');
                 var gate = $('#trSignin');
                 if (gate) { gate.style.display = 'block'; }
             }
@@ -527,7 +571,7 @@
     function fillLocationSelects() {
         var groups = {};
         locations.forEach(function (l) { (groups[l.group] = groups[l.group] || []).push(l); });
-        var html = '<option value="">Airport, hotel, address or city</option>' +
+        var html = '<option value="">' + esc(T('ph_location', 'Airport, hotel, address or city')) + '</option>' +
             Object.keys(groups).map(function (g) {
                 return '<optgroup label="' + esc(g) + '">' +
                     groups[g].map(function (l) { return '<option value="' + esc(l.code) + '">' + esc(l.label) + '</option>'; }).join('') +
@@ -552,18 +596,24 @@
         }).join('');
         ['#trOfFrom', '#trOfTo'].forEach(function (sel) {
             var el = $(sel);
-            if (el) el.innerHTML = '<option value="">Anywhere</option>' + opts;
+            if (el) el.innerHTML = '<option value="">' + esc(T('opt_anywhere', 'Anywhere')) + '</option>' + opts;
         });
     }
 
-    function buildChips(host, items, selected, onChange) {
+    // Split in two so a language change can repaint the chips without
+    // stacking a second change listener on the host.
+    function paintChips(host, items, selected) {
         host.innerHTML = items.map(function (it) {
             var on = selected.indexOf(it.id) !== -1;
             return '<label class="tr-chip"><input type="checkbox" value="' + esc(it.id) + '"' + (on ? ' checked' : '') + '>' +
-                '<span>' + esc(it.label) +
+                '<span>' + esc(T('svc_' + it.id, it.label)) +
                 (it.price ? '<span class="tr-chip-price">' + money(it.price) + '</span>' : '') +
                 '</span></label>';
         }).join('');
+    }
+
+    function buildChips(host, items, selected, onChange) {
+        paintChips(host, items, selected);
         host.addEventListener('change', function (e) {
             if (e.target.tagName !== 'INPUT') return;
             var v = e.target.value;
@@ -606,29 +656,31 @@
     function offerCard(o) {
         var when = o.offer_date
             ? esc(o.offer_date) + (o.offer_time ? ' at ' + esc(o.offer_time) : '')
-            : 'Any date';
+            : T('any_date', 'Any date');
         var inc = (o.included || []).length
-            ? 'Includes: ' + esc((o.included || []).join(', '))
+            ? esc(T('includes', 'Includes:')) + ' ' + esc((o.included || []).join(', '))
             : '';
         return '<div class="tr-offer">' +
-            '<span class="tr-offer-kind">' + (o.kind === 'tour' ? 'Tour' : 'Transfer') + '</span>' +
+            '<span class="tr-offer-kind">' +
+            esc(o.kind === 'tour' ? T('kind_tour', 'Tour') : T('kind_transfer', 'Transfer')) + '</span>' +
             '<div class="tr-offer-route">' + esc(o.title || (o.from_label + ' → ' + o.to_label)) + '</div>' +
             (o.title ? '<div class="tr-offer-meta">' + esc(o.from_label) + ' → ' + esc(o.to_label) + '</div>' : '') +
-            '<div class="tr-offer-meta">' + when + ' · ' + o.seats + ' seats · ' + o.luggage + ' bags' +
+            '<div class="tr-offer-meta">' + when + ' · ' +
+              esc(T('seats_bags', '{{s}} seats · {{b}} bags', { s: o.seats, b: o.luggage })) +
               (o.vehicle_label ? ' · ' + esc(o.vehicle_label) : '') + '</div>' +
             (inc ? '<p class="tr-offer-inc">' + inc + '</p>' : '') +
             (o.conditions ? '<p class="tr-offer-inc">' + esc(o.conditions) + '</p>' : '') +
             '<div class="tr-offer-foot">' +
-              '<span class="tr-offer-price">from ' + money(o.base_price) + '</span>' +
+              '<span class="tr-offer-price">' + esc(T('from', 'from')) + ' ' + money(o.base_price) + '</span>' +
               '<button type="button" class="tr-btn tr-btn-primary tr-btn-sm tr-offer-book" ' +
-              'data-id="' + o.id + '">Book this</button>' +
+              'data-id="' + o.id + '">' + esc(T('book_this', 'Book this')) + '</button>' +
             '</div></div>';
     }
 
     function loadOffers() {
         var box = $('#trOffers');
         if (!box) return;
-        box.innerHTML = '<div class="tr-empty">Loading offers&hellip;</div>';
+        box.innerHTML = '<div class="tr-empty">' + esc(T('offers_loading', 'Loading offers…')) + '</div>';
 
         var qs = [];
         var f = $('#trOfFrom').value, t = $('#trOfTo').value,
@@ -643,8 +695,9 @@
             .then(function (d) {
                 var list = (d && d.offers) || [];
                 if (!list.length) {
-                    box.innerHTML = '<div class="tr-empty">No ready-made journeys match that yet. ' +
-                        'Create a transfer above and we will price it for you.</div>';
+                    box.innerHTML = '<div class="tr-empty">' + esc(T('offers_none',
+                        'No ready-made journeys match that yet. ' +
+                        'Create a transfer above and we will price it for you.')) + '</div>';
                     return;
                 }
                 box.innerHTML = list.map(offerCard).join('');
@@ -653,7 +706,7 @@
                 });
             })
             .catch(function () {
-                box.innerHTML = '<div class="tr-empty">Could not load offers just now.</div>';
+                box.innerHTML = '<div class="tr-empty">' + esc(T('offers_failed', 'Could not load offers just now.')) + '</div>';
             });
     }
 
@@ -666,16 +719,16 @@
             window.location.href = 'login.html?redirect=transfers.html';
             return;
         }
-        var name = prompt('Your name for this booking?');
+        var name = prompt(T('ask_name', 'Your name for this booking?'));
         if (!name) return;
-        var phone = prompt('Phone or WhatsApp we can reach you on?');
+        var phone = prompt(T('ask_phone', 'Phone or WhatsApp we can reach you on?'));
         if (!phone) return;
-        var date = offer.offer_date || prompt('Which date? (YYYY-MM-DD)');
+        var date = offer.offer_date || prompt(T('ask_date', 'Which date? (YYYY-MM-DD)'));
         if (!date) return;
-        var time = offer.offer_time || prompt('What time? (HH:MM)') || '10:00';
+        var time = offer.offer_time || prompt(T('ask_time', 'What time? (HH:MM)')) || '10:00';
 
         btn.disabled = true;
-        btn.textContent = 'Booking…';
+        btn.textContent = T('booking', 'Booking…');
         api('/offers/' + encodeURIComponent(id) + '/book', {
             method: 'POST',
             body: {
@@ -685,15 +738,15 @@
             }
         })
             .then(function (d) {
-                alert('Booked — your reference is ' + d.reference +
-                      '.\nWe will confirm the final price with you before anything is charged. ' +
-                      'You can follow it in My Transfers.');
-                btn.textContent = 'Requested';
+                alert(T('booked_ok', 'Booked — your reference is {{ref}}.', { ref: d.reference }) + '\n' +
+                      T('booked_note', 'We will confirm the final price with you before anything is charged. ' +
+                        'You can follow it in My Transfers.'));
+                btn.textContent = T('requested', 'Requested');
             })
             .catch(function (e) {
                 btn.disabled = false;
-                btn.textContent = 'Book this';
-                alert(e.message || 'Could not book this offer.');
+                btn.textContent = T('book_this', 'Book this');
+                alert(e.message || T('book_failed', 'Could not book this offer.'));
             });
     }
 
@@ -838,6 +891,21 @@
         showPartnerBand();
         loadOffers();
         loadAds();
+
+        // Switching language repaints everything this file drew by hand;
+        // i18n.js only touches nodes carrying data-i18n attributes.
+        document.addEventListener('languageChanged', function () {
+            var svc = $('#trServices');
+            if (svc) paintChips(svc, SERVICES, state.services);
+            fillLocationSelects();
+            fillOfferSelects();
+            if (state.pickup_code) $('#trPickup').value = state.pickup_code;
+            if (state.dropoff_code) $('#trDropoff').value = state.dropoff_code;
+            renderRoute();
+            loadOffers();
+            if (state.step === 2) loadVehicles();
+            render();
+        });
 
         render();
     }
