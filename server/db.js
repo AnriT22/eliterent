@@ -859,6 +859,12 @@ async function initDB() {
         )
     `);
 
+    // A quote stores BOTH sides of the money: the fee columns are what the
+    // partner entered and will receive, `partner_total` sums them, and `total`
+    // is what the customer pays once the platform commission is included.
+    await pool.query(`ALTER TABLE transfer_quotes ADD COLUMN IF NOT EXISTS partner_total NUMERIC(10,2)`);
+    await pool.query(`ALTER TABLE transfer_quotes ADD COLUMN IF NOT EXISTS commission_rate NUMERIC(5,4)`);
+
     // A request booked against a published offer keeps the link.
     await pool.query(`ALTER TABLE transfer_requests ADD COLUMN IF NOT EXISTS offer_id INTEGER`);
 

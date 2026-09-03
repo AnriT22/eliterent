@@ -4041,6 +4041,9 @@
                 'style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(148,163,184,.2);">' +
                 '<div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;' +
                 'color:var(--tt-muted, #A0A3B0);margin-bottom:14px;">Your price</div>' +
+                '<p style="font-size:12.5px;color:var(--tt-muted, #A0A3B0);margin:-6px 0 14px;line-height:1.55;">' +
+                'Enter what <strong>you</strong> want to receive. Our commission is added on top and ' +
+                'spread across the lines, so the customer sees one clean breakdown.</p>' +
                 rows +
                 '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap;">' +
                   '<label style="min-width:150px;font-size:13.5px;">Label for "Other"</label>' +
@@ -4105,13 +4108,24 @@
 
             body.querySelectorAll('.tr-price-form').forEach(function (form) {
                 var totalEl = form.querySelector('.tr-running-total');
+                // Mirror the server's commission maths so a partner can see, while
+                // typing, both what they receive and what the customer will be
+                // shown. Keep RATE in step with PLATFORM_COMMISSION on the server.
+                var RATE = 0.15;
                 function recalc() {
-                    var sum = 0;
+                    var net = 0, gross = 0;
                     form.querySelectorAll('.tr-fee-in').forEach(function (i) {
                         var v = parseFloat(i.value);
-                        if (!isNaN(v) && v > 0) sum += v;
+                        if (!isNaN(v) && v > 0) {
+                            net += v;
+                            gross += Math.round((v / (1 - RATE)) * 100) / 100;
+                        }
                     });
-                    totalEl.textContent = 'Total $' + (Math.round(sum * 100) / 100);
+                    net = Math.round(net * 100) / 100;
+                    gross = Math.round(gross * 100) / 100;
+                    totalEl.innerHTML = 'You receive <strong>$' + net + '</strong>' +
+                        '<span style="color:var(--tt-muted, #A0A3B0);font-weight:400;"> · customer pays $' +
+                        gross + '</span>';
                 }
                 form.querySelectorAll('.tr-fee-in').forEach(function (i) { i.addEventListener('input', recalc); });
 
