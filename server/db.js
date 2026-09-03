@@ -865,6 +865,15 @@ async function initDB() {
     await pool.query(`ALTER TABLE transfer_quotes ADD COLUMN IF NOT EXISTS partner_total NUMERIC(10,2)`);
     await pool.query(`ALTER TABLE transfer_quotes ADD COLUMN IF NOT EXISTS commission_rate NUMERIC(5,4)`);
 
+    // The customer pays OUR commission online; that payment is what confirms
+    // the transfer. The partner's share is settled with them directly, exactly
+    // like the reservation fee on a rental.
+    await pool.query(`ALTER TABLE transfer_requests ADD COLUMN IF NOT EXISTS commission_due NUMERIC(10,2)`);
+    await pool.query(`ALTER TABLE transfer_requests ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'unpaid'`);
+    await pool.query(`ALTER TABLE transfer_requests ADD COLUMN IF NOT EXISTS paypal_order_id TEXT`);
+    await pool.query(`ALTER TABLE transfer_requests ADD COLUMN IF NOT EXISTS paypal_capture_id TEXT`);
+    await pool.query(`ALTER TABLE transfer_requests ADD COLUMN IF NOT EXISTS paid_at TIMESTAMP`);
+
     // A request booked against a published offer keeps the link.
     await pool.query(`ALTER TABLE transfer_requests ADD COLUMN IF NOT EXISTS offer_id INTEGER`);
 

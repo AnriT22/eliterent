@@ -712,3 +712,24 @@
     .gpt-card, .gpt-btn { transition: none; }
     .gpt-btn-accept:hover:not([disabled]) { transform: none; }
 }
+
+/* The money split: what confirms the booking now, and what is settled later. */
+.gpt-split {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed rgba(212,175,55,.25);
+    display: flex; flex-direction: column; gap: 7px;
+}
+.gpt-split-row {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    font-size: 13.5px; color: var(--tt-text2, #F0ECE2);
+}
+.gpt-split-row strong { color: var(--tt-gold2, #C9A84C); font-variant-numeric: tabular-nums; }
+.gpt-split-muted { color: var(--tt-muted2, #94a3b8); font-variant-numeric: tabular-nums; }
+
+.gpt-pay { margin-top: 14px; max-width: 460px; }
+.gpt-pay-note { font-size: 13px; color: var(--tt-muted2, #94a3b8); margin-bottom: 12px; line-height: 1.55; }
+.gpt-pay-err {
+    font-size: 13px; color: #f87171; line-height: 1.55;
+    background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.3);
+    border-radius: 10px; padding: 12px 14px;
+}
