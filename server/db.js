@@ -865,6 +865,10 @@ async function initDB() {
     await pool.query(`ALTER TABLE transfer_quotes ADD COLUMN IF NOT EXISTS partner_total NUMERIC(10,2)`);
     await pool.query(`ALTER TABLE transfer_quotes ADD COLUMN IF NOT EXISTS commission_rate NUMERIC(5,4)`);
 
+    // Time blocks created by a confirmed transfer carry the transfer id, so the
+    // block can be released precisely if that transfer is later cancelled.
+    await pool.query(`ALTER TABLE vehicle_time_blocks ADD COLUMN IF NOT EXISTS transfer_id INTEGER`);
+
     // The customer pays OUR commission online; that payment is what confirms
     // the transfer. The partner's share is settled with them directly, exactly
     // like the reservation fee on a rental.

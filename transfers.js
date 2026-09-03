@@ -697,6 +697,16 @@
             });
     }
 
+    /** A partner landing here wants to publish an offer, not book a ride. */
+    function showPartnerBand() {
+        var band = document.getElementById('trPartnerBand');
+        if (!band) return;
+        var user = null;
+        try { user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || 'null'); }
+        catch (e) { /* not signed in */ }
+        if (user && user.role === 'partner') band.style.display = '';
+    }
+
     function loadAds() {
         var box = $('#trAds'), section = $('#trAdsSection');
         if (!box || !section) return;
@@ -825,6 +835,7 @@
         // Landing extras: partner offers and ad placements.
         var ofSearch = $('#trOfSearch');
         if (ofSearch) ofSearch.addEventListener('click', loadOffers);
+        showPartnerBand();
         loadOffers();
         loadAds();
 
