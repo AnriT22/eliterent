@@ -1207,6 +1207,8 @@
     "loc_mtskheta": "מצחתה",
     "loc_kvareli": "קווארלי (קחתי)",
     "loc_gori": "גורי",
-    "loc_kobuleti": "קובולטי"
+    "loc_kobuleti": "קובולטי",
+    "unit_h": "ש'",
+    "unit_m": "ד'"
   }
 }

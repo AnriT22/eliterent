@@ -250,7 +250,7 @@
                     esc(locLabel(state.dropoff_code, state.dropoff_label)) + '</span>' +
                     '<span class="tr-route-meta"><strong>' + r.distance_km + ' ' + T('km', 'km') +
                     '</strong> &middot; ' + T('approx', 'approx') + ' <strong>' +
-                    (h ? h + 'h ' : '') + m + 'm</strong></span>';
+                    (h ? h + T('unit_h', 'h') + ' ' : '') + m + T('unit_m', 'm') + '</strong></span>';
                 box.classList.add('is-shown');
             })
             .catch(function () { box.classList.remove('is-shown'); });
@@ -474,7 +474,7 @@
                     { d: state.return_date, t: state.return_time })) + '</div>' : '') +
             (state.distance_km ? '<div class="tr-hint">' + state.distance_km + ' ' + T('km', 'km') +
                 ' &middot; ' + T('approx', 'approx') + ' ' +
-                Math.round(state.duration_min / 60 * 10) / 10 + ' h</div>' : '');
+                Math.round(state.duration_min / 60 * 10) / 10 + ' ' + T('unit_h', 'h') + '</div>' : '');
 
         $('#trSumVehicle').innerHTML = v
             ? '<strong>' + esc(v.brand + ' ' + (v.model || v.label)) + '</strong><br>' +

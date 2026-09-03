@@ -1625,6 +1625,8 @@
     "loc_mtskheta": "Mtskheta",
     "loc_kvareli": "Kvareli (Kakheti)",
     "loc_gori": "Gori",
-    "loc_kobuleti": "Kobuleti"
+    "loc_kobuleti": "Kobuleti",
+    "unit_h": "h",
+    "unit_m": "m"
   }
 }

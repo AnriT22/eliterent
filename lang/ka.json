@@ -1630,6 +1630,8 @@
     "loc_mtskheta": "მცხეთა",
     "loc_kvareli": "ყვარელი (კახეთი)",
     "loc_gori": "გორი",
-    "loc_kobuleti": "ქობულეთი"
+    "loc_kobuleti": "ქობულეთი",
+    "unit_h": "სთ",
+    "unit_m": "წთ"
   }
 }
