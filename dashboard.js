@@ -4282,14 +4282,17 @@
                 if (!totals) return;
                 var RATE = 0.15;
                 function recalc() {
-                    var net = 0;
+                    var net = 0, gross = 0;
                     document.querySelectorAll('.ofFee').forEach(function (i) {
                         var v = parseFloat(i.value);
-                        if (!isNaN(v) && v > 0) net += v;
+                        if (!isNaN(v) && v > 0) {
+                            net += v;
+                            // Per line, exactly as the server bills it.
+                            gross += Math.round((v / (1 - RATE)) * 100) / 100;
+                        }
                     });
-                    var gross = net > 0 ? net / (1 - RATE) : 0;
-                    totals.innerHTML = 'You receive $' + net.toFixed(0) +
-                        ' · customer pays $' + gross.toFixed(0);
+                    totals.innerHTML = 'You receive $' + (Math.round(net * 100) / 100) +
+                        ' · customer pays $' + (Math.round(gross * 100) / 100);
                 }
                 document.querySelectorAll('.ofFee').forEach(function (i) {
                     i.addEventListener('input', recalc);
