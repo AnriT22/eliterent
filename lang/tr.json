@@ -1250,7 +1250,7 @@
     "partner_band_text": "Kendi fiyatınızla bir transfer veya tur yayınlayın; müşteriler doğrudan bu sayfadan rezervasyon yapabilsin. Fiyatlandırılmayı bekleyen transfer taleplerini de burada görürsünüz.",
     "partner_band_cta": "Transfer teklif et",
     "offers_title": "Hazır transferler ve turlar",
-    "offers_lede": "İş ortaklarımızın önceden planlayıp fiyatlandırdığı yolculuklar. Birini seçip rezerve edin — temel fiyat için teklif beklemeye gerek yok.",
+    "offers_lede": "İş ortaklarımızın önceden planlayıp eksiksiz fiyatlandırdığı yolculuklar. Gördüğünüz fiyat ödediğiniz fiyattır — birini seçip rezerve edin.",
     "ads_title": "Öne çıkanlar",
     "ads_lede": "EliteAuto ve iş ortaklarımızdan teklifler ve hizmetler.",
     "closing_title": "Nereye gideceğinizi söyleyin. Gerisini biz halledelim.",
@@ -1449,6 +1449,9 @@
     "loc_gori": "Gori",
     "loc_kobuleti": "Kobuleti",
     "unit_h": "s",
-    "unit_m": "dk"
+    "unit_m": "dk",
+    "vcard_priced": "Bu yolculuk için tam fiyat verilir",
+    "offer_all_in": "tüm ücretler dahil",
+    "fee_other": "Diğer"
   }
 }

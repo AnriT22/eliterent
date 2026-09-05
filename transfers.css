@@ -404,7 +404,42 @@ html[data-theme="light"] .tr-btn-primary { color: #fff; }
 .tr-offer-inc { font-size: 13px; color: var(--tr-muted-2); line-height: 1.6; margin: 0 0 14px; }
 .tr-offer-foot { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: auto; }
 .tr-offer-price { font-size: 22px; font-weight: 800; color: var(--tr-gold); font-variant-numeric: tabular-nums; }
-.tr-offer-price small { font-size: 12px; font-weight: 600; color: var(--tr-muted); }
+.tr-offer-price small { font-size: 12px; font-weight: 600; color: var(--tr-muted); display: block; margin-top: 2px; }
+
+/* The offer's fee lines. Shown up front because the partner already priced
+   every one of them — there is nothing to add after the customer books. */
+.tr-offer-lines {
+    margin: 12px 0 0;
+    padding: 12px 0 0;
+    border-top: 1px dashed rgba(148, 163, 184, .25);
+    display: grid;
+    gap: 6px;
+}
+.tr-offer-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+    color: #A0A3B0;
+    color: var(--tr-muted, #A0A3B0);
+}
+.tr-offer-line span:last-child {
+    font-weight: 700;
+    color: #E8EAED;
+    color: var(--tr-text, #E8EAED);
+    font-variant-numeric: tabular-nums;
+}
+
+/* A transfer is priced per journey, so the vehicle card carries a promise
+   rather than a number. Sized like the price it replaces so cards stay level. */
+.tr-vcard-note {
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #A0A3B0;
+    color: var(--tr-muted, #A0A3B0);
+    max-width: 62%;
+}
 @media (prefers-reduced-motion: reduce) { .tr-offer { transition: none; } .tr-offer:hover { transform: none; } }
 
 /* Partner-only band: a partner on this page wants to publish, not book. */
