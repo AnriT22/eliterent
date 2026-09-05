@@ -881,6 +881,21 @@ async function initDB() {
     // A request booked against a published offer keeps the link.
     await pool.query(`ALTER TABLE transfer_requests ADD COLUMN IF NOT EXISTS offer_id INTEGER`);
 
+    // An offer now carries the SAME fee breakdown a partner would type into the
+    // pricing form, entered once when they publish it. `base_price` stays as the
+    // partner's total so older rows and existing queries keep working; the
+    // per-line columns are what the customer actually sees.
+    await pool.query(`ALTER TABLE transfer_offers ADD COLUMN IF NOT EXISTS price_car NUMERIC(10,2)`);
+    await pool.query(`ALTER TABLE transfer_offers ADD COLUMN IF NOT EXISTS fee_airport NUMERIC(10,2) DEFAULT 0`);
+    await pool.query(`ALTER TABLE transfer_offers ADD COLUMN IF NOT EXISTS fee_chauffeur NUMERIC(10,2) DEFAULT 0`);
+    await pool.query(`ALTER TABLE transfer_offers ADD COLUMN IF NOT EXISTS fee_dropoff NUMERIC(10,2) DEFAULT 0`);
+    await pool.query(`ALTER TABLE transfer_offers ADD COLUMN IF NOT EXISTS fee_luggage NUMERIC(10,2) DEFAULT 0`);
+    await pool.query(`ALTER TABLE transfer_offers ADD COLUMN IF NOT EXISTS fee_other NUMERIC(10,2) DEFAULT 0`);
+    await pool.query(`ALTER TABLE transfer_offers ADD COLUMN IF NOT EXISTS other_label TEXT`);
+    // Offers published before the breakdown existed: their single price was the
+    // car price, so say so rather than leaving the line blank.
+    await pool.query(`UPDATE transfer_offers SET price_car = base_price WHERE price_car IS NULL`);
+
 
     // Create indexes
     const indexes = [

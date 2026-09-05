@@ -1741,8 +1741,41 @@
                             <input id="ofSeats" type="number" min="1" max="20" value="4" class="db-input"></label>
                         <label style="font-size:13px;">Luggage
                             <input id="ofLuggage" type="number" min="0" max="20" value="2" class="db-input"></label>
-                        <label style="font-size:13px;">Base price (USD)
-                            <input id="ofPrice" type="number" min="1" step="1" class="db-input" placeholder="120"></label>
+                    </div>
+
+                    <!-- The whole price, entered once, up front. The customer meets a
+                         finished number instead of a placeholder with fees added later. -->
+                    <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(148,163,184,.2);">
+                        <div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+                                    color:var(--tt-muted, #A0A3B0);margin-bottom:6px;">Your price</div>
+                        <p style="font-size:12.5px;color:var(--tt-muted, #A0A3B0);margin:0 0 14px;line-height:1.55;">
+                            Enter what <strong>you</strong> want to receive. Our commission is added on top and spread
+                            across the lines, so the customer sees one clean total with nothing added afterwards.</p>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+                            <label style="font-size:13px;">Car price (USD) <span style="color:#D4AF37;">*</span>
+                                <input id="ofPrice" type="number" min="1" step="1" class="db-input ofFee"
+                                       data-field="price_car" placeholder="120"></label>
+                            <label style="font-size:13px;">Airport fee
+                                <input id="ofFeeAirport" type="number" min="0" step="1" class="db-input ofFee"
+                                       data-field="fee_airport" placeholder="0"></label>
+                            <label style="font-size:13px;">Chauffeur fee
+                                <input id="ofFeeChauffeur" type="number" min="0" step="1" class="db-input ofFee"
+                                       data-field="fee_chauffeur" placeholder="0"></label>
+                            <label style="font-size:13px;">Drop-off fee
+                                <input id="ofFeeDropoff" type="number" min="0" step="1" class="db-input ofFee"
+                                       data-field="fee_dropoff" placeholder="0"></label>
+                            <label style="font-size:13px;">Extra luggage
+                                <input id="ofFeeLuggage" type="number" min="0" step="1" class="db-input ofFee"
+                                       data-field="fee_luggage" placeholder="0"></label>
+                            <label style="font-size:13px;">Other
+                                <input id="ofFeeOther" type="number" min="0" step="1" class="db-input ofFee"
+                                       data-field="fee_other" placeholder="0"></label>
+                            <label style="font-size:13px;">Label for &quot;Other&quot;
+                                <input id="ofOtherLabel" class="db-input" maxlength="80"
+                                       placeholder="e.g. night surcharge"></label>
+                        </div>
+                        <div id="ofTotals" style="margin-top:12px;font-size:14px;font-weight:700;color:#D4AF37;">
+                            You receive $0 &middot; customer pays $0</div>
                     </div>
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:12px;">
                         <label style="font-size:13px;">Included services (comma separated)
@@ -2423,7 +2456,7 @@
 
     <script src="currency.js?v=2"></script>
 
-    <script src="dashboard.js?v=36"></script>
+    <script src="dashboard.js?v=37"></script>
 
 <script src="premium-animations.js?v=4"></script>
 

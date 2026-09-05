@@ -272,9 +272,12 @@
             badge += '<span class="tr-badge tr-badge-wait">' +
                 esc(T('badge_tight', 'Tight for {{n}} bags — add trunk service', { n: state.luggage })) + '</span>';
         }
-        var price = v.instant
-            ? '<span class="tr-vcard-price">' + money(v.price) + ' <small>/ ' + esc(T('per_day', 'day')) + '</small></span>'
-            : '<span class="tr-vcard-price">' + esc(T('from', 'from')) + ' ' + money(v.price) + '</span>';
+        // Deliberately no number here. This is a transfer, not a rental: the
+        // price is whatever the partner quotes for THIS journey, and showing
+        // the car's daily rental rate first made the quote look like a rental
+        // price with surcharges bolted on.
+        var price = '<span class="tr-vcard-note">' +
+            esc(T('vcard_priced', 'Full price quoted for this journey')) + '</span>';
         return '<button type="button" class="tr-vcard' + (selected ? ' is-selected' : '') +
             '" data-vehicle=\'' + esc(JSON.stringify(v)) + '\'>' + img +
             '<div class="tr-vcard-body">' +
@@ -684,6 +687,26 @@
        before anything is charged.
        --------------------------------------------------------------------- */
 
+    /* What the price is made of. The partner entered these lines when they
+       published the offer, so there is nothing left to add later — which is the
+       whole point of showing them here rather than after a quote. */
+    function offerBreakdown(o) {
+        var lines = o.lines || [];
+        if (!lines.length) return '';
+        var names = {
+            price_car: T('fee_car', 'Car price'),
+            fee_airport: T('fee_airport', 'Airport fee'),
+            fee_chauffeur: T('fee_chauffeur', 'Chauffeur fee'),
+            fee_dropoff: T('fee_dropoff', 'Drop-off fee'),
+            fee_luggage: T('fee_luggage', 'Extra luggage'),
+            fee_other: o.other_label || T('fee_other', 'Other')
+        };
+        return '<div class="tr-offer-lines">' + lines.map(function (l) {
+            return '<div class="tr-offer-line"><span>' + esc(names[l.field] || l.field) + '</span>' +
+                '<span>' + money(l.amount) + '</span></div>';
+        }).join('') + '</div>';
+    }
+
     function offerCard(o) {
         var when = o.offer_date
             ? esc(o.offer_date) + (o.offer_time ? ' at ' + esc(o.offer_time) : '')
@@ -699,10 +722,12 @@
             '<div class="tr-offer-meta">' + when + ' · ' +
               esc(T('seats_bags', '{{s}} seats · {{b}} bags', { s: o.seats, b: o.luggage })) +
               (o.vehicle_label ? ' · ' + esc(o.vehicle_label) : '') + '</div>' +
+            offerBreakdown(o) +
             (inc ? '<p class="tr-offer-inc">' + inc + '</p>' : '') +
             (o.conditions ? '<p class="tr-offer-inc">' + esc(o.conditions) + '</p>' : '') +
             '<div class="tr-offer-foot">' +
-              '<span class="tr-offer-price">' + esc(T('from', 'from')) + ' ' + money(o.base_price) + '</span>' +
+              '<span class="tr-offer-price">' + money(o.total) +
+              '<small>' + esc(T('offer_all_in', 'all fees included')) + '</small></span>' +
               '<button type="button" class="tr-btn tr-btn-primary tr-btn-sm tr-offer-book" ' +
               'data-id="' + o.id + '">' + esc(T('book_this', 'Book this')) + '</button>' +
             '</div></div>';

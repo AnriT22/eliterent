@@ -460,7 +460,10 @@ router.post('/', authenticateToken, async function (req, res) {
                 // A partner offer is indicative only — never stored as a firm quote.
                 kind === 'booking' ? (b.quoted_price != null ? Number(b.quoted_price) : null) : null,
                 str(b.currency, 8) || 'USD',
-                'pending_admin'
+                // Straight to whoever can price it. Waiting on an admin click
+                // before the partner may even quote only delays the customer;
+                // admin keeps full visibility and can still cancel anything.
+                assignedPartner ? 'claimed' : 'open'
             ]
         );
 
@@ -683,15 +686,37 @@ router.post('/:reference/quote', authenticateToken, requireRole('partner'), asyn
         var t = await queryOne(
             'SELECT id, partner_id, status FROM transfer_requests WHERE reference = $1', [ref]);
         if (!t) return res.status(404).json({ error: 'Not found' });
-        if (t.partner_id !== req.user.id) return res.status(403).json({ error: 'This transfer is not yours' });
         if (['confirmed', 'cancelled'].indexOf(t.status) !== -1) {
             return res.status(409).json({ error: 'This transfer is already ' + t.status });
+        }
+
+        // Pricing an unclaimed transfer takes it at the same time — the partner
+        // fills the form once instead of pressing Accept and coming back later.
+        // The conditional UPDATE is the race guard: if two partners submit at
+        // the same moment exactly one of them affects a row.
+        if (t.partner_id == null) {
+            var taken = await execute(
+                'UPDATE transfer_requests SET partner_id = $1, claimed_at = CURRENT_TIMESTAMP,' +
+                "  status = 'claimed', updated_at = CURRENT_TIMESTAMP" +
+                " WHERE id = $2 AND partner_id IS NULL AND status = 'open'",
+                [req.user.id, t.id]);
+            if (!taken.rowCount) {
+                return res.status(409).json({ error: 'Another partner has already taken this transfer' });
+            }
+            t.partner_id = req.user.id;
+        } else if (t.partner_id !== req.user.id) {
+            return res.status(403).json({ error: 'This transfer is not yours' });
         }
 
         var b = req.body || {};
         // What the partner enters is what the partner receives.
         var vals = FEE_FIELDS.map(function (f) { return money(b[f]); });
         var partnerTotal = Math.round(vals.reduce(function (a, n) { return a + n; }, 0) * 100) / 100;
+        // The car price is never optional: a transfer without one reads to the
+        // customer as fees bolted onto a price that was never stated.
+        if (money(b.price_car) <= 0) {
+            return res.status(400).json({ error: 'Enter the car price — it is required' });
+        }
         if (partnerTotal <= 0) return res.status(400).json({ error: 'Enter at least a car price' });
 
         // What the customer pays is that plus our commission, spread across the
@@ -786,7 +811,11 @@ router.get('/admin/list', authenticateToken, requireRole('admin'), async functio
         var params = [];
         var where = '';
         if (status === 'pending') {
-            where = " WHERE t.status = 'pending_admin'";
+            // Admin is no longer a gate in the middle of the flow, so "pending"
+            // means work still owed by someone: nobody has priced it yet, or the
+            // customer has a price in front of them and has not paid.
+            where = " WHERE t.status IN ('open', 'claimed', 'pending_admin')" +
+                    "    OR (t.status = 'quoted' AND t.payment_status <> 'paid')";
         } else if (status) {
             params.push(status);
             where = ' WHERE t.status = $1';
@@ -811,7 +840,7 @@ router.get('/admin/list', authenticateToken, requireRole('admin'), async functio
             "  COALESCE(SUM(CASE WHEN status = 'quoted' AND payment_status <> 'paid'" +
             "                    THEN commission_due END), 0) AS pending," +
             "  COUNT(*) FILTER (WHERE payment_status = 'paid') AS paid_count," +
-            "  COUNT(*) FILTER (WHERE status = 'pending_admin') AS awaiting_count" +
+            "  COUNT(*) FILTER (WHERE status IN ('open', 'claimed', 'pending_admin')) AS awaiting_count" +
             ' FROM transfer_requests');
         res.json({ transfers: rows, totals: totals });
     } catch (e) {
@@ -902,13 +931,50 @@ function offerRow(o) {
         luggage: o.luggage,
         included: parse(o.included_services),
         additional: parse(o.additional_services),
-        base_price: o.base_price == null ? null : Number(o.base_price),
+        // Customer-facing money only. The per-line figures are grossed the same
+        // way a quote is, so the breakdown adds up to the price they pay and
+        // our commission never shows as a separate charge.
+        lines: offerLines(o),
+        total: offerCustomerTotal(o),
+        other_label: o.other_label || null,
         currency: o.currency,
         conditions: o.conditions,
         // The partner is never named to the customer — the platform is the
         // single booking surface, the partner is the supply behind it.
         status: o.status
     };
+}
+
+/** Net fee values on an offer, falling back to base_price for older rows. */
+function offerNetVals(o) {
+    var vals = FEE_FIELDS.map(function (f) { return money(o[f]); });
+    var sum = vals.reduce(function (a, n) { return a + n; }, 0);
+    if (sum <= 0) vals[0] = money(o.base_price);
+    return vals;
+}
+
+/** The breakdown the customer sees: every non-zero line, commission included. */
+function offerLines(o) {
+    var vals = offerNetVals(o);
+    var out = [];
+    vals.forEach(function (v, i) {
+        if (v > 0) out.push({ field: FEE_FIELDS[i], amount: grossUp(v) });
+    });
+    return out;
+}
+
+function offerCustomerTotal(o) {
+    return Math.round(offerLines(o).reduce(function (a, l) { return a + l.amount; }, 0) * 100) / 100;
+}
+
+/** Partner's own view of an offer — they see their net as well as the total. */
+function offerRowOwner(o) {
+    var row = offerRow(o);
+    var vals = offerNetVals(o);
+    FEE_FIELDS.forEach(function (f, i) { row[f] = vals[i]; });
+    row.partner_total = Math.round(vals.reduce(function (a, n) { return a + n; }, 0) * 100) / 100;
+    row.customer_total = row.total;
+    return row;
 }
 
 /**
@@ -950,7 +1016,7 @@ router.get('/offers/mine', authenticateToken, requireRole('partner'), async func
         var rows = await queryAll(
             'SELECT * FROM transfer_offers WHERE partner_id = $1 ORDER BY created_at DESC LIMIT 100',
             [req.user.id]);
-        res.json({ offers: rows.map(offerRow) });
+        res.json({ offers: rows.map(offerRowOwner) });
     } catch (e) {
         console.error('[transfers] offers mine error:', e.message);
         res.status(500).json({ error: 'Could not load your offers' });
@@ -963,17 +1029,23 @@ router.post('/offers', authenticateToken, requireRole('partner'), async function
         var b = req.body || {};
         var fromLabel = str(b.from_label, 160);
         var toLabel = str(b.to_label, 160);
-        var price = parseFloat(b.base_price);
 
         if (!fromLabel || !toLabel) return res.status(400).json({ error: 'Departure and destination are required' });
-        if (isNaN(price) || price <= 0) return res.status(400).json({ error: 'Enter a base price' });
+
+        // Same fee lines as the quote form. The partner prices the journey ONCE,
+        // here, so the customer meets a finished number instead of a placeholder
+        // followed by fees appearing later.
+        var vals = FEE_FIELDS.map(function (f) { return money(b[f]); });
+        if (vals[0] <= 0) return res.status(400).json({ error: 'Enter the car price — it is required' });
+        var partnerTotal = Math.round(vals.reduce(function (a, n) { return a + n; }, 0) * 100) / 100;
 
         var kind = b.kind === 'tour' ? 'tour' : 'transfer';
         await execute(
             'INSERT INTO transfer_offers (partner_id, kind, title, from_code, from_label, to_code, to_label,' +
             ' offer_date, offer_time, vehicle_label, seats, luggage, included_services, additional_services,' +
+            ' price_car, fee_airport, fee_chauffeur, fee_dropoff, fee_luggage, fee_other, other_label,' +
             ' base_price, currency, conditions)' +
-            ' VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)',
+            ' VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)',
             [
                 req.user.id, kind, str(b.title, 160),
                 str(b.from_code, 40), fromLabel,
@@ -981,14 +1053,17 @@ router.post('/offers', authenticateToken, requireRole('partner'), async function
                 str(b.offer_date, 20), str(b.offer_time, 10),
                 str(b.vehicle_label, 120),
                 Math.max(1, int(b.seats, 4)), Math.max(0, int(b.luggage, 2)),
-                jsonList(b.included), jsonList(b.additional),
-                Math.round(price * 100) / 100, str(b.currency, 8) || 'USD',
+                jsonList(b.included), jsonList(b.additional)
+            ].concat(vals).concat([
+                str(b.other_label, 80),
+                partnerTotal, str(b.currency, 8) || 'USD',
                 str(b.conditions, 1000)
-            ]
+            ])
         );
         notifyOwner('New transfer offer published by partner #' + req.user.id + ': ' +
-            fromLabel + ' -> ' + toLabel + ' from ' + price);
-        res.status(201).json({ ok: true });
+            fromLabel + ' -> ' + toLabel +
+            '\nPartner receives ' + partnerTotal + ', customer pays ' + grossUp(partnerTotal));
+        res.status(201).json({ ok: true, partner_total: partnerTotal, customer_total: grossUp(partnerTotal) });
     } catch (e) {
         console.error('[transfers] offer create error:', e.message);
         res.status(500).json({ error: 'Could not publish the offer' });
@@ -1055,8 +1130,10 @@ router.post('/offers/:id/book', authenticateToken, async function (req, res) {
                 Math.max(1, int(b.passengers, 1)), Math.max(0, int(b.luggage, 0)),
                 JSON.stringify([]), jsonList(b.extras),
                 'partner', o.vehicle_label || (o.title || 'Partner offer'),
-                o.base_price, o.currency || 'USD',
-                'pending_admin'
+                offerCustomerTotal(o), o.currency || 'USD',
+                // Priced by the partner when they published it, so the customer
+                // can accept and pay right away.
+                'quoted'
             ]
         );
 
@@ -1065,15 +1142,22 @@ router.post('/offers/:id/book', authenticateToken, async function (req, res) {
         // pay as soon as you approve it, instead of waiting on a second step.
         // Same commission maths as a partner-entered quote.
         var created = await queryOne('SELECT id FROM transfer_requests WHERE reference = $1', [reference]);
-        var net = Math.round(Number(o.base_price) * 100) / 100;
-        var gross = grossUp(net);
+        var offerVals = FEE_FIELDS.map(function (f) { return money(o[f]); });
+        var net = Math.round(offerVals.reduce(function (a, n) { return a + n; }, 0) * 100) / 100;
+        // Older offers stored only base_price; treat that as the car price.
+        if (net <= 0) { net = Math.round(Number(o.base_price) * 100) / 100; offerVals[0] = net; }
+        var offerGrossed = offerVals.map(grossUp);
+        var gross = Math.round(offerGrossed.reduce(function (a, n) { return a + n; }, 0) * 100) / 100;
         if (created && net > 0) {
             await execute(
-                'INSERT INTO transfer_quotes (transfer_id, partner_id, price_car, total, currency,' +
+                'INSERT INTO transfer_quotes (transfer_id, partner_id, price_car, fee_airport, fee_chauffeur,' +
+                ' fee_dropoff, fee_luggage, fee_other, other_label, total, currency,' +
                 ' partner_total, commission_rate, note)' +
-                ' VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',
-                [created.id, o.partner_id, net, gross, o.currency || 'USD', net, PLATFORM_COMMISSION,
-                 o.title ? 'Booked from the published offer: ' + o.title : 'Booked from a published offer']);
+                ' VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)',
+                [created.id, o.partner_id].concat(offerVals).concat([
+                    o.other_label || null, gross, o.currency || 'USD', net, PLATFORM_COMMISSION,
+                    o.title ? 'Booked from the published offer: ' + o.title : 'Booked from a published offer'
+                ]));
             await execute(
                 'UPDATE transfer_requests SET quoted_total = $1, commission_due = $2 WHERE id = $3',
                 [gross, Math.round((gross - net) * 100) / 100, created.id]);
@@ -1084,7 +1168,7 @@ router.post('/offers/:id/book', authenticateToken, async function (req, res) {
             '\nPartner receives ' + net + ', customer pays ' + gross +
             '\nYour commission ' + (Math.round((gross - net) * 100) / 100) +
             ' (partner #' + o.partner_id + ')');
-        res.status(201).json({ reference: reference, status: 'pending_admin' });
+        res.status(201).json({ reference: reference, status: 'quoted' });
     } catch (e) {
         console.error('[transfers] offer book error:', e.message);
         res.status(500).json({ error: 'Could not book this offer' });

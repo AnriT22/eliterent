@@ -3978,7 +3978,7 @@
         var view = 'mine';
 
         var FEES = [
-            ['price_car', 'Car price', 'The vehicle for the journey'],
+            ['price_car', 'Car price', 'The vehicle for the journey', true],
             ['fee_airport', 'Airport fee', 'Meeting or dropping at an airport'],
             ['fee_chauffeur', 'Chauffeur fee', 'Driver for the journey'],
             ['fee_dropoff', 'Drop-off fee', 'Leaving the car at the destination'],
@@ -4026,14 +4026,18 @@
                 esc(t.reference) + '</div>';
         }
 
-        function priceForm(t) {
+        function priceForm(t, isOpenBoard) {
             var rows = FEES.map(function (f) {
+                var required = f[3] === true;
                 return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap;">' +
                     '<label style="min-width:150px;font-size:13.5px;">' + esc(f[1]) +
+                    (required ? '<span style="color:#D4AF37;"> *</span>' : '') +
                     '<span style="display:block;font-size:11.5px;color:var(--tt-muted, #A0A3B0);">' + esc(f[2]) + '</span></label>' +
-                    '<input type="number" min="0" step="1" class="tr-fee-in" data-field="' + f[0] + '" ' +
-                    'placeholder="0" style="width:120px;padding:9px 12px;border-radius:9px;' +
-                    'border:1px solid rgba(148,163,184,.4);background:transparent;color:inherit;font-size:14px;">' +
+                    '<input type="number" min="0" step="1" class="tr-fee-in' + (required ? ' tr-fee-req' : '') +
+                    '" data-field="' + f[0] + '" ' +
+                    'placeholder="0" style="width:120px;padding:9px 12px;border-radius:9px;border:1px solid ' +
+                    (required ? 'rgba(212,175,55,.55)' : 'rgba(148,163,184,.4)') +
+                    ';background:transparent;color:inherit;font-size:14px;">' +
                     '</div>';
             }).join('');
 
@@ -4043,7 +4047,11 @@
                 'color:var(--tt-muted, #A0A3B0);margin-bottom:14px;">Your price</div>' +
                 '<p style="font-size:12.5px;color:var(--tt-muted, #A0A3B0);margin:-6px 0 14px;line-height:1.55;">' +
                 'Enter what <strong>you</strong> want to receive. Our commission is added on top and ' +
-                'spread across the lines, so the customer sees one clean breakdown.</p>' +
+                'spread across the lines, so the customer sees one clean breakdown.' +
+                (isOpenBoard
+                    ? ' <strong style="color:#D4AF37;">Sending your price takes this job</strong> — ' +
+                      'first partner to send one gets it.'
+                    : '') + '</p>' +
                 rows +
                 '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap;">' +
                   '<label style="min-width:150px;font-size:13.5px;">Label for "Other"</label>' +
@@ -4058,14 +4066,20 @@
                   'background:transparent;color:inherit;font-size:14px;font-family:inherit;"></textarea>' +
                 '</div>' +
                 '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">' +
-                  '<button class="btn btn-primary tr-send-quote">Send price to customer</button>' +
+                  '<button class="btn btn-primary tr-send-quote">' +
+                  (isOpenBoard ? 'Take job &amp; send price' : 'Send price to customer') + '</button>' +
                   '<span class="tr-running-total" style="font-size:15px;font-weight:700;color:#D4AF37;">Total $0</span>' +
                 '</div></div>';
         }
 
         function card(t) {
             var st = STATUS[t.status] || [t.status, '#8894a5'];
-            var canPrice = view === 'mine' && ['claimed', 'declined', 'quoted'].indexOf(t.status) !== -1;
+            // Pricing IS taking the job now. An open request shows the form
+            // straight away instead of an Accept button that hands you a second
+            // trip back to the dashboard to type numbers.
+            var canPrice = view === 'open'
+                ? t.status === 'open'
+                : ['claimed', 'declined', 'quoted', 'open'].indexOf(t.status) !== -1;
 
             return '<div style="background:var(--th-surface, #1C1E26);border:1px solid rgba(148,163,184,.18);' +
                 'border-radius:14px;padding:18px 20px;margin-bottom:14px;">' +
@@ -4080,32 +4094,11 @@
                       Number(t.live_total).toFixed(0) + '</strong>' +
                       (t.quote_status === 'rejected' ? ' &mdash; rejected, send a new one' : '') + '</div>'
                     : '') +
-                (view === 'open'
-                    ? '<div style="margin-top:14px;"><button class="btn btn-primary tr-claim" data-ref="' +
-                      esc(t.reference) + '">Accept this transfer</button></div>'
-                    : '') +
-                (canPrice ? priceForm(t) : '') +
+                (canPrice ? priceForm(t, view === 'open') : '') +
                 '</div>';
         }
 
         function wire() {
-            body.querySelectorAll('.tr-claim').forEach(function (b) {
-                b.addEventListener('click', function () {
-                    b.disabled = true; b.textContent = 'Accepting…';
-                    fetch('/api/transfers/' + encodeURIComponent(b.dataset.ref) + '/claim', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
-                    })
-                        .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Failed'); return d; }); })
-                        .then(function () { view = 'mine'; syncFilterButtons(); load(); })
-                        .catch(function (e) {
-                            b.disabled = false; b.textContent = 'Accept this transfer';
-                            alert(e.message || 'Could not take this transfer.');
-                            load();   // it was probably claimed by someone else — refresh the board
-                        });
-                });
-            });
-
             body.querySelectorAll('.tr-price-form').forEach(function (form) {
                 var totalEl = form.querySelector('.tr-running-total');
                 // Mirror the server's commission maths so a partner can see, while
@@ -4131,11 +4124,21 @@
 
                 form.querySelector('.tr-send-quote').addEventListener('click', function () {
                     var btn = this;
+                    var label = btn.textContent;
                     var payload = { other_label: form.querySelector('.tr-other-label').value,
                                     note: form.querySelector('.tr-note').value };
                     form.querySelectorAll('.tr-fee-in').forEach(function (i) {
                         payload[i.dataset.field] = parseFloat(i.value) || 0;
                     });
+                    // The car price is the number the whole quote hangs off; a
+                    // breakdown of fees with no car price reads as a surcharge
+                    // list attached to nothing.
+                    if (!(payload.price_car > 0)) {
+                        var carIn = form.querySelector('.tr-fee-req');
+                        if (carIn) { carIn.style.borderColor = '#f87171'; carIn.focus(); }
+                        alert('Enter the car price — it is required.');
+                        return;
+                    }
                     btn.disabled = true; btn.textContent = 'Sending…';
                     fetch('/api/transfers/' + encodeURIComponent(form.dataset.ref) + '/quote', {
                         method: 'POST',
@@ -4145,7 +4148,7 @@
                         .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Failed'); return d; }); })
                         .then(load)
                         .catch(function (e) {
-                            btn.disabled = false; btn.textContent = 'Send price to customer';
+                            btn.disabled = false; btn.textContent = label;
                             alert(e.message || 'Could not send the price.');
                         });
                 });
@@ -4166,8 +4169,10 @@
                   esc(o.offer_date || 'any date') + (o.offer_time ? ' ' + esc(o.offer_time) : '') +
                   ' · ' + o.seats + ' seats · ' + o.luggage + ' bags' +
                 '</div>' +
-                '<div style="margin-top:8px;font-size:15px;font-weight:800;color:#D4AF37;">from $' +
-                  Number(o.base_price).toFixed(0) + '</div>' +
+                '<div style="margin-top:8px;font-size:15px;font-weight:800;color:#D4AF37;">You receive $' +
+                  Number(o.partner_total || 0).toFixed(0) +
+                  '<span style="font-weight:600;color:var(--tt-muted, #A0A3B0);"> &middot; customer pays $' +
+                  Number(o.customer_total || 0).toFixed(0) + '</span></div>' +
                 '<div style="margin-top:12px;">' +
                   '<button class="btn btn-sm tr-offer-toggle" data-id="' + o.id + '" data-next="' +
                   (paused ? 'active' : 'paused') + '">' + (paused ? 'Reactivate' : 'Pause') + '</button>' +
@@ -4221,6 +4226,14 @@
             }
             var fromSel = document.getElementById('ofFrom'), toSel = document.getElementById('ofTo');
             if (!fromSel.value || !toSel.value) { msg.textContent = 'Choose a departure and destination.'; return; }
+            // An offer exists to BE a finished price, so it cannot ship without
+            // the car price the rest of the breakdown hangs off.
+            if (!(parseFloat(val('ofPrice')) > 0)) {
+                msg.textContent = 'Enter the car price - it is required.';
+                var carIn = document.getElementById('ofPrice');
+                if (carIn) { carIn.style.borderColor = '#f87171'; carIn.focus(); }
+                return;
+            }
             btn.disabled = true; msg.textContent = 'Publishing...';
 
             fetch('/api/transfers/offers', {
@@ -4235,7 +4248,13 @@
                     seats: parseInt(val('ofSeats'), 10) || 4,
                     luggage: parseInt(val('ofLuggage'), 10) || 0,
                     included: csv('ofIncluded'), additional: csv('ofAdditional'),
-                    base_price: parseFloat(val('ofPrice')),
+                    price_car: parseFloat(val('ofPrice')) || 0,
+                    fee_airport: parseFloat(val('ofFeeAirport')) || 0,
+                    fee_chauffeur: parseFloat(val('ofFeeChauffeur')) || 0,
+                    fee_dropoff: parseFloat(val('ofFeeDropoff')) || 0,
+                    fee_luggage: parseFloat(val('ofFeeLuggage')) || 0,
+                    fee_other: parseFloat(val('ofFeeOther')) || 0,
+                    other_label: val('ofOtherLabel'),
                     conditions: val('ofConditions')
                 })
             })
@@ -4243,7 +4262,9 @@
                 .then(function () {
                     btn.disabled = false;
                     msg.textContent = 'Published - customers can now find it.';
-                    ['ofTitle', 'ofVehicle', 'ofPrice', 'ofIncluded', 'ofAdditional', 'ofConditions'].forEach(function (id) {
+                    ['ofTitle', 'ofVehicle', 'ofPrice', 'ofFeeAirport', 'ofFeeChauffeur', 'ofFeeDropoff',
+                     'ofFeeLuggage', 'ofFeeOther', 'ofOtherLabel',
+                     'ofIncluded', 'ofAdditional', 'ofConditions'].forEach(function (id) {
                         var e = document.getElementById(id); if (e) e.value = '';
                     });
                     loadOffers();
@@ -4255,6 +4276,27 @@
         }
 
         function load() {
+            // Same commission maths as the server, shown while they type.
+            (function () {
+                var totals = document.getElementById('ofTotals');
+                if (!totals) return;
+                var RATE = 0.15;
+                function recalc() {
+                    var net = 0;
+                    document.querySelectorAll('.ofFee').forEach(function (i) {
+                        var v = parseFloat(i.value);
+                        if (!isNaN(v) && v > 0) net += v;
+                    });
+                    var gross = net > 0 ? net / (1 - RATE) : 0;
+                    totals.innerHTML = 'You receive $' + net.toFixed(0) +
+                        ' · customer pays $' + gross.toFixed(0);
+                }
+                document.querySelectorAll('.ofFee').forEach(function (i) {
+                    i.addEventListener('input', recalc);
+                });
+                recalc();
+            })();
+
             var creator = document.getElementById('trOfferCreate');
             if (creator) creator.style.display = view === 'offers' ? '' : 'none';
             if (view === 'offers') { loadOffers(); return; }

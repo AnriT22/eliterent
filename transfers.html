@@ -43,7 +43,7 @@
     <link rel="stylesheet" href="style.css?v=17">
     <link rel="stylesheet" href="premium.css?v=25">
     <link rel="stylesheet" href="navbar-auth.css?v=8">
-    <link rel="stylesheet" href="transfers.css?v=7">
+    <link rel="stylesheet" href="transfers.css?v=8">
     <script src="api-helper.js?v=3"></script>
     <script src="i18n.js?v=8"></script>
     <link rel="stylesheet" href="theme.css?v=4">
@@ -108,7 +108,44 @@
             </div>
         </section>
 
-        <section class="tr-section">
+        <section class="tr-section" id="trOffersSection">
+            <div class="tr-wrap">
+                <h2 class="tr-h2" data-i18n="transfers.offers_title">Ready-made transfers &amp; tours</h2>
+                <p class="tr-lede" data-i18n="transfers.offers_lede">Journeys our partners have already planned and priced. Pick one and book it &mdash; no waiting for a quote on the base price.</p>
+
+                <div class="tr-offer-search">
+                    <div class="tr-field" style="margin:0;">
+                        <label class="tr-label" for="trOfFrom" data-i18n="transfers.f_from">From</label>
+                        <select class="tr-select" id="trOfFrom"><option value="" data-i18n="transfers.opt_anywhere">Anywhere</option></select>
+                    </div>
+                    <div class="tr-field" style="margin:0;">
+                        <label class="tr-label" for="trOfTo" data-i18n="transfers.f_to">To</label>
+                        <select class="tr-select" id="trOfTo"><option value="" data-i18n="transfers.opt_anywhere">Anywhere</option></select>
+                    </div>
+                    <div class="tr-field" style="margin:0;">
+                        <label class="tr-label" for="trOfDate" data-i18n="transfers.f_date">Date</label>
+                        <input class="tr-input" type="date" id="trOfDate">
+                    </div>
+                    <div class="tr-field" style="margin:0;">
+                        <label class="tr-label" for="trOfPax" data-i18n="transfers.f_passengers">Passengers</label>
+                        <input class="tr-input" type="number" id="trOfPax" min="1" max="20" placeholder="Any" data-i18n-placeholder="transfers.opt_any">
+                    </div>
+                    <div class="tr-field" style="margin:0;">
+                        <label class="tr-label" for="trOfKind" data-i18n="transfers.f_type">Type</label>
+                        <select class="tr-select" id="trOfKind">
+                            <option value="" data-i18n="transfers.opt_transfers_tours">Transfers &amp; tours</option>
+                            <option value="transfer" data-i18n="transfers.opt_transfers">Transfers</option>
+                            <option value="tour" data-i18n="transfers.opt_tours">Tours</option>
+                        </select>
+                    </div>
+                    <button type="button" class="tr-btn tr-btn-primary" id="trOfSearch" data-i18n="transfers.search">Search</button>
+                </div>
+
+                <div class="tr-offers" id="trOffers"></div>
+            </div>
+        </section>
+
+        <section class="tr-section tr-section-alt">
             <div class="tr-wrap">
                 <h2 class="tr-h2" data-i18n="transfers.types_title">However you're travelling</h2>
                 <p class="tr-lede" data-i18n="transfers.types_lede">Every transfer is private, met on arrival, and driven by someone who knows the roads.</p>
@@ -151,43 +188,6 @@
                     </div>
                     <a class="tr-btn tr-btn-primary" href="partner-dashboard.html#transfers" data-i18n="transfers.partner_band_cta">Offer a transfer</a>
                 </div>
-            </div>
-        </section>
-
-        <section class="tr-section tr-section-alt" id="trOffersSection">
-            <div class="tr-wrap">
-                <h2 class="tr-h2" data-i18n="transfers.offers_title">Ready-made transfers &amp; tours</h2>
-                <p class="tr-lede" data-i18n="transfers.offers_lede">Journeys our partners have already planned and priced. Pick one and book it &mdash; no waiting for a quote on the base price.</p>
-
-                <div class="tr-offer-search">
-                    <div class="tr-field" style="margin:0;">
-                        <label class="tr-label" for="trOfFrom" data-i18n="transfers.f_from">From</label>
-                        <select class="tr-select" id="trOfFrom"><option value="" data-i18n="transfers.opt_anywhere">Anywhere</option></select>
-                    </div>
-                    <div class="tr-field" style="margin:0;">
-                        <label class="tr-label" for="trOfTo" data-i18n="transfers.f_to">To</label>
-                        <select class="tr-select" id="trOfTo"><option value="" data-i18n="transfers.opt_anywhere">Anywhere</option></select>
-                    </div>
-                    <div class="tr-field" style="margin:0;">
-                        <label class="tr-label" for="trOfDate" data-i18n="transfers.f_date">Date</label>
-                        <input class="tr-input" type="date" id="trOfDate">
-                    </div>
-                    <div class="tr-field" style="margin:0;">
-                        <label class="tr-label" for="trOfPax" data-i18n="transfers.f_passengers">Passengers</label>
-                        <input class="tr-input" type="number" id="trOfPax" min="1" max="20" placeholder="Any" data-i18n-placeholder="transfers.opt_any">
-                    </div>
-                    <div class="tr-field" style="margin:0;">
-                        <label class="tr-label" for="trOfKind" data-i18n="transfers.f_type">Type</label>
-                        <select class="tr-select" id="trOfKind">
-                            <option value="" data-i18n="transfers.opt_transfers_tours">Transfers &amp; tours</option>
-                            <option value="transfer" data-i18n="transfers.opt_transfers">Transfers</option>
-                            <option value="tour" data-i18n="transfers.opt_tours">Tours</option>
-                        </select>
-                    </div>
-                    <button type="button" class="tr-btn tr-btn-primary" id="trOfSearch" data-i18n="transfers.search">Search</button>
-                </div>
-
-                <div class="tr-offers" id="trOffers"></div>
             </div>
         </section>
 
@@ -512,6 +512,6 @@
 
     <script src="script.js?v=26"></script>
     <script src="navbar-auth.js?v=6"></script>
-    <script src="transfers.js?v=12"></script>
+    <script src="transfers.js?v=13"></script>
 </body>
 </html>

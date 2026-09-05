@@ -1428,7 +1428,7 @@
     "partner_band_text": "Publish a transfer or tour with your own price and customers can book it straight from this page. You'll also see transfer requests waiting to be priced.",
     "partner_band_cta": "Offer a transfer",
     "offers_title": "Ready-made transfers & tours",
-    "offers_lede": "Journeys our partners have already planned and priced. Pick one and book it — no waiting for a quote on the base price.",
+    "offers_lede": "Journeys our partners have already planned and priced in full. What you see is what you pay — pick one and book it.",
     "ads_title": "Featured",
     "ads_lede": "Offers and services from EliteAuto and our partners.",
     "closing_title": "Tell us where you're going. We'll take care of the rest.",
@@ -1627,6 +1627,9 @@
     "loc_gori": "Gori",
     "loc_kobuleti": "Kobuleti",
     "unit_h": "h",
-    "unit_m": "m"
+    "unit_m": "m",
+    "vcard_priced": "Full price quoted for this journey",
+    "offer_all_in": "all fees included",
+    "fee_other": "Other"
   }
 }
