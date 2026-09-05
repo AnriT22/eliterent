@@ -1896,7 +1896,11 @@ select.db-input option:checked {
     padding: 16px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     transition: box-shadow 0.2s;
+    /* anchors the "clear this one" checkbox in the corner */
+    position: relative;
 }
+/* Give the thumbnail room so the checkbox never sits on top of the car. */
+.db-booking-card:has(.bk-pick) .db-booking-img { margin-top: 18px; }
 .db-booking-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
 
 .db-booking-img {

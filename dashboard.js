@@ -2881,9 +2881,33 @@
             // Count pending
             var pendingCount = bookings.filter(function(b) { return b.status === 'pending'; }).length;
 
+            // Only settled bookings can be cleared: a live one is work still
+            // owed to a customer, and hiding it would hide the job.
+            var todayStr = new Date().toISOString().slice(0, 10);
+            function bkClearable(b) {
+                if (['cancelled', 'rejected', 'completed'].indexOf(b.status) !== -1) return true;
+                return b.status === 'accepted' && b.dropoff_date &&
+                       String(b.dropoff_date).slice(0, 10) < todayStr;
+            }
+            var anyClearable = bookings.some(bkClearable);
+
             var html = '<div class="db-tab-header"><h2>Bookings'
                 + (pendingCount > 0 ? ' <span style="background:#f59e0b;color:#fff;font-size:12px;padding:2px 8px;border-radius:10px;margin-left:8px;">' + pendingCount + ' pending</span>' : '')
-                + '</h2></div><div class="db-bookings-list">';
+                + '</h2></div>'
+                + (anyClearable
+                    ? '<div class="bk-clear-bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;'
+                      + 'padding:10px 14px;margin-bottom:14px;border-radius:12px;'
+                      + 'background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.18);">'
+                      + '<label style="display:flex;gap:8px;align-items:center;font-size:13.5px;cursor:pointer;">'
+                      + '<input type="checkbox" class="bk-pick-all" style="width:16px;height:16px;'
+                      + 'accent-color:#C9A84C;cursor:pointer;">Select all finished</label>'
+                      + '<button class="btn btn-sm bk-clear-go" disabled '
+                      + 'style="color:#ef4444;border-color:rgba(239,68,68,.4);">Clear selected</button>'
+                      + '<span style="font-size:12.5px;color:var(--tt-muted, #A0A3B0);">'
+                      + 'Removes finished bookings from your list only &mdash; the record is kept.</span>'
+                      + '</div>'
+                    : '')
+                + '<div class="db-bookings-list">';
 
             bookings.forEach(function(b) {
                 var imgSrc = b.image_url || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240'%3E%3Crect fill='%23e2e8f0' width='400' height='240'/%3E%3Ctext x='200' y='125' text-anchor='middle' fill='%2394a3b8' font-size='14'%3ENo Image%3C/text%3E%3C/svg%3E";
@@ -2895,6 +2919,11 @@
                 var created = new Date(b.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
 
                 html += '<div class="db-booking-card">'
+                    + (bkClearable(b)
+                        ? '<input type="checkbox" class="bk-pick" data-id="' + b.id + '" '
+                          + 'title="Select to clear from your list" style="position:absolute;top:10px;left:10px;'
+                          + 'width:17px;height:17px;accent-color:#C9A84C;cursor:pointer;z-index:2;">'
+                        : '')
                     + '<img class="db-booking-img" src="' + imgSrc + '" alt="' + (b.vehicle_name||'') + '">'
                     + '<div class="db-booking-info">'
                     + '<div class="db-booking-header">'
@@ -2944,6 +2973,46 @@
             });
             html += '</div>';
             tab.innerHTML = html;
+
+            var bar = tab.querySelector('.bk-clear-bar');
+            if (bar) {
+                var all = bar.querySelector('.bk-pick-all');
+                var go = bar.querySelector('.bk-clear-go');
+                function sync() {
+                    var n = tab.querySelectorAll('.bk-pick:checked').length;
+                    go.disabled = n === 0;
+                    go.textContent = n ? 'Clear ' + n + ' selected' : 'Clear selected';
+                }
+                all.addEventListener('change', function () {
+                    tab.querySelectorAll('.bk-pick').forEach(function (c) { c.checked = all.checked; });
+                    sync();
+                });
+                tab.querySelectorAll('.bk-pick').forEach(function (c) {
+                    c.addEventListener('change', sync);
+                });
+                go.addEventListener('click', function () {
+                    var ids = Array.prototype.map.call(
+                        tab.querySelectorAll('.bk-pick:checked'),
+                        function (c) { return parseInt(c.dataset.id, 10); });
+                    if (!ids.length) return;
+                    if (!confirm('Clear ' + ids.length + ' booking' + (ids.length > 1 ? 's' : '') +
+                                 ' from your list? They stay in the records and EliteAuto can still see them.')) return;
+                    go.disabled = true; go.textContent = 'Clearing…';
+                    fetch('/api/bookings/partner/clear', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                        body: JSON.stringify({ ids: ids })
+                    })
+                        .then(function (r) { return r.json().then(function (d) {
+                            if (!r.ok) throw new Error(d.error || 'Failed'); return d; }); })
+                        .then(loadPartnerBookings)
+                        .catch(function (e) {
+                            go.disabled = false; go.textContent = 'Clear selected';
+                            alert(e.message || 'Could not clear those bookings.');
+                        });
+                });
+                sync();
+            }
         })
         .catch(function() {
             tab.innerHTML = '<div class="db-tab-header"><h2>Bookings</h2></div>'
@@ -4072,6 +4141,16 @@
                 '</div></div>';
         }
 
+        /* Only settled work can be cleared. Hiding a job that still needs a
+           price, or one the customer has not answered yet, would be a partner
+           hiding work from themselves. */
+        function clearable(t) {
+            if (view === 'open') return false;
+            if (t.status === 'cancelled' || t.status === 'completed') return true;
+            return t.status === 'confirmed' && t.pickup_date &&
+                   t.pickup_date < new Date().toISOString().slice(0, 10);
+        }
+
         function card(t) {
             var st = STATUS[t.status] || [t.status, '#8894a5'];
             // Pricing IS taking the job now. An open request shows the form
@@ -4084,7 +4163,14 @@
             return '<div style="background:var(--th-surface, #1C1E26);border:1px solid rgba(148,163,184,.18);' +
                 'border-radius:14px;padding:18px 20px;margin-bottom:14px;">' +
                 '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between;">' +
-                  '<div style="flex:1;min-width:240px;">' + journeyBlock(t) + '</div>' +
+                  '<div style="flex:1;min-width:240px;display:flex;gap:10px;align-items:flex-start;">' +
+                    (clearable(t)
+                      ? '<input type="checkbox" class="tr-pick" data-ref="' + esc(t.reference) + '" ' +
+                        'style="margin-top:5px;width:16px;height:16px;accent-color:#D4AF37;cursor:pointer;" ' +
+                        'title="Select to clear from your list">'
+                      : '') +
+                    '<div style="flex:1;">' + journeyBlock(t) + '</div>' +
+                  '</div>' +
                   '<span style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;' +
                     'padding:5px 11px;border-radius:999px;color:' + st[1] + ';background:rgba(148,163,184,.13);">' +
                     esc(st[0]) + '</span>' +
@@ -4173,9 +4259,11 @@
                   Number(o.partner_total || 0).toFixed(0) +
                   '<span style="font-weight:600;color:var(--tt-muted, #A0A3B0);"> &middot; customer pays $' +
                   Number(o.customer_total || 0).toFixed(0) + '</span></div>' +
-                '<div style="margin-top:12px;">' +
+                '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">' +
                   '<button class="btn btn-sm tr-offer-toggle" data-id="' + o.id + '" data-next="' +
                   (paused ? 'active' : 'paused') + '">' + (paused ? 'Reactivate' : 'Pause') + '</button>' +
+                  '<button class="btn btn-sm tr-offer-delete" data-id="' + o.id + '" ' +
+                  'style="color:#f87171;border-color:rgba(248,113,113,.4);">Delete</button>' +
                 '</div></div>';
         }
 
@@ -4197,6 +4285,19 @@
                                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                                 body: JSON.stringify({ status: b.dataset.next })
                             }).then(loadOffers).catch(function () { b.disabled = false; });
+                        });
+                    });
+                    body.querySelectorAll('.tr-offer-delete').forEach(function (b) {
+                        b.addEventListener('click', function () {
+                            if (!confirm('Delete this offer? Customers will stop seeing it. ' +
+                                         'Transfers already booked from it are not affected.')) return;
+                            b.disabled = true; b.textContent = 'Deleting…';
+                            fetch('/api/transfers/offers/' + b.dataset.id, {
+                                method: 'DELETE',
+                                headers: { 'Authorization': 'Bearer ' + token }
+                            }).then(loadOffers).catch(function () {
+                                b.disabled = false; b.textContent = 'Delete';
+                            });
                         });
                     });
                 })
@@ -4316,12 +4417,71 @@
                                 : 'No transfers assigned to you yet. Check the open requests tab.') + '</p>';
                         return;
                     }
-                    body.innerHTML = list.map(card).join('');
+                    var anyClearable = list.some(clearable);
+                    body.innerHTML = (anyClearable ? clearBar() : '') + list.map(card).join('');
                     wire();
+                    wireClearBar();
                 })
                 .catch(function () {
                     body.innerHTML = '<p style="color:#f87171;text-align:center;padding:40px;">Could not load transfers.</p>';
                 });
+        }
+
+        /* Bulk tidying. "Clear" is the honest word here: the rows leave this
+           screen, they are not deleted — admin keeps every one of them. */
+        function clearBar() {
+            return '<div class="tr-clear-bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;' +
+                'padding:10px 14px;margin-bottom:14px;border-radius:12px;' +
+                'background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.18);">' +
+                '<label style="display:flex;gap:8px;align-items:center;font-size:13.5px;cursor:pointer;">' +
+                  '<input type="checkbox" class="tr-pick-all" ' +
+                  'style="width:16px;height:16px;accent-color:#D4AF37;cursor:pointer;">Select all finished</label>' +
+                '<button class="btn btn-sm tr-clear-go" disabled ' +
+                  'style="color:#f87171;border-color:rgba(248,113,113,.4);">Clear selected</button>' +
+                '<span style="font-size:12.5px;color:var(--tt-muted, #A0A3B0);">' +
+                  'Removes finished jobs from your list only &mdash; the record is kept.</span>' +
+                '</div>';
+        }
+
+        function wireClearBar() {
+            var bar = body.querySelector('.tr-clear-bar');
+            if (!bar) return;
+            var all = bar.querySelector('.tr-pick-all');
+            var go = bar.querySelector('.tr-clear-go');
+            var picks = function () { return body.querySelectorAll('.tr-pick'); };
+
+            function sync() {
+                var n = body.querySelectorAll('.tr-pick:checked').length;
+                go.disabled = n === 0;
+                go.textContent = n ? 'Clear ' + n + ' selected' : 'Clear selected';
+            }
+            all.addEventListener('change', function () {
+                picks().forEach(function (c) { c.checked = all.checked; });
+                sync();
+            });
+            picks().forEach(function (c) { c.addEventListener('change', sync); });
+
+            go.addEventListener('click', function () {
+                var refs = Array.prototype.map.call(
+                    body.querySelectorAll('.tr-pick:checked'), function (c) { return c.dataset.ref; });
+                if (!refs.length) return;
+                if (!confirm('Clear ' + refs.length + ' transfer' + (refs.length > 1 ? 's' : '') +
+                             ' from your list? They stay in the records and EliteAuto can still see them.')) return;
+                go.disabled = true; go.textContent = 'Clearing…';
+                fetch('/api/transfers/mine/clear', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ references: refs })
+                })
+                    .then(function (r) { return r.json().then(function (d) {
+                        if (!r.ok) throw new Error(d.error || 'Failed'); return d; }); })
+                    .then(load)
+                    .catch(function (e) {
+                        go.disabled = false; go.textContent = 'Clear selected';
+                        alert(e.message || 'Could not clear those transfers.');
+                    });
+            });
+            sync();
         }
 
         function syncFilterButtons() {

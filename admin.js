@@ -1042,9 +1042,14 @@ function escHtml(s) {
                 if (payStatus === 'paid' && (status === 'cancelled' || status === 'rejected')) {
                     actions += ' <button class="admin-action-btn" style="color:#7c3aed;border-color:#c4b5fd;" onclick="adminRefundBooking(' + b.id + ')">Refund</button>';
                 }
-                return '<tr>'
+                var clearedTag = b.partner_cleared_at
+                    ? '<br><span class="admin-subtle" title="The partner cleared this from their own list. '
+                      + 'The record is intact." style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;">'
+                      + 'Cleared by partner</span>'
+                    : '';
+                return '<tr' + (b.partner_cleared_at ? ' style="opacity:.72;"' : '') + '>'
                     + '<td>' + b.id + '</td>'
-                    + '<td><strong>' + escHtml(b.vehicle_name || '-') + '</strong></td>'
+                    + '<td><strong>' + escHtml(b.vehicle_name || '-') + '</strong>' + clearedTag + '</td>'
                     + '<td class="hide-mobile">' + escHtml(b.guest_name || '-') + '<br><span class="admin-subtle">' + escHtml(b.guest_email || '') + '</span></td>'
                     + '<td class="hide-mobile">' + escHtml(partnerLabel) + '</td>'
                     + '<td class="hide-mobile">' + dateRange + '</td>'
@@ -1389,9 +1394,17 @@ function escHtml(s) {
             '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between;">' +
               '<div style="font-weight:700;font-size:15.5px;">' + trEsc(t.pickup_label) +
                 ' <span style="opacity:.6;">&rarr;</span> ' + trEsc(t.dropoff_label) + '</div>' +
+              '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+              (t.partner_cleared_at
+                ? '<span title="The partner cleared this from their own list. The record is intact." ' +
+                  'style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;' +
+                  'padding:5px 11px;border-radius:999px;color:#8894a5;border:1px dashed rgba(148,163,184,.5);">' +
+                  'Cleared by partner</span>'
+                : '') +
               '<span style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;' +
                 'padding:5px 11px;border-radius:999px;color:' + st[1] + ';background:rgba(148,163,184,.13);">' +
                 trEsc(st[0]) + '</span>' +
+              '</div>' +
             '</div>' +
             '<div style="font-size:13px;color:var(--tt-muted, #A0A3B0);margin-top:7px;">' +
               trEsc(t.pickup_date) + ' at ' + trEsc(t.pickup_time) + ' &middot; ' +
@@ -1424,7 +1437,73 @@ function escHtml(s) {
             '</div>';
     }
 
+    /* Every offer a partner has ever published, deleted ones included. A
+       partner deleting an offer only hides it from customers and from their own
+       list; the record and the money behind it stay visible here. */
+    function loadAdminOffers() {
+        var body = document.getElementById('trAdminBody');
+        if (!body) return;
+        body.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:40px;">Loading offers...</p>';
+
+        fetch('/api/transfers/admin/offers', { headers: { 'Authorization': 'Bearer ' + token } })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                var list = (d && d.offers) || [];
+                if (!list.length) {
+                    body.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:60px;">' +
+                        'No partner offers published yet.</p>';
+                    return;
+                }
+                body.innerHTML = list.map(function (o) {
+                    var gone = !!o.deleted_at;
+                    return '<div class="admin-card" style="background:var(--th-surface, #1C1E26);' +
+                        'border:1px solid rgba(148,163,184,.18);border-radius:14px;padding:16px 20px;' +
+                        'margin-bottom:12px;' + (gone ? 'opacity:.7;' : '') + '">' +
+                        '<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;' +
+                        'align-items:baseline;">' +
+                          '<div style="font-weight:700;font-size:15px;">' +
+                            trEsc(o.title || (o.from_label + ' → ' + o.to_label)) + '</div>' +
+                          '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+                          (gone
+                            ? '<span title="Deleted by the partner. Customers no longer see it; you still do." ' +
+                              'style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;' +
+                              'padding:5px 11px;border-radius:999px;color:#f87171;' +
+                              'border:1px dashed rgba(248,113,113,.5);">Deleted by partner</span>'
+                            : '') +
+                          '<span style="font-size:11px;font-weight:800;letter-spacing:.07em;' +
+                            'text-transform:uppercase;padding:5px 11px;border-radius:999px;color:' +
+                            (o.status === 'active' && !gone ? '#34d399' : '#8894a5') +
+                            ';background:rgba(148,163,184,.13);">' + trEsc(o.status) + '</span>' +
+                          '</div>' +
+                        '</div>' +
+                        '<div style="font-size:13px;color:var(--tt-muted, #A0A3B0);margin-top:6px;">' +
+                          trEsc(o.from_label) + ' → ' + trEsc(o.to_label) + ' · ' +
+                          trEsc(o.offer_date || 'any date') +
+                          (o.offer_time ? ' ' + trEsc(o.offer_time) : '') +
+                          ' · ' + o.seats + ' seats · ' + o.luggage + ' bags' +
+                          (o.vehicle_label ? ' · ' + trEsc(o.vehicle_label) : '') +
+                        '</div>' +
+                        '<div style="font-size:13px;color:var(--tt-muted, #A0A3B0);margin-top:5px;">Partner: <strong>' +
+                          trEsc(o.partner_name || ('#' + o.partner_id)) + '</strong></div>' +
+                        '<div style="margin-top:8px;font-size:14.5px;font-weight:800;color:#D4AF37;">' +
+                          'Partner receives $' + Number(o.partner_total || 0).toFixed(2) +
+                          '<span style="font-weight:600;color:var(--tt-muted, #A0A3B0);"> · customer pays $' +
+                          Number(o.customer_total || 0).toFixed(2) +
+                          ' · your cut $' +
+                          (Number(o.customer_total || 0) - Number(o.partner_total || 0)).toFixed(2) +
+                          '</span></div>' +
+                        (gone ? '<div style="font-size:12px;color:var(--tt-muted, #A0A3B0);margin-top:6px;">Deleted ' +
+                          trEsc(String(o.deleted_at).slice(0, 16).replace('T', ' ')) + '</div>' : '') +
+                        '</div>';
+                }).join('');
+            })
+            .catch(function () {
+                body.innerHTML = '<p style="color:#f87171;text-align:center;padding:40px;">Could not load offers.</p>';
+            });
+    }
+
     function loadTransfers() {
+        if (trAdminStatus === '__offers') return loadAdminOffers();
         var body = document.getElementById('trAdminBody');
         if (!body) return;
         body.innerHTML = '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:40px;">Loading transfers...</p>';

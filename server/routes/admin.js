@@ -286,6 +286,7 @@ router.get('/users/:id/detail', async (req, res) => {
         } else if (user.role === 'partner') {
             bookings = await queryAll(
                 `SELECT b.id, b.pickup_date, b.dropoff_date, b.total_price, b.service_fee, b.status, b.payment_status, b.created_at,
+                        b.partner_cleared_at,
                         v.name as vehicle_name, v.image_url,
                         u.full_name as guest_name, u.email as guest_email
                  FROM bookings b

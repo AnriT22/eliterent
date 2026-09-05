@@ -638,7 +638,8 @@ router.get('/claimed', authenticateToken, requireRole('partner'), async function
             ' FROM transfer_requests t' +
             ' LEFT JOIN LATERAL (SELECT total, status FROM transfer_quotes' +
             '   WHERE transfer_id = t.id ORDER BY created_at DESC, id DESC LIMIT 1) q ON true' +
-            ' WHERE t.partner_id = $1 ORDER BY t.pickup_date ASC LIMIT 100',
+            ' WHERE t.partner_id = $1 AND t.partner_cleared_at IS NULL' +
+            ' ORDER BY t.pickup_date ASC LIMIT 100',
             [req.user.id]
         );
         res.json({ transfers: rows });
@@ -983,7 +984,7 @@ function offerRowOwner(o) {
  */
 router.get('/offers', async function (req, res) {
     try {
-        var where = ["status = 'active'"];
+        var where = ["status = 'active'", 'deleted_at IS NULL'];
         var params = [];
         var q = req.query || {};
 
@@ -1014,7 +1015,8 @@ router.get('/offers', async function (req, res) {
 router.get('/offers/mine', authenticateToken, requireRole('partner'), async function (req, res) {
     try {
         var rows = await queryAll(
-            'SELECT * FROM transfer_offers WHERE partner_id = $1 ORDER BY created_at DESC LIMIT 100',
+            'SELECT * FROM transfer_offers WHERE partner_id = $1 AND deleted_at IS NULL' +
+            ' ORDER BY created_at DESC LIMIT 100',
             [req.user.id]);
         res.json({ offers: rows.map(offerRowOwner) });
     } catch (e) {
@@ -1071,6 +1073,88 @@ router.post('/offers', authenticateToken, requireRole('partner'), async function
     } catch (e) {
         console.error('[transfers] offer create error:', e.message);
         res.status(500).json({ error: 'Could not publish the offer' });
+    }
+});
+
+/**
+ * DELETE /api/transfers/offers/:id — a partner removes their own offer.
+ *
+ * Soft: the row is stamped, not dropped. Customers and the partner stop seeing
+ * it; admin still does. Transfers already booked against it keep working,
+ * because they carry their own copy of the price.
+ */
+router.delete('/offers/:id', authenticateToken, requireRole('partner'), async function (req, res) {
+    try {
+        var id = int(req.params.id);
+        var r = await execute(
+            'UPDATE transfer_offers SET deleted_at = CURRENT_TIMESTAMP,' +
+            ' updated_at = CURRENT_TIMESTAMP' +
+            ' WHERE id = $1 AND partner_id = $2 AND deleted_at IS NULL',
+            [id, req.user.id]);
+        if (!r.rowCount) return res.status(404).json({ error: 'Not found' });
+        res.json({ ok: true, deleted: id });
+    } catch (e) {
+        console.error('[transfers] offer delete error:', e.message);
+        res.status(500).json({ error: 'Could not delete the offer' });
+    }
+});
+
+/**
+ * POST /api/transfers/mine/clear — a partner clears finished transfers.
+ *
+ * Body: { references: ['TR-...', ...] } for specific ones, or { all: true }.
+ * Only settled jobs can go. A transfer still waiting on a price or on the
+ * customer would be work the partner had hidden from themselves, and a
+ * confirmed job is only history once its pickup date has passed.
+ */
+router.post('/mine/clear', authenticateToken, requireRole('partner'), async function (req, res) {
+    try {
+        var b = req.body || {};
+        var today = new Date().toISOString().slice(0, 10);
+        var settled =
+            "(t.status IN ('cancelled', 'completed')" +
+            "  OR (t.status = 'confirmed' AND t.pickup_date < $2))";
+
+        var params = [req.user.id, today];
+        var filter = '';
+        if (!b.all) {
+            var refs = (Array.isArray(b.references) ? b.references : [])
+                .map(function (r) { return (str(r, 20) || '').toUpperCase(); })
+                .filter(Boolean).slice(0, 200);
+            if (!refs.length) return res.status(400).json({ error: 'Nothing selected' });
+            params.push(refs);
+            filter = ' AND t.reference = ANY($3)';
+        }
+
+        var r = await execute(
+            'UPDATE transfer_requests t SET partner_cleared_at = CURRENT_TIMESTAMP' +
+            ' WHERE t.partner_id = $1 AND t.partner_cleared_at IS NULL AND ' + settled + filter,
+            params);
+        res.json({ ok: true, cleared: r.rowCount });
+    } catch (e) {
+        console.error('[transfers] clear error:', e.message);
+        res.status(500).json({ error: 'Could not clear those transfers' });
+    }
+});
+
+/** GET /api/transfers/admin/offers — every offer, deleted ones included. */
+router.get('/admin/offers', authenticateToken, requireRole('admin'), async function (req, res) {
+    try {
+        var rows = await queryAll(
+            'SELECT o.*, u.full_name AS partner_name FROM transfer_offers o' +
+            ' LEFT JOIN users u ON u.id = o.partner_id' +
+            ' ORDER BY o.created_at DESC LIMIT 200');
+        res.json({
+            offers: rows.map(function (o) {
+                var row = offerRowOwner(o);
+                row.partner_name = o.partner_name;
+                row.deleted_at = o.deleted_at;
+                return row;
+            })
+        });
+    } catch (e) {
+        console.error('[transfers] admin offers error:', e.message);
+        res.status(500).json({ error: 'Could not load offers' });
     }
 });
 
