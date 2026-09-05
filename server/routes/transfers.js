@@ -634,9 +634,10 @@ router.get('/open', authenticateToken, requireRole('partner'), async function (r
 router.get('/claimed', authenticateToken, requireRole('partner'), async function (req, res) {
     try {
         var rows = await queryAll(
-            'SELECT t.*, q.total AS live_total, q.status AS quote_status' +
+            'SELECT t.*, q.total AS live_total, q.partner_total AS live_partner_total,' +
+            ' q.status AS quote_status' +
             ' FROM transfer_requests t' +
-            ' LEFT JOIN LATERAL (SELECT total, status FROM transfer_quotes' +
+            ' LEFT JOIN LATERAL (SELECT total, partner_total, status FROM transfer_quotes' +
             '   WHERE transfer_id = t.id ORDER BY created_at DESC, id DESC LIMIT 1) q ON true' +
             ' WHERE t.partner_id = $1 AND t.partner_cleared_at IS NULL' +
             ' ORDER BY t.pickup_date ASC LIMIT 100',
