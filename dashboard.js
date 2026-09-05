@@ -4056,7 +4056,7 @@
         ];
 
         var STATUS = {
-            open:      ['Open — claim it', '#6FA8D4'],
+            open:      ['Open — price it to take it', '#6FA8D4'],
             claimed:   ['Needs your price', '#e0b252'],
             quoted:    ['Priced — waiting on customer', '#D4AF37'],
             confirmed: ['Confirmed', '#34d399'],
@@ -4156,9 +4156,15 @@
             // Pricing IS taking the job now. An open request shows the form
             // straight away instead of an Accept button that hands you a second
             // trip back to the dashboard to type numbers.
+            //
+            // 'quoted' is deliberately NOT here. Once a price is out the ball is
+            // with the customer, and a job booked from a published offer was
+            // priced when the partner published it — re-showing an empty form
+            // invites them to price the same journey twice. The form comes back
+            // only if the customer rejects ('declined').
             var canPrice = view === 'open'
                 ? t.status === 'open'
-                : ['claimed', 'declined', 'quoted', 'open'].indexOf(t.status) !== -1;
+                : ['claimed', 'declined', 'open'].indexOf(t.status) !== -1;
 
             return '<div style="background:var(--th-surface, #1C1E26);border:1px solid rgba(148,163,184,.18);' +
                 'border-radius:14px;padding:18px 20px;margin-bottom:14px;">' +
@@ -4176,9 +4182,22 @@
                     esc(st[0]) + '</span>' +
                 '</div>' +
                 (t.live_total != null
-                    ? '<div style="margin-top:10px;font-size:14px;">Your last price: <strong style="color:#D4AF37;">$' +
-                      Number(t.live_total).toFixed(0) + '</strong>' +
+                    ? '<div style="margin-top:10px;font-size:14px;">You receive <strong style="color:#D4AF37;">$' +
+                      Number(t.live_partner_total != null ? t.live_partner_total : t.live_total).toFixed(2) +
+                      '</strong>' +
+                      '<span style="color:var(--tt-muted, #A0A3B0);"> &middot; customer pays $' +
+                      Number(t.live_total).toFixed(2) + '</span>' +
                       (t.quote_status === 'rejected' ? ' &mdash; rejected, send a new one' : '') + '</div>'
+                    : '') +
+                // Say what is happening instead of leaving a priced job looking
+                // like it still needs something from the partner.
+                (t.status === 'quoted'
+                    ? '<div style="margin-top:10px;font-size:13px;color:var(--tt-muted, #A0A3B0);' +
+                      'line-height:1.55;">' +
+                      (t.offer_id
+                        ? 'Priced from your published offer &mdash; nothing to fill in. '
+                        : 'Your price is with the customer. ') +
+                      'They accept and pay the booking fee, or reject it and you can send a new price.</div>'
                     : '') +
                 (canPrice ? priceForm(t, view === 'open') : '') +
                 '</div>';
