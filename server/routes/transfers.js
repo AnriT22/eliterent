@@ -1062,8 +1062,8 @@ router.post('/offers', authenticateToken, requireRole('partner'), async function
         );
         notifyOwner('New transfer offer published by partner #' + req.user.id + ': ' +
             fromLabel + ' -> ' + toLabel +
-            '\nPartner receives ' + partnerTotal + ', customer pays ' + grossUp(partnerTotal));
-        res.status(201).json({ ok: true, partner_total: partnerTotal, customer_total: grossUp(partnerTotal) });
+            '\nPartner receives ' + partnerTotal + ', customer pays ' + customerTotal);
+        res.status(201).json({ ok: true, partner_total: partnerTotal, customer_total: customerTotal });
     } catch (e) {
         console.error('[transfers] offer create error:', e.message);
         res.status(500).json({ error: 'Could not publish the offer' });
