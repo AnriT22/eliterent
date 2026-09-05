@@ -896,6 +896,14 @@ async function initDB() {
     // car price, so say so rather than leaving the line blank.
     await pool.query(`UPDATE transfer_offers SET price_car = base_price WHERE price_car IS NULL`);
 
+    // Partners tidy their own screens; nothing is ever really deleted. These
+    // stamps hide a row from the partner (and from customers, for an offer)
+    // while admin keeps seeing every record, marked as cleared. Deleting for
+    // real would destroy the audit trail behind money that has changed hands.
+    await pool.query(`ALTER TABLE transfer_offers ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP`);
+    await pool.query(`ALTER TABLE transfer_requests ADD COLUMN IF NOT EXISTS partner_cleared_at TIMESTAMP`);
+    await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS partner_cleared_at TIMESTAMP`);
+
 
     // Create indexes
     const indexes = [

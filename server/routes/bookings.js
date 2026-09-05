@@ -670,7 +670,7 @@ router.get(
              FROM bookings b
              JOIN vehicles v ON b.vehicle_id = v.id
              JOIN users u ON b.guest_id = u.id
-             WHERE b.partner_id = $1
+             WHERE b.partner_id = $1 AND b.partner_cleared_at IS NULL
              ORDER BY b.created_at DESC`,
         [req.user.id],
       );
@@ -678,6 +678,52 @@ router.get(
     } catch (err) {
       console.error("Get partner bookings error:", err);
       res.status(500).json({ error: "Failed to get bookings" });
+    }
+  },
+);
+
+/**
+ * POST /api/bookings/partner/clear — a partner clears finished bookings.
+ *
+ * Body: { ids: [1,2,3] } for specific ones, or { all: true }. Soft: the rows
+ * are stamped, never dropped, so admin keeps the full record of every booking
+ * and the money attached to it. Only settled bookings can go — hiding a live
+ * one would hide work the partner still owes a customer.
+ */
+router.post(
+  "/partner/clear",
+  authenticateToken,
+  requireRole("partner"),
+  async (req, res) => {
+    try {
+      var b = req.body || {};
+      var today = new Date().toISOString().slice(0, 10);
+      var settled =
+        "(b.status IN ('cancelled', 'rejected', 'completed')" +
+        "  OR (b.status = 'accepted' AND b.dropoff_date < $2))";
+
+      var params = [req.user.id, today];
+      var filter = "";
+      if (!b.all) {
+        var ids = (Array.isArray(b.ids) ? b.ids : [])
+          .map(function (n) { return parseInt(n, 10); })
+          .filter(function (n) { return n > 0; })
+          .slice(0, 200);
+        if (!ids.length) return res.status(400).json({ error: "Nothing selected" });
+        params.push(ids);
+        filter = " AND b.id = ANY($3)";
+      }
+
+      var r = await execute(
+        "UPDATE bookings b SET partner_cleared_at = CURRENT_TIMESTAMP" +
+          " WHERE b.partner_id = $1 AND b.partner_cleared_at IS NULL AND " +
+          settled + filter,
+        params,
+      );
+      res.json({ ok: true, cleared: r.rowCount });
+    } catch (err) {
+      console.error("Clear partner bookings error:", err);
+      res.status(500).json({ error: "Could not clear those bookings" });
     }
   },
 );
