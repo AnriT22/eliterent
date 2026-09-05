@@ -1038,6 +1038,10 @@ router.post('/offers', authenticateToken, requireRole('partner'), async function
         var vals = FEE_FIELDS.map(function (f) { return money(b[f]); });
         if (vals[0] <= 0) return res.status(400).json({ error: 'Enter the car price — it is required' });
         var partnerTotal = Math.round(vals.reduce(function (a, n) { return a + n; }, 0) * 100) / 100;
+        // Sum the grossed LINES, not grossUp(total): the breakdown is what the
+        // customer is billed, so it has to be the number both sides are quoted.
+        var customerTotal = Math.round(
+            vals.map(grossUp).reduce(function (a, n) { return a + n; }, 0) * 100) / 100;
 
         var kind = b.kind === 'tour' ? 'tour' : 'transfer';
         await execute(
