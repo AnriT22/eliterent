@@ -1038,9 +1038,11 @@ function escHtml(s) {
                 } else {
                     payBadge = '<span class="admin-status inactive" style="font-size:10px;">Unpaid</span>';
                 }
-                // Add refund button for paid bookings that are cancelled
-                if (payStatus === 'paid' && (status === 'cancelled' || status === 'rejected')) {
-                    actions += ' <button class="admin-action-btn" style="color:#7c3aed;border-color:#c4b5fd;" onclick="adminRefundBooking(' + b.id + ')">Refund</button>';
+                // A paid booking can always have the customer's money returned,
+                // whatever its status — e.g. the car turned out to be unavailable.
+                // (Once refunded the badge shows "Refunded" and the button is gone.)
+                if (payStatus === 'paid') {
+                    actions += ' <button class="admin-action-btn" style="color:#7c3aed;border-color:#c4b5fd;" onclick="adminRefundBooking(' + b.id + ')" title="Send the customer their money back via PayPal">&#8617; Return money</button>';
                 }
                 var clearedTag = b.partner_cleared_at
                     ? '<br><span class="admin-subtle" title="The partner cleared this from their own list. '
@@ -1075,7 +1077,7 @@ function escHtml(s) {
     }
 
     window.adminRefundBooking = function (id) {
-        if (!confirm('Refund the service fee for booking #' + id + '? This will send money back to the customer via PayPal.')) return;
+        if (!confirm('Return the online fee the customer paid for booking #' + id + '?\n\nThis sends the money back to them via PayPal and cannot be undone.')) return;
         fetch('/api/payments/refund', {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
