@@ -232,6 +232,7 @@
     "sort_price_asc": "Price: Low to High",
     "sort_price_desc": "Price: High to Low",
     "sort_year": "Year: Newest",
+    "sort_created": "Newest Added",
     "sort_name": "Name: A-Z",
     "no_results": "No vehicles found matching your criteria",
     "loading": "Loading vehicles...",
