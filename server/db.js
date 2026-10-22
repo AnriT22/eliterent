@@ -116,7 +116,7 @@ async function initDB() {
             service_options TEXT,
             tech_passport_front TEXT,
             tech_passport_back TEXT,
-            status TEXT DEFAULT 'pending' CHECK(status IN ('active', 'inactive', 'pending', 'delete_requested')),
+            status TEXT DEFAULT 'pending' CHECK(status IN ('active', 'inactive', 'pending', 'delete_requested', 'deactivate_requested')),
             brand TEXT,
             model TEXT,
             color TEXT,
@@ -895,6 +895,14 @@ async function initDB() {
     // Offers published before the breakdown existed: their single price was the
     // car price, so say so rather than leaving the line blank.
     await pool.query(`UPDATE transfer_offers SET price_car = base_price WHERE price_car IS NULL`);
+
+    // Partners can ask for a car to be taken off the market without deleting
+    // it, which needs its own status alongside delete_requested.
+    await pool.query(`ALTER TABLE vehicles DROP CONSTRAINT IF EXISTS vehicles_status_check`);
+    await pool.query(`
+        ALTER TABLE vehicles ADD CONSTRAINT vehicles_status_check
+        CHECK (status IN ('active', 'inactive', 'pending', 'delete_requested', 'deactivate_requested'))
+    `);
 
     // Partners tidy their own screens; nothing is ever really deleted. These
     // stamps hide a row from the partner (and from customers, for an offer)

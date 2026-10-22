@@ -525,6 +525,26 @@ router.put('/:id', authenticateToken, requireRole('partner'), async (req, res) =
     }
 });
 
+/**
+ * A booking only blocks a partner from retiring a car while it is still
+ * LIVE — upcoming, or running right now.
+ *
+ * Status alone is not enough. 'accepted' is never swept to 'completed' by
+ * anything, so a rental that ended months ago keeps its accepted status and
+ * used to block the car forever. The dropoff date is what decides whether the
+ * booking is really still in play.
+ */
+async function liveBookingFor(vehicleId) {
+    return queryOne(
+        "SELECT id, status, dropoff_date FROM bookings" +
+        " WHERE vehicle_id = $1" +
+        "   AND status IN ('pending', 'accepted', 'cancel_requested')" +
+        "   AND dropoff_date >= to_char(NOW(), 'YYYY-MM-DD')" +
+        ' LIMIT 1',
+        [vehicleId]
+    );
+}
+
 // DELETE /api/vehicles/:id — request vehicle deletion (partner only, own vehicles)
 // Partners cannot directly delete — they request deletion, admin approves
 router.delete('/:id', authenticateToken, requireRole('partner'), async (req, res) => {
@@ -535,14 +555,16 @@ router.delete('/:id', authenticateToken, requireRole('partner'), async (req, res
         if (!existing) {
             return res.status(404).json({ error: 'Vehicle not found or not yours' });
         }
+        if (existing.status === 'delete_requested') {
+            return res.status(400).json({ error: 'You have already requested deletion for this vehicle.' });
+        }
 
-        // Check for active reservations (pending, accepted, cancel_requested)
-        var activeBooking = await queryOne(
-            "SELECT id FROM bookings WHERE vehicle_id = $1 AND status IN ('pending', 'accepted', 'cancel_requested')",
-            [vehicleId]
-        );
+        var activeBooking = await liveBookingFor(vehicleId);
         if (activeBooking) {
-            return res.status(400).json({ error: 'Cannot request deletion — this vehicle has active reservations. Please wait until all bookings are completed or cancelled.' });
+            return res.status(400).json({
+                error: 'Cannot request deletion — this vehicle has a booking running until ' +
+                    activeBooking.dropoff_date + '. You can request deletion once it ends.'
+            });
         }
 
         // Set status to delete_requested instead of actually deleting
@@ -552,6 +574,49 @@ router.delete('/:id', authenticateToken, requireRole('partner'), async (req, res
     } catch (err) {
         console.error('Delete vehicle request error:', err);
         res.status(500).json({ error: 'Failed to request vehicle deletion' });
+    }
+});
+
+/**
+ * POST /api/vehicles/:id/deactivate-request — take a car off the market
+ * without deleting it. Same approval route as deletion: the partner asks,
+ * admin decides, and a live booking blocks it for the same reason.
+ */
+router.post('/:id/deactivate-request', authenticateToken, requireRole('partner'), async (req, res) => {
+    try {
+        var vehicleId = parseInt(req.params.id);
+        var existing = await queryOne('SELECT * FROM vehicles WHERE id = $1 AND partner_id = $2', [vehicleId, req.user.id]);
+
+        if (!existing) {
+            return res.status(404).json({ error: 'Vehicle not found or not yours' });
+        }
+        if (existing.status === 'deactivate_requested') {
+            return res.status(400).json({ error: 'You have already requested deactivation for this vehicle.' });
+        }
+        if (existing.status === 'inactive') {
+            return res.status(400).json({ error: 'This vehicle is already inactive.' });
+        }
+        if (existing.status === 'delete_requested') {
+            return res.status(400).json({ error: 'This vehicle is already waiting on a deletion request.' });
+        }
+
+        var activeBooking = await liveBookingFor(vehicleId);
+        if (activeBooking) {
+            return res.status(400).json({
+                error: 'Cannot request deactivation — this vehicle has a booking running until ' +
+                    activeBooking.dropoff_date + '. You can request deactivation once it ends.'
+            });
+        }
+
+        await execute(
+            "UPDATE vehicles SET status = 'deactivate_requested', updated_at = CURRENT_TIMESTAMP" +
+            ' WHERE id = $1 AND partner_id = $2',
+            [vehicleId, req.user.id]);
+
+        res.json({ message: 'Deactivation requested. Admin will review and approve your request.' });
+    } catch (err) {
+        console.error('Deactivate vehicle request error:', err);
+        res.status(500).json({ error: 'Failed to request vehicle deactivation' });
     }
 });
 

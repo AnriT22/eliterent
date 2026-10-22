@@ -707,7 +707,7 @@ router.put('/vehicles/:id/status', async (req, res) => {
     try {
         const vehicleId = parseInt(req.params.id);
         const { status } = req.body;
-        if (!['active', 'inactive', 'pending', 'delete_requested'].includes(status)) {
+        if (!['active', 'inactive', 'pending', 'delete_requested', 'deactivate_requested'].includes(status)) {
             return res.status(400).json({ error: 'Invalid status' });
         }
         await execute('UPDATE vehicles SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [status, vehicleId]);
