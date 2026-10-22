@@ -1278,7 +1278,11 @@
             } else if (statusClass === 'pending') {
                 verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(249,115,22,0.15);color:#f97316;border-radius:12px;font-size:11px;font-weight:600;">Unverified</span>';
             } else if (statusClass === 'delete_requested') {
-                verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(239,68,68,0.15);color:#ef4444;border-radius:12px;font-size:11px;font-weight:600;">Delete Requested</span>';
+                verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(239,68,68,0.15);color:#ef4444;border-radius:12px;font-size:11px;font-weight:600;">'
+                    + tOr('partner_dashboard.delete_requested_badge', 'Delete Requested') + '</span>';
+            } else if (statusClass === 'deactivate_requested') {
+                verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(249,115,22,0.15);color:#f97316;border-radius:12px;font-size:11px;font-weight:600;">'
+                    + tOr('partner_dashboard.deactivate_requested_badge', 'Deactivation Requested') + '</span>';
             } else {
                 verBadge = '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(100,116,139,0.15);color:var(--tt-muted, #A0A3B0);border-radius:12px;font-size:11px;font-weight:600;">' + statusClass.toUpperCase() + '</span>';
             }
@@ -1300,16 +1304,25 @@
                 html += '<div style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;margin-left:6px;background:rgba(201,168,76,0.18);color:var(--tt-gold2, #C9A84C);border-radius:12px;font-size:11px;font-weight:700;">⭐ VIP</div>';
             }
             html += '<div class="db-vehicle-actions">';
-            if (statusClass !== 'delete_requested') {
+            var awaitingDecision = statusClass === 'delete_requested' || statusClass === 'deactivate_requested';
+            if (!awaitingDecision) {
                 html += '<button class="db-btn-edit" onclick="editVehicle(' + v.id + ')" data-i18n="partner_dashboard.edit_btn">Edit</button>';
                 html += '<button class="db-btn-dates" onclick="openAvailabilityCalendar(' + v.id + ')" data-i18n="partner_dashboard.dates_btn">DATES</button>';
                 if (statusClass === 'active') {
                     var vipLabel = vipActive ? tOr('partner_dashboard.vip_extend', '⭐ Extend VIP') : tOr('partner_dashboard.vip_btn', '⭐ VIP');
                     html += '<button class="db-btn-vip" data-id="' + v.id + '">' + vipLabel + '</button>';
                 }
+                // Taking a car off the market is the reversible choice, so it
+                // sits before the irreversible one. Already-inactive cars have
+                // nothing to deactivate.
+                if (statusClass !== 'inactive') {
+                    html += '<button class="db-btn-deactivate" onclick="deactivateVehicle(' + v.id + ')" data-i18n="partner_dashboard.deactivate_btn">Request Deactivate</button>';
+                }
                 html += '<button class="db-btn-delete" onclick="deleteVehicle(' + v.id + ')" data-i18n="partner_dashboard.delete_btn">Request Delete</button>';
-            } else {
+            } else if (statusClass === 'delete_requested') {
                 html += '<span style="color:#ef4444;font-size:12px;font-style:italic;" data-i18n="partner_dashboard.awaiting_deletion">Awaiting admin approval for deletion</span>';
+            } else {
+                html += '<span style="color:#f97316;font-size:12px;font-style:italic;" data-i18n="partner_dashboard.awaiting_deactivation">Awaiting admin approval for deactivation</span>';
             }
             html += '</div>';
             html += '</div></div>';
@@ -1916,8 +1929,32 @@
     // ========================================
     // DELETE VEHICLE (global function)
     // ========================================
+    window.deactivateVehicle = function (id) {
+        if (!confirm(tOr('partner_dashboard.deactivate_confirm',
+            'Request deactivation of this vehicle? It will be hidden from customers once admin approves. ' +
+            'You can ask to reactivate it later.'))) return;
+
+        fetch('/api/vehicles/' + id + '/deactivate-request', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+        })
+        .then(function (res) { return res.json().then(function (d) { return { ok: res.ok, data: d }; }); })
+        .then(function (result) {
+            if (!result.ok) {
+                alert(result.data.error || tOr('partner_dashboard.deactivate_failed', 'Failed to request deactivation'));
+                return;
+            }
+            alert(result.data.message || tOr('partner_dashboard.deactivate_ok', 'Deactivation requested'));
+            loadVehicles();
+        })
+        .catch(function () {
+            alert(tOr('partner_dashboard.deactivate_failed', 'Failed to request deactivation'));
+        });
+    };
+
     window.deleteVehicle = function (id) {
-        if (!confirm('Request deletion of this vehicle? Admin will review and approve your request.')) return;
+        if (!confirm(tOr('partner_dashboard.delete_confirm',
+            'Request deletion of this vehicle? Admin will review and approve your request.'))) return;
 
         fetch('/api/vehicles/' + id, {
             method: 'DELETE',

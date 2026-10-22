@@ -305,6 +305,16 @@
     background: rgba(239,68,68,0.06);
 }
 
+/* Deactivate is reversible, so it reads as a caution rather than a danger. */
+.db-vehicle-actions .db-btn-deactivate {
+    color: #f97316;
+    border-color: #f97316;
+}
+
+.db-vehicle-actions .db-btn-deactivate:hover {
+    background: rgba(249,115,22,0.08);
+}
+
 /* ========================================
    IMAGE UPLOAD AREA
    ======================================== */

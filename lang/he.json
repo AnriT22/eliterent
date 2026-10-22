@@ -1,5 +1,15 @@
 {
   "partner_dashboard": {
+    "deactivate_btn": "בקשת השבתה",
+    "deactivate_requested_badge": "התקבלה בקשת השבתה",
+    "awaiting_deactivation": "ממתין לאישור מנהל להשבתה",
+    "deactivate_confirm": "לבקש השבתה של הרכב הזה? לאחר אישור המנהל הוא יוסתר מהלקוחות. תוכלו לבקש להפעיל אותו שוב בהמשך.",
+    "deactivate_ok": "בקשת ההשבתה נשלחה",
+    "deactivate_failed": "לא הצלחנו לשלוח בקשת השבתה",
+    "delete_requested_badge": "התקבלה בקשת מחיקה",
+    "delete_confirm": "לבקש מחיקה של הרכב הזה? המנהל יבדוק ויאשר את הבקשה.",
+    "delete_btn": "בקשת מחיקה",
+    "awaiting_deletion": "ממתין לאישור מנהל למחיקה",
     "min_rental_days": "מינימום ימי השכרה",
     "min_rental_days_hint": "לקוחות לא יוכלו להזמין פחות ימים מזה. השאירו 1 ללא מינימום.",
     "payout_subtitle": "משוך את יתרת ההפניות שלך",

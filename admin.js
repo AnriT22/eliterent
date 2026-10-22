@@ -721,9 +721,11 @@ function escHtml(s) {
                     + (status === 'pending' ? '<button class="admin-action-btn success" onclick="adminSetVehicleStatus(' + v.id + ',\'active\')">Approve</button>' : '')
                     + (status === 'delete_requested' ? '<button class="admin-action-btn success" onclick="adminApproveDelete(' + v.id + ')">Approve Delete</button>' : '')
                     + (status === 'delete_requested' ? '<button class="admin-action-btn" onclick="adminRejectDelete(' + v.id + ')">Reject Delete</button>' : '')
+                    + (status === 'deactivate_requested' ? '<button class="admin-action-btn success" onclick="adminApproveDeactivate(' + v.id + ')">Approve Deactivate</button>' : '')
+                    + (status === 'deactivate_requested' ? '<button class="admin-action-btn" onclick="adminRejectDeactivate(' + v.id + ')">Reject Deactivate</button>' : '')
                     + (status === 'active' ? '<button class="admin-action-btn" onclick="adminSetVehicleStatus(' + v.id + ',\'inactive\')">Deactivate</button>' : '')
                     + (status === 'inactive' ? '<button class="admin-action-btn success" onclick="adminSetVehicleStatus(' + v.id + ',\'active\')">Activate</button>' : '')
-                    + (status !== 'delete_requested' ? '<button class="admin-action-btn danger" onclick="adminDeleteVehicle(' + v.id + ')">Delete</button>' : '')
+                    + (status !== 'delete_requested' && status !== 'deactivate_requested' ? '<button class="admin-action-btn danger" onclick="adminDeleteVehicle(' + v.id + ')">Delete</button>' : '')
                     + '</td></tr>';
             }).join('');
 
@@ -790,6 +792,18 @@ function escHtml(s) {
     };
     window.adminRejectDelete = function (id) {
         apiPut('/api/admin/vehicles/' + id + '/reject-delete', {}).then(function () { loadVehicles(); });
+    };
+    // Deactivation is reversible, so approving it just parks the car as
+    // inactive and rejecting puts it back on the market.
+    window.adminApproveDeactivate = function (id) {
+        apiPut('/api/admin/vehicles/' + id + '/status', { status: 'inactive' })
+            .then(function () { loadVehicles(); })
+            .catch(function () { alert('Failed to deactivate'); });
+    };
+    window.adminRejectDeactivate = function (id) {
+        apiPut('/api/admin/vehicles/' + id + '/status', { status: 'active' })
+            .then(function () { loadVehicles(); })
+            .catch(function () { alert('Failed to reject'); });
     };
 
     // ---- Toggle VIP green glow on a vehicle card ----
