@@ -12,9 +12,12 @@ const { countryName } = require('../visitor-tracking');
 const router = express.Router();
 router.use(authenticateToken, requireRole('admin'));
 
-// A visit counts as HUMAN if it passed header checks (is_bot=0) OR the browser
-// later proved itself by running JS (is_verified=1) — same rule as admin.js.
-const HUMAN = '(is_verified = 1 OR is_bot = 0)';
+// A visit counts as HUMAN only if the browser RAN JavaScript (is_verified) and is not
+// a flagged bot. The old "OR is_bot = 0" let non-JS crawlers with a normal-looking
+// browser string (Tencent Cloud, US/SG/NL data centers) count as people — they were
+// ~80-99% of US/SG/NL/CN/BR "visitors". Rows before 2026-07-25 carry a broken is_bot
+// flag (every browser was flagged), so for those is_verified alone decides.
+const HUMAN = "(is_verified = 1 AND (is_bot = 0 OR created_at < '2026-07-25'))";
 const ORGANIC_SOURCES = "('google_organic','organic_other','google_maps')";
 // Real booking attempts (guest passed OTP); revenue counts confirmed ones only.
 const REAL_BOOKINGS = "status <> 'pending_verification'";

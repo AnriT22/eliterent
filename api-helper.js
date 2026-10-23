@@ -39,4 +39,35 @@
             if (_ref) localStorage.setItem('pendingReferralCode', _ref);
         }
     } catch (e) { /* ignore */ }
+
+    // Human verification ping — proves the browser runs JavaScript (crawlers mostly
+    // don't), and reports screen size + clock timezone for the admin analytics.
+    // Lives here (not script.js) because every page loads this file; fires soon after
+    // load, or on leave, so quick bouncers still count as real visitors.
+    var _humanSent = false;
+    function sendHuman(onLeave) {
+        if (_humanSent) return;
+        _humanSent = true;
+        var info = {};
+        try {
+            info.screen = window.screen.width + 'x' + window.screen.height;
+            info.tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        } catch (e) {}
+        var body = JSON.stringify(info);
+        if (onLeave && navigator.sendBeacon) {
+            navigator.sendBeacon(API_BASE + '/api/verify-human', new Blob([body], { type: 'application/json' }));
+            return;
+        }
+        fetch('/api/verify-human', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: body,
+            keepalive: true
+        }).catch(function () {});
+    }
+    function scheduleHuman() { setTimeout(function () { sendHuman(false); }, 600); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scheduleHuman);
+    else scheduleHuman();
+    window.addEventListener('pagehide', function () { sendHuman(true); });
 })();

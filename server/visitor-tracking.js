@@ -46,6 +46,20 @@ function isBot(req) {
     // 5. Known headless/browser automation markers
     if (lowerUa.includes('headless') || lowerUa.includes('selenium') || lowerUa.includes('webdriver')) return true;
 
+    // 6. Crawlers that run JavaScript and so used to pass as humans: Google's
+    // ad/landing-page checkers (Google-AdWords-Express, Google-BusinessLinkVerification,
+    // GoogleOther, Google-InspectionTool…), Lighthouse/PageSpeed and SEO site checkers.
+    if (/google-|googleother|compatible; ?google|adwords|lighthouse|pagespeed|gtmetrix|seositecheck|siteaudit|screaming ?frog|sitebulb|pingdom|uptimerobot|statuscake|site24x7|netcraft|zgrab|nuclei|censys|shodan/i.test(ua)) return true;
+
+    // 7. Google infrastructure IPs (Googlebot, ads landing-page review, renderers).
+    // Real visitors never browse from these ranges.
+    if (/^(66\.249|66\.102|74\.125|142\.250|64\.233|72\.14|209\.85)\./.test(clientIp(req) || '')) return true;
+
+    // 8. Requests addressed to the raw server IP / hosting hostname instead of the
+    // domain bypass Cloudflare — that's vulnerability scanners, not travellers.
+    var host = String(req.headers.host || '').replace(/:\d+$/, '').toLowerCase();
+    if ((/^\d{1,3}(\.\d{1,3}){3}$/.test(host) && host !== '127.0.0.1') || host.endsWith('your-server.de')) return true;
+
     return false;
 }
 
