@@ -256,14 +256,25 @@ function verifyHumanHandler(getPool) {
             if (typeof req.body.tz === 'string' && req.body.tz.length <= 64 && /^[\w+\-\/ ]+$/.test(req.body.tz)) tz = req.body.tz;
         }
 
+        // Headless browsers run JS too, but report tell-tale screens: 800x600 (headless
+        // Chrome default), 1280x1200 (Tencent Cloud crawler fleet), huge full-page
+        // screenshot canvases. No real 2026 device has these, so mark them as bots.
+        var headless = false;
+        if (screen) {
+            var wh = screen.split('x').map(Number);
+            headless = screen === '800x600' || screen === '1280x1200' || screen === '2000x2000' ||
+                wh[1] >= 4000 || wh[0] > 7680;
+        }
+
         var pool = getPool();
         if (pool) {
             pool.query(
                 `UPDATE page_visits SET is_verified = 1,
+                        is_bot = CASE WHEN $4 THEN 1 ELSE is_bot END,
                         screen = COALESCE($2, screen),
                         timezone = COALESCE($3, timezone)
                  WHERE visitor_id = $1 AND created_at > NOW() - INTERVAL '1 hour'`,
-                [vid, screen, tz]
+                [vid, screen, tz, headless]
             ).catch(function () {});
         }
         res.json({ ok: true });
