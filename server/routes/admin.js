@@ -130,10 +130,10 @@ router.get('/analytics', async (req, res) => {
 router.get('/visitors', async (req, res) => {
     try {
         var excludeBots = req.query.excludeBots === '1';
-        // A visit counts as HUMAN if it either passed the header checks (is_bot = 0)
-        // OR the browser later proved itself by running JS (is_verified = 1).
-        // It only counts as a BOT when it was flagged AND never verified.
-        var botClause = excludeBots ? " AND (is_verified = 1 OR is_bot = 0)" : "";
+        // A visit counts as HUMAN only if the browser ran JavaScript (is_verified = 1)
+        // and wasn't flagged as a bot — same rule as admin-analytics.js. Non-JS
+        // crawlers with a normal browser string used to pass as people.
+        var botClause = excludeBots ? " AND (is_verified = 1 AND is_bot = 0)" : "";
 
         // Total page views
         const todayViews = await queryOne("SELECT COUNT(*) as count FROM page_visits WHERE created_at >= CURRENT_DATE" + botClause);
@@ -158,10 +158,9 @@ router.get('/visitors', async (req, res) => {
         // Live — visitors in last 5 minutes
         const liveNow = await queryOne("SELECT COUNT(DISTINCT visitor_id) as count FROM page_visits WHERE created_at >= NOW() - INTERVAL '5 minutes'" + botClause);
 
-        // Bot stats (always show these for context) — reclassify using the
-        // JS-verified signal so verified humans never count as bots.
+        // Bot stats (always show these for context).
         const botStatsRow = await queryOne(
-            "SELECT COUNT(*) FILTER (WHERE is_bot = 1 AND is_verified = 0) as bots, COUNT(*) FILTER (WHERE is_verified = 1 OR is_bot = 0) as humans FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'"
+            "SELECT COUNT(*) FILTER (WHERE NOT (is_verified = 1 AND is_bot = 0)) as bots, COUNT(*) FILTER (WHERE is_verified = 1 AND is_bot = 0) as humans FROM page_visits WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'"
         );
         var botCount = parseInt(botStatsRow.bots) || 0, humanCount = parseInt(botStatsRow.humans) || 0;
 
@@ -194,8 +193,7 @@ router.get('/visitors/recent', async (req, res) => {
         var excludeBots = req.query.excludeBots === '1';
 
         // Group by visitor_id + ip — show first/last seen, total visits, pages, bot flags.
-        // A visitor is only a BOT if flagged AND never verified via JS. The excludeBots
-        // filter keeps everyone who verified (is_verified=1) or was never flagged.
+        // A visitor is HUMAN only if it ran JS (verified) and was never flagged as a bot.
         const rows = await queryAll(
             `SELECT
                 visitor_id,
@@ -206,12 +204,12 @@ router.get('/visitors/recent', async (req, res) => {
                 (array_agg(DISTINCT page))[1:5] as pages,
                 (array_agg(user_agent ORDER BY created_at DESC))[1] as user_agent,
                 (array_agg(referrer ORDER BY created_at DESC))[1] as referrer,
-                CASE WHEN MAX(is_verified) = 1 THEN 0 ELSE MAX(is_bot) END as is_bot,
+                CASE WHEN MAX(is_verified) = 1 AND MAX(is_bot) = 0 THEN 0 ELSE 1 END as is_bot,
                 MAX(is_verified) as is_verified
             FROM page_visits
             WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
             GROUP BY visitor_id, ip
-            HAVING true` + (excludeBots ? ` AND NOT (MAX(is_bot) = 1 AND MAX(is_verified) = 0)` : ``) + `
+            HAVING true` + (excludeBots ? ` AND MAX(is_verified) = 1 AND MAX(is_bot) = 0` : ``) + `
             ORDER BY last_seen DESC
             LIMIT $1`,
             [limit]
