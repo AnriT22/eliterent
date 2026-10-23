@@ -904,6 +904,14 @@ async function initDB() {
         CHECK (status IN ('active', 'inactive', 'pending', 'delete_requested', 'deactivate_requested'))
     `);
 
+    // Admin can settle a paid booking by KEEPING the fee instead of returning
+    // it. Deliberately a separate flag rather than a payment_status value:
+    // payment_status stays 'paid' so every earnings, analytics and
+    // user-deletion query that filters on 'paid' keeps counting it. The stamp
+    // only records the decision and closes the refund route for good.
+    await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS fee_kept_at TIMESTAMP`);
+    await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS fee_kept_by INTEGER`);
+
     // Partners tidy their own screens; nothing is ever really deleted. These
     // stamps hide a row from the partner (and from customers, for an offer)
     // while admin keeps seeing every record, marked as cleared. Deleting for

@@ -1055,8 +1055,19 @@ function escHtml(s) {
                 // A paid booking can always have the customer's money returned,
                 // whatever its status — e.g. the car turned out to be unavailable.
                 // (Once refunded the badge shows "Refunded" and the button is gone.)
-                if (payStatus === 'paid') {
-                    actions += ' <button class="admin-action-btn" style="color:#7c3aed;border-color:#c4b5fd;" onclick="adminRefundBooking(' + b.id + ')" title="Send the customer their money back via PayPal">&#8617; Return money</button>';
+                //
+                // Keeping sits ABOVE returning and is the settling move: it is
+                // final, so once taken both buttons go and only the stamp shows.
+                if (payStatus === 'paid' && !b.fee_kept_at) {
+                    actions += '<div style="margin-top:4px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;">'
+                        + '<button class="admin-action-btn" style="color:#16a34a;border-color:#86efac;" onclick="adminKeepFee(' + b.id + ')" title="Keep this fee for good. The money stays with you and can no longer be returned.">&#10003; Keep money</button>'
+                        + '<button class="admin-action-btn" style="color:#7c3aed;border-color:#c4b5fd;" onclick="adminRefundBooking(' + b.id + ')" title="Send the customer their money back via PayPal">&#8617; Return money</button>'
+                        + '</div>';
+                } else if (payStatus === 'paid' && b.fee_kept_at) {
+                    actions += '<div style="margin-top:4px;"><span class="admin-subtle" title="Kept on '
+                        + escHtml(String(b.fee_kept_at).slice(0, 10))
+                        + '. This fee can no longer be returned." style="color:#16a34a;font-size:11px;font-weight:700;">'
+                        + '&#10003; Money kept</span></div>';
                 }
                 var clearedTag = b.partner_cleared_at
                     ? '<br><span class="admin-subtle" title="The partner cleared this from their own list. '
@@ -1089,6 +1100,23 @@ function escHtml(s) {
             r.style.display = (matchText && matchStatus) ? '' : 'none';
         });
     }
+
+    window.adminKeepFee = function (id) {
+        var CHR = String.fromCharCode(10);
+        if (!confirm('Keep the fee the customer paid for booking #' + id + '?' + CHR + CHR
+            + 'The money stays with you permanently and the "Return money" option '
+            + 'will be gone for good. This cannot be undone.')) return;
+        fetch('/api/payments/keep-fee', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ booking_id: id })
+        }).then(function (r) { return r.json(); }).then(function (data) {
+            if (data.error) { alert('Could not keep the fee: ' + data.error); return; }
+            alert(data.message || 'Fee kept.');
+            loadBookings();
+            loadAnalytics();
+        }).catch(function () { alert('Request failed'); });
+    };
 
     window.adminRefundBooking = function (id) {
         if (!confirm('Return the online fee the customer paid for booking #' + id + '?\n\nThis sends the money back to them via PayPal and cannot be undone.')) return;
