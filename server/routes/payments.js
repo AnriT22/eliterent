@@ -113,6 +113,45 @@ router.post('/capture-order', authenticateToken, requireRole('guest'), async (re
     }
 });
 
+/**
+ * POST /api/payments/keep-fee — admin decides to KEEP the fee a customer paid.
+ *
+ * The opposite of a refund, and just as final: once stamped, /refund refuses
+ * the booking. No money moves, so payment_status stays 'paid' and every
+ * earnings query keeps counting it — this records the decision and closes the
+ * door, nothing more.
+ */
+router.post('/keep-fee', authenticateToken, requireRole('admin'), async (req, res) => {
+    try {
+        var bookingId = parseInt(req.body.booking_id);
+        if (!bookingId || isNaN(bookingId)) return res.status(400).json({ error: 'booking_id required' });
+
+        var booking = await queryOne('SELECT * FROM bookings WHERE id = $1', [bookingId]);
+        if (!booking) return res.status(404).json({ error: 'Booking not found' });
+
+        var pStatus = String(booking.payment_status || 'unpaid');
+        if (pStatus === 'refunded') {
+            return res.status(400).json({ error: 'This fee was already returned to the customer.' });
+        }
+        if (pStatus !== 'paid') {
+            return res.status(400).json({ error: 'Booking is not paid (status: ' + pStatus + ')' });
+        }
+        if (booking.fee_kept_at) {
+            return res.status(400).json({ error: 'This fee is already marked as kept.' });
+        }
+
+        await execute(
+            'UPDATE bookings SET fee_kept_at = CURRENT_TIMESTAMP, fee_kept_by = $1,' +
+            ' updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+            [req.user.id, bookingId]);
+
+        res.json({ message: 'Fee kept. It can no longer be returned.' });
+    } catch (err) {
+        console.error('Keep fee error:', err);
+        res.status(500).json({ error: 'Failed to keep the fee: ' + err.message });
+    }
+});
+
 // POST /api/payments/refund — admin refunds a booking's payment
 router.post('/refund', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
@@ -124,6 +163,11 @@ router.post('/refund', authenticateToken, requireRole('admin'), async (req, res)
 
         var pStatus = String(booking.payment_status || 'unpaid');
         if (pStatus !== 'paid') return res.status(400).json({ error: 'Booking is not paid (status: ' + pStatus + ')' });
+        if (booking.fee_kept_at) {
+            return res.status(400).json({
+                error: 'This fee was marked as kept and can no longer be returned.'
+            });
+        }
 
         var captureId = booking.paypal_capture_id;
         if (!captureId) return res.status(400).json({ error: 'No PayPal capture ID found — cannot refund' });
