@@ -82,6 +82,12 @@ async function sendSMS(to, message) {
     return { success: true, simulated: true };
   }
 
+  // Verify-only setups have no sender number, and Twilio would reject the message.
+  if (!process.env.TWILIO_PHONE_NUMBER) {
+    console.error(`[SMS] Cannot send to ${maskPhoneNumber(phone)}: TWILIO_PHONE_NUMBER is not set`);
+    return { success: false, error: "Direct SMS is not configured" };
+  }
+
   try {
     const result = await twilioClient.messages.create({
       body: message,

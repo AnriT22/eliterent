@@ -636,7 +636,7 @@ router.post("/phone-verify/send", authenticateToken, async (req, res) => {
     const otpHash = await bcrypt.hash(otp, 10);
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-    await insertOtpRecord({
+    const otpRecordId = await insertOtpRecord({
       userId,
       phone: cleanPhone,
       email: null,
@@ -649,6 +649,7 @@ router.post("/phone-verify/send", authenticateToken, async (req, res) => {
     const smsSent = Boolean(smsResult && smsResult.success);
 
     if (!smsSent) {
+      await invalidateOtpRecord(otpRecordId);
       return res.status(502).json({ error: "Failed to send verification code. Please try again." });
     }
 

@@ -591,27 +591,32 @@ router.post("/", authenticateToken, requireRole("guest"), async (req, res) => {
         [vehicle.partner_id],
       );
       if (partnerInfo && partnerInfo.email) {
-        var { sendEmail } = require("../mailer");
+        var { sendEmail, escapeHtml } = require("../mailer");
         var guestUser = await queryOne(
           "SELECT full_name FROM users WHERE id = $1",
           [req.user.id],
         );
         var veh = await queryOne("SELECT name FROM vehicles WHERE id = $1", [vehicle_id]);
-        sendEmail(
-          partnerInfo.email,
-          "New Booking Request — " + (veh ? veh.name : "Vehicle"),
+        var partnerText =
           "Dear " +
-            (partnerInfo.company_name || partnerInfo.full_name || "Partner") +
-            ",\n\nYou have a new booking request:\n\nVehicle: " +
-            (veh ? veh.name : "Vehicle") +
-            "\nGuest: " +
-            (guestUser ? guestUser.full_name : "Guest") +
-            "\nDates: " +
-            pickup_date +
-            " → " +
-            dropoff_date +
-            "\n\nPlease log in to your dashboard to accept or decline.\n\nhttps://eliteauto.rent/partner-dashboard.html",
-        ).catch(function () {});
+          (partnerInfo.company_name || partnerInfo.full_name || "Partner") +
+          ",\n\nYou have a new booking request:\n\nVehicle: " +
+          (veh ? veh.name : "Vehicle") +
+          "\nGuest: " +
+          (guestUser ? guestUser.full_name : "Guest") +
+          "\nDates: " +
+          pickup_date +
+          " → " +
+          dropoff_date +
+          "\n\nPlease log in to your dashboard to accept or decline.\n\nhttps://eliteauto.rent/partner-dashboard.html";
+        sendEmail({
+          to: partnerInfo.email,
+          subject: "New Booking Request — " + (veh ? veh.name : "Vehicle"),
+          text: partnerText,
+          html: escapeHtml(partnerText).replace(/\n/g, "<br>"),
+        }).catch(function (mailErr) {
+          console.error("Partner notification email error:", mailErr.message);
+        });
       }
     } catch (emailErr) {
       console.error("Partner notification email error:", emailErr.message);
