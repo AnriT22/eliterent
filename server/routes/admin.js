@@ -607,7 +607,7 @@ router.get('/partners', async (req, res) => {
                  FROM vehicles GROUP BY partner_id
              ) vc ON vc.partner_id = u.id
              WHERE u.role = 'partner'
-             ORDER BY u.created_at DESC`
+             ORDER BY (COALESCE(vc.pending, 0) > 0) DESC, u.created_at DESC`
         );
         console.log('[Admin] GET /partners — found', partners.length, 'partner(s)');
         res.json({ partners, count: partners.length });
