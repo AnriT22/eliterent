@@ -2075,6 +2075,13 @@ select.db-input option:checked {
         border-left: none;
         border-bottom: 3px solid var(--tb-gold, #C9A84C);
         background: rgba(201,168,76,0.1);
+        /* The desktop rule pairs #fff text with a solid gold fill. This swaps
+           the fill for a 10% tint, so the white has to go with it or the label
+           disappears into the box — invisible in light mode. */
+        color: var(--tb-gold, #C9A84C);
+    }
+    .db-nav-item.active svg {
+        stroke: var(--tb-gold, #C9A84C);
     }
     .db-nav-item svg { display: none; }
 
