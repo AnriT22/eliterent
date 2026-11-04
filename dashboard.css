@@ -2077,8 +2077,11 @@ select.db-input option:checked {
         background: rgba(201,168,76,0.1);
         /* The desktop rule pairs #fff text with a solid gold fill. This swaps
            the fill for a 10% tint, so the white has to go with it or the label
-           disappears into the box — invisible in light mode. */
-        color: var(--tb-gold, #C9A84C);
+           disappears into the box — it measured 1.17:1 in light mode, i.e.
+           invisible. Gold-on-tint only reaches 2.15:1, so use the normal text
+           colour and let the gold underline carry the "selected" signal. */
+        color: var(--tt-text2, #F0ECE2);
+        font-weight: 700;
     }
     .db-nav-item.active svg {
         stroke: var(--tb-gold, #C9A84C);
