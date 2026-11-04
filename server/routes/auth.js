@@ -1077,6 +1077,9 @@ router.post("/auth/google", async (req, res) => {
     let user = await queryOne("SELECT * FROM users WHERE email = $1", [googleEmail]);
 
     if (user) {
+      if (user.suspended_at) {
+        return res.status(403).json({ error: "Your account has been suspended. Please contact support." });
+      }
       // Existing user — log them in (unapproved = still in registration flow, not suspended)
       // Update google_id and avatar if not set
       if (!user.google_id || !user.avatar_url) {
@@ -1314,6 +1317,9 @@ router.get("/auth/google/callback", async (req, res) => {
     let user = await queryOne("SELECT * FROM users WHERE email = $1", [googleEmail]);
 
     if (user) {
+      if (user.suspended_at) {
+        return res.redirect("/login.html?error=" + encodeURIComponent("Your account has been suspended. Please contact support."));
+      }
       // Existing user — log them in (unapproved = still in registration flow, not suspended)
       // Update google_id and avatar if not set
       if (!user.google_id || !user.avatar_url) {
@@ -1470,6 +1476,10 @@ router.post("/login", async (req, res) => {
     if (!validPassword) {
       recordFailedLogin(email);
       return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    if (user.suspended_at) {
+      return res.status(403).json({ error: "Your account has been suspended. Please contact support." });
     }
 
     // Admins always pass. Others need is_approved=1.
@@ -1739,7 +1749,7 @@ router.post("/forgot-password", async (req, res) => {
         "\n\nThis link expires in 1 hour.\n\nIf you did not request this, please ignore this email.\n\nEliteAuto.rent Team",
       html:
         "<p>Hello " +
-        (user.full_name || "") +
+        escapeHtml(user.full_name || "") +
         ',</p><p>You requested a password reset. Click the link below to set a new password:</p><p><a href="' +
         resetUrl +
         '" style="display:inline-block;padding:12px 28px;background:#c8a961;color:#0f172a;border-radius:8px;text-decoration:none;font-weight:700;">Reset Password</a></p><p>This link expires in 1 hour.</p><p>If you did not request this, please ignore this email.</p><p>EliteAuto.rent Team</p>',

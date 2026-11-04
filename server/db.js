@@ -49,6 +49,7 @@ async function initDB() {
     try {
         await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified INTEGER DEFAULT 0`);
         await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_verified INTEGER DEFAULT 0`);
+        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS suspended_at TIMESTAMP`);
         await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified INTEGER DEFAULT 0`);
         await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id TEXT`);
         await pool.query(`ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL`);

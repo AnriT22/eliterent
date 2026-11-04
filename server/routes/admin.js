@@ -340,10 +340,10 @@ router.put('/users/:id/approve', async (req, res) => {
         const user = await queryOne('SELECT * FROM users WHERE id = $1 AND role != $2', [userId, 'admin']);
         if (!user) return res.status(404).json({ error: 'User not found' });
         if (user.role === 'partner') {
-            await execute('UPDATE users SET is_approved = 1, is_verified = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
+            await execute('UPDATE users SET is_approved = 1, is_verified = 1, suspended_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
             await execute('UPDATE partner_profiles SET is_verified = 1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $1', [userId]);
         } else {
-            await execute('UPDATE users SET is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
+            await execute('UPDATE users SET is_approved = 1, suspended_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
         }
         res.json({ message: 'User approved' });
     } catch (err) {
@@ -451,7 +451,7 @@ router.put('/users/:id/suspend', async (req, res) => {
         const userId = parseInt(req.params.id);
         const user = await queryOne('SELECT * FROM users WHERE id = $1 AND role != $2', [userId, 'admin']);
         if (!user) return res.status(404).json({ error: 'User not found' });
-        await execute('UPDATE users SET is_approved = 0, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
+        await execute('UPDATE users SET is_approved = 0, suspended_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
         res.json({ message: 'User suspended' });
     } catch (err) {
         console.error('Suspend user error:', err);
@@ -462,7 +462,7 @@ router.put('/users/:id/suspend', async (req, res) => {
 router.put('/users/:id/unsuspend', async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
-        await execute('UPDATE users SET is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
+        await execute('UPDATE users SET is_approved = 1, suspended_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = $1', [userId]);
         res.json({ message: 'User unsuspended' });
     } catch (err) {
         console.error('Unsuspend user error:', err);
@@ -1006,7 +1006,7 @@ router.patch('/bookings/:id/status', async (req, res) => {
                     to: booking.guest_email,
                     subject: 'Reservation accepted — ' + (booking.vehicle_name || 'Vehicle'),
                     text: guestText,
-                    html: guestText.replace(/\n/g, '<br>')
+                    html: escapeHtml(guestText).replace(/\n/g, '<br>')
                 });
             }
             if (booking.partner_email) {
@@ -1014,7 +1014,7 @@ router.patch('/bookings/:id/status', async (req, res) => {
                     to: booking.partner_email,
                     subject: 'New accepted reservation — ' + (booking.vehicle_name || 'Vehicle'),
                     text: partnerText,
-                    html: partnerText.replace(/\n/g, '<br>')
+                    html: escapeHtml(partnerText).replace(/\n/g, '<br>')
                 });
             }
         }

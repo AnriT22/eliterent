@@ -12,7 +12,9 @@ if (!JWT_SECRET) {
     console.warn('WARNING: JWT_SECRET not set — generated a random secret. Sessions will reset on each restart. Set JWT_SECRET env var for persistent sessions.');
 }
 
-function authenticateToken(req, res, next) {
+// Tokens live for 30 days, so role and suspension come from the database on each
+// request: a suspended, deleted or re-roled account loses access immediately.
+async function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = (authHeader && authHeader.split(' ')[1]) || req.query.token;
 
@@ -20,13 +22,30 @@ function authenticateToken(req, res, next) {
         return res.status(401).json({ error: 'Access token required' });
     }
 
+    let decoded;
     try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        req.user = decoded;
-        next();
+        decoded = jwt.verify(token, JWT_SECRET);
     } catch (err) {
         return res.status(403).json({ error: 'Invalid or expired token' });
     }
+
+    try {
+        const { queryOne } = require('../db-helpers');
+        const account = await queryOne('SELECT role, suspended_at FROM users WHERE id = $1', [decoded.id]);
+        if (!account) {
+            return res.status(401).json({ error: 'Account no longer exists' });
+        }
+        if (account.suspended_at) {
+            return res.status(403).json({ error: 'Your account has been suspended. Please contact support.', suspended: true });
+        }
+        decoded.role = account.role;
+    } catch (err) {
+        console.error('Auth account check error:', err.message);
+        return res.status(503).json({ error: 'Service temporarily unavailable' });
+    }
+
+    req.user = decoded;
+    next();
 }
 
 function requireRole(role) {

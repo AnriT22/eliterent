@@ -423,6 +423,13 @@ router.put('/:id', authenticateToken, requireRole('partner'), async (req, res) =
 
         var b = req.body;
 
+        if (b.price_per_day !== undefined && b.price_per_day !== null && b.price_per_day !== '') {
+            var newPrice = parseFloat(b.price_per_day);
+            if (!newPrice || newPrice <= 0 || newPrice > 100000) {
+                return res.status(400).json({ error: 'Price must be between $1 and $100,000 per day' });
+            }
+        }
+
         await execute(`
             UPDATE vehicles SET
                 name = $1, brand = $2, model = $3, color = $4, min_age = $5, location_city = $6,

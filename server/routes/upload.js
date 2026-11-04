@@ -88,6 +88,12 @@ async function processImage(filePath) {
     }
 }
 
+// A file that the image decoder rejects is not a real image, whatever its name
+// and declared type claim. Remove it rather than publishing it under /uploads.
+function discardUpload(file) {
+    try { fs.unlinkSync(file.path); } catch (e) {}
+}
+
 // POST /api/upload/vehicle-image — upload single image
 router.post('/vehicle-image', authenticateToken, upload.single('image'), async (req, res) => {
     if (!req.file) {
@@ -99,9 +105,8 @@ router.post('/vehicle-image', authenticateToken, upload.single('image'), async (
         res.json({ message: 'Image uploaded', url: imageUrl });
     } catch (err) {
         console.error('Image processing error:', err.message);
-        // Fallback: serve original if processing fails
-        var imageUrl = '/uploads/vehicles/' + req.file.filename;
-        res.json({ message: 'Image uploaded', url: imageUrl });
+        discardUpload(req.file);
+        res.status(400).json({ error: 'This file could not be read as an image' });
     }
 });
 
@@ -117,8 +122,11 @@ router.post('/vehicle-images', authenticateToken, upload.array('images', 10), as
             urls.push('/uploads/vehicles/' + processedName);
         } catch (err) {
             console.error('Image processing error for ' + req.files[i].filename + ':', err.message);
-            urls.push('/uploads/vehicles/' + req.files[i].filename);
+            discardUpload(req.files[i]);
         }
+    }
+    if (urls.length === 0) {
+        return res.status(400).json({ error: 'These files could not be read as images' });
     }
     res.json({ message: 'Images uploaded', urls: urls });
 });
@@ -134,8 +142,8 @@ router.post('/driver-image', authenticateToken, uploadDriver.single('image'), as
         res.json({ message: 'Image uploaded', url: imageUrl });
     } catch (err) {
         console.error('Driver image processing error:', err.message);
-        var imageUrl = '/uploads/drivers/' + req.file.filename;
-        res.json({ message: 'Image uploaded', url: imageUrl });
+        discardUpload(req.file);
+        res.status(400).json({ error: 'This file could not be read as an image' });
     }
 });
 
@@ -150,8 +158,8 @@ router.post('/ad-cover', authenticateToken, upload.single('image'), async (req, 
         res.json({ message: 'Image uploaded', url: imageUrl });
     } catch (err) {
         console.error('Ad cover processing error:', err.message);
-        var imageUrl = '/uploads/vehicles/' + req.file.filename;
-        res.json({ message: 'Image uploaded', url: imageUrl });
+        discardUpload(req.file);
+        res.status(400).json({ error: 'This file could not be read as an image' });
     }
 });
 
