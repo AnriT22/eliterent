@@ -404,9 +404,10 @@ html[data-theme="light"] .cl-hero-bg {
     background: linear-gradient(135deg, rgba(246,245,241,0.82), rgba(236,238,242,0.88)) !important;
 }
 
-/* Search button — was #00FF7F with dark text, keep green but adjust */
+/* Search button — bright #00FF7F green. White text on it measures 1.5:1,
+   effectively unreadable; the dark ink the button ships with is 11:1. */
 html[data-theme="light"] .search-btn {
-    color: #FFFFFF;
+    color: #08130C;
 }
 
 /* ============================================================

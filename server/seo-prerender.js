@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { queryAll } = require('./db-helpers');
+const { getReservationFeePercent } = require('./services/reservation-fee');
 
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://eliteauto.rent';
@@ -49,11 +50,14 @@ function escapeHtml(str) {
 
 // On-brand styles for the injected homepage browse block (rendered for ALL visitors).
 const SEO_STYLES = '<style>'
-    + '.seo-crawlable{max-width:1200px;margin:0 auto;padding:0 16px;color:#EAEAEA;font-family:inherit}'
-    + '.seo-crawlable-heading{font-size:20px;font-weight:800;margin:24px 0 4px;color:#EAEAEA}'
-    + '.seo-crawlable-sub{color:#A0A3B0;font-size:14px;line-height:1.6;margin:0 0 16px;max-width:820px}'
+    // These colours were written for the dark theme only, so the headings sat
+    // at 1.1:1 on the light background - invisible. Use the theme variables and
+    // keep the dark values as the fallback.
+    + '.seo-crawlable{max-width:1200px;margin:0 auto;padding:0 16px;color:var(--tt-text, #EAEAEA);font-family:inherit}'
+    + '.seo-crawlable-heading{font-size:20px;font-weight:800;margin:24px 0 4px;color:var(--tt-text, #EAEAEA)}'
+    + '.seo-crawlable-sub{color:var(--tt-muted, #A0A3B0);font-size:14px;line-height:1.6;margin:0 0 16px;max-width:820px}'
     + '.seo-cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:0 0 8px}'
-    + '.seo-cat-card{display:block;background:#1C1E26;border:1px solid #3A3F4B;border-radius:14px;padding:16px 18px;text-decoration:none;color:#EAEAEA;transition:border-color .2s}'
+    + '.seo-cat-card{display:block;background:var(--th-surface, #1C1E26);border:1px solid var(--tb-border, #3A3F4B);border-radius:14px;padding:16px 18px;text-decoration:none;color:var(--tt-text, #EAEAEA);transition:border-color .2s}'
     + '.seo-cat-card:hover{border-color:#D4AF37}'
     + '.seo-cat-card .t{font-weight:700;font-size:15px;margin-bottom:4px}'
     + '.seo-cat-card .p{color:#D4AF37;font-weight:700;font-size:14px}'
@@ -141,7 +145,7 @@ function injectItemList(html, vehicles) {
 
 async function fetchActiveVehicles(limit) {
     return queryAll(
-        `SELECT v.id, v.name, v.price_per_day, v.location_city, v.category, v.image_url,
+        `SELECT v.id, v.name, v.price_per_day, v.custom_service_fee, v.location_city, v.category, v.image_url,
                 v.year, v.seats, v.engine, v.gearbox, v.drive_type, v.interior_type,
                 v.steering_side, v.payment_method, v.priority, v.created_at,
                 pp.company_name
@@ -171,7 +175,7 @@ function buildVehicleCardsHtml(vehicles) {
         var engine = String(v.engine || '').toLowerCase();
         var gearbox = String(v.gearbox || '').toLowerCase();
         var drive = String(v.drive_type || '').toLowerCase();
-        var price = v.price_per_day || 0;
+        var price = money(displayDaily(v));
         var year = v.year || '';
         var seats = v.seats || 5;
         var partner = v.company_name ? escapeHtml(v.company_name) : '';
@@ -263,9 +267,33 @@ async function fetchVehicleById(id) {
     return (rows && rows[0]) || null;
 }
 
+/**
+ * The all-in daily rate a customer actually sees.
+ *
+ * Listings and the vehicle page show price_per_day PLUS the reservation fee,
+ * so quoting the raw figure under-quoted the car — a shared link advertised
+ * $85 for a vehicle whose page reads $95.20. Mirrors allInDaily() in
+ * pricing.js; days = 1, the same basis the listing cards use.
+ */
+function displayDaily(v) {
+    var raw = parseFloat(v.price_per_day) || 0;
+    if (raw <= 0) return 0;
+    var custom = v.custom_service_fee;
+    if (custom != null && custom !== '' && !isNaN(parseFloat(custom))) {
+        return Math.round((raw + parseFloat(custom)) * 100) / 100;
+    }
+    return Math.round(raw * (1 + getReservationFeePercent(raw, 1)) * 100) / 100;
+}
+
+/** Two decimals only when they carry information ($95.20, but $85). */
+function money(n) {
+    var x = Math.round((Number(n) || 0) * 100) / 100;
+    return x % 1 === 0 ? String(x) : x.toFixed(2);
+}
+
 function vehicleTitle(v) {
     var city = v.location_city || 'Georgia';
-    return 'Rent ' + (v.name || 'a Car') + ' in ' + city + ' — $' + (v.price_per_day || 0) + '/day';
+    return 'Rent ' + (v.name || 'a Car') + ' in ' + city + ' — $' + money(displayDaily(v)) + '/day';
 }
 
 function vehicleDesc(v) {
@@ -277,7 +305,7 @@ function vehicleDesc(v) {
     var specs = bits.length ? ' ' + bits.join(', ') + '.' : '';
     var yearStr = (v.year && String(v.name || '').indexOf(String(v.year)) === -1) ? ' (' + v.year + ')' : '';
     return (v.name || 'Rental car') + yearStr + ' for rent in ' + city
-        + ', Georgia — $' + (v.price_per_day || 0) + '/day.' + specs
+        + ', Georgia — $' + money(displayDaily(v)) + '/day.' + specs
         + ' Book with a verified local partner' + (v.company_name ? ' (' + v.company_name + ')' : '')
         + '. Insurance included, airport pickup and no-deposit options available.';
 }
@@ -285,7 +313,7 @@ function vehicleDesc(v) {
 function buildVehicleContentHtml(v, url, img) {
     var name = escapeHtml(v.name || 'Rental car');
     var city = escapeHtml(v.location_city || 'Georgia');
-    var price = v.price_per_day || 0;
+    var price = money(displayDaily(v));
     function spec(label, val) {
         if (!val) return '';
         return '<span class="seo-vd-spec"><strong>' + escapeHtml(label) + ':</strong> ' + escapeHtml(String(val).replace(/_/g, ' ')) + '</span>';
@@ -321,7 +349,7 @@ function buildVehicleSchema(v, url, img) {
         offers: {
             '@type': 'Offer',
             priceCurrency: 'USD',
-            price: String(v.price_per_day || 0),
+            price: money(displayDaily(v)),
             priceValidUntil: new Date(Date.now() + 365 * 864e5).toISOString().slice(0, 10),
             itemCondition: 'https://schema.org/UsedCondition',
             availability: 'https://schema.org/InStock',
