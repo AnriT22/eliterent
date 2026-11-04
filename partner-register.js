@@ -249,7 +249,17 @@
         } catch (err) {
             nextBtn.disabled = false;
             nextBtn.textContent = 'Create Partner Account';
-            showGlobalError(err.message);
+            // "already registered" means the earlier attempt worked. Point at
+            // sign-in rather than leaving them to retry the same form forever.
+            if (/already registered|already exists/i.test(err.message || '')) {
+                showGlobalError(err.message +
+                    '. That account already exists — sign in instead, or use ' +
+                    '"Forgot password" if you cannot get in.');
+                var footer = document.querySelector('.auth-footer');
+                if (footer) footer.style.display = '';
+            } else {
+                showGlobalError(err.message);
+            }
         }
     }
 
@@ -298,9 +308,11 @@
                 .then(function (result) {
                     var badge = document.getElementById('choiceEmailBadge');
                     if (!result.available) {
-                        badge.textContent = 'Already registered';
-                        badge.style.background = 'rgba(239,68,68,0.15)';
-                        badge.style.color = '#ef4444';
+                        // The email is taken BY THIS ACCOUNT — we just created it.
+                        // Red "Already registered" made a finished step look failed.
+                        badge.textContent = 'Account ready';
+                        badge.style.background = 'rgba(34,197,94,0.15)';
+                        badge.style.color = '#22c55e';
                     }
                 })
                 .catch(function () { /* ignore */ });
@@ -498,7 +510,10 @@
             });
             var data = await res.json();
 
-            if (!res.ok) {
+            // 409 = this account already has a code applied. That is the state
+            // the partner was trying to reach, so carry on to the dashboard
+            // instead of showing a red error they can never clear.
+            if (!res.ok && res.status !== 409) {
                 throw new Error(data.error || 'Invalid referral code');
             }
 

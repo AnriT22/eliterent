@@ -883,6 +883,17 @@ router.post("/register/partner/apply-invite", authenticateToken, async (req, res
       return res.status(404).json({ error: "Partner profile not found" });
     }
     if (profile.signup_method === "invite" && profile.invite_code_used) {
+      // Re-sending the SAME code is a retry, not a conflict — a partner who
+      // reloaded the page or pressed Apply twice has already reached the state
+      // they wanted, so report success instead of a dead end.
+      if (String(profile.invite_code_used).toUpperCase() === code) {
+        return res.json({
+          message: "Code already applied to your account",
+          pending_approval: true,
+          referrer_linked: !!profile.referred_by_user_id,
+          already_applied: true,
+        });
+      }
       return res.status(409).json({ error: "You have already applied an invite code" });
     }
 
