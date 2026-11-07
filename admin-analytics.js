@@ -66,7 +66,7 @@
     function growthBadge(g) {
         if (g == null) return '';
         var up = g >= 0;
-        return ' <span style="color:' + (up ? '#22c55e' : '#ef4444') + ';font-weight:700;">' + (up ? '▲' : '▼') + ' ' + Math.abs(g) + '%</span>';
+        return ' <span style="color:' + (up ? '#15803D' : '#DC2626') + ';font-weight:700;">' + (up ? '▲' : '▼') + ' ' + Math.abs(g) + '%</span>';
     }
     var SOURCE_LABELS = {
         direct: '🔗 Direct', google_organic: '🔍 Google Organic', google_ads: '💰 Google Ads',
@@ -138,13 +138,13 @@
         var step = Math.max(1, Math.ceil(series.length / 5));
         for (var i = 0; i < series.length; i += step) {
             var lbl = String(series[i].date).substring(5); // MM-DD
-            svg += '<text x="' + X(i).toFixed(1) + '" y="' + (h - 6) + '" font-size="10" fill="#94a3b8" text-anchor="middle">' + lbl + '</text>';
+            svg += '<text x="' + X(i).toFixed(1) + '" y="' + (h - 6) + '" font-size="10" fill="#64748B" text-anchor="middle">' + lbl + '</text>';
         }
         // legend
         var lx = padL;
         metrics.forEach(function (m) {
             svg += '<rect x="' + lx + '" y="6" width="10" height="10" rx="2" fill="' + m.color + '"/>'
-                + '<text x="' + (lx + 14) + '" y="15" font-size="11" fill="#94a3b8">' + esc(m.label) + '</text>';
+                + '<text x="' + (lx + 14) + '" y="15" font-size="11" fill="#64748B">' + esc(m.label) + '</text>';
             lx += 14 + m.label.length * 6 + 18;
         });
         svg += '</svg>';
@@ -228,7 +228,7 @@
                 + '<tbody>';
             data.rows.forEach(function (r, i) {
                 html += '<tr>'
-                    + '<td style="color:#94a3b8;">' + (i + 1) + '</td>'
+                    + '<td style="color:#64748B;">' + (i + 1) + '</td>'
                     + '<td>' + flagEmoji(r.countryCode) + ' ' + esc(r.label) + '</td>'
                     + '<td style="text-align:right;font-weight:700;color:var(--tt-gold2, #C9A84C);">' + fmtNum(r.visitors) + '</td>'
                     + '<td class="hide-mobile" style="min-width:90px;">' + pctBar(r.visitors, maxV) + '</td>'
@@ -237,7 +237,7 @@
                     + '<td class="hide-mobile" style="text-align:right;">' + r.bounceRate + '%</td>'
                     + '<td class="hide-mobile" style="text-align:right;">' + fmtDur(r.avgSessionDuration) + '</td>'
                     + '<td style="text-align:right;">' + fmtNum(r.bookings) + '</td>'
-                    + '<td style="text-align:right;color:#22c55e;font-weight:600;">' + fmtMoney(r.revenue) + '</td>'
+                    + '<td style="text-align:right;color:#15803D;font-weight:600;">' + fmtMoney(r.revenue) + '</td>'
                     + '<td style="text-align:right;">' + r.conversionRate + '%</td>'
                     + '<td class="hide-mobile" style="text-align:right;">' + (r.avgBookingValue ? fmtMoney(r.avgBookingValue) : '—') + '</td>'
                     + '</tr>';
@@ -358,7 +358,7 @@
             data.visitors.forEach(function (v) {
                 html += '<tr>'
                     + '<td>' + flagEmoji(v.country_code) + ' ' + esc(v.city ? v.city + ', ' : '') + esc(v.country || '—')
-                    + (v.booked_today ? ' <span class="admin-status" style="background:#22c55e;color:#fff;font-size:9px;">BOOKED</span>' : '') + '</td>'
+                    + (v.booked_today ? ' <span class="admin-status" style="background:#15803D;color:#fff;font-size:9px;">BOOKED</span>' : '') + '</td>'
                     + '<td style="color:var(--tt-gold2, #C9A84C);">' + esc(pageLabel(v.current_page)) + '</td>'
                     + '<td class="hide-mobile">' + esc(pageLabel(v.entry_page)) + '</td>'
                     + '<td>' + deviceIcon(v.device) + ' ' + esc(v.device || '?') + '</td>'
@@ -393,7 +393,7 @@
                             + '<td class="hide-mobile" style="text-align:right;">' + fmtNum(r.sessions) + '</td>'
                             + '<td class="hide-mobile" style="text-align:right;">' + r.bounceRate + '%</td>'
                             + '<td style="text-align:right;">' + fmtNum(r.bookings) + '</td>'
-                            + '<td style="text-align:right;color:#22c55e;">' + fmtMoney(r.revenue) + '</td>'
+                            + '<td style="text-align:right;color:#15803D;">' + fmtMoney(r.revenue) + '</td>'
                             + '<td style="text-align:right;">' + r.conversionRate + '%</td>'
                             + '</tr>';
                     });
@@ -548,7 +548,7 @@
             data.visitors.forEach(function (v) {
                 var badges = '';
                 if (v.registered) badges += ' <span class="admin-status" style="background:#3b82f6;color:#fff;font-size:9px;">USER</span>';
-                if (v.confirmed_bookings > 0) badges += ' <span class="admin-status" style="background:#22c55e;color:#fff;font-size:9px;">BOOKED ×' + v.confirmed_bookings + '</span>';
+                if (v.confirmed_bookings > 0) badges += ' <span class="admin-status" style="background:#15803D;color:#fff;font-size:9px;">BOOKED ×' + v.confirmed_bookings + '</span>';
                 else if (v.bookings > 0) badges += ' <span class="admin-status" style="background:#0ea5e9;color:#fff;font-size:9px;">BOOKING</span>';
                 else if (v.booking_started) badges += ' <span class="admin-status" style="background:#f59e0b;color:#fff;font-size:9px;">STARTED</span>';
                 var loc = (v.city ? esc(v.city) + ', ' : '') + esc(v.country || '—');
@@ -720,7 +720,7 @@
                     + '<td class="hide-mobile" style="text-align:right;">' + fmtNum(r.views) + '</td>'
                     + '<td class="hide-mobile" style="text-align:right;">' + (r.landingSessions > 0 ? r.bounceRate + '%' : '—') + '</td>'
                     + '<td style="text-align:right;">' + fmtNum(r.assistedBookings) + '</td>'
-                    + '<td style="text-align:right;color:#22c55e;">' + fmtMoney(r.revenue) + '</td>'
+                    + '<td style="text-align:right;color:#15803D;">' + fmtMoney(r.revenue) + '</td>'
                     + '<td class="hide-mobile" style="text-align:right;">' + r.conversionRate + '%</td>'
                     + '</tr>';
             });
@@ -734,7 +734,7 @@
             if (!el) return;
             var recs = data.recommendations || [];
             if (recs.length === 0) {
-                el.innerHTML = '<p style="color:#22c55e;font-size:13px;">✅ Nothing urgent detected in this period. As traffic grows, insights will appear here.</p>';
+                el.innerHTML = '<p style="color:#15803D;font-size:13px;">✅ Nothing urgent detected in this period. As traffic grows, insights will appear here.</p>';
                 return;
             }
             var prColors = { high: '#ef4444', medium: '#f59e0b', low: '#64748b' };
@@ -763,8 +763,8 @@
                 sm.innerHTML = '<div class="va-audit-chips">'
                     + '<span class="va-audit-chip" style="border-color:#ef4444;color:#ef4444;">' + s.high + ' high</span>'
                     + '<span class="va-audit-chip" style="border-color:#f59e0b;color:#f59e0b;">' + s.medium + ' medium</span>'
-                    + '<span class="va-audit-chip" style="border-color:#64748b;color:#94a3b8;">' + s.low + ' low</span>'
-                    + '<span class="va-audit-chip" style="border-color:#22c55e;color:#22c55e;">' + s.healthy + ' healthy pages</span>'
+                    + '<span class="va-audit-chip" style="border-color:#64748b;color:#475569;">' + s.low + ' low</span>'
+                    + '<span class="va-audit-chip" style="border-color:#22c55e;color:#15803D;">' + s.healthy + ' healthy pages</span>'
                     + '<span style="font-size:12px;color:var(--tt-muted, #A0A3B0);margin-left:auto;">' + data.pagesScanned + ' pages scanned · ' + timeAgo(data.generatedAt) + '</span>'
                     + '</div>'
                     + (data.siteIssues && data.siteIssues.length
@@ -773,7 +773,7 @@
             var el = document.getElementById('seoAuditTable');
             if (el) {
                 var withIssues = (data.pages || []).filter(function (p) { return p.issues.length > 0; });
-                if (withIssues.length === 0) { el.innerHTML = '<p style="color:#22c55e;font-size:13px;">✅ No page-level issues found.</p>'; return; }
+                if (withIssues.length === 0) { el.innerHTML = '<p style="color:#15803D;font-size:13px;">✅ No page-level issues found.</p>'; return; }
                 var sevColor = { high: '#ef4444', medium: '#f59e0b', low: '#64748b' };
                 var html = '<table class="admin-table" style="font-size:12px;">'
                     + thead([{ t: 'Page' }, { t: 'Title', cls: 'hide-mobile' }, { t: 'Issues' }]) + '<tbody>';

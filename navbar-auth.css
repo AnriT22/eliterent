@@ -37,7 +37,7 @@
     height: 32px;
     border-radius: 50%;
     background: linear-gradient(135deg, #C9A84C, #A6832E);
-    color: #fff;
+    color: #1A1408; /* white initials on this gold were 2.8:1 */
     font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.5px;
@@ -104,7 +104,7 @@
     height: 42px;
     border-radius: 50%;
     background: linear-gradient(135deg, #C9A84C, #A6832E);
-    color: #fff;
+    color: #1A1408; /* white initials on this gold were 2.8:1 */
     font-size: 15px;
     font-weight: 800;
     flex-shrink: 0;

@@ -12,6 +12,13 @@
 (function () {
     var KEY = 'EliteAuto_theme';
     var root = document.documentElement;
+    // A page can pin itself with <html data-theme-lock="light">. The admin panel
+    // does: its surfaces are hard-coded light in admin.css, so the dark text
+    // tokens turned its headings white-on-white. A locked page ignores the
+    // saved choice, the OS preference and other tabs, and gets no toggle - but
+    // never overwrites the visitor's choice for the rest of the site.
+    var LOCK = root.getAttribute('data-theme-lock');
+    if (LOCK !== 'light' && LOCK !== 'dark') LOCK = null;
     var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
 
     function saved() {
@@ -39,6 +46,7 @@
     }
 
     function apply(theme, animate) {
+        if (LOCK) theme = LOCK;
         if (animate) {
             root.classList.add('theme-switching');
             clearTimeout(apply._t);
@@ -101,6 +109,7 @@
     }
 
     function injectToggle() {
+        if (LOCK) return;
         if (document.querySelector('.theme-toggle')) return;
 
         // 1) Public pages: put it in the navbar right section, before the

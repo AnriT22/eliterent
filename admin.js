@@ -186,7 +186,7 @@ function escHtml(s) {
             function botBadge(v) {
                 if (v.is_bot == 1) return ' <span class="admin-status" style="background:#ef4444;color:#fff;font-size:9px;">BOT</span>';
                 if (v.is_verified == 1) return ' <span class="admin-status" style="background:#22c55e;color:#fff;font-size:9px;">HUMAN</span>';
-                if (v.visits > 20) return ' <span class="admin-status" style="background:#f59e0b;color:#fff;font-size:9px;">LIKELY BOT</span>';
+                if (v.visits > 20) return ' <span class="admin-status" style="background:#B45309;color:#fff;font-size:9px;">LIKELY BOT</span>';
                 return '';
             }
             function fmtTime(ts) {
@@ -1402,13 +1402,13 @@ function escHtml(s) {
     var trAdminStatus = 'pending';
 
     var TR_ADMIN_STATUS = {
-        pending_admin: ['Awaiting your approval', '#e0b252'],
-        open:          ['On the partner board', '#6FA8D4'],
-        claimed:       ['With a partner', '#6FA8D4'],
-        quoted:        ['Priced — waiting on customer', '#D4AF37'],
-        confirmed:     ['Confirmed', '#34d399'],
-        declined:      ['Customer rejected the price', '#e0b252'],
-        cancelled:     ['Cancelled', '#8894a5']
+        pending_admin: ['Awaiting your approval', '#9A5B05'],
+        open:          ['On the partner board', '#1D5FA0'],
+        claimed:       ['With a partner', '#1D5FA0'],
+        quoted:        ['Priced — waiting on customer', '#7A5E0A'],
+        confirmed:     ['Confirmed', '#15803D'],
+        declined:      ['Customer rejected the price', '#9A5B05'],
+        cancelled:     ['Cancelled', '#5B6573']
     };
 
     function trEsc(v) {
@@ -1427,7 +1427,7 @@ function escHtml(s) {
     }
 
     function trAdminCard(t) {
-        var st = TR_ADMIN_STATUS[t.status] || [t.status, '#8894a5'];
+        var st = TR_ADMIN_STATUS[t.status] || [t.status, '#5B6573'];
         var pending = t.status === 'pending_admin';
         var routedTo = t.partner_name
             ? 'Routed to <strong>' + trEsc(t.partner_name) + '</strong> (owns the chosen car)'
@@ -1442,7 +1442,7 @@ function escHtml(s) {
               (t.partner_cleared_at
                 ? '<span title="The partner cleared this from their own list. The record is intact." ' +
                   'style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;' +
-                  'padding:5px 11px;border-radius:999px;color:#8894a5;border:1px dashed rgba(148,163,184,.5);">' +
+                  'padding:5px 11px;border-radius:999px;color:#5B6573;border:1px dashed rgba(148,163,184,.5);">' +
                   'Cleared by partner</span>'
                 : '') +
               '<span style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;' +
@@ -1466,7 +1466,7 @@ function escHtml(s) {
               (t.contact_email ? ' &middot; ' + trEsc(t.contact_email) : '') +
             '</div>' +
             (t.quote_total != null
-                ? '<div style="margin-top:8px;font-size:14px;">Partner quoted <strong style="color:#D4AF37;">$' +
+                ? '<div style="margin-top:8px;font-size:14px;">Partner quoted <strong style="color:#7A5E0A;">$' +
                   Number(t.quote_total).toFixed(0) + '</strong></div>'
                 : '') +
             '<div style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px;opacity:.65;margin-top:8px;">' +
@@ -1475,7 +1475,7 @@ function escHtml(s) {
                 ? '<div style="display:flex;gap:9px;margin-top:14px;flex-wrap:wrap;">' +
                   '<button class="btn btn-primary btn-sm tr-adm-approve" data-ref="' + trEsc(t.reference) + '">Approve</button>' +
                   '<button class="btn btn-sm tr-adm-decline" data-ref="' + trEsc(t.reference) + '" ' +
-                  'style="background:transparent;border:1px solid rgba(248,113,113,.5);color:#f87171;">Decline</button>' +
+                  'style="background:transparent;border:1px solid rgba(185,28,28,.45);color:#B91C1C;">Decline</button>' +
                   '</div>'
                 : '') +
             '</div>';
@@ -1511,12 +1511,12 @@ function escHtml(s) {
                           (gone
                             ? '<span title="Deleted by the partner. Customers no longer see it; you still do." ' +
                               'style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;' +
-                              'padding:5px 11px;border-radius:999px;color:#f87171;' +
+                              'padding:5px 11px;border-radius:999px;color:#B91C1C;' +
                               'border:1px dashed rgba(248,113,113,.5);">Deleted by partner</span>'
                             : '') +
                           '<span style="font-size:11px;font-weight:800;letter-spacing:.07em;' +
                             'text-transform:uppercase;padding:5px 11px;border-radius:999px;color:' +
-                            (o.status === 'active' && !gone ? '#34d399' : '#8894a5') +
+                            (o.status === 'active' && !gone ? '#15803D' : '#5B6573') +
                             ';background:rgba(148,163,184,.13);">' + trEsc(o.status) + '</span>' +
                           '</div>' +
                         '</div>' +
@@ -1529,7 +1529,7 @@ function escHtml(s) {
                         '</div>' +
                         '<div style="font-size:13px;color:var(--tt-muted, #A0A3B0);margin-top:5px;">Partner: <strong>' +
                           trEsc(o.partner_name || ('#' + o.partner_id)) + '</strong></div>' +
-                        '<div style="margin-top:8px;font-size:14.5px;font-weight:800;color:#D4AF37;">' +
+                        '<div style="margin-top:8px;font-size:14.5px;font-weight:800;color:#7A5E0A;">' +
                           'Partner receives $' + Number(o.partner_total || 0).toFixed(2) +
                           '<span style="font-weight:600;color:var(--tt-muted, #A0A3B0);"> · customer pays $' +
                           Number(o.customer_total || 0).toFixed(2) +
@@ -1542,7 +1542,7 @@ function escHtml(s) {
                 }).join('');
             })
             .catch(function () {
-                body.innerHTML = '<p style="color:#f87171;text-align:center;padding:40px;">Could not load offers.</p>';
+                body.innerHTML = '<p style="color:#B91C1C;text-align:center;padding:40px;">Could not load offers.</p>';
             });
     }
 
@@ -1561,10 +1561,10 @@ function escHtml(s) {
                 var summary =
                     '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));' +
                     'gap:12px;margin-bottom:20px;">' +
-                    trStat('Commission earned', '$' + Number(tt.earned || 0).toFixed(2), '#34d399') +
-                    trStat('Awaiting payment', '$' + Number(tt.pending || 0).toFixed(2), '#D4AF37') +
-                    trStat('Paid transfers', tt.paid_count || 0, '#EAEAEA') +
-                    trStat('Awaiting approval', tt.awaiting_count || 0, '#e0b252') +
+                    trStat('Commission earned', '$' + Number(tt.earned || 0).toFixed(2), '#15803D') +
+                    trStat('Awaiting payment', '$' + Number(tt.pending || 0).toFixed(2), '#7A5E0A') +
+                    trStat('Paid transfers', tt.paid_count || 0, 'var(--tt-text, #111)') +
+                    trStat('Awaiting approval', tt.awaiting_count || 0, '#9A5B05') +
                     '</div>';
                 if (!list.length) {
                     body.innerHTML = summary + '<p style="color:var(--tt-muted, #A0A3B0);text-align:center;padding:60px;">' +

@@ -48,7 +48,7 @@
 
 .admin-badge {
     background: #C9A84C;
-    color: #fff;
+    color: #1A1408;
     font-size: 10px;
     font-weight: 800;
     padding: 2px 8px;
@@ -1028,7 +1028,7 @@
     position: absolute;
     left: 10px;
     border-radius: 6px;
-    background: var(--th-navy2, #0f172a);
+    background: #0f172a;
     color: #fff;
     width: 26px;
     height: 26px;

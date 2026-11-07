@@ -35,7 +35,7 @@
     height: 64px;
     border-radius: 50%;
     background: linear-gradient(135deg, #C9A84C, #A6832E);
-    color: #fff;
+    color: #1A1408;
     font-size: 22px;
     font-weight: 800;
     display: flex;
@@ -101,11 +101,11 @@
 
 .gp-nav-item.active {
     background: #C9A84C;
-    color: #fff;
+    color: #1A1408; /* white on this gold was 2.3:1 */
 }
 
 .gp-nav-item.active svg {
-    stroke: #fff;
+    stroke: #1A1408;
 }
 
 /* Logout */
@@ -452,7 +452,7 @@
 
     .gp-nav-item.active {
         background: #C9A84C;
-        color: #fff;
+        color: #1A1408;
     }
 
     .gp-nav-item svg {
